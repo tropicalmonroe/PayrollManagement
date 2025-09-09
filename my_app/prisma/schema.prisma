@@ -1,0 +1,333 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==============================
+// User Models
+// ==============================
+enum UserRole {
+  ADMIN
+  USER
+  VIEWER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String
+  role          UserRole  @default(USER)
+  profileImage  String?
+  createdBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// ==============================
+// HR Models
+// ==============================
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  SUSPENDED
+  RESIGNED
+  TERMINATED
+  RETIRED
+}
+
+model Employee {
+  id                        String              @id @default(cuid())
+  employeeId                String              @unique
+  lastName                  String
+  firstName                 String
+  position                  String
+  idNumber                  String?             @unique
+  kraPin                    String?             @unique  // KRA PIN for PAYE
+  nssfNumber                String?             @unique
+  maritalStatus             MaritalStatus       @default(SINGLE)
+  dateOfBirth               DateTime?
+  hireDate                  DateTime
+  seniority                 Int                 @default(0)
+  numberOfDaysPerMonth      Int                 @default(26)
+  baseSalary                Float
+  housingAllowance          Float               @default(0)
+  transportAllowance        Float               @default(0)
+  mealAllowance             Float               @default(0)
+  grossSalary               Float               @default(0)
+  taxableGrossSalary        Float               @default(0)
+  netSalary                 Float               @default(0)
+  bankAccount               String?
+  bankBranch                String?
+  phone                     String?
+  email                     String?
+  address                   String?
+
+  // Loan & deductions tracking
+  loanRepayment             Float               @default(0)
+  helbLoan                  Float               @default(0)
+
+  // Flags
+  subjectToNssf             Boolean             @default(true)
+  subjectToShif             Boolean             @default(true)
+  subjectToHousingLevy      Boolean             @default(true)
+
+  status                    EmployeeStatus      @default(ACTIVE)
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime            @updatedAt
+
+  // Relations
+  payrollCalculations       PayrollCalculation[]
+  advances                  Advance[]
+  credits                   Credit[]
+  variableElements          VariableElement[]
+  documents                 Document[]
+}
+
+// ==============================
+// Advances, Credits & Loans
+// ==============================
+enum AdvanceStatus {
+  IN_PROGRESS
+  REPAID
+  CANCELLED
+}
+
+model Advance {
+  id                        String        @id @default(cuid())
+  employee                  Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId                String
+  amount                    Float
+  advanceDate               DateTime
+  reason                    String
+  numberOfInstallments      Int
+  installmentAmount         Float
+  remainingBalance          Float
+  status                    AdvanceStatus @default(IN_PROGRESS)
+  creationDate              DateTime      @default(now())
+  createdBy                 String
+  fullRepaymentDate         DateTime?
+  notes                     String?
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
+}
+
+enum CreditType { //type of loan
+  HOUSING
+  CONSUMER
+}
+
+enum CreditStatus { //status of loan
+  ACTIVE
+  PAID_OFF
+  SUSPENDED // e.g. for maternity leave, sabbatical, and so on
+}
+
+model Credit { //loan
+  id                String        @id @default(cuid())
+  employee          Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId        String
+  type              CreditType
+  loanAmount        Float
+  interestRate      Float
+  durationYears     Int
+  monthlyPayment    Float
+  startDate         DateTime
+  endDate           DateTime
+  remainingBalance  Float
+  amountRepaid      Float         @default(0)
+  status            CreditStatus  @default(ACTIVE)
+  bank              String
+  accountNumber     String?
+  creationDate      DateTime      @default(now())
+  createdBy         String
+  notes             String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations to installments
+  paymentSchedule   CreditInstallment[]
+}
+
+enum InstallmentStatus { //status of loan installment
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model CreditInstallment { //loan installment
+  id                String             @id @default(cuid())
+  credit            Credit             @relation(fields: [creditId], references: [id], onDelete: Cascade)
+  creditId          String
+  installmentNumber Int 
+  dueDate           DateTime // expected payment date 
+  totalMonthlyPayment Float
+  principal         Float // portion of payment that goes to principal
+  interest          Float // portion of payment that goes to interest
+  interestTax       Float          // e.g. 10% Withholding Tax
+  insurance         Float
+  remainingPrincipal Float
+  status            InstallmentStatus @default(PENDING)
+  paymentDate       DateTime?
+  amountPaid        Float?
+  notes             String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@unique([creditId, installmentNumber])
+}
+
+// ==============================
+// Variable Elements
+// ==============================
+enum VariableElementType { //means varying elements susceptible to change monthly or periodically or we'd say non-fixed elements
+  OVERTIME
+  ABSENCE
+  BONUS
+  LEAVE
+  LATENESS
+  ADVANCE
+  OTHER
+}
+
+model VariableElement {
+  id            String              @id @default(cuid())
+  employee      Employee            @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId    String
+  type          VariableElementType
+  description   String
+  amount        Float
+  hours         Float?
+  rate          Float?
+  date          DateTime
+  month         String
+  year          String
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+}
+
+// ==============================
+// Payroll Calculation
+// ==============================
+model PayrollCalculation {
+  // dentifies the record id, employeeId, month, year → this makes sure one employee has one payroll record per month.
+  id                          String    @id @default(cuid())
+  employee                    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId                  String
+  month                       String
+  year                        String
+
+  // Earnings side (money the employee earns)
+// baseSalary (main salary)
+// seniorityBonus, housingAllowance, transportAllowance, mealAllowance, etc.
+// overtimeHours, exceptionalBonuses, otherEarnings
+// All of these add up into → totalEarnings
+// Then you calculate what portion is taxable → taxableGrossSalary
+  baseSalary                  Float
+  housingAllowance            Float
+  mealAllowance               Float
+  transportAllowance          Float
+  overtimePay                 Float     @default(0)
+  bonuses                     Float     @default(0)
+  otherEarnings               Float     @default(0)
+  grossSalary                 Float
+  taxableGrossSalary          Float
+
+  // Employee statutory deductions
+  nssfEmployee                Float
+  shif                        Float
+  housingLevyEmployee         Float
+  paye                        Float
+  personalRelief              Float     @default(2400)
+  helb                        Float     @default(0)
+  otherDeductions             Float     @default(0)
+  totalDeductions             Float
+
+  // Employer contributions (company expenses)
+  nssfEmployer                Float
+  housingLevyEmployer         Float
+  totalEmployerContributions  Float
+
+  // Final
+  taxableIncome               Float
+  netSalary                   Float
+
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+
+  @@unique([employeeId, month, year])
+}
+
+// ==============================
+// Documents
+// ==============================
+enum DocumentType {
+  PAYSLIP
+  SALARY_CERTIFICATE
+  ACCOUNT_STATEMENT
+  PAYROLL_JOURNAL
+  BULK_TRANSFER
+  TAX_REPORT
+}
+
+enum DocumentStatus {
+  GENERATED
+  SENT
+  ARCHIVED
+}
+
+model Document {//generated documents like payslips, reports, etc.
+  id              String         @id @default(cuid())
+  type            DocumentType
+  title           String
+  description     String?
+  employee        Employee?      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId      String?
+  period          String
+  generationDate  DateTime       @default(now())
+  generatedBy     String
+  fileSize        Int
+  status          DocumentStatus @default(GENERATED)
+  downloadCount   Int            @default(0)
+  fileUrl         String?
+  metadata        Json?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+// ==============================
+// Company Settings
+// ==============================
+model CompanySettings {
+  id                    String   @id @default(cuid())
+  companyName           String
+  companyAddress        String?
+  companyPhone          String?
+  companyEmail          String?
+
+  // Default statutory rates (2025 Kenya)
+  nssfRate              Float    @default(0.06)     // 6% (tiered)
+  nssfMaxContribution   Float    @default(4320)     // Employee or Employer max
+  shifRate              Float    @default(0.0275)   // 2.75% of gross
+  shifMinContribution   Float    @default(300)
+  housingLevyRate       Float    @default(0.015)    // 1.5% of gross
+  personalRelief        Float    @default(2400)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
