@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../lib/prisma';
-import { genererEcheancierSimple, type CreditSimple } from '../../../lib/simpleEcheancier';
+import { prisma } from '../../../../lib/prisma';
+import { genererEcheancierSimple, type CreditSimple } from '../../../../lib/simpleEcheancier';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '../../components/Layout';
+import { Layout } from '../../../components/Layout';
 import { Play, ArrowLeft, Calculator, Users, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Employee } from '@prisma/client';
-import { calculerPaie, type EmployeePayrollData } from '../../lib/payrollCalculations';
+import { calculerPaie, type EmployeePayrollData } from '../../../lib/payrollCalculations';
 
 interface PayrollCalculationResult {
   employeeId: string;

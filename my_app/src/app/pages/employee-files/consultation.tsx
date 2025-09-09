@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '../../components/Layout';
+import { Layout } from '../../../components/Layout';
 import { Eye, ArrowLeft, Search, Filter } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Employee, EmployeeStatus, SituationFamiliale } from '@prisma/client';
-import EmployeeDetails from '../../components/EmployeeDetails';
+import EmployeeDetails from '../../../components/EmployeeDetails';
+
 
 const EmployeeConsultationPage = () => {
   const router = useRouter();

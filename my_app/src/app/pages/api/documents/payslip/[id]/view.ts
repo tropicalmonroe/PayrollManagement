@@ -1,87 +1,87 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../../../lib/prisma';
+import { prisma } from '../../../../../../lib/prisma';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
+if (req.method === 'GET') {
     try {
-      const { id } = req.query;
+    const { id } = req.query;
 
-      // Récupérer le document
-      const document = await prisma.document.findUnique({
+    // Récupérer le document
+    const document = await prisma.document.findUnique({
         where: { id: id as string },
         include: {
-          employee: true
+        employee: true
         }
-      });
+    });
 
-      if (!document) {
+    if (!document) {
         return res.status(404).json({ error: 'Document non trouvé' });
-      }
+    }
 
-      // Récupérer le calcul de paie associé
-      const metadata = document.metadata as any;
-      const payrollCalculation = await prisma.payrollCalculation.findUnique({
+    // Récupérer le calcul de paie associé
+    const metadata = document.metadata as any;
+    const payrollCalculation = await prisma.payrollCalculation.findUnique({
         where: { id: metadata?.payrollCalculationId },
         include: {
-          employee: true
+        employee: true
         }
-      });
+    });
 
-      if (!payrollCalculation) {
+    if (!payrollCalculation) {
         return res.status(404).json({ error: 'Calcul de paie non trouvé' });
-      }
-
-      // Générer le HTML du bulletin de paie
-      const html = generatePayslipHTML(document, payrollCalculation);
-
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.status(200).send(html);
-    } catch (error) {
-      console.error('Error generating payslip view:', error);
-      res.status(500).json({ error: 'Erreur lors de la génération du bulletin' });
     }
-  } else {
+
+    // Générer le HTML du bulletin de paie
+    const html = generatePayslipHTML(document, payrollCalculation);
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.status(200).send(html);
+    } catch (error) {
+    console.error('Error generating payslip view:', error);
+    res.status(500).json({ error: 'Erreur lors de la génération du bulletin' });
+    }
+} else {
     res.setHeader('Allow', ['GET']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
+}
 }
 
 function generatePayslipHTML(document: any, payrollCalculation: any) {
-  const employee = payrollCalculation.employee;
-  const [monthName, year] = document.periode.split(' ');
-  
-  const formatCurrency = (amount: number) => {
+const employee = payrollCalculation.employee;
+const [monthName, year] = document.periode.split(' ');
+
+const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-MA', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
     }).format(amount)
-  }
+}
 
-  const formatDate = (date: Date) => {
+const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
     }).format(new Date(date))
-  }
+}
 
-  const getSituationFamiliale = () => {
+const getSituationFamiliale = () => {
     switch (employee.situationFamiliale) {
-      case 'CELIBATAIRE': return 'Célibataire'
-      case 'MARIE': return 'Marié(e)'
-      case 'DIVORCE': return 'Divorcé(e)'
-      case 'VEUF': return 'Veuf/Veuve'
-      default: return employee.situationFamiliale
+    case 'CELIBATAIRE': return 'Célibataire'
+    case 'MARIE': return 'Marié(e)'
+    case 'DIVORCE': return 'Divorcé(e)'
+    case 'VEUF': return 'Veuf/Veuve'
+    default: return employee.situationFamiliale
     }
-  }
+}
 
-  // Calculer les taux en pourcentage
-  const tauxCNSS = 4.48
-  const tauxAMO = 2.26
-  const tauxAssuranceDivers = 1.26
-  const tauxRetraite = 6.00
-  
-  return `
+// Calculer les taux en pourcentage
+const tauxCNSS = 4.48
+const tauxAMO = 2.26
+const tauxAssuranceDivers = 1.26
+const tauxRetraite = 6.00
+
+return `
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -454,5 +454,5 @@ function generatePayslipHTML(document: any, payrollCalculation: any) {
     </div>
 </body>
 </html>
-  `;
+`;
 }

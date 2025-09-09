@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Layout } from '../../components/Layout';
+import { Layout } from '../../../components/Layout';
 import { Download, FileText, Calendar } from 'lucide-react';
 
 interface Employee {

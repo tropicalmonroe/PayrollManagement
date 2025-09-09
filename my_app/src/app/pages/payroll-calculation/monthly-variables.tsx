@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '../../components/Layout';
+import { Layout } from '../../../components/Layout';
 import { Edit, ArrowLeft, Plus, Save, Calendar, User } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Employee, VariableElement } from '@prisma/client';
-import AddVariableElementModal from '../../components/AddVariableElementModal';
+import AddVariableElementModal from '../../../components/AddVariableElementModal';
 
 type VariableElementWithEmployee = VariableElement & {
   employee: Employee;

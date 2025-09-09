@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../lib/prisma';
-import { generateAmortizationTable } from '../../../lib/creditCalculations';
+import { prisma } from '../../../../lib/prisma';
+import { generateAmortizationTable } from '../../../../lib/creditCalculations';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {

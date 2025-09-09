@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../../lib/prisma';
+import { prisma } from '../../../../../lib/prisma';
 import { DocumentType, DocumentStatus } from '@prisma/client';
-import { generateFinalSettlementPDF, FinalSettlementData } from '../../../../lib/pdfGenerators/finalSettlementPDF';
+import { generateFinalSettlementPDF, FinalSettlementData } from '../../../../../lib/pdfGenerators/finalSettlementPDF';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {

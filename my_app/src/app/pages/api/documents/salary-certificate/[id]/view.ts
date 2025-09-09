@@ -1,70 +1,70 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../../../lib/prisma';
+import { prisma } from '../../../../../../lib/prisma';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
+if (req.method === 'GET') {
     try {
-      const { id } = req.query;
+    const { id } = req.query;
 
-      // Récupérer le document
-      const document = await prisma.document.findUnique({
+    // Récupérer le document
+    const document = await prisma.document.findUnique({
         where: { id: id as string },
         include: {
-          employee: true
+        employee: true
         }
-      });
+    });
 
-      if (!document) {
+    if (!document) {
         return res.status(404).json({ error: 'Document non trouvé' });
-      }
-
-      // Générer le HTML de l'attestation de salaire
-      const html = generateSalaryCertificateHTML(document);
-
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.status(200).send(html);
-    } catch (error) {
-      console.error('Error generating salary certificate view:', error);
-      res.status(500).json({ error: 'Erreur lors de la génération de l\'attestation' });
     }
-  } else {
+
+    // Générer le HTML de l'attestation de salaire
+    const html = generateSalaryCertificateHTML(document);
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.status(200).send(html);
+    } catch (error) {
+    console.error('Error generating salary certificate view:', error);
+    res.status(500).json({ error: 'Erreur lors de la génération de l\'attestation' });
+    }
+} else {
     res.setHeader('Allow', ['GET']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
+}
 }
 
 function generateSalaryCertificateHTML(document: any) {
-  const employee = document.employee;
-  const metadata = document.metadata as any;
-  
-  const formatCurrency = (amount: number) => {
+const employee = document.employee;
+const metadata = document.metadata as any;
+
+const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-MA', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
     }).format(amount)
-  }
+}
 
-  const formatDate = (date: Date) => {
+const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
     }).format(new Date(date))
-  }
+}
 
-  const getSituationFamiliale = () => {
+const getSituationFamiliale = () => {
     switch (employee.situationFamiliale) {
-      case 'CELIBATAIRE': return 'Célibataire'
-      case 'MARIE': return 'Marié(e)'
-      case 'DIVORCE': return 'Divorcé(e)'
-      case 'VEUF': return 'Veuf/Veuve'
-      default: return employee.situationFamiliale
+    case 'CELIBATAIRE': return 'Célibataire'
+    case 'MARIE': return 'Marié(e)'
+    case 'DIVORCE': return 'Divorcé(e)'
+    case 'VEUF': return 'Veuf/Veuve'
+    default: return employee.situationFamiliale
     }
-  }
+}
 
-  const today = new Date();
-  
-  return `
+const today = new Date();
+
+return `
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -327,5 +327,5 @@ function generateSalaryCertificateHTML(document: any) {
     </div>
 </body>
 </html>
-  `;
+`;
 }

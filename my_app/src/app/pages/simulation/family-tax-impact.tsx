@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { Layout } from '../../components/Layout';
+import { Layout } from '../../../components/Layout';
 import { Users, ArrowLeft, Download, RefreshCw, Info, TrendingUp, TrendingDown } from 'lucide-react';
 
 export default function FamilyTaxImpact() {

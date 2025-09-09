@@ -1,0 +1,417 @@
+import React, { useState, useEffect } from 'react';
+import { X, Calendar, DollarSign, User, FileText, Clock } from 'lucide-react';
+
+interface Employee {
+id: string;
+matricule: string;
+nom: string;
+prenom: string;
+fonction: string;
+}
+
+interface Advance {
+id: string;
+employee: Employee;
+montant: number;
+dateAvance: Date;
+motif: string;
+nombreMensualites: number;
+montantMensualite: number;
+soldeRestant: number;
+statut: 'EN_COURS' | 'REMBOURSE' | 'ANNULE';
+dateCreation: Date;
+createdBy: string;
+dateRemboursementComplete?: Date;
+notes?: string;
+createdAt: Date;
+}
+
+interface AddAdvanceModalProps {
+isOpen: boolean;
+onClose: () => void;
+onSuccess: () => void;
+employees: Employee[];
+editAdvance?: Advance | null;
+}
+
+const AddAdvanceModal: React.FC<AddAdvanceModalProps> = ({
+isOpen,
+onClose,
+onSuccess,
+employees,
+editAdvance = null
+}) => {
+const [formData, setFormData] = useState({
+    employeeId: '',
+    montant: '',
+    dateAvance: '',
+    motif: '',
+    nombreMensualites: '',
+    notes: ''
+});
+const [loading, setLoading] = useState(false);
+const [errors, setErrors] = useState<Record<string, string>>({});
+
+// Initialize form data when editing
+useEffect(() => {
+    if (editAdvance) {
+    setFormData({
+        employeeId: editAdvance.employee.id,
+        montant: editAdvance.montant.toString(),
+        dateAvance: new Date(editAdvance.dateAvance).toISOString().split('T')[0],
+        motif: editAdvance.motif,
+        nombreMensualites: editAdvance.nombreMensualites.toString(),
+        notes: editAdvance.notes || ''
+    });
+    } else {
+    // Reset form for new advance
+    setFormData({
+        employeeId: '',
+        montant: '',
+        dateAvance: new Date().toISOString().split('T')[0],
+        motif: '',
+        nombreMensualites: '',
+        notes: ''
+    });
+    }
+    setErrors({});
+}, [editAdvance, isOpen]);
+
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+    ...prev,
+    [name]: value
+    }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+    setErrors(prev => ({
+        ...prev,
+        [name]: ''
+    }));
+    }
+};
+
+const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.employeeId) {
+    newErrors.employeeId = 'Veuillez sélectionner un employé';
+    }
+
+    if (!formData.montant || parseFloat(formData.montant) <= 0) {
+    newErrors.montant = 'Veuillez entrer un montant valide';
+    }
+
+    if (!formData.dateAvance) {
+    newErrors.dateAvance = 'Veuillez sélectionner une date';
+    }
+
+    if (!formData.motif.trim()) {
+    newErrors.motif = 'Veuillez entrer un motif';
+    }
+
+    if (!formData.nombreMensualites || parseInt(formData.nombreMensualites) <= 0) {
+    newErrors.nombreMensualites = 'Veuillez entrer un nombre de mensualités valide';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+};
+
+const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+    return;
+    }
+
+    setLoading(true);
+    
+    try {
+    const montant = parseFloat(formData.montant);
+    const nombreMensualites = parseInt(formData.nombreMensualites);
+    const montantMensualite = montant / nombreMensualites;
+
+    const advanceData = {
+        employeeId: formData.employeeId,
+        montant: montant,
+        dateAvance: new Date(formData.dateAvance),
+        motif: formData.motif.trim(),
+        nombreMensualites: nombreMensualites,
+        montantMensualite: montantMensualite,
+        soldeRestant: montant, // Initially, the full amount is remaining
+        notes: formData.notes.trim() || undefined
+    };
+
+    const url = editAdvance ? `/api/advances/${editAdvance.id}` : '/api/advances';
+    const method = editAdvance ? 'PUT' : 'POST';
+
+    const response = await fetch(url, {
+        method: method,
+        headers: {
+        'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(advanceData),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur lors de la sauvegarde');
+    }
+
+    onSuccess();
+    onClose();
+    } catch (error: any) {
+    console.error('Error saving advance:', error);
+    setErrors({ submit: error.message });
+    } finally {
+    setLoading(false);
+    }
+};
+
+const calculateMensualite = () => {
+    const montant = parseFloat(formData.montant);
+    const nombreMensualites = parseInt(formData.nombreMensualites);
+    
+    if (montant > 0 && nombreMensualites > 0) {
+    return (montant / nombreMensualites).toFixed(2);
+    }
+    return '0.00';
+};
+
+const formatCurrency = (amount: string) => {
+    const num = parseFloat(amount);
+    if (isNaN(num)) return '0,00 MAD';
+    return new Intl.NumberFormat('fr-MA', {
+    style: 'currency',
+    currency: 'MAD'
+    }).format(num);
+};
+
+if (!isOpen) return null;
+
+return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
+        <div className="mt-3">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-medium text-gray-900 flex items-center">
+            <DollarSign className="w-5 h-5 mr-2 text-[#0063b4]" />
+            {editAdvance ? 'Modifier l\'avance' : 'Nouvelle avance sur salaire'}
+            </h3>
+            <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+            <X className="w-6 h-6" />
+            </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Employee Selection */}
+            <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+                <User className="w-4 h-4 inline mr-1" />
+                Employé *
+            </label>
+            <select
+                name="employeeId"
+                value={formData.employeeId}
+                onChange={handleInputChange}
+                className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
+                errors.employeeId ? 'border-red-300' : 'border-gray-300'
+                }`}
+                disabled={!!editAdvance} // Disable when editing
+            >
+                <option value="">Sélectionner un employé</option>
+                {employees.map((employee) => (
+                <option key={employee.id} value={employee.id}>
+                    {employee.prenom} {employee.nom} - {employee.matricule} ({employee.fonction})
+                </option>
+                ))}
+            </select>
+            {errors.employeeId && (
+                <p className="mt-1 text-sm text-red-600">{errors.employeeId}</p>
+            )}
+            </div>
+
+            {/* Amount and Date */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <DollarSign className="w-4 h-4 inline mr-1" />
+                Montant de l'avance (MAD) *
+                </label>
+                <input
+                type="number"
+                name="montant"
+                value={formData.montant}
+                onChange={handleInputChange}
+                step="0.01"
+                min="0"
+                className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
+                    errors.montant ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="0.00"
+                />
+                {errors.montant && (
+                <p className="mt-1 text-sm text-red-600">{errors.montant}</p>
+                )}
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Calendar className="w-4 h-4 inline mr-1" />
+                Date de l'avance *
+                </label>
+                <input
+                type="date"
+                name="dateAvance"
+                value={formData.dateAvance}
+                onChange={handleInputChange}
+                className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
+                    errors.dateAvance ? 'border-red-300' : 'border-gray-300'
+                }`}
+                />
+                {errors.dateAvance && (
+                <p className="mt-1 text-sm text-red-600">{errors.dateAvance}</p>
+                )}
+            </div>
+            </div>
+
+            {/* Motif */}
+            <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+                <FileText className="w-4 h-4 inline mr-1" />
+                Motif de l'avance *
+            </label>
+            <input
+                type="text"
+                name="motif"
+                value={formData.motif}
+                onChange={handleInputChange}
+                className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
+                errors.motif ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="Ex: Urgence familiale, frais médicaux, etc."
+            />
+            {errors.motif && (
+                <p className="mt-1 text-sm text-red-600">{errors.motif}</p>
+            )}
+            </div>
+
+            {/* Repayment Terms */}
+            <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Clock className="w-4 h-4 inline mr-1" />
+                Nombre de mensualités *
+            </label>
+            <input
+                type="number"
+                name="nombreMensualites"
+                value={formData.nombreMensualites}
+                onChange={handleInputChange}
+                min="1"
+                max="24"
+                className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
+                errors.nombreMensualites ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="Ex: 6"
+            />
+            {errors.nombreMensualites && (
+                <p className="mt-1 text-sm text-red-600">{errors.nombreMensualites}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+                Maximum 24 mensualités
+            </p>
+            </div>
+
+            {/* Calculated Monthly Payment */}
+            {formData.montant && formData.nombreMensualites && (
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                <div className="flex items-center">
+                <div className="flex-shrink-0">
+                    <DollarSign className="h-5 w-5 text-blue-400" />
+                </div>
+                <div className="ml-3">
+                    <h3 className="text-sm font-medium text-blue-800">
+                    Mensualité calculée
+                    </h3>
+                    <div className="mt-1 text-sm text-blue-700">
+                    <span className="font-semibold text-lg">
+                        {formatCurrency(calculateMensualite())}
+                    </span>
+                    <span className="ml-2 text-xs">
+                        sur {formData.nombreMensualites} mois
+                    </span>
+                    </div>
+                </div>
+                </div>
+            </div>
+            )}
+
+            {/* Notes */}
+            <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+                Notes (optionnel)
+            </label>
+            <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows={3}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+                placeholder="Informations complémentaires..."
+            />
+            </div>
+
+            {/* Submit Error */}
+            {errors.submit && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                <div className="flex">
+                <div className="flex-shrink-0">
+                    <X className="h-5 w-5 text-red-400" />
+                </div>
+                <div className="ml-3">
+                    <p className="text-sm text-red-800">{errors.submit}</p>
+                </div>
+                </div>
+            </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0063b4]"
+            >
+                Annuler
+            </button>
+            <button
+                type="submit"
+                disabled={loading}
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#0063b4] hover:bg-[#0052a3] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0063b4] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                {loading ? (
+                <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Sauvegarde...
+                </div>
+                ) : (
+                editAdvance ? 'Modifier l\'avance' : 'Créer l\'avance'
+                )}
+            </button>
+            </div>
+        </form>
+        </div>
+    </div>
+    </div>
+);
+};
+
+export default AddAdvanceModal;

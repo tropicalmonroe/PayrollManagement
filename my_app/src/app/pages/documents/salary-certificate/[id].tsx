@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Layout } from '../../../components/Layout';
-import { SalaryCertificate } from '../../../components/SalaryCertificate';
+import { Layout } from '../../../../components/Layout';
+import { SalaryCertificate } from '../../../../components/SalaryCertificate';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 
 interface Employee {

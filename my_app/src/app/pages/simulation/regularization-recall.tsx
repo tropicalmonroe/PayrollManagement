@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { Layout } from '../../components/Layout';
+import { Layout } from '../../../components/Layout';
 import { TrendingUp, ArrowLeft, Download, RefreshCw, Info, Calendar, AlertCircle } from 'lucide-react';
 
 export default function RegularizationRecall() {

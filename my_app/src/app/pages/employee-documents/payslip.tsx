@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '../../components/Layout';
+import { Layout } from '../../../components/Layout';
 import { FileText, ArrowLeft, Download, User, Calendar, Search, Filter } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Employee } from '@prisma/client';
-import { calculerPaie, type EmployeePayrollData } from '../../lib/payrollCalculations';
+import { calculerPaie, type EmployeePayrollData } from '../../../lib/payrollCalculations';
 
 const PayslipPage = () => {
   const router = useRouter();

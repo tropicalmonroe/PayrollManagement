@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '../../components/Layout';
+import { Layout } from '../../../components/Layout';
 import { TrendingUp, ArrowLeft, Plus } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Advance, Employee } from '@prisma/client';
-import AddAdvanceModal from '../../components/AddAdvanceModal';
+import AddAdvanceModal from '../../../components/AddAdvanceModal';
 
 type AdvanceWithEmployee = Advance & {
   employee: Employee;
