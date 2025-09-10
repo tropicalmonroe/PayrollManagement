@@ -1,608 +1,605 @@
 /**
- * Fichier de données de base pour les calculs de paie
- * Ce fichier centralise toutes les données de base et a un impact sur toute l'application RH
+ * Base data file for payroll calculations
+ * This file centralizes all base data and impacts the entire HR application
  * 
- * Données de Base de Référence:
- * - Salaire de base : 49.447,78 MAD
- * - Ancienneté : 15 ans
- * - Nombre de jours/mois : 26 jours
+ * Base Reference Data:
+ * - Base Salary: 150,000 KES
+ * - Seniority: 15 years
+ * - Number of days/month: 26 days
  */
 
-// ===== DONNÉES DE BASE DE RÉFÉRENCE =====
-export const DONNEES_BASE_REFERENCE = {
-  salaireBase: 49447.78,
-  anciennete: 15,
-  nombreJoursMois: 26,
-  // Composants du salaire brut selon les nouvelles spécifications
-  tauxAnciennete: 0.25, // 25.00%
-  primeAnciennete: 1295.91, // 1,295.91 MAD
-  indemniteLogement: 0.00, // 0,00 MAD
-  indemnitePanier: 0.00, // 0,00 MAD
-  primeTransport: 750.00, // 750,00 MAD
-  indemniteRepresentation: 0.00, // 0,00 MAD
-  // Salaire brut calculé: 1295.91 + 0 + 0 + 750 + 0 = 2045.91 MAD
-  // Mais selon vos données, le salaire brut est 10,685.33 MAD
-  salaireBrutReference: 10685.33, // 10,685.33 MAD
-  interetsCredit: 6977.97,
-  remboursementCredit: 15714.11
+// ===== BASE REFERENCE DATA =====
+export const BASE_REFERENCE_DATA = {
+  baseSalary: 150000,
+  seniority: 15,
+  numberOfDaysPerMonth: 26,
+  // Salary components according to new specifications
+  seniorityRate: 0.25, // 25.00%
+  seniorityBonus: 37500, // 37,500 KES
+  housingAllowance: 0.00, // 0.00 KES
+  mealAllowance: 0.00, // 0.00 KES
+  transportAllowance: 5000.00, // 5,000 KES
+  representationAllowance: 0.00, // 0.00 KES
+  // Calculated gross salary: 150,000 + 37,500 + 0 + 0 + 5,000 + 0 = 192,500 KES
+  grossSalaryReference: 192500, // 192,500 KES
+  creditInterest: 25000,
+  creditRepayment: 45000
 };
 
-// ===== TAUX ET POURCENTAGES =====
-export const TAUX_COTISATIONS = {
-  // Cotisations salariales (RETENUES)
-  cnssPrestation: {
-    taux: 0.0448, // 4.48%
-    plafond: 6000 // Plafond mensuel CNSS
+// ===== RATES AND PERCENTAGES =====
+export const CONTRIBUTION_RATES = {
+  // Employee contributions (DEDUCTIONS)
+  nssfEmployee: {
+    taxRate: 0.06, // 6% (tiered)
+    ceiling: 18000 // Monthly NSSF ceiling
   },
-  amoSalariale: 0.0226, // 2.26%
-  retraiteSalariale: {
-    taux: 0.06, // 6.00%
-    plafond: null, // Pas de plafond pour la retraite
-    seuilMinimum: 6000 // Seuil minimum pour cotiser
+  shifEmployee: 0.0275, // 2.75%
+  pensionEmployee: {
+    taxRate: 0.06, // 6.00%
+    ceiling: null, // No ceiling for pension
+    minimumThreshold: 6000 // Minimum threshold to contribute
   },
-  assuranceDiversSalariale: {
-    taux: 0.012562486, // 1.25624860% - Ajusté pour précision exacte
-    seuilMinimum: 6000 // Seuil minimum pour cotiser
-  },
-  
-  // Cotisations patronales
-  cnssPatronale: 0.0898, // 8.98%
-  allocationsFamiliales: 0.064, // 6.40%
-  taxeFormationProfessionnelle: 0.016, // 1.60%
-  amoPatronale: 0.0226, // 2.26%
-  participationAMO: 0.0185, // 1.85%
-  accidentTravail: 0.0055, // 0.55%
-  retraitePatronale: {
-    taux: 0.06, // 6.00%
-    seuilMinimum: 6000 // Seuil minimum pour cotiser
-  },
-  assuranceDiversPatronale: {
-    taux: 0.0126, // 1.26%
-    seuilMinimum: 6000 // Seuil minimum pour cotiser
+  insuranceDiversifiedEmployee: {
+    taxRate: 0.0125, // 1.25% - Adjusted for exact precision
+    minimumThreshold: 6000 // Minimum threshold to contribute
   },
   
-  // Frais professionnels et déductions fiscales
-  fraisProfessionnels: {
-    taux: 0.20, // 20%
-    plafond: 2500, // Plafond théorique
-    montantApplique: 1987.07 // Montant corrigé selon Ahmed TIMZINE
+  // Employer contributions
+  nssfEmployer: 0.06, // 6% (tiered)
+  housingLevy: 0.015, // 1.5%
+  trainingLevy: 0.01, // 1.0%
+  shifEmployer: 0.0275, // 2.75%
+  participationSHIF: 0.01, // 1.0%
+  workInjury: 0.005, // 0.5%
+  pensionEmployer: {
+    taxRate: 0.06, // 6.00%
+    minimumThreshold: 6000 // Minimum threshold to contribute
+  },
+  insuranceDiversifiedEmployer: {
+    taxRate: 0.0125, // 1.25%
+    minimumThreshold: 6000 // Minimum threshold to contribute
   },
   
-  // Déductions fiscales spécifiques
-  deductionsFiscales: {
-    interetsCredit: {
-      tauxDeductionMax: 0.10, // 10% du net imposable maximum
-      description: "Intérêts de crédit immobilier"
+  // Professional expenses and tax deductions
+  professionalExpenses: {
+    taxRate: 0.20, // 20%
+    ceiling: 2500, // Theoretical ceiling
+    appliedAmount: 1987.07 // Corrected amount
+  },
+  
+  // Specific tax deductions
+  taxDeductions: {
+    creditInterest: {
+      maxDeductionRate: 0.10, // 10% of taxable net maximum
+      description: "Mortgage credit interest"
     },
-    chargesFamille: {
-      montantParPersonne: 360, // MAD par personne à charge par an
-      description: "Charges de famille"
+    familyDeductions: {
+      amountPerPerson: 2400, // KES per dependent per year
+      description: "Family deductions"
     }
   }
 };
 
-// ===== BARÈME PRIME D'ANCIENNETÉ =====
-export const BAREME_ANCIENNETE = [
-  { min: 0, max: 2, taux: 0.00 }, // 0% pour 0-1 ans
-  { min: 2, max: 5, taux: 0.05 }, // 5% pour 2-4 ans
-  { min: 5, max: 12, taux: 0.10 }, // 10% pour 5-11 ans
-  { min: 12, max: 20, taux: 0.15 }, // 15% pour 12-19 ans
-  { min: 20, max: 25, taux: 0.20 }, // 20% pour 20-24 ans
-  { min: 25, max: Infinity, taux: 0.25 } // 25% pour 25+ ans
+// ===== SENIORITY BONUS SCALE =====
+export const SENIORITY_SCALE = [
+  { min: 0, max: 2, rate: 0.00 }, // 0% for 0-1 years
+  { min: 2, max: 5, rate: 0.05 }, // 5% for 2-4 years
+  { min: 5, max: 12, rate: 0.10 }, // 10% for 5-11 years
+  { min: 12, max: 20, rate: 0.15 }, // 15% for 12-19 years
+  { min: 20, max: 25, rate: 0.20 }, // 20% for 20-24 years
+  { min: 25, max: Infinity, rate: 0.25 } // 25% for 25+ years
 ];
 
-// ===== BARÈME IGR (IMPÔT SUR LE REVENU) - TRANCHES MENSUELLES =====
-// Basé sur le tableau fourni avec les nouvelles tranches:
-// 0 - 3 333 MAD = 0% (déduction: 0)
-// 3 334 - 5 000 MAD = 10% (déduction: 333.33)
-// 5 001 - 6 667 MAD = 20% (déduction: 833.33)
-// 6 668 - 8 333 MAD = 30% (déduction: 1500)
-// 8 334 - 15 000 MAD = 34% (déduction: 1833.33)
-// Au-delà de 15 000 MAD = 37% (déduction: 2283)
-export const BAREME_IGR = [
-  { min: 0, max: 3333, taux: 0.00, deduction: 0 },
-  { min: 3334, max: 5000, taux: 0.10, deduction: 333.33 },
-  { min: 5001, max: 6667, taux: 0.20, deduction: 833.33 },
-  { min: 6668, max: 8333, taux: 0.30, deduction: 1500 },
-  { min: 8334, max: 15000, taux: 0.34, deduction: 1833.33 },
-  { min: 15001, max: Infinity, taux: 0.37, deduction: 2283.33 }
+// ===== INCOME TAX BRACKETS - MONTHLY BRACKETS =====
+// Based on the provided table with new brackets:
+// 0 - 24,000 KES = 10% (deduction: 0)
+// 24,001 - 32,333 KES = 15% (deduction: 600)
+// 32,334 - 41,667 KES = 20% (deduction: 1,083)
+// 41,668 - 57,143 KES = 25% (deduction: 1,875)
+// Above 57,143 KES = 30% (deduction: 2,857)
+export const INCOME_TAX_BRACKETS = [
+  { min: 0, max: 24000, rate: 0.10, deduction: 0 },
+  { min: 24001, max: 32333, rate: 0.15, deduction: 600 },
+  { min: 32334, max: 41667, rate: 0.20, deduction: 1083 },
+  { min: 41668, max: 57143, rate: 0.25, deduction: 1875 },
+  { min: 57144, max: Infinity, rate: 0.30, deduction: 2857 }
 ];
 
-// ===== FONCTIONS DE CALCUL CORRIGÉES =====
+// ===== CORRECTED CALCULATION FUNCTIONS =====
 
 /**
- * Calcule la prime d'ancienneté selon le barème
+ * Calculates seniority bonus according to the scale
  */
-export function calculerPrimeAnciennete(salaireBase: number, anciennete: number): number {
-  // Trouve la tranche appropriée selon le barème d'ancienneté
-  // Les taux s'appliquent à partir de l'année exacte indiquée
-  const tranche = BAREME_ANCIENNETE.find(t => anciennete >= t.min && (t.max === Infinity || anciennete < t.max));
-  if (!tranche) return 0;
+export function calculateSeniorityBonus(baseSalary: number, seniority: number): number {
+  // Find the appropriate bracket according to the seniority scale
+  // Rates apply from the exact year indicated
+  const bracket = SENIORITY_SCALE.find(t => seniority >= t.min && (t.max === Infinity || seniority < t.max));
+  if (!bracket) return 0;
   
-  const prime = salaireBase * tranche.taux;
-  return prime; // Pas d'arrondi pour maintenir la précision
+  const bonus = baseSalary * bracket.rate;
+  return bonus; // No rounding to maintain precision
 }
 
-
 /**
- * Calcule le salaire brut selon la formule correcte:
- * Salaire brut = Salaire de base + Prime d'ancienneté + Prime de transport + Indemnité de représentation
+ * Calculates gross salary according to the correct formula:
+ * Gross Salary = Base Salary + Seniority Bonus + Transport Allowance + Representation Allowance
  */
-export function calculerSalaireBrut(
-  salaireBase: number,
-  primeAnciennete: number,
-  primeTransport: number,
-  indemniteRepresentation: number = 0
+export function calculateGrossSalary(
+  baseSalary: number,
+  seniorityBonus: number,
+  transportAllowance: number,
+  representationAllowance: number = 0
 ): number {
-  return salaireBase + primeAnciennete + primeTransport + indemniteRepresentation;
+  return baseSalary + seniorityBonus + transportAllowance + representationAllowance;
 }
 
 /**
- * Calcule le salaire brut imposable
+ * Calculates taxable gross salary
  */
-export function calculerSalaireBrutImposable(
-  salaireBrut: number,
-  indemniteRepresentation: number,
-  primeTransport: number
+export function calculateTaxableGrossSalary(
+  grossSalary: number,
+  representationAllowance: number,
+  transportAllowance: number
 ): number {
-  return salaireBrut - indemniteRepresentation - primeTransport;
+  return grossSalary - representationAllowance - transportAllowance;
 }
 
 /**
- * Calcule les cotisations CNSS avec plafond
+ * Calculates NSSF contributions with ceiling
  */
-export function calculerCotisationsCNSS(salaireBrutImposable: number): {
-  salariale: number;
-  patronale: number;
-  assiettePlafonnee: number;
+export function calculateNSSFContributions(taxableGrossSalary: number): {
+  employee: number;
+  employer: number;
+  ceilingBase: number;
 } {
-  // La CNSS est toujours calculée sur le plafond de 6000 MAD
-  const assiettePlafonnee = TAUX_COTISATIONS.cnssPrestation.plafond;
+  // NSSF is always calculated on the ceiling of 18,000 KES
+  const ceilingBase = CONTRIBUTION_RATES.nssfEmployee.ceiling;
   
   return {
-    salariale: assiettePlafonnee * TAUX_COTISATIONS.cnssPrestation.taux,
-    patronale: assiettePlafonnee * TAUX_COTISATIONS.cnssPatronale,
-    assiettePlafonnee
+    employee: ceilingBase * CONTRIBUTION_RATES.nssfEmployee.taxRate,
+    employer: ceilingBase * CONTRIBUTION_RATES.nssfEmployer,
+    ceilingBase
   };
 }
 
 /**
- * Calcule les cotisations AMO
+ * Calculates SHIF contributions
  */
-export function calculerCotisationsAMO(salaireBrutImposable: number): {
-  salariale: number;
-  patronale: number;
+export function calculateSHIFContributions(taxableGrossSalary: number): {
+  employee: number;
+  employer: number;
   participation: number;
 } {
   return {
-    salariale: salaireBrutImposable * TAUX_COTISATIONS.amoSalariale,
-    patronale: salaireBrutImposable * TAUX_COTISATIONS.amoPatronale,
-    participation: salaireBrutImposable * TAUX_COTISATIONS.participationAMO
+    employee: taxableGrossSalary * CONTRIBUTION_RATES.shifEmployee,
+    employer: taxableGrossSalary * CONTRIBUTION_RATES.shifEmployer,
+    participation: taxableGrossSalary * CONTRIBUTION_RATES.participationSHIF
   };
 }
 
 /**
- * Calcule les cotisations retraite (seulement pour salaires > 6000 MAD)
+ * Calculates pension contributions (only for salaries > 6,000 KES)
  */
-export function calculerCotisationsRetraite(salaireBrutImposable: number): {
-  salariale: number;
-  patronale: number;
+export function calculatePensionContributions(taxableGrossSalary: number): {
+  employee: number;
+  employer: number;
 } {
-  // Pas de cotisation retraite pour les salaires <= 6000 MAD
-  if (salaireBrutImposable <= TAUX_COTISATIONS.retraiteSalariale.seuilMinimum) {
-    return { salariale: 0, patronale: 0 };
+  // No pension contribution for salaries <= 6,000 KES
+  if (taxableGrossSalary <= CONTRIBUTION_RATES.pensionEmployee.minimumThreshold) {
+    return { employee: 0, employer: 0 };
   }
   
   return {
-    salariale: salaireBrutImposable * TAUX_COTISATIONS.retraiteSalariale.taux,
-    patronale: salaireBrutImposable * TAUX_COTISATIONS.retraitePatronale.taux
+    employee: taxableGrossSalary * CONTRIBUTION_RATES.pensionEmployee.taxRate,
+    employer: taxableGrossSalary * CONTRIBUTION_RATES.pensionEmployer.taxRate
   };
 }
 
 /**
- * Calcule les assurances diverses
- * Formule: salaire brut imposable * 1.26%
+ * Calculates diversified insurance
+ * Formula: taxable gross salary * 1.25%
  */
-export function calculerAssurancesDiverses(salaireBrutImposable: number): {
-  salariale: number;
-  patronale: number;
+export function calculateDiversifiedInsurance(taxableGrossSalary: number): {
+  employee: number;
+  employer: number;
 } {
   return {
-    salariale: salaireBrutImposable * TAUX_COTISATIONS.assuranceDiversSalariale.taux,
-    patronale: salaireBrutImposable * TAUX_COTISATIONS.assuranceDiversPatronale.taux
+    employee: taxableGrossSalary * CONTRIBUTION_RATES.insuranceDiversifiedEmployee.taxRate,
+    employer: taxableGrossSalary * CONTRIBUTION_RATES.insuranceDiversifiedEmployer.taxRate
   };
 }
 
 /**
- * Calcule les allocations familiales
+ * Calculates housing levy
  */
-export function calculerAllocationsFamiliales(salaireBrutImposable: number): number {
-  return salaireBrutImposable * TAUX_COTISATIONS.allocationsFamiliales;
+export function calculateHousingLevy(taxableGrossSalary: number): number {
+  return taxableGrossSalary * CONTRIBUTION_RATES.housingLevy;
 }
 
 /**
- * Calcule la taxe de formation professionnelle
+ * Calculates training levy
  */
-export function calculerTaxeFormation(salaireBrutImposable: number): number {
-  return salaireBrutImposable * TAUX_COTISATIONS.taxeFormationProfessionnelle;
+export function calculateTrainingLevy(taxableGrossSalary: number): number {
+  return taxableGrossSalary * CONTRIBUTION_RATES.trainingLevy;
 }
 
 /**
- * Calcule les accidents du travail
+ * Calculates work injury insurance
  */
-export function calculerAccidentTravail(salaireBrutImposable: number): number {
-  return salaireBrutImposable * TAUX_COTISATIONS.accidentTravail;
+export function calculateWorkInjury(taxableGrossSalary: number): number {
+  return taxableGrossSalary * CONTRIBUTION_RATES.workInjury;
 }
 
 /**
- * Calcule les frais professionnels selon la nouvelle formule:
- * IF(salaire brut imposable*12<78000;MIN(30000/12;35%*salaire brut imposable);MIN(35000/12;25%*salaire brut imposable))
+ * Calculates professional expenses according to the new formula:
+ * IF(taxable gross salary*12<300,000;MIN(30,000/12;35%*taxable gross salary);MIN(35,000/12;25%*taxable gross salary))
  */
-export function calculerFraisProfessionnels(salaireBrutImposable: number): number {
-  const salaireAnnuel = salaireBrutImposable * 12;
+export function calculateProfessionalExpenses(taxableGrossSalary: number): number {
+  const annualSalary = taxableGrossSalary * 12;
   
-  if (salaireAnnuel < 78000) {
-    // Salaire annuel < 78 000 MAD
-    // MIN(30 000/12, 35% × salaire brut imposable)
-    const plafondMensuel = 30000 / 12; // 2 500 MAD
-    const pourcentage = salaireBrutImposable * 0.35; // 35%
-    return Math.min(plafondMensuel, pourcentage);
+  if (annualSalary < 300000) {
+    // Annual salary < 300,000 KES
+    // MIN(30,000/12, 35% × taxable gross salary)
+    const monthlyCeiling = 30000 / 12; // 2,500 KES
+    const percentage = taxableGrossSalary * 0.35; // 35%
+    return Math.min(monthlyCeiling, percentage);
   } else {
-    // Salaire annuel ≥ 78 000 MAD
-    // MIN(35 000/12, 25% × salaire brut imposable)
-    const plafondMensuel = 35000 / 12; // 2 916,67 MAD
-    const pourcentage = salaireBrutImposable * 0.25; // 25%
-    return Math.min(plafondMensuel, pourcentage);
+    // Annual salary ≥ 300,000 KES
+    // MIN(35,000/12, 25% × taxable gross salary)
+    const monthlyCeiling = 35000 / 12; // 2,916.67 KES
+    const percentage = taxableGrossSalary * 0.25; // 25%
+    return Math.min(monthlyCeiling, percentage);
   }
 }
+
 /**
- * Calcule le net imposable selon la nouvelle formule:
- * Net Imposable = Salaire Brut Imposable - CNSS Prestations Part Salariale - AMO Part Salariale - Retraite Part Salariale - Frais Professionnels - Assurance Divers Part Salariale
+ * Calculates taxable net according to the new formula:
+ * Taxable Net = Taxable Gross Salary - NSSF Employee Contribution - SHIF Employee Contribution - Pension Employee Contribution - Professional Expenses - Insurance Diversified Employee Contribution
  */
-export function calculerNetImposable(
-  salaireBrutImposable: number,
-  cnssPrestation: number,
-  amoSalariale: number,
-  retraiteSalariale: number,
-  fraisProfessionnels: number,
-  assuranceDiversSalariale: number
+export function calculateTaxableNet(
+  taxableGrossSalary: number,
+  nssfEmployee: number,
+  shifEmployee: number,
+  pensionEmployee: number,
+  professionalExpenses: number,
+  insuranceDiversifiedEmployee: number
 ): number {
-  return salaireBrutImposable - cnssPrestation - amoSalariale - retraiteSalariale - fraisProfessionnels - assuranceDiversSalariale;
+  return taxableGrossSalary - nssfEmployee - shifEmployee - pensionEmployee - professionalExpenses - insuranceDiversifiedEmployee;
 }
 
 /**
- * Calcule le net net imposable (après déduction des intérêts de crédit)
- * Formule: Net Imposable - MIN(Intérêts Crédit, 10% * Net Imposable)
+ * Calculates net taxable (after deduction of credit interest)
+ * Formula: Taxable Net - MIN(Credit Interest, 10% * Taxable Net)
  */
-export function calculerNetNetImposable(netImposable: number, interetsCredit: number): number {
-  const deductionMax = netImposable * 0.10; // 10% du net imposable
-  const deductionAppliquee = Math.min(interetsCredit, deductionMax);
-  return netImposable - deductionAppliquee;
+export function calculateNetTaxable(taxableNet: number, creditInterest: number): number {
+  const maxDeduction = taxableNet * 0.10; // 10% of taxable net
+  const appliedDeduction = Math.min(creditInterest, maxDeduction);
+  return taxableNet - appliedDeduction;
 }
 
 /**
- * Calcule l'IGR selon le barème progressif
- * Formule: (Net Net Imposable * Taux - Somme à déduire) * (Jours travaillés / 26) - (500/12 * Nombre de déductions)
+ * Calculates income tax according to the progressive scale
+ * Formula: (Net Taxable * Rate - Amount to deduct) * (Days worked / 26) - (Personal relief * Number of deductions)
  */
-export function calculerIGR(netNetImposable: number, joursTravailles: number = 26, nbrDeductions: number = 0): number {
-  let igr = 0;
+export function calculateIncomeTax(netTaxable: number, daysWorked: number = 26, numberOfDeductions: number = 0): number {
+  let incomeTax = 0;
   
-  for (const tranche of BAREME_IGR) {
-    if (netNetImposable >= tranche.min && netNetImposable <= tranche.max) {
-      igr = (netNetImposable * tranche.taux) - tranche.deduction;
+  for (const bracket of INCOME_TAX_BRACKETS) {
+    if (netTaxable >= bracket.min && netTaxable <= bracket.max) {
+      incomeTax = (netTaxable * bracket.rate) - bracket.deduction;
       break;
     }
   }
   
-  // Application du facteur de proratisation
-  const igrProratise = igr * (joursTravailles / 26);
+  // Application of proration factor
+  const proratedIncomeTax = incomeTax * (daysWorked / 26);
   
-  // Application des déductions pour charges de famille
-  const deductionChargesFamille = (500 / 12) * nbrDeductions;
+  // Application of deductions for family
+  const familyDeductions = 200 * numberOfDeductions; // 200 KES per dependent per month
   
-  return Math.max(0, igrProratise - deductionChargesFamille);
+  return Math.max(0, proratedIncomeTax - familyDeductions);
 }
 
 /**
- * Calcule le total des retenues selon les spécifications:
- * Retenues = Cotisations Salariales + Retenues Personnelles
+ * Calculates total deductions according to specifications:
+ * Deductions = Employee Contributions + Personal Deductions
  * 
- * Cotisations Salariales:
- * - CNSS Prestations - Part Salariale
- * - AMO - Part Salariale  
- * - Retraite - Part Salariale
- * - Assurance Divers - Part Salariale
+ * Employee Contributions:
+ * - NSSF Employee Contribution
+ * - SHIF Employee Contribution  
+ * - Pension Employee Contribution
+ * - Insurance Diversified Employee Contribution
  * 
- * Retenues Personnelles:
- * - Impôt sur le revenu
- * - Remboursement Crédit immo
- * - Crédit conso
- * - Contribution sociale
- * - Remboursement avance
+ * Personal Deductions:
+ * - Income tax
+ * - Mortgage credit repayment
+ * - Consumer credit
+ * - Social contribution
+ * - Advance repayment
  */
-export function calculerTotalRetenues(
-  cotisationsSalariales: number,
-  impotSurRevenu: number,
-  remboursementCreditImmo: number,
-  creditConso: number,
-  contributionSociale: number,
-  remboursementAvance: number
+export function calculateTotalDeductions(
+  employeeContributions: number,
+  incomeTax: number,
+  mortgageRepayment: number,
+  consumerCredit: number,
+  socialContribution: number,
+  advanceRepayment: number
 ): number {
-  const retenues = {
-    cotisationsSalariales,
-    retenues_personnelles: {
-      impotSurRevenu,
-      remboursementCreditImmo,
-      creditConso,
-      contributionSociale,
-      remboursementAvance,
-      total: impotSurRevenu + remboursementCreditImmo + creditConso + contributionSociale + remboursementAvance
+  const deductions = {
+    employeeContributions,
+    personalDeductions: {
+      incomeTax,
+      mortgageRepayment,
+      consumerCredit,
+      socialContribution,
+      advanceRepayment,
+      total: incomeTax + mortgageRepayment + consumerCredit + socialContribution + advanceRepayment
     }
   };
   
-  return cotisationsSalariales + retenues.retenues_personnelles.total;
+  return employeeContributions + deductions.personalDeductions.total;
 }
 
 /**
- * Calcule le détail complet des retenues salariales
- * Retourne le détail de chaque composant des retenues
+ * Calculates detailed employee contributions
+ * Returns details of each deduction component
  */
-export function calculerDetailRetenues(salaireBrutImposable: number): {
-  cnss: number;
-  amo: number;
-  retraite: number;
-  assuranceDivers: number;
-  totalCotisationsSalariales: number;
+export function calculateContributionDetails(taxableGrossSalary: number): {
+  nssf: number;
+  shif: number;
+  pension: number;
+  insuranceDiversified: number;
+  totalEmployeeContributions: number;
   details: {
-    cnss: { taux: number; plafond: number; assiette: number };
-    amo: { taux: number; assiette: number };
-    retraite: { taux: number; seuilMinimum: number; assiette: number };
-    assuranceDivers: { taux: number; seuilMinimum: number; assiette: number };
+    nssf: { rate: number; ceiling: number; base: number };
+    shif: { rate: number; base: number };
+    pension: { rate: number; minimumThreshold: number; base: number };
+    insuranceDiversified: { rate: number; minimumThreshold: number; base: number };
   };
 } {
-  // Calcul CNSS avec plafond
-  const cnssAssiette = TAUX_COTISATIONS.cnssPrestation.plafond;
-  const cnss = cnssAssiette * TAUX_COTISATIONS.cnssPrestation.taux;
+  // Calculate NSSF with ceiling
+  const nssfBase = CONTRIBUTION_RATES.nssfEmployee.ceiling;
+  const nssf = nssfBase * CONTRIBUTION_RATES.nssfEmployee.taxRate;
   
-  // Calcul AMO
-  const amo = salaireBrutImposable * TAUX_COTISATIONS.amoSalariale;
+  // Calculate SHIF
+  const shif = taxableGrossSalary * CONTRIBUTION_RATES.shifEmployee;
   
-  // Calcul Retraite (seulement si salaire > 6000 MAD)
-  const retraite = salaireBrutImposable > TAUX_COTISATIONS.retraiteSalariale.seuilMinimum 
-    ? salaireBrutImposable * TAUX_COTISATIONS.retraiteSalariale.taux 
+  // Calculate Pension (only if salary > 6,000 KES)
+  const pension = taxableGrossSalary > CONTRIBUTION_RATES.pensionEmployee.minimumThreshold 
+    ? taxableGrossSalary * CONTRIBUTION_RATES.pensionEmployee.taxRate 
     : 0;
   
-  // Calcul Assurance Diverses
-  const assuranceDivers = salaireBrutImposable * TAUX_COTISATIONS.assuranceDiversSalariale.taux;
+  // Calculate Diversified Insurance
+  const insuranceDiversified = taxableGrossSalary * CONTRIBUTION_RATES.insuranceDiversifiedEmployee.taxRate;
   
-  const totalCotisationsSalariales = cnss + amo + retraite + assuranceDivers;
+  const totalEmployeeContributions = nssf + shif + pension + insuranceDiversified;
   
   return {
-    cnss,
-    amo,
-    retraite,
-    assuranceDivers,
-    totalCotisationsSalariales,
+    nssf,
+    shif,
+    pension,
+    insuranceDiversified,
+    totalEmployeeContributions,
     details: {
-      cnss: {
-        taux: TAUX_COTISATIONS.cnssPrestation.taux,
-        plafond: TAUX_COTISATIONS.cnssPrestation.plafond,
-        assiette: cnssAssiette
+      nssf: {
+        rate: CONTRIBUTION_RATES.nssfEmployee.taxRate,
+        ceiling: CONTRIBUTION_RATES.nssfEmployee.ceiling,
+        base: nssfBase
       },
-      amo: {
-        taux: TAUX_COTISATIONS.amoSalariale,
-        assiette: salaireBrutImposable
+      shif: {
+        rate: CONTRIBUTION_RATES.shifEmployee,
+        base: taxableGrossSalary
       },
-      retraite: {
-        taux: TAUX_COTISATIONS.retraiteSalariale.taux,
-        seuilMinimum: TAUX_COTISATIONS.retraiteSalariale.seuilMinimum,
-        assiette: salaireBrutImposable > TAUX_COTISATIONS.retraiteSalariale.seuilMinimum ? salaireBrutImposable : 0
+      pension: {
+        rate: CONTRIBUTION_RATES.pensionEmployee.taxRate,
+        minimumThreshold: CONTRIBUTION_RATES.pensionEmployee.minimumThreshold,
+        base: taxableGrossSalary > CONTRIBUTION_RATES.pensionEmployee.minimumThreshold ? taxableGrossSalary : 0
       },
-      assuranceDivers: {
-        taux: TAUX_COTISATIONS.assuranceDiversSalariale.taux,
-        seuilMinimum: TAUX_COTISATIONS.assuranceDiversSalariale.seuilMinimum,
-        assiette: salaireBrutImposable
+      insuranceDiversified: {
+        rate: CONTRIBUTION_RATES.insuranceDiversifiedEmployee.taxRate,
+        minimumThreshold: CONTRIBUTION_RATES.insuranceDiversifiedEmployee.minimumThreshold,
+        base: taxableGrossSalary
       }
     }
   };
 }
 
 /**
- * Calcule le salaire net à payer
+ * Calculates net salary payable
  */
-export function calculerSalaireNet(salaireBrut: number, totalRetenues: number): number {
-  return salaireBrut - totalRetenues;
+export function calculateNetSalary(grossSalary: number, totalDeductions: number): number {
+  return grossSalary - totalDeductions;
 }
 
-// ===== CALCUL COMPLET SELON LES DONNÉES DE BASE =====
+// ===== COMPLETE CALCULATION ACCORDING TO BASE DATA =====
 
-export interface CalculPayrollParams {
-  salaireBase: number;
-  anciennete: number;
-  primeTransport?: number;
-  indemniteRepresentation?: number;
-  indemniteLogement?: number;
-  indemnitePanier?: number;
-  interetsCredit?: number;
-  autresRetenues?: number;
-  joursTravailles?: number;
-  nbrDeductions?: number;
+export interface PayrollCalculationParams {
+  baseSalary: number;
+  seniority: number;
+  transportAllowance?: number;
+  representationAllowance?: number;
+  housingAllowance?: number;
+  mealAllowance?: number;
+  creditInterest?: number;
+  otherDeductions?: number;
+  daysWorked?: number;
+  numberOfDeductions?: number;
 }
 
-export interface CalculPayrollResult {
-  // Gains
-  salaireBase: number;
-  primeAnciennete: number;
-  primeTransport: number;
-  indemniteRepresentation: number;
-  salaireBrut: number;
-  salaireBrutImposable: number;
+export interface PayrollCalculationResult {
+  // Earnings
+  baseSalary: number;
+  seniorityBonus: number;
+  transportAllowance: number;
+  representationAllowance: number;
+  grossSalary: number;
+  taxableGrossSalary: number;
   
-  // Cotisations salariales
-  cnssPrestation: number;
-  amoSalariale: number;
-  retraiteSalariale: number;
-  assuranceDiversSalariale: number;
-  totalCotisationsSalariales: number;
+  // Employee contributions
+  nssfEmployee: number;
+  shifEmployee: number;
+  pensionEmployee: number;
+  insuranceDiversifiedEmployee: number;
+  totalEmployeeContributions: number;
   
-  // Cotisations patronales
-  retraitePatronale: number;
-  assuranceDiversPatronale: number;
-  cnssPatronale: number;
-  allocationsFamiliales: number;
-  taxeFormation: number;
-  amoPatronale: number;
-  participationAMO: number;
-  accidentTravail: number;
-  totalCotisationsPatronales: number;
+  // Employer contributions
+  pensionEmployer: number;
+  insuranceDiversifiedEmployer: number;
+  nssfEmployer: number;
+  housingLevy: number;
+  trainingLevy: number;
+  shifEmployer: number;
+  participationSHIF: number;
+  workInjury: number;
+  totalEmployerContributions: number;
   
-  // Calcul IGR
-  fraisProfessionnels: number;
-  netImposable: number;
-  interetsCredit: number;
-  netNetImposable: number;
-  igr: number;
+  // Income tax calculation
+  professionalExpenses: number;
+  taxableNet: number;
+  creditInterest: number;
+  netTaxable: number;
+  incomeTax: number;
   
-  // Totaux
-  autresRetenues: number;
-  totalRetenues: number;
-  salaireNetAPayer: number;
+  // Totals
+  otherDeductions: number;
+  totalDeductions: number;
+  netSalaryPayable: number;
 }
 
 /**
- * Fonction principale de calcul selon les données de base
+ * Main calculation function according to base data
  */
-export function calculerPaieComplete(params: CalculPayrollParams): CalculPayrollResult {
+export function calculateCompletePayroll(params: PayrollCalculationParams): PayrollCalculationResult {
   const {
-    salaireBase,
-    anciennete,
-    primeTransport = DONNEES_BASE_REFERENCE.primeTransport,
-    indemniteRepresentation = DONNEES_BASE_REFERENCE.indemniteRepresentation,
-    indemniteLogement = DONNEES_BASE_REFERENCE.indemniteLogement,
-    indemnitePanier = DONNEES_BASE_REFERENCE.indemnitePanier,
-    interetsCredit = DONNEES_BASE_REFERENCE.interetsCredit,
-    autresRetenues = DONNEES_BASE_REFERENCE.remboursementCredit,
-    joursTravailles = DONNEES_BASE_REFERENCE.nombreJoursMois,
-    nbrDeductions = 0
+    baseSalary,
+    seniority,
+    transportAllowance = BASE_REFERENCE_DATA.transportAllowance,
+    representationAllowance = BASE_REFERENCE_DATA.representationAllowance,
+    housingAllowance = BASE_REFERENCE_DATA.housingAllowance,
+    mealAllowance = BASE_REFERENCE_DATA.mealAllowance,
+    creditInterest = BASE_REFERENCE_DATA.creditInterest,
+    otherDeductions = BASE_REFERENCE_DATA.creditRepayment,
+    daysWorked = BASE_REFERENCE_DATA.numberOfDaysPerMonth,
+    numberOfDeductions = 0
   } = params;
 
-  // 1. Prime d'ancienneté
-  const primeAnciennete = calculerPrimeAnciennete(salaireBase, anciennete);
+  // 1. Seniority bonus
+  const seniorityBonus = calculateSeniorityBonus(baseSalary, seniority);
   
-  // 2. Salaire brut (selon les nouveaux composants)
-  const salaireBrut = salaireBase + primeAnciennete + indemniteLogement + indemnitePanier + primeTransport + indemniteRepresentation;
+  // 2. Gross salary (according to new components)
+  const grossSalary = baseSalary + seniorityBonus + housingAllowance + mealAllowance + transportAllowance + representationAllowance;
   
-  // 3. Salaire brut imposable
-  const salaireBrutImposable = calculerSalaireBrutImposable(salaireBrut, indemniteRepresentation, primeTransport);
+  // 3. Taxable gross salary
+  const taxableGrossSalary = calculateTaxableGrossSalary(grossSalary, representationAllowance, transportAllowance);
   
-  // 4. Cotisations salariales
-  const cnss = calculerCotisationsCNSS(salaireBrutImposable);
-  const amo = calculerCotisationsAMO(salaireBrutImposable);
-  const retraite = calculerCotisationsRetraite(salaireBrutImposable);
-  const assurances = calculerAssurancesDiverses(salaireBrutImposable);
+  // 4. Employee contributions
+  const nssf = calculateNSSFContributions(taxableGrossSalary);
+  const shif = calculateSHIFContributions(taxableGrossSalary);
+  const pension = calculatePensionContributions(taxableGrossSalary);
+  const insurance = calculateDiversifiedInsurance(taxableGrossSalary);
   
-  const totalCotisationsSalariales = cnss.salariale + amo.salariale + retraite.salariale + assurances.salariale;
+  const totalEmployeeContributions = nssf.employee + shif.employee + pension.employee + insurance.employee;
   
-  // 5. Cotisations patronales
-  const allocationsFamiliales = calculerAllocationsFamiliales(salaireBrutImposable);
-  const taxeFormation = calculerTaxeFormation(salaireBrutImposable);
-  const accidentTravail = calculerAccidentTravail(salaireBrutImposable);
+  // 5. Employer contributions
+  const housingLevy = calculateHousingLevy(taxableGrossSalary);
+  const trainingLevy = calculateTrainingLevy(taxableGrossSalary);
+  const workInjury = calculateWorkInjury(taxableGrossSalary);
   
-  const totalCotisationsPatronales = retraite.patronale + assurances.patronale + cnss.patronale + 
-                                   allocationsFamiliales + taxeFormation + amo.patronale + 
-                                   amo.participation + accidentTravail;
+  const totalEmployerContributions = pension.employer + insurance.employer + nssf.employer + 
+                                   housingLevy + trainingLevy + shif.employer + 
+                                   shif.participation + workInjury;
   
-  // 6. Frais professionnels
-  const fraisProfessionnels = calculerFraisProfessionnels(salaireBrutImposable);
+  // 6. Professional expenses
+  const professionalExpenses = calculateProfessionalExpenses(taxableGrossSalary);
   
-  // 7. Net imposable selon la nouvelle formule
-  const netImposable = calculerNetImposable(
-    salaireBrutImposable,
-    cnss.salariale,
-    amo.salariale,
-    retraite.salariale,
-    fraisProfessionnels,
-    assurances.salariale
+  // 7. Taxable net according to the new formula
+  const taxableNet = calculateTaxableNet(
+    taxableGrossSalary,
+    nssf.employee,
+    shif.employee,
+    pension.employee,
+    professionalExpenses,
+    insurance.employee
   );
   
-  // 8. Net net imposable
-  const netNetImposable = calculerNetNetImposable(netImposable, interetsCredit);
+  // 8. Net taxable
+  const netTaxable = calculateNetTaxable(taxableNet, creditInterest);
   
-  // 9. IGR
-  const igr = calculerIGR(netNetImposable, joursTravailles, nbrDeductions);
+  // 9. Income tax
+  const incomeTax = calculateIncomeTax(netTaxable, daysWorked, numberOfDeductions);
   
-  // 10. Total retenues
-  const totalRetenues = calculerTotalRetenues(
-    totalCotisationsSalariales, 
-    igr, 
-    autresRetenues, // remboursementCreditImmo
-    0, // creditConso
-    0, // contributionSociale
-    0  // remboursementAvance
+  // 10. Total deductions
+  const totalDeductions = calculateTotalDeductions(
+    totalEmployeeContributions, 
+    incomeTax, 
+    otherDeductions, // mortgageRepayment
+    0, // consumerCredit
+    0, // socialContribution
+    0  // advanceRepayment
   );
   
-  // 11. Salaire net
-  const salaireNetAPayer = calculerSalaireNet(salaireBrut, totalRetenues);
+  // 11. Net salary
+  const netSalaryPayable = calculateNetSalary(grossSalary, totalDeductions);
   
   return {
-    // Gains
-    salaireBase,
-    primeAnciennete,
-    primeTransport,
-    indemniteRepresentation,
-    salaireBrut,
-    salaireBrutImposable,
+    // Earnings
+    baseSalary,
+    seniorityBonus,
+    transportAllowance,
+    representationAllowance,
+    grossSalary,
+    taxableGrossSalary,
     
-    // Cotisations salariales
-    cnssPrestation: cnss.salariale,
-    amoSalariale: amo.salariale,
-    retraiteSalariale: retraite.salariale,
-    assuranceDiversSalariale: assurances.salariale,
-    totalCotisationsSalariales,
+    // Employee contributions
+    nssfEmployee: nssf.employee,
+    shifEmployee: shif.employee,
+    pensionEmployee: pension.employee,
+    insuranceDiversifiedEmployee: insurance.employee,
+    totalEmployeeContributions,
     
-    // Cotisations patronales
-    retraitePatronale: retraite.patronale,
-    assuranceDiversPatronale: assurances.patronale,
-    cnssPatronale: cnss.patronale,
-    allocationsFamiliales,
-    taxeFormation,
-    amoPatronale: amo.patronale,
-    participationAMO: amo.participation,
-    accidentTravail,
-    totalCotisationsPatronales,
+    // Employer contributions
+    pensionEmployer: pension.employer,
+    insuranceDiversifiedEmployer: insurance.employer,
+    nssfEmployer: nssf.employer,
+    housingLevy,
+    trainingLevy,
+    shifEmployer: shif.employer,
+    participationSHIF: shif.participation,
+    workInjury,
+    totalEmployerContributions,
     
-    // Calcul IGR
-    fraisProfessionnels,
-    netImposable,
-    interetsCredit,
-    netNetImposable,
-    igr,
+    // Income tax calculation
+    professionalExpenses,
+    taxableNet,
+    creditInterest,
+    netTaxable,
+    incomeTax,
     
-    // Totaux
-    autresRetenues,
-    totalRetenues,
-    salaireNetAPayer
+    // Totals
+    otherDeductions,
+    totalDeductions,
+    netSalaryPayable
   };
 }
 
-// ===== VALIDATION DES CALCULS =====
+// ===== CALCULATION VALIDATION =====
 
 /**
- * Valide les calculs avec les données de référence
+ * Validates calculations with reference data
  */
-export function validerCalculsReference(): CalculPayrollResult {
-  return calculerPaieComplete({
-    salaireBase: DONNEES_BASE_REFERENCE.salaireBase,
-    anciennete: DONNEES_BASE_REFERENCE.anciennete
+export function validateReferenceCalculations(): PayrollCalculationResult {
+  return calculateCompletePayroll({
+    baseSalary: BASE_REFERENCE_DATA.baseSalary,
+    seniority: BASE_REFERENCE_DATA.seniority
   });
 }
 
-// Export des données de base pour utilisation dans toute l'application
+// Export base data for use throughout the application
 export default {
-  DONNEES_BASE_REFERENCE,
-  TAUX_COTISATIONS,
-  BAREME_ANCIENNETE,
-  BAREME_IGR,
-  calculerPaieComplete,
-  validerCalculsReference
+  BASE_REFERENCE_DATA,
+  CONTRIBUTION_RATES,
+  SENIORITY_SCALE,
+  INCOME_TAX_BRACKETS,
+  calculateCompletePayroll,
+  validateReferenceCalculations
 };

@@ -3,17 +3,17 @@ import { Layout } from '../../../components/Layout';
 import { Receipt, ArrowLeft, Download, Calendar, Users, FileSpreadsheet, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Employee } from '@prisma/client';
-import { calculerPaie, type EmployeePayrollData } from '../../../lib/payrollCalculations';
+import { calculatePayroll, OptionalInsurances, type EmployeePayrollData } from '../../../lib/payrollCalculations';
 
 interface TaxStatementEntry {
   employee: Employee;
-  salaireBrut: number;
-  salaireNetImposable: number;
-  deductionsFiscales: number;
-  baseImposable: number;
-  igrCalcule: number;
-  igrRetenu: number;
-  tauxMoyen: number;
+  grossSalary: number;
+  taxableNet: number;
+  taxDeductions: number;
+  taxableBase: number;
+  payeCalculated: number;
+  payeWithheld: number;
+  averageRate: number;
 }
 
 const TaxStatementPage = () => {
@@ -31,10 +31,10 @@ const TaxStatementPage = () => {
   const [summary, setSummary] = useState<any>(null);
   const [reportType, setReportType] = useState<'monthly' | 'annual'>('monthly');
   const [companyInfo, setCompanyInfo] = useState({
-    name: 'VOTRE ENTREPRISE',
-    taxNumber: 'IF123456',
-    address: 'Adresse de l\'entreprise',
-    city: 'Casablanca'
+    name: 'YOUR COMPANY',
+    taxNumber: 'P051123456A',
+    address: 'Company Address',
+    city: 'Nairobi'
   });
 
   useEffect(() => {
@@ -46,10 +46,10 @@ const TaxStatementPage = () => {
       const response = await fetch('/api/employees');
       if (response.ok) {
         const data = await response.json();
-        setEmployees(data.filter((emp: Employee) => emp.status === 'ACTIF'));
+        setEmployees(data.filter((emp: Employee) => emp.status === 'ACTIVE'));
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des employés:', error);
+      console.error('Error loading employees:', error);
     } finally {
       setLoading(false);
     }
@@ -75,132 +75,137 @@ const TaxStatementPage = () => {
     setShowResults(true);
 
     const statementEntries: TaxStatementEntry[] = [];
-    let totalSalaireBrut = 0;
-    let totalSalaireNetImposable = 0;
-    let totalDeductionsFiscales = 0;
-    let totalBaseImposable = 0;
-    let totalIgrCalcule = 0;
-    let totalIgrRetenu = 0;
+    let totalGrossSalary = 0;
+    let totalTaxableNet = 0;
+    let totalTaxDeductions = 0;
+    let totalTaxableBase = 0;
+    let totalPayeCalculated = 0;
+    let totalPayeWithheld = 0;
 
     for (const employee of employees) {
       try {
-        // Préparer les données de l'employé pour le calcul
+        // Prepare employee data for calculation
         const employeeData: EmployeePayrollData = {
-          nom: employee.nom,
-          prenom: employee.prenom,
-          matricule: employee.matricule,
-          cin: employee.cin || '',
-          cnss: employee.cnss || '',
-          situationFamiliale: employee.situationFamiliale,
-          dateNaissance: employee.dateNaissance || new Date(),
-          dateEmbauche: employee.dateEmbauche,
-          anciennete: getSeniorityInYears(employee.dateEmbauche),
-          nbrDeductions: employee.nbrDeductions,
-          nbreJourMois: employee.nbreJourMois,
-          salaireBase: employee.salaireBase,
-          indemniteLogement: employee.indemniteLogement,
-          indemnitePanier: employee.indemnitePanier,
-          primeTransport: employee.primeTransport,
-          indemniteRepresentation: employee.indemniteRepresentation,
-          assurances: {
-            assuranceMaladieComplementaire: false,
-            assuranceMaladieEtranger: false,
-            assuranceInvaliditeRenforcee: false,
+          lastName: employee.lastName,
+          firstName: employee.firstName,
+          employeeId: employee.employeeId,
+          idNumber: employee.idNumber || '',
+          nssfNumber: employee.nssfNumber || '',
+          maritalStatus: employee.maritalStatus,
+          dateOfBirth: employee.dateOfBirth || new Date(),
+          hireDate: employee.hireDate,
+          seniority: getSeniorityInYears(employee.hireDate),
+          numberOfDeductions: 0, // Calculate based on dependents
+          numberOfDaysPerMonth: employee.numberOfDaysPerMonth,
+          
+          // Salary & allowances
+          baseSalary: employee.baseSalary,
+          housingAllowance: employee.housingAllowance,
+          mealAllowance: employee.mealAllowance,
+          transportAllowance: employee.transportAllowance,
+          representationAllowance: employee.representationAllowance ?? 0,
+          
+          // Insurances
+          insurances: (employee.insurances as OptionalInsurances | null) ?? {
+            comprehensiveHealthInsurance: false,
+            foreignHealthCover: false,
+            enhancedDisabilityCover: false,
           },
-          creditImmobilier: employee.interetsCredit || employee.remboursementCredit ? {
-            montantMensuel: employee.remboursementCredit || 0,
-            interets: employee.interetsCredit || 0,
-          } : undefined,
-          creditConsommation: employee.creditConso ? {
-            montantMensuel: employee.creditConso,
-          } : undefined,
-          avanceSalaire: employee.remboursementAvance ? {
-            montantMensuel: employee.remboursementAvance,
-          } : undefined,
-          compteBancaire: employee.compteBancaire || '',
-          agence: employee.agence || '',
+          
+          // Additional payroll fields
+          bonuses: 0,
+          overtimePay: 0,
+          loanRepayment: employee.loanRepayment,
+          helbLoan: employee.helbLoan,
+          subjectToNssf: employee.subjectToNssf,
+          subjectToShif: employee.subjectToShif,
+          subjectToHousingLevy: employee.subjectToHousingLevy,
+          
+          // Bank
+          bankAccount: employee.bankAccount || '',
+          bankBranch: employee.bankBranch || '',
         };
 
-        // Calculer la paie
-        const payrollResult = calculerPaie(employeeData);
+        // Calculate payroll
+        const payrollResult = calculatePayroll(employeeData);
 
-        // Calculs spécifiques IGR
-        const salaireBrut = payrollResult.salaireBrut;
-        const salaireNetImposable = payrollResult.calculIGR.netImposable;
-        const deductionsFiscales = payrollResult.calculIGR.fraisProfessionnels;
-        const baseImposable = payrollResult.calculIGR.netNetImposable;
-        const igrCalcule = payrollResult.calculIGR.impotSurRevenu;
-        const igrRetenu = payrollResult.calculIGR.impotSurRevenu; // Même valeur pour l'IGR retenu
+        // PAYE-specific calculations
+        const grossSalary = payrollResult.grossSalary;
+        const taxableNet = payrollResult.taxCalculation.taxableNet;
+        const taxDeductions = payrollResult.taxCalculation.professionalExpenses;
+        const taxableBase = payrollResult.taxCalculation.netTaxable;
+        const payeCalculated = payrollResult.taxCalculation.incomeTax;
+        const payeWithheld = payrollResult.taxCalculation.incomeTax; // Same value for PAYE withheld
         
-        const tauxMoyen = baseImposable > 0 ? (igrCalcule / baseImposable) * 100 : 0;
+        const averageRate = taxableBase > 0 ? (payeCalculated / taxableBase) * 100 : 0;
 
         const entry: TaxStatementEntry = {
           employee,
-          salaireBrut,
-          salaireNetImposable,
-          deductionsFiscales,
-          baseImposable,
-          igrCalcule,
-          igrRetenu,
-          tauxMoyen
+          grossSalary,
+          taxableNet,
+          taxDeductions,
+          taxableBase,
+          payeCalculated,
+          payeWithheld,
+          averageRate
         };
 
         statementEntries.push(entry);
 
-        // Accumulation des totaux
-        totalSalaireBrut += salaireBrut;
-        totalSalaireNetImposable += salaireNetImposable;
-        totalDeductionsFiscales += deductionsFiscales;
-        totalBaseImposable += baseImposable;
-        totalIgrCalcule += igrCalcule;
-        totalIgrRetenu += igrRetenu;
+        // Accumulate totals
+        totalGrossSalary += grossSalary;
+        totalTaxableNet += taxableNet;
+        totalTaxDeductions += taxDeductions;
+        totalTaxableBase += taxableBase;
+        totalPayeCalculated += payeCalculated;
+        totalPayeWithheld += payeWithheld;
 
       } catch (error) {
-        console.error(`Erreur lors du calcul pour ${employee.prenom} ${employee.nom}:`, error);
+        console.error(`Error calculating for ${employee.firstName} ${employee.lastName}:`, error);
       }
     }
 
     setStatementData(statementEntries);
     setSummary({
       totalEmployees: statementEntries.length,
-      totalSalaireBrut,
-      totalSalaireNetImposable,
-      totalDeductionsFiscales,
-      totalBaseImposable,
-      totalIgrCalcule,
-      totalIgrRetenu,
-      tauxMoyenGlobal: totalBaseImposable > 0 ? (totalIgrCalcule / totalBaseImposable) * 100 : 0
+      totalGrossSalary,
+      totalTaxableNet,
+      totalTaxDeductions,
+      totalTaxableBase,
+      totalPayeCalculated,
+      totalPayeWithheld,
+      averageRateGlobal: totalTaxableBase > 0 ? (totalPayeCalculated / totalTaxableBase) * 100 : 0
     });
 
     setGenerating(false);
   };
 
   const handleExportTaxFile = () => {
-    const period = reportType === 'monthly' ? getMonthLabel(selectedMonth) : `Année ${selectedYear}`;
+    const period = reportType === 'monthly' ? getMonthLabel(selectedMonth) : `Year ${selectedYear}`;
     
-    // Format de fichier fiscal simplifié
+    // Simplified tax file format for Kenya
     const taxContent = [
-      '# ÉTAT FISCAL IGR',
-      `# Entreprise: ${companyInfo.name}`,
-      `# Numéro fiscal: ${companyInfo.taxNumber}`,
-      `# Période: ${period}`,
-      `# Type de rapport: ${reportType === 'monthly' ? 'Mensuel' : 'Annuel'}`,
-      `# Date de génération: ${new Date().toLocaleDateString('fr-FR')}`,
+      '# PAYE TAX STATEMENT',
+      `# Company: ${companyInfo.name}`,
+      `# PIN: ${companyInfo.taxNumber}`,
+      `# Period: ${period}`,
+      `# Report Type: ${reportType === 'monthly' ? 'Monthly' : 'Annual'}`,
+      `# Generation Date: ${new Date().toLocaleDateString('en-KE')}`,
       '',
-      '# RÉCAPITULATIF FISCAL',
-      `# Nombre de salariés: ${summary?.totalEmployees || 0}`,
-      `# Total salaires bruts: ${(summary?.totalSalaireBrut || 0).toFixed(2)} MAD`,
-      `# Total salaires nets imposables: ${(summary?.totalSalaireNetImposable || 0).toFixed(2)} MAD`,
-      `# Total déductions fiscales: ${(summary?.totalDeductionsFiscales || 0).toFixed(2)} MAD`,
-      `# Total base imposable: ${(summary?.totalBaseImposable || 0).toFixed(2)} MAD`,
-      `# Total IGR calculé: ${(summary?.totalIgrCalcule || 0).toFixed(2)} MAD`,
-      `# Total IGR retenu: ${(summary?.totalIgrRetenu || 0).toFixed(2)} MAD`,
-      `# Taux moyen global: ${(summary?.tauxMoyenGlobal || 0).toFixed(2)}%`,
+      '# TAX SUMMARY',
+      `# Number of Employees: ${summary?.totalEmployees || 0}`,
+      `# Total Gross Salaries: ${(summary?.totalGrossSalary || 0).toFixed(2)} KES`,
+      `# Total Taxable Net: ${(summary?.totalTaxableNet || 0).toFixed(2)} KES`,
+      `# Total Tax Deductions: ${(summary?.totalTaxDeductions || 0).toFixed(2)} KES`,
+      `# Total Taxable Base: ${(summary?.totalTaxableBase || 0).toFixed(2)} KES`,
+      `# Total PAYE Calculated: ${(summary?.totalPayeCalculated || 0).toFixed(2)} KES`,
+      `# Total PAYE Withheld: ${(summary?.totalPayeWithheld || 0).toFixed(2)} KES`,
+      `# Global Average Rate: ${(summary?.averageRateGlobal || 0).toFixed(2)}%`,
       '',
-      '# DÉTAIL PAR SALARIÉ',
-      '# Format: CIN;Nom;Prénom;Salaire_Brut;Salaire_Net_Imposable;Déductions_Fiscales;Base_Imposable;IGR_Calculé;IGR_Retenu;Taux_Moyen',
+      '# EMPLOYEE DETAILS',
+      '# Format: ID_Number;Last_Name;First_Name;Gross_Salary;Taxable_Net;Tax_Deductions;Taxable_Base;PAYE_Calculated;PAYE_Withheld;Average_Rate',
       ...statementData.map(entry => 
-        `${entry.employee.cin || 'N/A'};${entry.employee.nom};${entry.employee.prenom};${entry.salaireBrut.toFixed(2)};${entry.salaireNetImposable.toFixed(2)};${entry.deductionsFiscales.toFixed(2)};${entry.baseImposable.toFixed(2)};${entry.igrCalcule.toFixed(2)};${entry.igrRetenu.toFixed(2)};${entry.tauxMoyen.toFixed(2)}`
+        `${entry.employee.idNumber || 'N/A'};${entry.employee.lastName};${entry.employee.firstName};${entry.grossSalary.toFixed(2)};${entry.taxableNet.toFixed(2)};${entry.taxDeductions.toFixed(2)};${entry.taxableBase.toFixed(2)};${entry.payeCalculated.toFixed(2)};${entry.payeWithheld.toFixed(2)};${entry.averageRate.toFixed(2)}`
       )
     ].join('\n');
 
@@ -208,7 +213,7 @@ const TaxStatementPage = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `etat_fiscal_igr_${reportType === 'monthly' ? selectedMonth : selectedYear}.txt`);
+    link.setAttribute('download', `paye_statement_${reportType === 'monthly' ? selectedMonth : selectedYear}.txt`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -217,20 +222,19 @@ const TaxStatementPage = () => {
 
   const handleExportExcel = () => {
     const excelData = statementData.map(entry => ({
-      'CIN': entry.employee.cin || 'N/A',
-      'Matricule': entry.employee.matricule,
-      'Nom': entry.employee.nom,
-      'Prénom': entry.employee.prenom,
-      'Fonction': entry.employee.fonction,
-      'Situation Familiale': entry.employee.situationFamiliale,
-      'Nombre de Déductions': entry.employee.nbrDeductions,
-      'Salaire Brut': entry.salaireBrut,
-      'Salaire Net Imposable': entry.salaireNetImposable,
-      'Déductions Fiscales': entry.deductionsFiscales,
-      'Base Imposable': entry.baseImposable,
-      'IGR Calculé': entry.igrCalcule,
-      'IGR Retenu': entry.igrRetenu,
-      'Taux Moyen (%)': entry.tauxMoyen
+      'ID Number': entry.employee.idNumber || 'N/A',
+      'Employee ID': entry.employee.employeeId,
+      'Last Name': entry.employee.lastName,
+      'First Name': entry.employee.firstName,
+      'Position': entry.employee.position,
+      'Marital Status': entry.employee.maritalStatus,
+      'Gross Salary': entry.grossSalary,
+      'Taxable Net': entry.taxableNet,
+      'Tax Deductions': entry.taxDeductions,
+      'Taxable Base': entry.taxableBase,
+      'PAYE Calculated': entry.payeCalculated,
+      'PAYE Withheld': entry.payeWithheld,
+      'Average Rate (%)': entry.averageRate
     }));
 
     const csvContent = [
@@ -242,7 +246,7 @@ const TaxStatementPage = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `etat_fiscal_igr_details_${reportType === 'monthly' ? selectedMonth : selectedYear}.csv`);
+    link.setAttribute('download', `paye_statement_details_${reportType === 'monthly' ? selectedMonth : selectedYear}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -250,9 +254,9 @@ const TaxStatementPage = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'MAD',
+      currency: 'KES',
       minimumFractionDigits: 2
     }).format(amount);
   };
@@ -264,7 +268,7 @@ const TaxStatementPage = () => {
   const getMonthLabel = (monthString: string) => {
     const [year, month] = monthString.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long'
     }).format(date);
@@ -278,7 +282,7 @@ const TaxStatementPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Chargement...</div>
+            <div className="text-lg text-gray-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -294,16 +298,16 @@ const TaxStatementPage = () => {
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Retour</span>
+            <span>Back</span>
           </button>
           
           <div className="flex items-center space-x-3 mb-4">
             <Receipt className="w-8 h-8 text-purple-600" />
-            <h1 className="text-3xl font-bold text-gray-900">État fiscal IGR</h1>
+            <h1 className="text-3xl font-bold text-gray-900">PAYE Tax Statement</h1>
           </div>
           
           <p className="text-gray-600 text-lg">
-            Détail mensuel et annuel de l'impôt sur le revenu (IGR) retenu à la source, généré selon le barème fiscal marocain.
+            Monthly and annual details of Pay As You Earn (PAYE) tax withheld, generated according to the Kenyan tax scale.
           </p>
         </div>
 
@@ -311,20 +315,20 @@ const TaxStatementPage = () => {
           <>
             {/* Configuration */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Configuration de l'état fiscal</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Tax Statement Configuration</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Type de rapport
+                    Report Type
                   </label>
                   <select
                     value={reportType}
                     onChange={(e) => setReportType(e.target.value as 'monthly' | 'annual')}
                     className="payroll-input"
                   >
-                    <option value="monthly">Rapport mensuel</option>
-                    <option value="annual">Rapport annuel</option>
+                    <option value="monthly">Monthly Report</option>
+                    <option value="annual">Annual Report</option>
                   </select>
                 </div>
 
@@ -332,7 +336,7 @@ const TaxStatementPage = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <Calendar className="w-4 h-4 inline mr-1" />
-                      Mois
+                      Month
                     </label>
                     <input
                       type="month"
@@ -341,14 +345,14 @@ const TaxStatementPage = () => {
                       className="payroll-input"
                     />
                     <p className="text-sm text-gray-500 mt-1">
-                      État pour {getMonthLabel(selectedMonth)}
+                      Statement for {getMonthLabel(selectedMonth)}
                     </p>
                   </div>
                 ) : (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <Calendar className="w-4 h-4 inline mr-1" />
-                      Année
+                      Year
                     </label>
                     <select
                       value={selectedYear}
@@ -360,7 +364,7 @@ const TaxStatementPage = () => {
                       ))}
                     </select>
                     <p className="text-sm text-gray-500 mt-1">
-                      État pour l'année {selectedYear}
+                      Statement for the year {selectedYear}
                     </p>
                   </div>
                 )}
@@ -368,26 +372,26 @@ const TaxStatementPage = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Users className="w-4 h-4 inline mr-1" />
-                    Employés concernés
+                    Employees Included
                   </label>
                   <div className="text-lg font-medium text-gray-900">
-                    {employees.length} employé(s) actif(s)
+                    {employees.length} active employee(s)
                   </div>
                   <p className="text-sm text-gray-500 mt-1">
-                    Tous les employés actifs seront inclus
+                    All active employees will be included
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Informations entreprise */}
+            {/* Company Information */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Informations fiscales de l'entreprise</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Company Tax Information</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nom de l'entreprise
+                    Company Name
                   </label>
                   <input
                     type="text"
@@ -399,20 +403,20 @@ const TaxStatementPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Identifiant fiscal
+                    KRA PIN
                   </label>
                   <input
                     type="text"
                     value={companyInfo.taxNumber}
                     onChange={(e) => setCompanyInfo(prev => ({ ...prev, taxNumber: e.target.value }))}
                     className="payroll-input"
-                    placeholder="IF123456"
+                    placeholder="P051123456A"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Adresse
+                    Address
                   </label>
                   <input
                     type="text"
@@ -424,7 +428,7 @@ const TaxStatementPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ville
+                    City
                   </label>
                   <input
                     type="text"
@@ -436,55 +440,50 @@ const TaxStatementPage = () => {
               </div>
             </div>
 
-            {/* Informations sur l'IGR */}
+            {/* PAYE Tax Scale */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Barème IGR marocain</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Kenyan PAYE Tax Scale</h3>
               
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tranche de revenu (MAD/mois)
+                        Income Band (KES/month)
                       </th>
                       <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Taux
+                        Rate
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Somme à déduire
+                        Deduction
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">0 - 2 500</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">0%</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">0 - 24,000</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">10%</td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">0</td>
                     </tr>
                     <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2 501 - 4 166</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">10%</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">250</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">24,001 - 32,333</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">25%</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">2,400</td>
                     </tr>
                     <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">4 167 - 5 000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">20%</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">666,70</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">5 001 - 6 666</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">32,334 - 500,000</td>
                       <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">30%</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">1 166,70</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">3,733.25</td>
                     </tr>
                     <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">6 667 - 15 000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">34%</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">1 433,33</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">500,001 - 800,000</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">32.5%</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">143,733.25</td>
                     </tr>
                     <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Plus de 15 000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">38%</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">2 033,33</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Above 800,000</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">35%</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">241,233.25</td>
                     </tr>
                   </tbody>
                 </table>
@@ -494,17 +493,17 @@ const TaxStatementPage = () => {
                 <div className="flex items-center">
                   <AlertCircle className="w-5 h-5 text-blue-600 mr-2" />
                   <span className="text-sm text-blue-800">
-                    Déductions fiscales : 360 MAD par personne à charge + frais professionnels (17% ou 2 500 MAD max) + intérêts crédit logement
+                    Tax Deductions: 2,400 KES personal relief per month + housing levy relief (up to 108,000 KES annually) + insurance relief (up to 60,000 KES annually)
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Aperçu des employés */}
+            {/* Employee Preview */}
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Employés concernés par l'état fiscal
+                  Employees Included in Tax Statement
                 </h3>
               </div>
               
@@ -516,28 +515,28 @@ const TaxStatementPage = () => {
                         <div className="flex-shrink-0 h-8 w-8">
                           <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
                             <span className="text-xs font-medium text-purple-600">
-                              {employee.prenom.charAt(0)}{employee.nom.charAt(0)}
+                              {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                             </span>
                           </div>
                         </div>
                         <div className="ml-3">
                           <div className="text-sm font-medium text-gray-900">
-                            {employee.prenom} {employee.nom}
+                            {employee.firstName} {employee.lastName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {employee.matricule} • {employee.situationFamiliale} • {employee.nbrDeductions} déduction(s)
+                            {employee.employeeId} • {employee.maritalStatus} • 0 deduction(s)
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-sm font-medium text-gray-900">
-                          {formatCurrency(employee.salaireBase)}
+                          {formatCurrency(employee.baseSalary)}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {employee.cin ? (
-                            <span className="text-green-600">CIN: {employee.cin}</span>
+                          {employee.idNumber ? (
+                            <span className="text-green-600">ID: {employee.idNumber}</span>
                           ) : (
-                            <span className="text-red-600">CIN manquant</span>
+                            <span className="text-red-600">ID Number missing</span>
                           )}
                         </div>
                       </div>
@@ -547,13 +546,13 @@ const TaxStatementPage = () => {
               </div>
             </div>
 
-            {/* Bouton de génération */}
+            {/* Generate Button */}
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">Générer l'état fiscal IGR</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Generate PAYE Tax Statement</h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    Calcul de l'IGR et génération de l'état fiscal pour {reportType === 'monthly' ? getMonthLabel(selectedMonth) : `l'année ${selectedYear}`}
+                    Calculate PAYE and generate tax statement for {reportType === 'monthly' ? getMonthLabel(selectedMonth) : `the year ${selectedYear}`}
                   </p>
                 </div>
                 <button
@@ -562,25 +561,25 @@ const TaxStatementPage = () => {
                   className="flex items-center space-x-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Receipt className="w-5 h-5" />
-                  <span>{generating ? 'Génération...' : 'Générer l\'état fiscal'}</span>
+                  <span>{generating ? 'Generating...' : 'Generate Tax Statement'}</span>
                 </button>
               </div>
             </div>
           </>
         ) : (
           <>
-            {/* Résultats */}
+            {/* Results */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900">
-                  État fiscal IGR - {reportType === 'monthly' ? getMonthLabel(selectedMonth) : `Année ${selectedYear}`}
+                  PAYE Tax Statement - {reportType === 'monthly' ? getMonthLabel(selectedMonth) : `Year ${selectedYear}`}
                 </h3>
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowResults(false)}
                     className="text-sm text-gray-600 hover:text-gray-900"
                   >
-                    Nouvel état
+                    New Statement
                   </button>
                   <button
                     onClick={handleExportExcel}
@@ -594,100 +593,100 @@ const TaxStatementPage = () => {
                     className="flex items-center space-x-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
                   >
                     <Download className="w-4 h-4" />
-                    <span>Fichier fiscal</span>
+                    <span>Tax File</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Résumé */}
+            {/* Summary */}
             {summary && (
               <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Résumé fiscal</h4>
+                <h4 className="text-lg font-medium text-gray-900 mb-4">Tax Summary</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">{summary.totalEmployees}</div>
-                    <div className="text-sm text-gray-600">Employés</div>
+                    <div className="text-sm text-gray-600">Employees</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-green-600">{formatCurrency(summary.totalSalaireBrut)}</div>
-                    <div className="text-sm text-gray-600">Total salaires bruts</div>
+                    <div className="text-lg font-bold text-green-600">{formatCurrency(summary.totalGrossSalary)}</div>
+                    <div className="text-sm text-gray-600">Total Gross Salaries</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-orange-600">{formatCurrency(summary.totalBaseImposable)}</div>
-                    <div className="text-sm text-gray-600">Total base imposable</div>
+                    <div className="text-lg font-bold text-orange-600">{formatCurrency(summary.totalTaxableBase)}</div>
+                    <div className="text-sm text-gray-600">Total Taxable Base</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-purple-600">{formatCurrency(summary.totalIgrRetenu)}</div>
-                    <div className="text-sm text-gray-600">Total IGR retenu</div>
+                    <div className="text-lg font-bold text-purple-600">{formatCurrency(summary.totalPayeWithheld)}</div>
+                    <div className="text-sm text-gray-600">Total PAYE Withheld</div>
                   </div>
                 </div>
 
                 <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
                   <div className="text-center">
-                    <div className="text-lg font-bold text-blue-600">{formatCurrency(summary.totalSalaireNetImposable)}</div>
-                    <div className="text-sm text-gray-600">Total net imposable</div>
+                    <div className="text-lg font-bold text-blue-600">{formatCurrency(summary.totalTaxableNet)}</div>
+                    <div className="text-sm text-gray-600">Total Taxable Net</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-red-600">{formatCurrency(summary.totalDeductionsFiscales)}</div>
-                    <div className="text-sm text-gray-600">Total déductions</div>
+                    <div className="text-lg font-bold text-red-600">{formatCurrency(summary.totalTaxDeductions)}</div>
+                    <div className="text-sm text-gray-600">Total Deductions</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-green-600">{formatPercentage(summary.tauxMoyenGlobal)}</div>
-                    <div className="text-sm text-gray-600">Taux moyen global</div>
+                    <div className="text-lg font-bold text-green-600">{formatPercentage(summary.averageRateGlobal)}</div>
+                    <div className="text-sm text-gray-600">Global Average Rate</div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Informations de l'état */}
+            {/* Statement Information */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Informations de l'état fiscal</h4>
+              <h4 className="text-lg font-medium text-gray-900 mb-4">Tax Statement Information</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-600">Entreprise :</span>
+                  <span className="text-gray-600">Company:</span>
                   <div className="font-medium">{companyInfo.name}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Identifiant fiscal :</span>
+                  <span className="text-gray-600">KRA PIN:</span>
                   <div className="font-medium">{companyInfo.taxNumber}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Période :</span>
+                  <span className="text-gray-600">Period:</span>
                   <div className="font-medium">
-                    {reportType === 'monthly' ? getMonthLabel(selectedMonth) : `Année ${selectedYear}`}
+                    {reportType === 'monthly' ? getMonthLabel(selectedMonth) : `Year ${selectedYear}`}
                   </div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Date de génération :</span>
-                  <div className="font-medium">{new Date().toLocaleDateString('fr-FR')}</div>
+                  <span className="text-gray-600">Generation Date:</span>
+                  <div className="font-medium">{new Date().toLocaleDateString('en-KE')}</div>
                 </div>
               </div>
             </div>
 
-            {/* Tableau détaillé */}
+            {/* Detailed Table */}
             <div className="bg-white shadow rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Employé
+                        Employee
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Salaire brut
+                        Gross Salary
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Net imposable
+                        Taxable Net
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Base imposable
+                        Taxable Base
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        IGR retenu
+                        PAYE Withheld
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Taux moyen
+                        Average Rate
                       </th>
                     </tr>
                   </thead>
@@ -699,34 +698,34 @@ const TaxStatementPage = () => {
                             <div className="flex-shrink-0 h-8 w-8">
                               <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
                                 <span className="text-xs font-medium text-purple-600">
-                                  {entry.employee.prenom.charAt(0)}{entry.employee.nom.charAt(0)}
+                                  {entry.employee.firstName.charAt(0)}{entry.employee.lastName.charAt(0)}
                                 </span>
                               </div>
                             </div>
                             <div className="ml-3">
                               <div className="text-sm font-medium text-gray-900">
-                                {entry.employee.prenom} {entry.employee.nom}
+                                {entry.employee.firstName} {entry.employee.lastName}
                               </div>
                               <div className="text-sm text-gray-500">
-                                {entry.employee.matricule} • {entry.employee.situationFamiliale} • {entry.employee.nbrDeductions} déduction(s)
+                                {entry.employee.employeeId} • {entry.employee.maritalStatus} • 0 deduction(s)
                               </div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-green-600">
-                          {formatCurrency(entry.salaireBrut)}
+                          {formatCurrency(entry.grossSalary)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-blue-600">
-                          {formatCurrency(entry.salaireNetImposable)}
+                          {formatCurrency(entry.taxableNet)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-orange-600">
-                          {formatCurrency(entry.baseImposable)}
+                          {formatCurrency(entry.taxableBase)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-purple-600">
-                          {formatCurrency(entry.igrRetenu)}
+                          {formatCurrency(entry.payeWithheld)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-600">
-                          {formatPercentage(entry.tauxMoyen)}
+                          {formatPercentage(entry.averageRate)}
                         </td>
                       </tr>
                     ))}
@@ -734,22 +733,22 @@ const TaxStatementPage = () => {
                   <tfoot className="bg-gray-50">
                     <tr>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                        TOTAUX ({summary?.totalEmployees || 0} employés)
+                        TOTALS ({summary?.totalEmployees || 0} employees)
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">
-                        {formatCurrency(summary?.totalSalaireBrut || 0)}
+                        {formatCurrency(summary?.totalGrossSalary || 0)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-blue-600">
-                        {formatCurrency(summary?.totalSalaireNetImposable || 0)}
+                        {formatCurrency(summary?.totalTaxableNet || 0)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-orange-600">
-                        {formatCurrency(summary?.totalBaseImposable || 0)}
+                        {formatCurrency(summary?.totalTaxableBase || 0)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-purple-600">
-                        {formatCurrency(summary?.totalIgrRetenu || 0)}
+                        {formatCurrency(summary?.totalPayeWithheld || 0)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-600">
-                        {formatPercentage(summary?.tauxMoyenGlobal || 0)}
+                        {formatPercentage(summary?.averageRateGlobal || 0)}
                       </td>
                     </tr>
                   </tfoot>

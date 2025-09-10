@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  // output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -67,6 +67,7 @@ model Employee {
   baseSalary                Float
   housingAllowance          Float               @default(0)
   transportAllowance        Float               @default(0)
+  representationAllowance   Float               @default(0) // ✅ new field
   mealAllowance             Float               @default(0)
   grossSalary               Float               @default(0)
   taxableGrossSalary        Float               @default(0)
@@ -85,6 +86,9 @@ model Employee {
   subjectToNssf             Boolean             @default(true)
   subjectToShif             Boolean             @default(true)
   subjectToHousingLevy      Boolean             @default(true)
+
+  //Insurances (optional)
+  insurances                Json?               // ✅ new field
 
   status                    EmployeeStatus      @default(ACTIVE)
   createdAt                 DateTime            @default(now())

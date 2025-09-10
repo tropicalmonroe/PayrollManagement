@@ -1,627 +1,643 @@
-// Système de calcul de paie conforme aux données de base centralisées
-// Basé sur la réglementation marocaine en vigueur et les données de référence
+// Payroll calculation system compliant with centralized base data
+// Based on current Kenyan regulations and reference data
 
 import {
-  DONNEES_BASE_REFERENCE,
-  TAUX_COTISATIONS,
-  BAREME_ANCIENNETE,
-  BAREME_IGR,
-  calculerPaieComplete,
-  calculerFraisProfessionnels,
-  calculerNetImposable,
-  type CalculPayrollParams,
-  type CalculPayrollResult
+  BASE_REFERENCE_DATA,
+  CONTRIBUTION_RATES,
+  SENIORITY_SCALE,
+  INCOME_TAX_BRACKETS,
+  calculateCompletePayroll,
+  calculateProfessionalExpenses,
+  calculateTaxableNet,
+  type PayrollCalculationParams,
+  type PayrollCalculationResult
 } from './payrollBaseData';
 
 export interface PayrollConfig {
-  tauxCNSS: {
-    prestationsSalariale: number;
-    prestationsPatronale: number;
-    allocationsFamiliales: number;
-    taxeFormation: number;
+  nssfRates: {
+    employeeContribution: number;
+    employerContribution: number;
+    housingLevy: number;
+    trainingLevy: number;
   };
-  tauxAMO: {
-    salariale: number;
-    patronale: number;
+  shifRates: {
+    employee: number;
+    employer: number;
     participation: number;
   };
-  tauxAssurance: {
-    diversSalariale: number;
-    diversPatronale: number;
-    accidentTravail: number;
+  insuranceRates: {
+    employeeDiversified: number;
+    employerDiversified: number;
+    workInjury: number;
   };
-  tauxRetraite: {
-    salariale: number;
-    patronale: number;
+  pensionRates: {
+    employee: number;
+    employer: number;
   };
-  plafonds: {
-    cnssPlafond: number;
-    fraisProfessionnels: number;
+  ceilings: {
+    nssfCeiling: number;
+    professionalExpenses: number;
   };
 }
 
-// Configuration basée sur les données de base centralisées
+// Configuration based on centralized base data
 export const PAYROLL_CONFIG: PayrollConfig = {
-  tauxCNSS: {
-    prestationsSalariale: TAUX_COTISATIONS.cnssPrestation.taux,
-    prestationsPatronale: TAUX_COTISATIONS.cnssPatronale,
-    allocationsFamiliales: TAUX_COTISATIONS.allocationsFamiliales,
-    taxeFormation: TAUX_COTISATIONS.taxeFormationProfessionnelle,
+  nssfRates: {
+    employeeContribution: CONTRIBUTION_RATES.nssfEmployee.taxRate,
+    employerContribution: CONTRIBUTION_RATES.nssfEmployer,
+    housingLevy: CONTRIBUTION_RATES.housingLevy,
+    trainingLevy: CONTRIBUTION_RATES.trainingLevy,
   },
-  tauxAMO: {
-    salariale: TAUX_COTISATIONS.amoSalariale,
-    patronale: TAUX_COTISATIONS.amoPatronale,
-    participation: TAUX_COTISATIONS.participationAMO,
+  shifRates: {
+    employee: CONTRIBUTION_RATES.shifEmployee,
+    employer: CONTRIBUTION_RATES.shifEmployer,
+    participation: CONTRIBUTION_RATES.participationSHIF,
   },
-  tauxAssurance: {
-    diversSalariale: TAUX_COTISATIONS.assuranceDiversSalariale.taux,
-    diversPatronale: TAUX_COTISATIONS.assuranceDiversPatronale.taux,
-    accidentTravail: TAUX_COTISATIONS.accidentTravail,
+  insuranceRates: {
+    employeeDiversified: CONTRIBUTION_RATES.insuranceDiversifiedEmployee.taxRate,
+    employerDiversified: CONTRIBUTION_RATES.insuranceDiversifiedEmployer.taxRate,
+    workInjury: CONTRIBUTION_RATES.workInjury,
   },
-  tauxRetraite: {
-    salariale: TAUX_COTISATIONS.retraiteSalariale.taux,
-    patronale: TAUX_COTISATIONS.retraitePatronale.taux,
+  pensionRates: {
+    employee: CONTRIBUTION_RATES.pensionEmployee.taxRate,
+    employer: CONTRIBUTION_RATES.pensionEmployer.taxRate,
   },
-  plafonds: {
-    cnssPlafond: TAUX_COTISATIONS.cnssPrestation.plafond,
-    fraisProfessionnels: TAUX_COTISATIONS.fraisProfessionnels.montantApplique,
+  ceilings: {
+    nssfCeiling: CONTRIBUTION_RATES.nssfEmployee.ceiling,
+    professionalExpenses: CONTRIBUTION_RATES.professionalExpenses.appliedAmount,
   }
 };
 
-// Barème IGR progressif (tranches mensuelles)
-export interface TrancheIGR {
+// Progressive income tax brackets (monthly)
+export interface TaxBracket {
   min: number;
   max: number;
-  taux: number;
+  rate: number;
   deduction: number;
 }
 
-// Export des barèmes depuis les données de base
-export { BAREME_IGR };
+// Export tax brackets from base data
+export { INCOME_TAX_BRACKETS };
 
-// Valeurs par défaut pour les CNSS Prestations - Part Salariale
-export const CNSS_PRESTATIONS_DEFAULTS = {
-  cnssPrestation: 268.80,
-  amoSalariale: 180.16,
-  retraiteSalariale: 478.29,
-  assuranceDiversSalariale: 100.14
+// Default values for NSSF Employee Contributions
+export const NSSF_DEFAULTS = {
+  nssfEmployee: 1080,      // Based on current NSSF rates
+  shifEmployee: 1080,      // Based on current SHIF rates
+  pensionEmployee: 2000,   // Example pension contribution
+  insuranceDiversifiedEmployee: 500 // Example insurance
 };
 
-// Barème prime d'ancienneté
-export interface TrancheAnciennete {
+// Seniority bonus scale
+export interface SeniorityBracket {
   min: number;
   max: number;
-  taux: number;
+  rate: number;
 }
 
-// Export du barème d'ancienneté depuis les données de base
-export { BAREME_ANCIENNETE };
+// Export seniority scale from base data
+export { SENIORITY_SCALE };
 
-// Types d'assurances optionnelles
-export interface AssurancesOptionnelles {
-  assuranceMaladieComplementaire: boolean; // 2.5%
-  assuranceMaladieEtranger: boolean;       // 0.5%
-  assuranceInvaliditeRenforcee: boolean;   // 0.316%
+// Types of optional insurances
+export interface OptionalInsurances {
+  comprehensiveHealthInsurance: boolean; // 2.5%
+  foreignHealthCover: boolean;           // 0.5%
+  enhancedDisabilityCover: boolean;      // 0.316%
 }
 
-export const TAUX_ASSURANCES_OPTIONNELLES = {
-  assuranceMaladieComplementaire: 0.025,   // 2.5%
-  assuranceMaladieEtranger: 0.005,         // 0.5%
-  assuranceInvaliditeRenforcee: 0.00316,   // 0.316%
+export const OPTIONAL_INSURANCE_RATES = {
+  comprehensiveHealthInsurance: 0.025,   // 2.5%
+  foreignHealthCover: 0.005,             // 0.5%
+  enhancedDisabilityCover: 0.00316,      // 0.316%
 };
 
-// Plafonds des indemnités
-export const PLAFONDS_INDEMNITES = {
-  logement: {
-    pourcentageMax: 0.20,    // 20% du salaire
-    plafondAbsolu: 5000,     // 5000 MAD max
+// Allowance ceilings
+export const ALLOWANCE_CEILINGS = {
+  housing: {
+    maxPercentage: 0.20,    // 20% of salary
+    absoluteCeiling: 20000,  // 20,000 KES max
   },
   representation: {
-    pourcentageMax: 0.10,    // 10% du salaire
-    plafondAbsolu: 3000,     // 3000 MAD max
+    maxPercentage: 0.10,    // 10% of salary
+    absoluteCeiling: 10000,  // 10,000 KES max
   },
-  panier: 750,               // 750 MAD standard
-  transport: [500, 1000],    // Options 500 ou 1000 MAD
+  meal: 2000,               // 2,000 KES standard
+  transport: [3000, 5000],  // Options 3,000 or 5,000 KES
 };
 
-// Interface pour les éléments variables
+// Interface for variable elements
 export interface VariableElement {
   id: string;
-  type: 'HEURES_SUP' | 'ABSENCE' | 'PRIME_EXCEPTIONNELLE' | 'CONGE' | 'RETARD' | 'AVANCE' | 'AUTRE';
+  type: 'OVERTIME' | 'ABSENCE' | 'EXCEPTIONAL_BONUS' | 'LEAVE' | 'LATENESS' | 'ADVANCE' | 'OTHER';
   description: string;
-  montant: number;
-  heures?: number;
-  taux?: number;
+  amount: number;
+  hours?: number;
+  rate?: number;
   date: Date;
-  mois: string;
-  annee: string;
+  month: string;
+  year: string;
 }
 
-// Interface pour les données de calcul
+// Types of optional insurances
+export interface OptionalInsurances {
+  comprehensiveHealthInsurance: boolean;
+  foreignHealthCover: boolean;
+  enhancedDisabilityCover: boolean;
+}
+
+// Interface for calculation data
 export interface EmployeePayrollData {
-  // Données personnelles
-  nom: string;
-  prenom: string;
-  matricule: string;
-  cin: string;
-  cnss: string;
-  situationFamiliale: 'CELIBATAIRE' | 'MARIE' | 'DIVORCE' | 'VEUF';
-  dateNaissance: Date;
-  dateEmbauche: Date;
-  anciennete: number;
-  nbrDeductions: number; // Enfants à charge
-  nbreJourMois: number;
+  // Personal data
+  lastName: string;
+  firstName: string;
+  employeeId: string;
+  idNumber: string;
+  nssfNumber: string;
+  maritalStatus: 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED';
+  dateOfBirth: Date;
+  hireDate: Date;
+  seniority: number;
+  numberOfDeductions: number; // Dependents
+  numberOfDaysPerMonth: number;
   
-  // Salaire et indemnités
-  salaireBase: number;
-  indemniteLogement: number;
-  indemnitePanier: number;
-  primeTransport: number;
-  indemniteRepresentation: number;
+  // Salary and allowances
+  baseSalary: number;
+  housingAllowance: number;
+  mealAllowance: number;
+  transportAllowance: number;
+  representationAllowance: number;
   
-  // Assurances optionnelles
-  assurances: AssurancesOptionnelles;
+  // Optional insurances
+  insurances: OptionalInsurances;
   
-  // Crédits et avances
-  creditImmobilier?: {
-    montantMensuel: number;
-    interets: number;
+  // Credits and advances
+  mortgageCredit?: {
+    monthlyAmount: number;
+    interest: number;
   };
-  creditConsommation?: {
-    montantMensuel: number;
+  consumerCredit?: {
+    monthlyAmount: number;
   };
-  avanceSalaire?: {
-    montantMensuel: number;
+  salaryAdvance?: {
+    monthlyAmount: number;
   };
   
-  // Éléments variables (optionnel pour compatibilité)
+  // Variable elements (optional for compatibility)
   variableElements?: VariableElement[];
   
-  // Banque
-  compteBancaire: string;
-  agence: string;
+  // Bank
+  bankAccount: string;
+  bankBranch: string;
   
-  // CNSS Prestations - Part Salariale (optionnelles)
-  useCnssPrestation?: boolean;
-  useAmoSalariale?: boolean;
-  useRetraiteSalariale?: boolean;
-  useAssuranceDiversSalariale?: boolean;
+  // NSSF Employee Contributions (optional)
+  useNssfEmployee?: boolean;
+  useShifEmployee?: boolean;
+  usePensionEmployee?: boolean;
+  useInsuranceDiversifiedEmployee?: boolean;
+
+  // Additional fields for payroll calculation
+  bonuses: number;
+  overtimePay: number;
+  loanRepayment: number;
+  helbLoan: number;
+  subjectToNssf: boolean;
+  subjectToShif: boolean;
+  subjectToHousingLevy: boolean;
 }
 
-// Résultat du calcul de paie
+// Payroll calculation result
 export interface PayrollResult {
-  // Gains
-  gains: {
-    salaireBase: number;
-    primeAnciennete: number;
-    indemniteLogement: number;
-    indemnitePanier: number;
-    primeTransport: number;
-    indemniteRepresentation: number;
-    heuresSupplementaires?: number;
-    primesExceptionnelles?: number;
-    autresGains?: number;
-    totalGains: number;
+  // Earnings
+  earnings: {
+    baseSalary: number;
+    seniorityBonus: number;
+    housingAllowance: number;
+    mealAllowance: number;
+    transportAllowance: number;
+    representationAllowance: number;
+    overtimePay?: number;
+    exceptionalBonuses?: number;
+    otherEarnings?: number;
+    totalEarnings: number;
   };
   
-  // Salaires bruts
-  salaireBrut: number;
-  salaireBrutImposable: number;
+  // Gross salaries
+  grossSalary: number;
+  taxableGrossSalary: number;
   
-  // Cotisations salariales
-  cotisationsSalariales: {
-    cnssPrestation: number;
-    amoSalariale: number;
-    retraiteSalariale: number;
-    assuranceDiversSalariale: number;
-    assurancesOptionnelles: number;
-    totalCotisationsSalariales: number;
+  // Employee contributions
+  employeeContributions: {
+    nssfEmployee: number;
+    shifEmployee: number;
+    pensionEmployee: number;
+    insuranceDiversifiedEmployee: number;
+    optionalInsurances: number;
+    totalEmployeeContributions: number;
   };
   
-  // Cotisations patronales
-  cotisationsPatronales: {
-    cnssPrestation: number;
-    allocationsFamiliales: number;
-    taxeFormation: number;
-    amoPatronale: number;
-    participationAMO: number;
-    accidentTravail: number;
-    retraitePatronale: number;
-    assuranceDiversPatronale: number;
-    totalCotisationsPatronales: number;
+  // Employer contributions
+  employerContributions: {
+    nssfEmployer: number;
+    housingLevy: number;
+    trainingLevy: number;
+    shifEmployer: number;
+    participationSHIF: number;
+    workInjury: number;
+    pensionEmployer: number;
+    insuranceDiversifiedEmployer: number;
+    totalEmployerContributions: number;
   };
   
-  // Calcul IGR
-  calculIGR: {
-    fraisProfessionnels: number;
-    netImposable: number;
-    netNetImposable: number;
-    igrTheorique: number;
-    impotSurRevenu: number;
+  // Income tax calculation
+  taxCalculation: {
+    professionalExpenses: number;
+    taxableNet: number;
+    netTaxable: number;
+    theoreticalTax: number;
+    incomeTax: number;
   };
   
-  // Autres retenues
-  autresRetenues: {
-    creditImmobilier: number;
-    creditConsommation: number;
-    avanceSalaire: number;
-    totalAutresRetenues: number;
+  // Other deductions
+  otherDeductions: {
+    mortgageCredit: number;
+    consumerCredit: number;
+    salaryAdvance: number;
+    totalOtherDeductions: number;
   };
   
-  // Résultat final
-  totalRetenues: number;
-  salaireNetAPayer: number;
-  coutTotalEmployeur: number;
+  // Final result
+  totalDeductions: number;
+  netSalaryPayable: number;
+  totalEmployerCost: number;
 }
 
 /**
- * Calcule la prime d'ancienneté selon le barème progressif
+ * Calculates seniority bonus according to progressive scale
  */
-export function calculerPrimeAnciennete(salaireBase: number, anciennete: number): number {
-  const tranche = BAREME_ANCIENNETE.find((t: TrancheAnciennete) => anciennete >= t.min && anciennete < t.max);
-  return tranche ? salaireBase * tranche.taux : 0;
+export function calculateSeniorityBonus(baseSalary: number, seniority: number): number {
+  const bracket = SENIORITY_SCALE.find((t: SeniorityBracket) => seniority >= t.min && seniority < t.max);
+  return bracket ? baseSalary * bracket.rate : 0;
 }
 
 /**
- * Calcule l'indemnité de logement avec plafond
+ * Calculates housing allowance with ceiling
  */
-export function calculerIndemniteLogement(salaireBase: number, montantDemande: number): number {
-  const plafondPourcentage = salaireBase * PLAFONDS_INDEMNITES.logement.pourcentageMax;
-  const plafondAbsolu = PLAFONDS_INDEMNITES.logement.plafondAbsolu;
-  const plafondEffectif = Math.min(plafondPourcentage, plafondAbsolu);
+export function calculateHousingAllowance(baseSalary: number, requestedAmount: number): number {
+  const percentageCeiling = baseSalary * ALLOWANCE_CEILINGS.housing.maxPercentage;
+  const absoluteCeiling = ALLOWANCE_CEILINGS.housing.absoluteCeiling;
+  const effectiveCeiling = Math.min(percentageCeiling, absoluteCeiling);
   
-  return Math.min(montantDemande, plafondEffectif);
+  return Math.min(requestedAmount, effectiveCeiling);
 }
 
 /**
- * Calcule l'indemnité de représentation avec plafond
+ * Calculates representation allowance with ceiling
  */
-export function calculerIndemniteRepresentation(salaireBase: number, montantDemande: number): number {
-  const plafondPourcentage = salaireBase * PLAFONDS_INDEMNITES.representation.pourcentageMax;
-  const plafondAbsolu = PLAFONDS_INDEMNITES.representation.plafondAbsolu;
-  const plafondEffectif = Math.min(plafondPourcentage, plafondAbsolu);
+export function calculateRepresentationAllowance(baseSalary: number, requestedAmount: number): number {
+  const percentageCeiling = baseSalary * ALLOWANCE_CEILINGS.representation.maxPercentage;
+  const absoluteCeiling = ALLOWANCE_CEILINGS.representation.absoluteCeiling;
+  const effectiveCeiling = Math.min(percentageCeiling, absoluteCeiling);
   
-  return Math.min(montantDemande, plafondEffectif);
+  return Math.min(requestedAmount, effectiveCeiling);
 }
 
 /**
- * Calcule les cotisations CNSS avec plafond
+ * Calculates NSSF contributions with ceiling
  */
-export function calculerCotisationsCNSS(salaireBrut: number, salaireBrutImposable: number): {
-  cnssPrestation: number;
-  allocationsFamiliales: number;
-  taxeFormation: number;
+export function calculateNSSFContributions(grossSalary: number, taxableGrossSalary: number): {
+  nssfEmployee: number;
+  housingLevy: number;
+  trainingLevy: number;
 } {
-  const assietteCNSS = Math.min(salaireBrut, PAYROLL_CONFIG.plafonds.cnssPlafond);
+  const nssfBase = Math.min(grossSalary, PAYROLL_CONFIG.ceilings.nssfCeiling);
   
   return {
-    cnssPrestation: assietteCNSS * PAYROLL_CONFIG.tauxCNSS.prestationsSalariale,
-    allocationsFamiliales: salaireBrutImposable * PAYROLL_CONFIG.tauxCNSS.allocationsFamiliales,
-    taxeFormation: salaireBrutImposable * PAYROLL_CONFIG.tauxCNSS.taxeFormation,
+    nssfEmployee: nssfBase * PAYROLL_CONFIG.nssfRates.employeeContribution,
+    housingLevy: taxableGrossSalary * PAYROLL_CONFIG.nssfRates.housingLevy,
+    trainingLevy: taxableGrossSalary * PAYROLL_CONFIG.nssfRates.trainingLevy,
   };
 }
 
 /**
- * Calcule les cotisations AMO
+ * Calculates SHIF contributions
  */
-export function calculerCotisationsAMO(salaireBrutImposable: number): {
-  amoSalariale: number;
-  amoPatronale: number;
-  participationAMO: number;
+export function calculateSHIFContributions(taxableGrossSalary: number): {
+  shifEmployee: number;
+  shifEmployer: number;
+  participationSHIF: number;
 } {
   return {
-    amoSalariale: salaireBrutImposable * PAYROLL_CONFIG.tauxAMO.salariale,
-    amoPatronale: salaireBrutImposable * PAYROLL_CONFIG.tauxAMO.patronale,
-    participationAMO: salaireBrutImposable * PAYROLL_CONFIG.tauxAMO.participation,
+    shifEmployee: taxableGrossSalary * PAYROLL_CONFIG.shifRates.employee,
+    shifEmployer: taxableGrossSalary * PAYROLL_CONFIG.shifRates.employer,
+    participationSHIF: taxableGrossSalary * PAYROLL_CONFIG.shifRates.participation,
   };
 }
 
 /**
- * Calcule les cotisations retraite (seulement pour salaires > 6000 MAD)
+ * Calculates pension contributions (only for salaries above threshold)
  */
-export function calculerCotisationsRetraite(salaireBrutImposable: number): {
-  retraiteSalariale: number;
-  retraitePatronale: number;
+export function calculatePensionContributions(taxableGrossSalary: number): {
+  pensionEmployee: number;
+  pensionEmployer: number;
 } {
-  // Pas de cotisation retraite pour les salaires <= 6000 MAD
-  if (salaireBrutImposable <= TAUX_COTISATIONS.retraiteSalariale.seuilMinimum) {
-    return { retraiteSalariale: 0, retraitePatronale: 0 };
+  // No pension contribution for salaries below threshold
+  if (taxableGrossSalary <= CONTRIBUTION_RATES.pensionEmployee.minimumThreshold) {
+    return { pensionEmployee: 0, pensionEmployer: 0 };
   }
   
   return {
-    retraiteSalariale: salaireBrutImposable * PAYROLL_CONFIG.tauxRetraite.salariale,
-    retraitePatronale: salaireBrutImposable * PAYROLL_CONFIG.tauxRetraite.patronale,
+    pensionEmployee: taxableGrossSalary * PAYROLL_CONFIG.pensionRates.employee,
+    pensionEmployer: taxableGrossSalary * PAYROLL_CONFIG.pensionRates.employer,
   };
 }
 
 /**
- * Calcule les assurances diverses
- * Formule: salaire brut imposable * 1.26% (taux standard sans ajustement)
- * IMPORTANT: Maintient la précision complète sans arrondi intermédiaire
+ * Calculates diversified insurance
+ * Formula: taxable gross salary * standard rate (without adjustment)
+ * IMPORTANT: Maintains full precision without intermediate rounding
  */
-export function calculerAssurancesDiverses(salaireBrutImposable: number): {
-  assuranceDiversSalariale: number;
-  assuranceDiversPatronale: number;
-  accidentTravail: number;
+export function calculateDiversifiedInsurance(taxableGrossSalary: number): {
+  insuranceDiversifiedEmployee: number;
+  insuranceDiversifiedEmployer: number;
+  workInjury: number;
 } {
   return {
-    assuranceDiversSalariale: salaireBrutImposable * PAYROLL_CONFIG.tauxAssurance.diversSalariale,
-    assuranceDiversPatronale: salaireBrutImposable * PAYROLL_CONFIG.tauxAssurance.diversPatronale,
-    accidentTravail: salaireBrutImposable * PAYROLL_CONFIG.tauxAssurance.accidentTravail,
+    insuranceDiversifiedEmployee: taxableGrossSalary * PAYROLL_CONFIG.insuranceRates.employeeDiversified,
+    insuranceDiversifiedEmployer: taxableGrossSalary * PAYROLL_CONFIG.insuranceRates.employerDiversified,
+    workInjury: taxableGrossSalary * PAYROLL_CONFIG.insuranceRates.workInjury,
   };
 }
 
 /**
- * Calcule les assurances optionnelles
+ * Calculates optional insurances
  */
-export function calculerAssurancesOptionnelles(
-  salaireBrutImposable: number, 
-  assurances: AssurancesOptionnelles
+export function calculateOptionalInsurances(
+  taxableGrossSalary: number, 
+  insurances: OptionalInsurances
 ): number {
   let total = 0;
   
-  if (assurances.assuranceMaladieComplementaire) {
-    total += salaireBrutImposable * TAUX_ASSURANCES_OPTIONNELLES.assuranceMaladieComplementaire;
+  if (insurances.comprehensiveHealthInsurance) {
+    total += taxableGrossSalary * OPTIONAL_INSURANCE_RATES.comprehensiveHealthInsurance;
   }
   
-  if (assurances.assuranceMaladieEtranger) {
-    total += salaireBrutImposable * TAUX_ASSURANCES_OPTIONNELLES.assuranceMaladieEtranger;
+  if (insurances.foreignHealthCover) {
+    total += taxableGrossSalary * OPTIONAL_INSURANCE_RATES.foreignHealthCover;
   }
   
-  if (assurances.assuranceInvaliditeRenforcee) {
-    total += salaireBrutImposable * TAUX_ASSURANCES_OPTIONNELLES.assuranceInvaliditeRenforcee;
+  if (insurances.enhancedDisabilityCover) {
+    total += taxableGrossSalary * OPTIONAL_INSURANCE_RATES.enhancedDisabilityCover;
   }
   
   return total;
 }
 
 /**
- * Calcule l'IGR selon le barème progressif avec proratisation et nouvelle formule de déductions
- * Formule IGR théorique: ((net net imposable * taux) - déduction) * (nb jours mois / 26)
- * Formule finale: IF((IGR théorique-(500/12*Nbr déductions))<=0;0;IGR théorique-(500/12*Nbr déductions))
- * IMPORTANT: Maintient la précision complète dans tous les calculs intermédiaires
+ * Calculates income tax according to progressive scale with proration and new deduction formula
+ * Theoretical tax formula: ((net taxable * rate) - deduction) * (number of days in month / 26)
+ * Final formula: IF((theoretical tax-(personal relief*number of deductions))<=0;0;theoretical tax-(personal relief*number of deductions))
+ * IMPORTANT: Maintains full precision in all intermediate calculations
  */
-export function calculerIGR(
-  netImposable: number, 
-  interetsCredit: number = 0,
-  situationFamiliale: string,
-  nbrDeductions: number,
-  nbreJourMois: number = 26
+export function calculateIncomeTax(
+  taxableNet: number, 
+  creditInterest: number = 0,
+  maritalStatus: string,
+  numberOfDeductions: number,
+  numberOfDaysPerMonth: number = 26
 ): {
-  netImposable: number;
-  netNetImposable: number;
-  igrTheorique: number;
-  impotSurRevenu: number;
+  taxableNet: number;
+  netTaxable: number;
+  theoreticalTax: number;
+  incomeTax: number;
 } {
-  // Calcul du net net imposable (après déduction des intérêts de crédit)
-  // Maintenir la précision complète sans arrondi
-  const deductionMax = netImposable * 0.10; // 10% du net imposable
-  const deductionAppliquee = Math.min(interetsCredit, deductionMax);
-  const netNetImposable = netImposable - deductionAppliquee;
+  // Calculate net taxable (after deduction of credit interest)
+  // Maintain full precision without rounding
+  const maxDeduction = taxableNet * 0.10; // 10% of taxable net
+  const appliedDeduction = Math.min(creditInterest, maxDeduction);
+  const netTaxable = taxableNet - appliedDeduction;
   
-  // Recherche de la tranche applicable
-  const tranche = BAREME_IGR.find((t: TrancheIGR) => netNetImposable >= t.min && netNetImposable <= t.max);
+  // Find applicable tax bracket
+  const bracket = INCOME_TAX_BRACKETS.find((t: TaxBracket) => netTaxable >= t.min && netTaxable <= t.max);
   
-  if (!tranche) {
+  if (!bracket) {
     return {
-      netImposable,
-      netNetImposable,
-      igrTheorique: 0,
-      impotSurRevenu: 0
+      taxableNet,
+      netTaxable,
+      theoreticalTax: 0,
+      incomeTax: 0
     };
   }
   
-  // Calcul IGR théorique avec proratisation selon le nombre de jours travaillés
-  // Formule: ((net net imposable * taux) - déduction) * (nb jours mois / 26)
-  // Maintenir la précision complète dans tous les calculs
-  const igrMensuelComplet = Math.max(0, (netNetImposable * tranche.taux) - tranche.deduction);
-  const igrTheorique = igrMensuelComplet * (nbreJourMois / 26);
+  // Calculate theoretical tax with proration based on number of working days
+  // Formula: ((net taxable * rate) - deduction) * (number of days in month / 26)
+  // Maintain full precision in all calculations
+  const monthlyTaxComplete = Math.max(0, (netTaxable * bracket.rate) - bracket.deduction);
+  const theoreticalTax = monthlyTaxComplete * (numberOfDaysPerMonth / 26);
   
-  // Application de la nouvelle formule de déductions pour charges de famille
-  // Formule: IF((IGR théorique-(500/12*Nbr déductions))<=0;0;IGR théorique-(500/12*Nbr déductions))
-  // Maintenir la précision complète: 500/12 = 41.666666666666664
-  const deductionMensuelle = (500 / 12) * nbrDeductions;
-  const impotApresDeduction = igrTheorique - deductionMensuelle;
+  // Application of new deduction formula for dependents
+  // Formula: IF((theoretical tax-(personal relief*number of deductions))<=0;0;theoretical tax-(personal relief*number of deductions))
+  // Personal relief is 2400 KES per year (200 KES per month)
+  const monthlyDeduction = 200 * numberOfDeductions;
+  const taxAfterDeduction = theoreticalTax - monthlyDeduction;
   
-  // Si le résultat est <= 0, alors l'impôt = 0, sinon on applique la déduction
-  // Maintenir la précision complète jusqu'au résultat final
-  const impotSurRevenu = Math.max(0, impotApresDeduction);
+  // If result is <= 0, then tax = 0, otherwise apply deduction
+  // Maintain full precision until final result
+  const incomeTax = Math.max(0, taxAfterDeduction);
   
   return {
-    netImposable,
-    netNetImposable,
-    igrTheorique,
-    impotSurRevenu
+    taxableNet,
+    netTaxable,
+    theoreticalTax,
+    incomeTax
   };
 }
 
 /**
- * Traite les éléments variables pour le calcul de paie
+ * Processes variable elements for payroll calculation
  */
-export function traiterElementsVariables(variableElements: VariableElement[] = []): {
-  heuresSupplementaires: number;
-  primesExceptionnelles: number;
+export function processVariableElements(variableElements: VariableElement[] = []): {
+  overtimePay: number;
+  exceptionalBonuses: number;
   absences: number;
-  retards: number;
-  avancesVariables: number;
-  autresGains: number;
-  autresRetenues: number;
+  lateness: number;
+  variableAdvances: number;
+  otherEarnings: number;
+  otherDeductions: number;
 } {
-  let heuresSupplementaires = 0;
-  let primesExceptionnelles = 0;
+  let overtimePay = 0;
+  let exceptionalBonuses = 0;
   let absences = 0;
-  let retards = 0;
-  let avancesVariables = 0;
-  let autresGains = 0;
-  let autresRetenues = 0;
+  let lateness = 0;
+  let variableAdvances = 0;
+  let otherEarnings = 0;
+  let otherDeductions = 0;
 
   variableElements.forEach(element => {
     switch (element.type) {
-      case 'HEURES_SUP':
-        heuresSupplementaires += element.montant;
+      case 'OVERTIME':
+        overtimePay += element.amount;
         break;
-      case 'PRIME_EXCEPTIONNELLE':
-        primesExceptionnelles += element.montant;
+      case 'EXCEPTIONAL_BONUS':
+        exceptionalBonuses += element.amount;
         break;
       case 'ABSENCE':
-        absences += element.montant; // Montant négatif (retenue)
+        absences += element.amount; // Negative amount (deduction)
         break;
-      case 'RETARD':
-        retards += element.montant; // Montant négatif (retenue)
+      case 'LATENESS':
+        lateness += element.amount; // Negative amount (deduction)
         break;
-      case 'AVANCE':
-        avancesVariables += element.montant; // Montant négatif (retenue)
+      case 'ADVANCE':
+        variableAdvances += element.amount; // Negative amount (deduction)
         break;
-      case 'CONGE':
-        // Les congés peuvent être payés ou non payés selon le contexte
-        if (element.montant > 0) {
-          autresGains += element.montant;
+      case 'LEAVE':
+        // Leave can be paid or unpaid depending on context
+        if (element.amount > 0) {
+          otherEarnings += element.amount;
         } else {
-          autresRetenues += Math.abs(element.montant);
+          otherDeductions += Math.abs(element.amount);
         }
         break;
-      case 'AUTRE':
-        // Autres éléments peuvent être des gains ou des retenues
-        if (element.montant > 0) {
-          autresGains += element.montant;
+      case 'OTHER':
+        // Other elements can be earnings or deductions
+        if (element.amount > 0) {
+          otherEarnings += element.amount;
         } else {
-          autresRetenues += Math.abs(element.montant);
+          otherDeductions += Math.abs(element.amount);
         }
         break;
     }
   });
 
   return {
-    heuresSupplementaires,
-    primesExceptionnelles,
-    absences: Math.abs(absences), // Convertir en positif pour les retenues
-    retards: Math.abs(retards),
-    avancesVariables: Math.abs(avancesVariables),
-    autresGains,
-    autresRetenues
+    overtimePay,
+    exceptionalBonuses,
+    absences: Math.abs(absences), // Convert to positive for deductions
+    lateness: Math.abs(lateness),
+    variableAdvances: Math.abs(variableAdvances),
+    otherEarnings,
+    otherDeductions
   };
 }
 
 /**
- * Fonction principale de calcul de paie
- * IMPORTANT: Maintient la précision complète dans tous les calculs intermédiaires
- * Les arrondis ne sont appliqués qu'au niveau de l'affichage final
+ * Main payroll calculation function
+ * IMPORTANT: Maintains full precision in all intermediate calculations
+ * Rounding is only applied at the final display level
  */
-export function calculerPaie(employee: EmployeePayrollData): PayrollResult {
-  // 0. Traitement des éléments variables
-  const elementsVariables = traiterElementsVariables(employee.variableElements);
+export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
+  // 0. Process variable elements
+  const variableElements = processVariableElements(employee.variableElements);
 
-  // 1. Calcul des gains
-  const primeAnciennete = calculerPrimeAnciennete(employee.salaireBase, employee.anciennete);
-  const indemniteLogement = calculerIndemniteLogement(employee.salaireBase, employee.indemniteLogement);
-  const indemniteRepresentation = calculerIndemniteRepresentation(employee.salaireBase, employee.indemniteRepresentation);
+  // 1. Calculate earnings
+  const seniorityBonus = calculateSeniorityBonus(employee.baseSalary, employee.seniority);
+  const housingAllowance = calculateHousingAllowance(employee.baseSalary, employee.housingAllowance);
+  const representationAllowance = calculateRepresentationAllowance(employee.baseSalary, employee.representationAllowance);
   
-  const gains = {
-    salaireBase: employee.salaireBase,
-    primeAnciennete,
-    indemniteLogement,
-    indemnitePanier: employee.indemnitePanier,
-    primeTransport: employee.primeTransport,
-    indemniteRepresentation,
-    // Ajout des éléments variables positifs
-    heuresSupplementaires: elementsVariables.heuresSupplementaires,
-    primesExceptionnelles: elementsVariables.primesExceptionnelles,
-    autresGains: elementsVariables.autresGains,
-    totalGains: employee.salaireBase + primeAnciennete + indemniteLogement + 
-                employee.indemnitePanier + employee.primeTransport + indemniteRepresentation +
-                elementsVariables.heuresSupplementaires + elementsVariables.primesExceptionnelles + 
-                elementsVariables.autresGains
+  const earnings = {
+    baseSalary: employee.baseSalary,
+    seniorityBonus,
+    housingAllowance,
+    mealAllowance: employee.mealAllowance,
+    transportAllowance: employee.transportAllowance,
+    representationAllowance,
+    // Add positive variable elements
+    overtimePay: variableElements.overtimePay,
+    exceptionalBonuses: variableElements.exceptionalBonuses,
+    otherEarnings: variableElements.otherEarnings,
+    totalEarnings: employee.baseSalary + seniorityBonus + housingAllowance + 
+                employee.mealAllowance + employee.transportAllowance + representationAllowance +
+                variableElements.overtimePay + variableElements.exceptionalBonuses + 
+                variableElements.otherEarnings
   };
   
-  // 2. Calcul des salaires bruts
-  const salaireBrut = gains.totalGains;
-  const salaireBrutImposable = salaireBrut - employee.primeTransport - employee.indemniteRepresentation; // Transport et représentation non imposables
+  // 2. Calculate gross salaries
+  const grossSalary = earnings.totalEarnings;
+  const taxableGrossSalary = grossSalary - employee.transportAllowance - employee.representationAllowance; // Transport and representation not taxable
   
-  // 3. Calcul des cotisations salariales
-  const cotisationsCNSS = calculerCotisationsCNSS(salaireBrut, salaireBrutImposable);
-  const cotisationsAMO = calculerCotisationsAMO(salaireBrutImposable);
-  const cotisationsRetraite = calculerCotisationsRetraite(salaireBrutImposable);
-  const assurancesDiverses = calculerAssurancesDiverses(salaireBrutImposable);
-  const assurancesOptionnelles = calculerAssurancesOptionnelles(salaireBrutImposable, employee.assurances);
+  // 3. Calculate employee contributions
+  const nssfContributions = calculateNSSFContributions(grossSalary, taxableGrossSalary);
+  const shifContributions = calculateSHIFContributions(taxableGrossSalary);
+  const pensionContributions = calculatePensionContributions(taxableGrossSalary);
+  const diversifiedInsurance = calculateDiversifiedInsurance(taxableGrossSalary);
+  const optionalInsurances = calculateOptionalInsurances(taxableGrossSalary, employee.insurances);
   
-  // Utiliser les valeurs par défaut si les checkboxes sont cochées, sinon calculer
-  const cotisationsSalariales = {
-    cnssPrestation: employee.useCnssPrestation ? CNSS_PRESTATIONS_DEFAULTS.cnssPrestation : cotisationsCNSS.cnssPrestation,
-    amoSalariale: employee.useAmoSalariale ? CNSS_PRESTATIONS_DEFAULTS.amoSalariale : cotisationsAMO.amoSalariale,
-    retraiteSalariale: employee.useRetraiteSalariale ? CNSS_PRESTATIONS_DEFAULTS.retraiteSalariale : cotisationsRetraite.retraiteSalariale,
-    assuranceDiversSalariale: employee.useAssuranceDiversSalariale ? CNSS_PRESTATIONS_DEFAULTS.assuranceDiversSalariale : assurancesDiverses.assuranceDiversSalariale,
-    assurancesOptionnelles,
-    totalCotisationsSalariales: 0 // Calculé ci-dessous
+  // Use default values if checkboxes are checked, otherwise calculate
+  const employeeContributions = {
+    nssfEmployee: employee.useNssfEmployee ? NSSF_DEFAULTS.nssfEmployee : nssfContributions.nssfEmployee,
+    shifEmployee: employee.useShifEmployee ? NSSF_DEFAULTS.shifEmployee : shifContributions.shifEmployee,
+    pensionEmployee: employee.usePensionEmployee ? NSSF_DEFAULTS.pensionEmployee : pensionContributions.pensionEmployee,
+    insuranceDiversifiedEmployee: employee.useInsuranceDiversifiedEmployee ? NSSF_DEFAULTS.insuranceDiversifiedEmployee : diversifiedInsurance.insuranceDiversifiedEmployee,
+    optionalInsurances,
+    totalEmployeeContributions: 0 // Calculated below
   };
   
-  // Calculer le total des cotisations salariales
-  cotisationsSalariales.totalCotisationsSalariales = 
-    cotisationsSalariales.cnssPrestation + cotisationsSalariales.amoSalariale + 
-    cotisationsSalariales.retraiteSalariale + cotisationsSalariales.assuranceDiversSalariale + 
-    cotisationsSalariales.assurancesOptionnelles;
+  // Calculate total employee contributions
+  employeeContributions.totalEmployeeContributions = 
+    employeeContributions.nssfEmployee + employeeContributions.shifEmployee + 
+    employeeContributions.pensionEmployee + employeeContributions.insuranceDiversifiedEmployee + 
+    employeeContributions.optionalInsurances;
   
-  // 4. Calcul des cotisations patronales
-  const cotisationsPatronales = {
-    cnssPrestation: Math.min(salaireBrut, PAYROLL_CONFIG.plafonds.cnssPlafond) * PAYROLL_CONFIG.tauxCNSS.prestationsPatronale,
-    allocationsFamiliales: cotisationsCNSS.allocationsFamiliales,
-    taxeFormation: cotisationsCNSS.taxeFormation,
-    amoPatronale: cotisationsAMO.amoPatronale,
-    participationAMO: cotisationsAMO.participationAMO,
-    accidentTravail: assurancesDiverses.accidentTravail,
-    retraitePatronale: cotisationsRetraite.retraitePatronale,
-    assuranceDiversPatronale: assurancesDiverses.assuranceDiversPatronale,
-    totalCotisationsPatronales: 0 // Calculé ci-dessous
+  // 4. Calculate employer contributions
+  const employerContributions = {
+    nssfEmployer: Math.min(grossSalary, PAYROLL_CONFIG.ceilings.nssfCeiling) * PAYROLL_CONFIG.nssfRates.employerContribution,
+    housingLevy: nssfContributions.housingLevy,
+    trainingLevy: nssfContributions.trainingLevy,
+    shifEmployer: shifContributions.shifEmployer,
+    participationSHIF: shifContributions.participationSHIF,
+    workInjury: diversifiedInsurance.workInjury,
+    pensionEmployer: pensionContributions.pensionEmployer,
+    insuranceDiversifiedEmployer: diversifiedInsurance.insuranceDiversifiedEmployer,
+    totalEmployerContributions: 0 // Calculated below
   };
   
-  cotisationsPatronales.totalCotisationsPatronales = 
-    cotisationsPatronales.cnssPrestation + cotisationsPatronales.allocationsFamiliales +
-    cotisationsPatronales.taxeFormation + cotisationsPatronales.amoPatronale +
-    cotisationsPatronales.participationAMO + cotisationsPatronales.accidentTravail +
-    cotisationsPatronales.retraitePatronale + cotisationsPatronales.assuranceDiversPatronale;
+  employerContributions.totalEmployerContributions = 
+    employerContributions.nssfEmployer + employerContributions.housingLevy +
+    employerContributions.trainingLevy + employerContributions.shifEmployer +
+    employerContributions.participationSHIF + employerContributions.workInjury +
+    employerContributions.pensionEmployer + employerContributions.insuranceDiversifiedEmployer;
   
-  // 5. Calcul des frais professionnels et du net imposable selon la nouvelle formule
-  const fraisProfessionnels = calculerFraisProfessionnels(salaireBrutImposable);
-  const netImposable = calculerNetImposable(
-    salaireBrutImposable,
-    cotisationsSalariales.cnssPrestation,
-    cotisationsSalariales.amoSalariale,
-    cotisationsSalariales.retraiteSalariale,
-    fraisProfessionnels,
-    cotisationsSalariales.assuranceDiversSalariale
+  // 5. Calculate professional expenses and taxable net according to new formula
+  const professionalExpenses = calculateProfessionalExpenses(taxableGrossSalary);
+  const taxableNet = calculateTaxableNet(
+    taxableGrossSalary,
+    employeeContributions.nssfEmployee,
+    employeeContributions.shifEmployee,
+    employeeContributions.pensionEmployee,
+    professionalExpenses,
+    employeeContributions.insuranceDiversifiedEmployee
   );
   
-  // 6. Calcul IGR avec proratisation selon le nombre de jours travaillés
-  const interetsCredit = employee.creditImmobilier?.interets || 0;
-  const calculIGR = calculerIGR(netImposable, interetsCredit, employee.situationFamiliale, employee.nbrDeductions, employee.nbreJourMois);
+  // 6. Calculate income tax with proration based on number of working days
+  const creditInterest = employee.mortgageCredit?.interest || 0;
+  const taxCalculation = calculateIncomeTax(taxableNet, creditInterest, employee.maritalStatus, employee.numberOfDeductions, employee.numberOfDaysPerMonth);
   
-  // 7. Autres retenues
-  const autresRetenues = {
-    creditImmobilier: employee.creditImmobilier?.montantMensuel || 0,
-    creditConsommation: employee.creditConsommation?.montantMensuel || 0,
-    avanceSalaire: employee.avanceSalaire?.montantMensuel || 0,
-    totalAutresRetenues: (employee.creditImmobilier?.montantMensuel || 0) + 
-                        (employee.creditConsommation?.montantMensuel || 0) + 
-                        (employee.avanceSalaire?.montantMensuel || 0)
+  // 7. Other deductions
+  const otherDeductions = {
+    mortgageCredit: employee.mortgageCredit?.monthlyAmount || 0,
+    consumerCredit: employee.consumerCredit?.monthlyAmount || 0,
+    salaryAdvance: employee.salaryAdvance?.monthlyAmount || 0,
+    totalOtherDeductions: (employee.mortgageCredit?.monthlyAmount || 0) + 
+                        (employee.consumerCredit?.monthlyAmount || 0) + 
+                        (employee.salaryAdvance?.monthlyAmount || 0)
   };
   
-  // 8. Calcul final
-  const totalRetenues = cotisationsSalariales.totalCotisationsSalariales + calculIGR.impotSurRevenu + autresRetenues.totalAutresRetenues;
-  const salaireNetAPayer = salaireBrut - totalRetenues;
-  const coutTotalEmployeur = salaireBrut + cotisationsPatronales.totalCotisationsPatronales;
+  // 8. Final calculation
+  const totalDeductions = employeeContributions.totalEmployeeContributions + taxCalculation.incomeTax + otherDeductions.totalOtherDeductions;
+  const netSalaryPayable = grossSalary - totalDeductions;
+  const totalEmployerCost = grossSalary + employerContributions.totalEmployerContributions;
   
   return {
-    gains,
-    salaireBrut,
-    salaireBrutImposable,
-    cotisationsSalariales,
-    cotisationsPatronales,
-    calculIGR: {
-      fraisProfessionnels,
-      ...calculIGR
+    earnings,
+    grossSalary,
+    taxableGrossSalary,
+    employeeContributions,
+    employerContributions,
+    taxCalculation: {
+      professionalExpenses,
+      ...taxCalculation
     },
-    autresRetenues,
-    totalRetenues,
-    salaireNetAPayer,
-    coutTotalEmployeur
+    otherDeductions,
+    totalDeductions,
+    netSalaryPayable,
+    totalEmployerCost
   };
 }

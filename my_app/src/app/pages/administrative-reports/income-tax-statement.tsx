@@ -4,20 +4,20 @@ import { Download, FileText, Calendar } from 'lucide-react';
 
 interface Employee {
   id: string;
-  matricule: string;
-  nom: string;
-  prenom: string;
-  fonction: string;
-  salaireBase: number;
-  cin: string;
+  employeeId: string;
+  lastName: string;
+  firstName: string;
+  position: string;
+  baseSalary: number;
+  idNumber: string;
 }
 
-export default function IgrTaxStatement() {
+export default function IncomeTaxStatement() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
-  const [periode, setPeriode] = useState({
-    mois: new Date().getMonth() + 1,
-    annee: new Date().getFullYear().toString()
+  const [period, setPeriod] = useState({
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear().toString()
   });
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -43,21 +43,21 @@ export default function IgrTaxStatement() {
 
   const handleGenerateStatement = async () => {
     if (selectedEmployees.length === 0) {
-      alert('Veuillez sélectionner au moins un employé');
+      alert('Please select at least one employee');
       return;
     }
 
     try {
       setGenerating(true);
       
-      const response = await fetch('/api/documents/igr-tax-statement/generate', {
+      const response = await fetch('/api/documents/income-tax-statement/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           employeeIds: selectedEmployees,
-          periode
+          period
         }),
       });
 
@@ -68,18 +68,18 @@ export default function IgrTaxStatement() {
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = `declaration-igr-${periode.mois}-${periode.annee}.pdf`;
+        a.download = `income-tax-statement-${period.month}-${period.year}.pdf`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
       } else {
         const error = await response.json();
-        alert(`Erreur: ${error.error}`);
+        alert(`Error: ${error.error}`);
       }
     } catch (error) {
-      console.error('Error generating IGR statement:', error);
-      alert('Erreur lors de la génération de la déclaration IGR');
+      console.error('Error generating income tax statement:', error);
+      alert('Error generating income tax statement');
     } finally {
       setGenerating(false);
     }
@@ -102,17 +102,25 @@ export default function IgrTaxStatement() {
   };
 
   const monthNames = [
-    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
   ];
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 2
+    }).format(amount);
+  };
 
   return (
     <Layout>
       <div className="p-6 space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Déclaration IGR</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Income Tax Statement</h1>
           <p className="text-gray-600">
-            Générer les déclarations d'impôt sur le revenu pour les employés
+            Generate income tax statements for employees
           </p>
         </div>
 
@@ -122,22 +130,22 @@ export default function IgrTaxStatement() {
             <div className="mb-4">
               <h3 className="text-lg font-medium flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Configuration de la période
+                Period Configuration
               </h3>
               <p className="text-sm text-gray-600">
-                Sélectionnez la période pour la déclaration IGR
+                Select the period for the income tax statement
               </p>
             </div>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="mois" className="block text-sm font-medium text-gray-700">
-                    Mois
+                  <label htmlFor="month" className="block text-sm font-medium text-gray-700">
+                    Month
                   </label>
                   <select
-                    id="mois"
-                    value={periode.mois.toString()}
-                    onChange={(e) => setPeriode(prev => ({ ...prev, mois: parseInt(e.target.value) }))}
+                    id="month"
+                    value={period.month.toString()}
+                    onChange={(e) => setPeriod(prev => ({ ...prev, month: parseInt(e.target.value) }))}
                     className="payroll-input"
                   >
                     {monthNames.map((month, index) => (
@@ -149,14 +157,14 @@ export default function IgrTaxStatement() {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="annee" className="block text-sm font-medium text-gray-700">
-                    Année
+                  <label htmlFor="year" className="block text-sm font-medium text-gray-700">
+                    Year
                   </label>
                   <input
-                    id="annee"
+                    id="year"
                     type="number"
-                    value={periode.annee}
-                    onChange={(e) => setPeriode(prev => ({ ...prev, annee: e.target.value }))}
+                    value={period.year}
+                    onChange={(e) => setPeriod(prev => ({ ...prev, year: e.target.value }))}
                     min="2020"
                     max="2030"
                     className="payroll-input"
@@ -171,16 +179,16 @@ export default function IgrTaxStatement() {
             <div className="mb-4">
               <h3 className="text-lg font-medium flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Génération du document
+                Document Generation
               </h3>
               <p className="text-sm text-gray-600">
-                Générer la déclaration IGR pour les employés sélectionnés
+                Generate income tax statement for selected employees
               </p>
             </div>
             <div className="space-y-4">
               <div className="flex flex-col gap-2">
                 <p className="text-sm text-gray-600">
-                  {selectedEmployees.length} employé(s) sélectionné(s)
+                  {selectedEmployees.length} employee(s) selected
                 </p>
                 <div className="flex gap-2">
                   <button
@@ -188,14 +196,14 @@ export default function IgrTaxStatement() {
                     disabled={loading}
                     className="payroll-button-secondary text-sm px-3 py-1"
                   >
-                    Tout sélectionner
+                    Select All
                   </button>
                   <button
                     onClick={clearSelection}
                     disabled={loading}
                     className="payroll-button-secondary text-sm px-3 py-1"
                   >
-                    Tout désélectionner
+                    Clear All
                   </button>
                 </div>
               </div>
@@ -208,12 +216,12 @@ export default function IgrTaxStatement() {
                 {generating ? (
                   <>
                     <div className="spinner" />
-                    Génération en cours...
+                    Generating...
                   </>
                 ) : (
                   <>
                     <Download className="h-4 w-4" />
-                    Générer la déclaration IGR
+                    Generate Income Tax Statement
                   </>
                 )}
               </button>
@@ -224,16 +232,16 @@ export default function IgrTaxStatement() {
         {/* Employee Selection */}
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="mb-4">
-            <h3 className="text-lg font-medium">Sélection des employés</h3>
+            <h3 className="text-lg font-medium">Employee Selection</h3>
             <p className="text-sm text-gray-600">
-              Sélectionnez les employés à inclure dans la déclaration IGR
+              Select employees to include in the income tax statement
             </p>
           </div>
           <div>
             {loading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="spinner mr-2" />
-                Chargement des employés...
+                Loading employees...
               </div>
             ) : (
               <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -257,18 +265,18 @@ export default function IgrTaxStatement() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">
-                            {employee.prenom} {employee.nom}
+                            {employee.firstName} {employee.lastName}
                           </p>
                           <p className="text-sm text-gray-600">
-                            {employee.matricule} • {employee.fonction}
+                            {employee.employeeId} • {employee.position}
                           </p>
                         </div>
                         <div className="text-right">
                           <p className="font-medium">
-                            {employee.salaireBase.toLocaleString('fr-FR')} MAD
+                            {formatCurrency(employee.baseSalary)}
                           </p>
                           <p className="text-sm text-gray-600">
-                            CIN: {employee.cin || 'Non renseigné'}
+                            ID: {employee.idNumber || 'Not provided'}
                           </p>
                         </div>
                       </div>

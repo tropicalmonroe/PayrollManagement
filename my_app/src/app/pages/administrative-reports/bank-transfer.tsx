@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '../../components/Layout';
+import { Layout } from '../../../components/Layout';
 import { CreditCard, ArrowLeft, Download, Calendar, Users, FileSpreadsheet, Building, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/router';
-import { Employee } from '@prisma/client';
-import { calculerPaie, type EmployeePayrollData } from '../../lib/payrollCalculations';
+import { Employee } from '@prisma/client/';
+import { calculatePayroll, OptionalInsurances, type EmployeePayrollData } from '../../../lib/payrollCalculations';
 
 interface BankTransferEntry {
   employee: Employee;
-  netAPayer: number;
-  compteBancaire: string;
-  agence: string;
+  netPayable: number;
+  bankAccount: string;
+  bankBranch: string;
   isValid: boolean;
   errors: string[];
 }
@@ -27,9 +27,9 @@ const BankTransferPage = () => {
   const [showResults, setShowResults] = useState(false);
   const [summary, setSummary] = useState<any>(null);
   const [companyInfo, setCompanyInfo] = useState({
-    name: 'VOTRE ENTREPRISE',
+    name: 'YOUR COMPANY',
     account: '123456789012345',
-    bank: 'BANQUE POPULAIRE',
+    bank: 'EQUITY BANK',
     reference: ''
   });
 
@@ -42,10 +42,10 @@ const BankTransferPage = () => {
       const response = await fetch('/api/employees');
       if (response.ok) {
         const data = await response.json();
-        setEmployees(data.filter((emp: Employee) => emp.status === 'ACTIF'));
+        setEmployees(data.filter((emp: Employee) => emp.status === 'ACTIVE'));
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des employés:', error);
+      console.error('Error loading employees:', error);
     } finally {
       setLoading(false);
     }
@@ -66,8 +66,8 @@ const BankTransferPage = () => {
   };
 
   const validateBankAccount = (account: string): boolean => {
-    // Validation basique du RIB marocain (24 chiffres)
-    return /^\d{24}$/.test(account.replace(/\s/g, ''));
+    const clean = account.replace(/\s/g, '');
+    return /^\d{6,16}$/.test(clean); 
   };
 
   const handleGenerateTransfer = async () => {
@@ -80,79 +80,85 @@ const BankTransferPage = () => {
     let validTransfers = 0;
     let invalidTransfers = 0;
 
-    // Générer une référence unique pour le virement
-    const reference = `VIR${selectedMonth.replace('-', '')}${Date.now().toString().slice(-4)}`;
+    // Generate a unique reference for the transfer
+    const reference = `TRF${selectedMonth.replace('-', '')}${Date.now().toString().slice(-4)}`;
     setCompanyInfo(prev => ({ ...prev, reference }));
 
     for (const employee of employees) {
       try {
-        // Préparer les données de l'employé pour le calcul
+        // Prepare employee data for calculation
         const employeeData: EmployeePayrollData = {
-          nom: employee.nom,
-          prenom: employee.prenom,
-          matricule: employee.matricule,
-          cin: employee.cin || '',
-          cnss: employee.cnss || '',
-          situationFamiliale: employee.situationFamiliale,
-          dateNaissance: employee.dateNaissance || new Date(),
-          dateEmbauche: employee.dateEmbauche,
-          anciennete: getSeniorityInYears(employee.dateEmbauche),
-          nbrDeductions: employee.nbrDeductions,
-          nbreJourMois: employee.nbreJourMois,
-          salaireBase: employee.salaireBase,
-          indemniteLogement: employee.indemniteLogement,
-          indemnitePanier: employee.indemnitePanier,
-          primeTransport: employee.primeTransport,
-          indemniteRepresentation: employee.indemniteRepresentation,
-          assurances: {
-            assuranceMaladieComplementaire: false,
-            assuranceMaladieEtranger: false,
-            assuranceInvaliditeRenforcee: false,
-          },
-          creditImmobilier: employee.interetsCredit || employee.remboursementCredit ? {
-            montantMensuel: employee.remboursementCredit || 0,
-            interets: employee.interetsCredit || 0,
-          } : undefined,
-          creditConsommation: employee.creditConso ? {
-            montantMensuel: employee.creditConso,
-          } : undefined,
-          avanceSalaire: employee.remboursementAvance ? {
-            montantMensuel: employee.remboursementAvance,
-          } : undefined,
-          compteBancaire: employee.compteBancaire || '',
-          agence: employee.agence || '',
+        lastName: employee.lastName,
+        firstName: employee.firstName,
+        employeeId: employee.employeeId,
+        idNumber: employee.idNumber || '',
+        nssfNumber: employee.nssfNumber || '',
+        maritalStatus: employee.maritalStatus,
+        dateOfBirth: employee.dateOfBirth || new Date(),
+        hireDate: employee.hireDate,
+        seniority: getSeniorityInYears(employee.hireDate),
+        numberOfDeductions: 0, // calculate based on dependents
+        numberOfDaysPerMonth: employee.numberOfDaysPerMonth,
+        
+        // Salary & allowances
+        baseSalary: employee.baseSalary,
+        housingAllowance: employee.housingAllowance,
+        mealAllowance: employee.mealAllowance,
+        transportAllowance: employee.transportAllowance,
+        representationAllowance: employee.representationAllowance ?? 0, // <-- FIXED
+        // Insurances
+        insurances: (employee.insurances as OptionalInsurances | null) ?? {
+        comprehensiveHealthInsurance: false,
+        foreignHealthCover: false,
+        enhancedDisabilityCover: false,
+      },
+
+        
+        // Additional payroll fields
+        bonuses: 0,
+        overtimePay: 0,
+        loanRepayment: employee.loanRepayment,
+        helbLoan: employee.helbLoan,
+        subjectToNssf: employee.subjectToNssf,
+        subjectToShif: employee.subjectToShif,
+        subjectToHousingLevy: employee.subjectToHousingLevy,
+        
+        // Bank
+        bankAccount: employee.bankAccount || '',
+        bankBranch: employee.bankBranch || '',
         };
 
-        // Calculer la paie
-        const payrollResult = calculerPaie(employeeData);
 
-        // Validation des données bancaires
+        // Calculate payroll
+        const payrollResult = calculatePayroll(employeeData);
+
+        // Validate bank data
         const errors: string[] = [];
         let isValid = true;
 
-        if (!employee.compteBancaire) {
-          errors.push('Compte bancaire manquant');
+        if (!employee.bankAccount) {
+          errors.push('Bank account missing');
           isValid = false;
-        } else if (!validateBankAccount(employee.compteBancaire)) {
-          errors.push('Format de compte bancaire invalide');
-          isValid = false;
-        }
-
-        if (!employee.agence) {
-          errors.push('Agence bancaire manquante');
+        } else if (!validateBankAccount(employee.bankAccount)) {
+          errors.push('Invalid bank account format');
           isValid = false;
         }
 
-        if (payrollResult.salaireNetAPayer <= 0) {
-          errors.push('Montant net négatif ou nul');
+        if (!employee.bankBranch) {
+          errors.push('Bank branch missing');
+          isValid = false;
+        }
+
+        if (payrollResult.netSalaryPayable <= 0) {
+          errors.push('Net amount negative or zero');
           isValid = false;
         }
 
         const entry: BankTransferEntry = {
           employee,
-          netAPayer: payrollResult.salaireNetAPayer,
-          compteBancaire: employee.compteBancaire || '',
-          agence: employee.agence || '',
+          netPayable: payrollResult.netSalaryPayable,
+          bankAccount: employee.bankAccount || '',
+          bankBranch: employee.bankBranch || '',
           isValid,
           errors
         };
@@ -160,22 +166,22 @@ const BankTransferPage = () => {
         transferEntries.push(entry);
 
         if (isValid) {
-          totalAmount += payrollResult.salaireNetAPayer;
+          totalAmount += payrollResult.netSalaryPayable;
           validTransfers++;
         } else {
           invalidTransfers++;
         }
 
       } catch (error) {
-        console.error(`Erreur lors du calcul pour ${employee.prenom} ${employee.nom}:`, error);
+        console.error(`Error calculating for ${employee.firstName} ${employee.lastName}:`, error);
         
         const entry: BankTransferEntry = {
           employee,
-          netAPayer: 0,
-          compteBancaire: employee.compteBancaire || '',
-          agence: employee.agence || '',
+          netPayable: 0,
+          bankAccount: employee.bankAccount || '',
+          bankBranch: employee.bankBranch || '',
           isValid: false,
-          errors: ['Erreur de calcul de paie']
+          errors: ['Payroll calculation error']
         };
 
         transferEntries.push(entry);
@@ -197,25 +203,25 @@ const BankTransferPage = () => {
   const handleExportBankFile = () => {
     const validTransfers = transferData.filter(entry => entry.isValid);
     
-    // Format SEPA simplifié pour le Maroc
-    const sepaContent = [
-      '# Fichier de virement SEPA',
-      `# Référence: ${companyInfo.reference}`,
+    // Simplified bank transfer format for Kenya
+    const bankContent = [
+      '# Bank Transfer File',
+      `# Reference: ${companyInfo.reference}`,
       `# Date: ${new Date().toISOString().split('T')[0]}`,
-      `# Nombre de virements: ${validTransfers.length}`,
-      `# Montant total: ${formatCurrency(summary?.totalAmount || 0)}`,
+      `# Number of transfers: ${validTransfers.length}`,
+      `# Total amount: ${formatCurrency(summary?.totalAmount || 0)}`,
       '',
-      '# Format: Nom;Prénom;Compte;Agence;Montant;Référence',
+      '# Format: LastName;FirstName;Account;Branch;Amount;Reference',
       ...validTransfers.map(entry => 
-        `${entry.employee.nom};${entry.employee.prenom};${entry.compteBancaire};${entry.agence};${entry.netAPayer.toFixed(2)};SALAIRE_${selectedMonth}_${entry.employee.matricule}`
+        `${entry.employee.lastName};${entry.employee.firstName};${entry.bankAccount};${entry.bankBranch};${entry.netPayable.toFixed(2)};SALARY_${selectedMonth}_${entry.employee.employeeId}`
       )
     ].join('\n');
 
-    const blob = new Blob([sepaContent], { type: 'text/plain;charset=utf-8;' });
+    const blob = new Blob([bankContent], { type: 'text/plain;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `virement_${companyInfo.reference}.txt`);
+    link.setAttribute('download', `transfer_${companyInfo.reference}.txt`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -224,16 +230,16 @@ const BankTransferPage = () => {
 
   const handleExportExcel = () => {
     const excelData = transferData.map(entry => ({
-      'Matricule': entry.employee.matricule,
-      'Nom': entry.employee.nom,
-      'Prénom': entry.employee.prenom,
-      'Fonction': entry.employee.fonction,
-      'Compte Bancaire': entry.compteBancaire,
-      'Agence': entry.agence,
-      'Net à Payer': entry.netAPayer,
-      'Statut': entry.isValid ? 'Valide' : 'Invalide',
-      'Erreurs': entry.errors.join('; '),
-      'Référence': `SALAIRE_${selectedMonth}_${entry.employee.matricule}`
+      'Employee ID': entry.employee.employeeId,
+      'Last Name': entry.employee.lastName,
+      'First Name': entry.employee.firstName,
+      'Position': entry.employee.position,
+      'Bank Account': entry.bankAccount,
+      'Bank Branch': entry.bankBranch,
+      'Net Payable': entry.netPayable,
+      'Status': entry.isValid ? 'Valid' : 'Invalid',
+      'Errors': entry.errors.join('; '),
+      'Reference': `SALARY_${selectedMonth}_${entry.employee.employeeId}`
     }));
 
     const csvContent = [
@@ -245,7 +251,7 @@ const BankTransferPage = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `virement_details_${selectedMonth}.csv`);
+    link.setAttribute('download', `transfer_details_${selectedMonth}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -253,9 +259,9 @@ const BankTransferPage = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'MAD',
+      currency: 'KES',
       minimumFractionDigits: 2
     }).format(amount);
   };
@@ -263,7 +269,7 @@ const BankTransferPage = () => {
   const getMonthLabel = (monthString: string) => {
     const [year, month] = monthString.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long'
     }).format(date);
@@ -278,7 +284,7 @@ const BankTransferPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Chargement...</div>
+            <div className="text-lg text-gray-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -294,16 +300,16 @@ const BankTransferPage = () => {
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Retour</span>
+            <span>Back</span>
           </button>
           
           <div className="flex items-center space-x-3 mb-4">
             <CreditCard className="w-8 h-8 text-green-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Virement de masse</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Bulk Bank Transfer</h1>
           </div>
           
           <p className="text-gray-600 text-lg">
-            Génération du fichier bancaire ou Excel pour l'exécution du virement groupé des salaires.
+            Generate bank or Excel file for executing bulk salary transfers.
           </p>
         </div>
 
@@ -311,13 +317,13 @@ const BankTransferPage = () => {
           <>
             {/* Configuration */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Configuration du virement</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Transfer Configuration</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Calendar className="w-4 h-4 inline mr-1" />
-                    Période de paie
+                    Payroll Period
                   </label>
                   <input
                     type="month"
@@ -326,33 +332,33 @@ const BankTransferPage = () => {
                     className="payroll-input"
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Virement pour {getMonthLabel(selectedMonth)}
+                    Transfer for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Users className="w-4 h-4 inline mr-1" />
-                    Employés concernés
+                    Employees Included
                   </label>
                   <div className="text-lg font-medium text-gray-900">
-                    {employees.length} employé(s) actif(s)
+                    {employees.length} active employee(s)
                   </div>
                   <p className="text-sm text-gray-500 mt-1">
-                    Seuls les employés avec des données bancaires valides seront inclus
+                    Only employees with valid bank data will be included
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Informations entreprise */}
+            {/* Company Information */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Informations de l'entreprise</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Company Information</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nom de l'entreprise
+                    Company Name
                   </label>
                   <input
                     type="text"
@@ -364,7 +370,7 @@ const BankTransferPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Compte débiteur
+                    Debit Account
                   </label>
                   <input
                     type="text"
@@ -377,7 +383,7 @@ const BankTransferPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Banque
+                    Bank
                   </label>
                   <input
                     type="text"
@@ -389,11 +395,11 @@ const BankTransferPage = () => {
               </div>
             </div>
 
-            {/* Aperçu des employés */}
+            {/* Employees Preview */}
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Aperçu des employés
+                  Employees Preview
                 </h3>
               </div>
               
@@ -405,28 +411,28 @@ const BankTransferPage = () => {
                         <div className="flex-shrink-0 h-8 w-8">
                           <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
                             <span className="text-xs font-medium text-green-600">
-                              {employee.prenom.charAt(0)}{employee.nom.charAt(0)}
+                              {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                             </span>
                           </div>
                         </div>
                         <div className="ml-3">
                           <div className="text-sm font-medium text-gray-900">
-                            {employee.prenom} {employee.nom}
+                            {employee.firstName} {employee.lastName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {employee.matricule} • {employee.fonction}
+                            {employee.employeeId} • {employee.position}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-sm font-medium text-gray-900">
-                          {formatCurrency(employee.salaireBase)}
+                          {formatCurrency(employee.baseSalary)}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {employee.compteBancaire ? (
-                            <span className="text-green-600">✓ RIB disponible</span>
+                          {employee.bankAccount ? (
+                            <span className="text-green-600">✓ Bank details available</span>
                           ) : (
-                            <span className="text-red-600">✗ RIB manquant</span>
+                            <span className="text-red-600">✗ Bank details missing</span>
                           )}
                         </div>
                       </div>
@@ -436,13 +442,13 @@ const BankTransferPage = () => {
               </div>
             </div>
 
-            {/* Bouton de génération */}
+            {/* Generate Button */}
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">Générer le fichier de virement</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Generate Transfer File</h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    Calcul des salaires nets et génération du fichier bancaire pour {getMonthLabel(selectedMonth)}
+                    Calculate net salaries and generate bank file for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
                 <button
@@ -451,23 +457,23 @@ const BankTransferPage = () => {
                   className="flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <CreditCard className="w-5 h-5" />
-                  <span>{generating ? 'Génération...' : 'Générer le virement'}</span>
+                  <span>{generating ? 'Generating...' : 'Generate Transfer'}</span>
                 </button>
               </div>
             </div>
           </>
         ) : (
           <>
-            {/* Résultats */}
+            {/* Results */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Virement de masse - {getMonthLabel(selectedMonth)}</h3>
+                <h3 className="text-lg font-medium text-gray-900">Bulk Transfer - {getMonthLabel(selectedMonth)}</h3>
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowResults(false)}
                     className="text-sm text-gray-600 hover:text-gray-900"
                   >
-                    Nouvelle génération
+                    New Generation
                   </button>
                   <button
                     onClick={handleExportExcel}
@@ -482,32 +488,32 @@ const BankTransferPage = () => {
                     className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Download className="w-4 h-4" />
-                    <span>Fichier bancaire</span>
+                    <span>Bank File</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Résumé */}
+            {/* Summary */}
             {summary && (
               <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Résumé du virement</h4>
+                <h4 className="text-lg font-medium text-gray-900 mb-4">Transfer Summary</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">{summary.totalEmployees}</div>
-                    <div className="text-sm text-gray-600">Total employés</div>
+                    <div className="text-sm text-gray-600">Total Employees</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">{summary.validTransfers}</div>
-                    <div className="text-sm text-gray-600">Virements valides</div>
+                    <div className="text-sm text-gray-600">Valid Transfers</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-red-600">{summary.invalidTransfers}</div>
-                    <div className="text-sm text-gray-600">Virements invalides</div>
+                    <div className="text-sm text-gray-600">Invalid Transfers</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-purple-600">{formatCurrency(summary.totalAmount)}</div>
-                    <div className="text-sm text-gray-600">Montant total</div>
+                    <div className="text-sm text-gray-600">Total Amount</div>
                   </div>
                 </div>
 
@@ -516,7 +522,7 @@ const BankTransferPage = () => {
                     <div className="flex items-center">
                       <AlertCircle className="w-5 h-5 text-yellow-600 mr-2" />
                       <span className="text-sm text-yellow-800">
-                        {summary.invalidTransfers} employé(s) ont des données bancaires invalides et ne seront pas inclus dans le fichier de virement.
+                        {summary.invalidTransfers} employee(s) have invalid bank data and will not be included in the transfer file.
                       </span>
                     </div>
                   </div>
@@ -524,46 +530,46 @@ const BankTransferPage = () => {
               </div>
             )}
 
-            {/* Informations du virement */}
+            {/* Transfer Information */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Informations du virement</h4>
+              <h4 className="text-lg font-medium text-gray-900 mb-4">Transfer Information</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-600">Référence :</span>
+                  <span className="text-gray-600">Reference :</span>
                   <div className="font-medium">{companyInfo.reference}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Entreprise :</span>
+                  <span className="text-gray-600">Company :</span>
                   <div className="font-medium">{companyInfo.name}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Compte débiteur :</span>
+                  <span className="text-gray-600">Debit Account :</span>
                   <div className="font-medium">{formatBankAccount(companyInfo.account)}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Banque :</span>
+                  <span className="text-gray-600">Bank :</span>
                   <div className="font-medium">{companyInfo.bank}</div>
                 </div>
               </div>
             </div>
 
-            {/* Tableau détaillé */}
+            {/* Detailed Table */}
             <div className="bg-white shadow rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Employé
+                        Employee
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Données bancaires
+                        Bank Details
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Net à payer
+                        Net Payable
                       </th>
                       <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Statut
+                        Status
                       </th>
                     </tr>
                   </thead>
@@ -575,26 +581,26 @@ const BankTransferPage = () => {
                             <div className="flex-shrink-0 h-8 w-8">
                               <div className={`h-8 w-8 rounded-full ${entry.isValid ? 'bg-green-100' : 'bg-red-100'} flex items-center justify-center`}>
                                 <span className={`text-xs font-medium ${entry.isValid ? 'text-green-600' : 'text-red-600'}`}>
-                                  {entry.employee.prenom.charAt(0)}{entry.employee.nom.charAt(0)}
+                                  {entry.employee.firstName.charAt(0)}{entry.employee.lastName.charAt(0)}
                                 </span>
                               </div>
                             </div>
                             <div className="ml-3">
                               <div className="text-sm font-medium text-gray-900">
-                                {entry.employee.prenom} {entry.employee.nom}
+                                {entry.employee.firstName} {entry.employee.lastName}
                               </div>
                               <div className="text-sm text-gray-500">
-                                {entry.employee.matricule} • {entry.employee.fonction}
+                                {entry.employee.employeeId} • {entry.employee.position}
                               </div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {entry.compteBancaire ? formatBankAccount(entry.compteBancaire) : 'Non renseigné'}
+                            {entry.bankAccount ? formatBankAccount(entry.bankAccount) : 'Not provided'}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {entry.agence || 'Agence non renseignée'}
+                            {entry.bankBranch || 'Branch not provided'}
                           </div>
                           {entry.errors.length > 0 && (
                             <div className="text-xs text-red-600 mt-1">
@@ -604,17 +610,17 @@ const BankTransferPage = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <span className={entry.isValid ? 'text-green-600' : 'text-gray-400'}>
-                            {formatCurrency(entry.netAPayer)}
+                            {formatCurrency(entry.netPayable)}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
                           {entry.isValid ? (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Valide
+                              Valid
                             </span>
                           ) : (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                              Invalide
+                              Invalid
                             </span>
                           )}
                         </td>
@@ -624,7 +630,7 @@ const BankTransferPage = () => {
                   <tfoot className="bg-gray-50">
                     <tr>
                       <td colSpan={2} className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                        TOTAL À VIRER ({summary?.validTransfers || 0} virements)
+                        TOTAL TO TRANSFER ({summary?.validTransfers || 0} transfers)
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">
                         {formatCurrency(summary?.totalAmount || 0)}
