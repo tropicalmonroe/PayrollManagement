@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 async function getVariableElements(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { employeeId, mois, annee, type } = req.query;
+    const { employeeId, month, year, type } = req.query;
 
     const whereClause: any = {};
     
@@ -30,12 +30,12 @@ async function getVariableElements(req: NextApiRequest, res: NextApiResponse) {
       whereClause.employeeId = employeeId;
     }
     
-    if (mois && typeof mois === 'string') {
-      whereClause.mois = mois;
+    if (month && typeof month === 'string') {
+      whereClause.month = month;
     }
     
-    if (annee && typeof annee === 'string') {
-      whereClause.annee = annee;
+    if (year && typeof year === 'string') {
+      whereClause.year = year;
     }
     
     if (type && typeof type === 'string') {
@@ -48,16 +48,16 @@ async function getVariableElements(req: NextApiRequest, res: NextApiResponse) {
         employee: {
           select: {
             id: true,
-            matricule: true,
-            nom: true,
-            prenom: true,
-            fonction: true
+            employeeId: true,
+            lastName: true,
+            firstName: true,
+            position: true
           }
         }
       },
       orderBy: [
-        { annee: 'desc' },
-        { mois: 'desc' },
+        { year: 'desc' },
+        { month: 'desc' },
         { date: 'desc' }
       ]
     });
@@ -65,7 +65,7 @@ async function getVariableElements(req: NextApiRequest, res: NextApiResponse) {
     return res.status(200).json(variableElements);
   } catch (error) {
     console.error('Error fetching variable elements:', error);
-    return res.status(500).json({ error: 'Erreur lors du chargement des éléments variables' });
+    return res.status(500).json({ error: 'Error loading variable elements' });
   }
 }
 
@@ -75,64 +75,64 @@ async function createVariableElement(req: NextApiRequest, res: NextApiResponse) 
       employeeId,
       type,
       description,
-      montant,
-      heures,
-      taux,
+      amount,
+      hours,
+      rate,
       date,
-      mois,
-      annee
+      month,
+      year
     } = req.body;
 
     // Validation
-    if (!employeeId || !type || !description || !date || !mois || !annee) {
-      return res.status(400).json({ error: 'Tous les champs obligatoires doivent être remplis' });
+    if (!employeeId || !type || !description || !date || !month || !year) {
+      return res.status(400).json({ error: 'All required fields must be filled' });
     }
 
-    // Vérifier que l'employé existe
+    // Check if employee exists
     const employee = await prisma.employee.findUnique({
       where: { id: employeeId }
     });
 
     if (!employee) {
-      return res.status(404).json({ error: 'Employé non trouvé' });
+      return res.status(404).json({ error: 'Employee not found' });
     }
 
-    // Validation selon le type
-    if (type === 'HEURES_SUP' && (!heures || !taux)) {
-      return res.status(400).json({ error: 'Les heures et le taux sont requis pour les heures supplémentaires' });
+    // Validation based on type
+    if (type === 'OVERTIME' && (!hours || !rate)) {
+      return res.status(400).json({ error: 'Hours and rate are required for overtime' });
     }
 
-    if (type !== 'HEURES_SUP' && !montant) {
-      return res.status(400).json({ error: 'Le montant est requis pour ce type d\'élément' });
+    if (type !== 'OVERTIME' && !amount) {
+      return res.status(400).json({ error: 'Amount is required for this type of element' });
     }
 
-    // Calculer le montant pour les heures supplémentaires
-    let finalMontant = montant || 0;
-    if (type === 'HEURES_SUP' && heures && taux) {
-      finalMontant = parseFloat(heures) * parseFloat(taux);
+    // Calculate amount for overtime
+    let finalAmount = amount || 0;
+    if (type === 'OVERTIME' && hours && rate) {
+      finalAmount = parseFloat(hours) * parseFloat(rate);
     }
 
-    // Créer l'élément variable
+    // Create variable element
     const variableElement = await prisma.variableElement.create({
       data: {
         employeeId,
         type,
         description: description.trim(),
-        montant: parseFloat(finalMontant.toString()),
-        heures: heures ? parseFloat(heures) : null,
-        taux: taux ? parseFloat(taux) : null,
+        amount: parseFloat(finalAmount.toString()),
+        hours: hours ? parseFloat(hours) : null,
+        rate: rate ? parseFloat(rate) : null,
         date: new Date(date),
-        mois,
-        annee
+        month,
+        year
       },
       include: {
         employee: {
           select: {
             id: true,
-            matricule: true,
-            nom: true,
-            prenom: true,
-            fonction: true
+            employeeId: true,
+            lastName: true,
+            firstName: true,
+            position: true
           }
         }
       }
@@ -141,6 +141,6 @@ async function createVariableElement(req: NextApiRequest, res: NextApiResponse) 
     return res.status(201).json(variableElement);
   } catch (error) {
     console.error('Error creating variable element:', error);
-    return res.status(500).json({ error: 'Erreur lors de la création de l\'élément variable' });
+    return res.status(500).json({ error: 'Error creating variable element' });
   }
 }

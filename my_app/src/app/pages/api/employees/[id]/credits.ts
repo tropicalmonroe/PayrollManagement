@@ -6,48 +6,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'GET') {
     try {
-      // Récupérer tous les crédits actifs de l'employé
+      // Get all active credits for the employee
       const credits = await prisma.credit.findMany({
         where: {
           employeeId: id as string,
-          statut: 'ACTIF'
+          status: 'ACTIVE'
         }
       });
 
-      // Calculer les déductions mensuelles
+      // Calculate monthly deductions
       const deductions = {
-        creditLogement: {
-          montantMensuel: 0,
-          interets: 0
+        housingCredit: {
+          monthlyAmount: 0,
+          interest: 0
         },
-        creditConsommation: {
-          montantMensuel: 0
+        consumerCredit: {
+          monthlyAmount: 0
         },
         totalDeductions: 0
       };
 
       credits.forEach(credit => {
-        if (credit.type === 'LOGEMENT') {
-          deductions.creditLogement.montantMensuel += credit.mensualite;
-          // Calculer les intérêts approximatifs basés sur le taux et le capital restant
-          const tauxMensuel = credit.tauxInteret / 100 / 12;
-          const interetsApproximatifs = credit.capitalRestant * tauxMensuel;
-          deductions.creditLogement.interets += interetsApproximatifs;
-        } else if (credit.type === 'CONSOMMATION') {
-          deductions.creditConsommation.montantMensuel += credit.mensualite;
+        if (credit.type === 'HOUSING') {
+          deductions.housingCredit.monthlyAmount += credit.monthlyPayment;
+          // Calculate approximate interest based on rate and remaining principal
+          const monthlyRate = credit.interestRate / 100 / 12;
+          const approximateInterest = credit.remainingBalance * monthlyRate;
+          deductions.housingCredit.interest += approximateInterest;
+        } else if (credit.type === 'CONSUMER') {
+          deductions.consumerCredit.monthlyAmount += credit.monthlyPayment;
         }
       });
 
-      deductions.totalDeductions = deductions.creditLogement.montantMensuel + 
-                                  deductions.creditConsommation.montantMensuel;
+      deductions.totalDeductions = deductions.housingCredit.monthlyAmount + 
+                                  deductions.consumerCredit.monthlyAmount;
 
       res.status(200).json({
         credits,
         deductions
       });
     } catch (error) {
-      console.error('Erreur lors de la récupération des crédits de l\'employé:', error);
-      res.status(500).json({ error: 'Erreur lors de la récupération des crédits' });
+      console.error('Error fetching employee credits:', error);
+      res.status(500).json({ error: 'Error fetching credits' });
     }
   } else {
     res.setHeader('Allow', ['GET']);

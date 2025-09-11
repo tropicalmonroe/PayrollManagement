@@ -35,10 +35,10 @@ async function getAdvances(req: NextApiRequest, res: NextApiResponse) {
         employee: {
           select: {
             id: true,
-            matricule: true,
-            nom: true,
-            prenom: true,
-            fonction: true
+            employeeId: true,
+            lastName: true,
+            firstName: true,
+            position: true
           }
         }
       },
@@ -50,7 +50,7 @@ async function getAdvances(req: NextApiRequest, res: NextApiResponse) {
     return res.status(200).json(advances);
   } catch (error) {
     console.error('Error fetching advances:', error);
-    return res.status(500).json({ error: 'Erreur lors du chargement des avances' });
+    return res.status(500).json({ error: 'Error loading advances' });
   }
 }
 
@@ -58,26 +58,26 @@ async function createAdvance(req: NextApiRequest, res: NextApiResponse) {
   try {
     const {
       employeeId,
-      montant,
-      dateAvance,
-      motif,
-      nombreMensualites,
-      montantMensualite,
-      soldeRestant,
+      amount,
+      advanceDate,
+      reason,
+      numberOfInstallments,
+      installmentAmount,
+      remainingBalance,
       notes
     } = req.body;
 
     // Validation
-    if (!employeeId || !montant || !dateAvance || !motif || !nombreMensualites) {
-      return res.status(400).json({ error: 'Tous les champs obligatoires doivent être remplis' });
+    if (!employeeId || !amount || !advanceDate || !reason || !numberOfInstallments) {
+      return res.status(400).json({ error: 'All required fields must be filled' });
     }
 
-    if (montant <= 0) {
-      return res.status(400).json({ error: 'Le montant doit être supérieur à 0' });
+    if (amount <= 0) {
+      return res.status(400).json({ error: 'Amount must be greater than 0' });
     }
 
-    if (nombreMensualites <= 0 || nombreMensualites > 24) {
-      return res.status(400).json({ error: 'Le nombre de mensualités doit être entre 1 et 24' });
+    if (numberOfInstallments <= 0 || numberOfInstallments > 24) {
+      return res.status(400).json({ error: 'Number of installments must be between 1 and 24' });
     }
 
     // Verify employee exists
@@ -86,20 +86,20 @@ async function createAdvance(req: NextApiRequest, res: NextApiResponse) {
     });
 
     if (!employee) {
-      return res.status(404).json({ error: 'Employé non trouvé' });
+      return res.status(404).json({ error: 'Employee not found' });
     }
 
     // Check if employee has active advances
     const activeAdvances = await prisma.advance.findMany({
       where: {
         employeeId: employeeId,
-        statut: 'EN_COURS'
+        status: 'IN_PROGRESS'
       }
     });
 
     if (activeAdvances.length > 0) {
       return res.status(400).json({ 
-        error: 'Cet employé a déjà une avance en cours. Veuillez d\'abord solder l\'avance existante.' 
+        error: 'This employee already has an advance in progress. Please settle the existing advance first.' 
       });
     }
 
@@ -107,13 +107,13 @@ async function createAdvance(req: NextApiRequest, res: NextApiResponse) {
     const advance = await prisma.advance.create({
       data: {
         employeeId,
-        montant: parseFloat(montant),
-        dateAvance: new Date(dateAvance),
-        motif: motif.trim(),
-        nombreMensualites: parseInt(nombreMensualites),
-        montantMensualite: parseFloat(montantMensualite),
-        soldeRestant: parseFloat(soldeRestant),
-        statut: 'EN_COURS',
+        amount: parseFloat(amount),
+        advanceDate: new Date(advanceDate),
+        reason: reason.trim(),
+        numberOfInstallments: parseInt(numberOfInstallments),
+        installmentAmount: parseFloat(installmentAmount),
+        remainingBalance: parseFloat(remainingBalance),
+        status: 'IN_PROGRESS',
         createdBy: 'admin', // TODO: Get from session
         notes: notes?.trim() || null
       },
@@ -121,10 +121,10 @@ async function createAdvance(req: NextApiRequest, res: NextApiResponse) {
         employee: {
           select: {
             id: true,
-            matricule: true,
-            nom: true,
-            prenom: true,
-            fonction: true
+            employeeId: true,
+            lastName: true,
+            firstName: true,
+            position: true
           }
         }
       }
@@ -133,6 +133,6 @@ async function createAdvance(req: NextApiRequest, res: NextApiResponse) {
     return res.status(201).json(advance);
   } catch (error) {
     console.error('Error creating advance:', error);
-    return res.status(500).json({ error: 'Erreur lors de la création de l\'avance' });
+    return res.status(500).json({ error: 'Error creating advance' });
   }
 }

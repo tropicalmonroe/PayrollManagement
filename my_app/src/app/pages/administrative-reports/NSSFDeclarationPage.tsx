@@ -3,21 +3,21 @@ import { Layout } from '../../../components/Layout';
 import { Building, ArrowLeft, Download, Calendar, Users, FileSpreadsheet, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Employee } from '@prisma/client';
-import { calculerPaie, type EmployeePayrollData } from '../../../lib/payrollCalculations';
+import { calculatePayroll, OptionalInsurances, type EmployeePayrollData } from '../../../lib/payrollCalculations';
 
-interface CNSSDeclarationEntry {
+interface NSSFDeclarationEntry {
   employee: Employee;
-  salaireBrut: number;
-  plafondCNSS: number;
-  assietteCNSS: number;
-  cotisationSalariale: number;
-  cotisationPatronale: number;
-  allocationsFamiliales: number;
-  taxeFormation: number;
-  totalCotisations: number;
+  grossSalary: number;
+  nssfCeiling: number;
+  nssfBase: number;
+  employeeContribution: number;
+  employerContribution: number;
+  housingLevy: number;
+  trainingLevy: number;
+  totalContributions: number;
 }
 
-const CNSSDeclarationPage = () => {
+const NSSFDeclarationPage = () => {
   const router = useRouter();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,23 +26,23 @@ const CNSSDeclarationPage = () => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
-  const [declarationData, setDeclarationData] = useState<CNSSDeclarationEntry[]>([]);
+  const [declarationData, setDeclarationData] = useState<NSSFDeclarationEntry[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [summary, setSummary] = useState<any>(null);
   const [companyInfo, setCompanyInfo] = useState({
-    name: 'VOTRE ENTREPRISE',
-    cnssNumber: '1234567',
-    address: 'Adresse de l\'entreprise',
-    city: 'Casablanca'
+    name: 'YOUR COMPANY',
+    nssfNumber: '1234567',
+    address: 'Company address',
+    city: 'Nairobi'
   });
 
-  // Barèmes CNSS 2024
-  const CNSS_RATES = {
-    plafond: 6000, // Plafond mensuel CNSS
-    prestationsSalariale: 0.0067, // 0.67%
-    prestationsPatronale: 0.0833, // 8.33%
-    allocationsFamiliales: 0.0675, // 6.75% (patronale uniquement)
-    taxeFormation: 0.016 // 1.6% (patronale uniquement)
+  // NSSF Rates 2024 (Kenya)
+  const NSSF_RATES = {
+    ceiling: 18000, // Monthly NSSF ceiling (Tier II)
+    employeeContribution: 0.06, // 6% (Tier II)
+    employerContribution: 0.06, // 6% (Tier II)
+    housingLevy: 0.015, // 1.5% (Employer only)
+    trainingLevy: 0.01 // 1.0% (Employer only)
   };
 
   useEffect(() => {
@@ -54,10 +54,10 @@ const CNSSDeclarationPage = () => {
       const response = await fetch('/api/employees');
       if (response.ok) {
         const data = await response.json();
-        setEmployees(data.filter((emp: Employee) => emp.status === 'ACTIF'));
+        setEmployees(data.filter((emp: Employee) => emp.status === 'ACTIVE'));
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des employés:', error);
+      console.error('Error loading employees:', error);
     } finally {
       setLoading(false);
     }
@@ -82,142 +82,147 @@ const CNSSDeclarationPage = () => {
     setDeclarationData([]);
     setShowResults(true);
 
-    const declarationEntries: CNSSDeclarationEntry[] = [];
-    let totalSalaireBrut = 0;
-    let totalAssietteCNSS = 0;
-    let totalCotisationsSalariales = 0;
-    let totalCotisationsPatronales = 0;
-    let totalAllocationsFamiliales = 0;
-    let totalTaxeFormation = 0;
-    let totalCotisations = 0;
+    const declarationEntries: NSSFDeclarationEntry[] = [];
+    let totalGrossSalary = 0;
+    let totalNSSFBase = 0;
+    let totalEmployeeContributions = 0;
+    let totalEmployerContributions = 0;
+    let totalHousingLevy = 0;
+    let totalTrainingLevy = 0;
+    let totalContributions = 0;
 
     for (const employee of employees) {
       try {
-        // Préparer les données de l'employé pour le calcul
+        // Prepare employee data for calculation
         const employeeData: EmployeePayrollData = {
-          nom: employee.nom,
-          prenom: employee.prenom,
-          matricule: employee.matricule,
-          cin: employee.cin || '',
-          cnss: employee.cnss || '',
-          situationFamiliale: employee.situationFamiliale,
-          dateNaissance: employee.dateNaissance || new Date(),
-          dateEmbauche: employee.dateEmbauche,
-          anciennete: getSeniorityInYears(employee.dateEmbauche),
-          nbrDeductions: employee.nbrDeductions,
-          nbreJourMois: employee.nbreJourMois,
-          salaireBase: employee.salaireBase,
-          indemniteLogement: employee.indemniteLogement,
-          indemnitePanier: employee.indemnitePanier,
-          primeTransport: employee.primeTransport,
-          indemniteRepresentation: employee.indemniteRepresentation,
-          assurances: {
-            assuranceMaladieComplementaire: false,
-            assuranceMaladieEtranger: false,
-            assuranceInvaliditeRenforcee: false,
+          lastName: employee.lastName,
+          firstName: employee.firstName,
+          employeeId: employee.employeeId,
+          idNumber: employee.idNumber || '',
+          nssfNumber: employee.nssfNumber || '',
+          maritalStatus: employee.maritalStatus,
+          dateOfBirth: employee.dateOfBirth || new Date(),
+          hireDate: employee.hireDate,
+          seniority: getSeniorityInYears(employee.hireDate),
+          numberOfDeductions: 0, // calculate based on dependents
+          numberOfDaysPerMonth: employee.numberOfDaysPerMonth,
+          
+          // Salary & allowances
+          baseSalary: employee.baseSalary,
+          housingAllowance: employee.housingAllowance,
+          mealAllowance: employee.mealAllowance,
+          transportAllowance: employee.transportAllowance,
+          representationAllowance: employee.representationAllowance ?? 0,
+          
+          // Insurances
+          insurances: (employee.insurances as OptionalInsurances | null) ?? {
+            comprehensiveHealthInsurance: false,
+            foreignHealthCover: false,
+            enhancedDisabilityCover: false,
           },
-          creditImmobilier: employee.interetsCredit || employee.remboursementCredit ? {
-            montantMensuel: employee.remboursementCredit || 0,
-            interets: employee.interetsCredit || 0,
-          } : undefined,
-          creditConsommation: employee.creditConso ? {
-            montantMensuel: employee.creditConso,
-          } : undefined,
-          avanceSalaire: employee.remboursementAvance ? {
-            montantMensuel: employee.remboursementAvance,
-          } : undefined,
-          compteBancaire: employee.compteBancaire || '',
-          agence: employee.agence || '',
+          
+          // Additional payroll fields
+          bonuses: 0,
+          overtimePay: 0,
+          loanRepayment: employee.loanRepayment,
+          helbLoan: employee.helbLoan,
+          subjectToNssf: employee.subjectToNssf,
+          subjectToShif: employee.subjectToShif,
+          subjectToHousingLevy: employee.subjectToHousingLevy,
+          
+          // Bank
+          bankAccount: employee.bankAccount || '',
+          bankBranch: employee.bankBranch || '',
         };
 
-        // Calculer la paie
-        const payrollResult = calculerPaie(employeeData);
+        // Calculate payroll
+        const payrollResult = calculatePayroll(employeeData);
 
-        // Calculs spécifiques CNSS
-        const salaireBrut = payrollResult.salaireBrut;
-        const assietteCNSS = Math.min(salaireBrut, CNSS_RATES.plafond);
+        // NSSF specific calculations
+        const grossSalary = payrollResult.grossSalary;
+        const nssfBase = Math.min(grossSalary, NSSF_RATES.ceiling);
         
-        const cotisationSalariale = assietteCNSS * CNSS_RATES.prestationsSalariale;
-        const cotisationPatronale = assietteCNSS * CNSS_RATES.prestationsPatronale;
-        const allocationsFamiliales = salaireBrut * CNSS_RATES.allocationsFamiliales;
-        const taxeFormation = salaireBrut * CNSS_RATES.taxeFormation;
+        const employeeContribution = nssfBase * NSSF_RATES.employeeContribution;
+        const employerContribution = nssfBase * NSSF_RATES.employerContribution;
+        const housingLevy = grossSalary * NSSF_RATES.housingLevy;
+        const trainingLevy = grossSalary * NSSF_RATES.trainingLevy;
         
-        const totalCotisationsEmployee = cotisationSalariale + cotisationPatronale + allocationsFamiliales + taxeFormation;
+        const totalContributionsEmployee = employeeContribution + employerContribution + housingLevy + trainingLevy;
 
-        const entry: CNSSDeclarationEntry = {
+        const entry: NSSFDeclarationEntry = {
           employee,
-          salaireBrut,
-          plafondCNSS: CNSS_RATES.plafond,
-          assietteCNSS,
-          cotisationSalariale,
-          cotisationPatronale,
-          allocationsFamiliales,
-          taxeFormation,
-          totalCotisations: totalCotisationsEmployee
+          grossSalary,
+          nssfCeiling: NSSF_RATES.ceiling,
+          nssfBase,
+          employeeContribution,
+          employerContribution,
+          housingLevy,
+          trainingLevy,
+          totalContributions: totalContributionsEmployee
         };
 
         declarationEntries.push(entry);
 
-        // Accumulation des totaux
-        totalSalaireBrut += salaireBrut;
-        totalAssietteCNSS += assietteCNSS;
-        totalCotisationsSalariales += cotisationSalariale;
-        totalCotisationsPatronales += cotisationPatronale;
-        totalAllocationsFamiliales += allocationsFamiliales;
-        totalTaxeFormation += taxeFormation;
-        totalCotisations += totalCotisationsEmployee;
+        // Accumulate totals
+        totalGrossSalary += grossSalary;
+        totalNSSFBase += nssfBase;
+        totalEmployeeContributions += employeeContribution;
+        totalEmployerContributions += employerContribution;
+        totalHousingLevy += housingLevy;
+        totalTrainingLevy += trainingLevy;
+        totalContributions += totalContributionsEmployee;
 
       } catch (error) {
-        console.error(`Erreur lors du calcul pour ${employee.prenom} ${employee.nom}:`, error);
+        console.error(`Error calculating for ${employee.firstName} ${employee.lastName}:`, error);
       }
     }
 
     setDeclarationData(declarationEntries);
     setSummary({
       totalEmployees: declarationEntries.length,
-      totalSalaireBrut,
-      totalAssietteCNSS,
-      totalCotisationsSalariales,
-      totalCotisationsPatronales,
-      totalAllocationsFamiliales,
-      totalTaxeFormation,
-      totalCotisations
+      totalGrossSalary,
+      totalNSSFBase,
+      totalEmployeeContributions,
+      totalEmployerContributions,
+      totalHousingLevy,
+      totalTrainingLevy,
+      totalContributions
     });
 
     setGenerating(false);
   };
 
-  const handleExportCNSSFile = () => {
-    // Format de fichier CNSS simplifié
-    const cnssContent = [
-      '# DÉCLARATION CNSS',
-      `# Entreprise: ${companyInfo.name}`,
-      `# Numéro CNSS: ${companyInfo.cnssNumber}`,
-      `# Période: ${getMonthLabel(selectedMonth)}`,
-      `# Date de génération: ${new Date().toLocaleDateString('fr-FR')}`,
+  const handleExportNSSFFile = () => {
+    // Simplified NSSF file format
+    const nssfContent = [
+      '# NSSF DECLARATION',
+      `# Company: ${companyInfo.name}`,
+      `# NSSF Number: ${companyInfo.nssfNumber}`,
+      `# Period: ${getMonthLabel(selectedMonth)}`,
+      `# Generation date: ${new Date().toLocaleDateString('en-US')}`,
       '',
-      '# RÉCAPITULATIF',
-      `# Nombre de salariés: ${summary?.totalEmployees || 0}`,
-      `# Total salaires bruts: ${(summary?.totalSalaireBrut || 0).toFixed(2)} MAD`,
-      `# Total assiette CNSS: ${(summary?.totalAssietteCNSS || 0).toFixed(2)} MAD`,
-      `# Total cotisations salariales: ${(summary?.totalCotisationsSalariales || 0).toFixed(2)} MAD`,
-      `# Total cotisations patronales: ${(summary?.totalCotisationsPatronales || 0).toFixed(2)} MAD`,
-      `# Total allocations familiales: ${(summary?.totalAllocationsFamiliales || 0).toFixed(2)} MAD`,
-      `# Total taxe formation: ${(summary?.totalTaxeFormation || 0).toFixed(2)} MAD`,
-      `# TOTAL À PAYER: ${(summary?.totalCotisations || 0).toFixed(2)} MAD`,
+      '# SUMMARY',
+      `# Number of employees: ${summary?.totalEmployees || 0}`,
+      `# Total gross salaries: ${(summary?.totalGrossSalary || 0).toFixed(2)} KES`,
+      `# Total NSSF base: ${(summary?.totalNSSFBase || 0).toFixed(2)} KES`,
+      `# Total employee contributions: ${(summary?.totalEmployeeContributions || 0).toFixed(2)} KES`,
+      `# Total employer contributions: ${(summary?.totalEmployerContributions || 0).toFixed(2)} KES`,
+      `# Total housing levy: ${(summary?.totalHousingLevy || 0).toFixed(2)} KES`,
+      `# Total training levy: ${(summary?.totalTrainingLevy || 0).toFixed(2)} KES`,
+      `# TOTAL TO PAY: ${(summary?.totalContributions || 0).toFixed(2)} KES`,
       '',
-      '# DÉTAIL PAR SALARIÉ',
-      '# Format: CNSS;Nom;Prénom;Salaire_Brut;Assiette_CNSS;Cotis_Salariale;Cotis_Patronale;Alloc_Familiales;Taxe_Formation;Total',
+      '# EMPLOYEE DETAILS',
+      '# Format: NSSF_Number;Last_Name;First_Name;Gross_Salary;NSSF_Base;Employee_Contribution;Employer_Contribution;Housing_Levy;Training_Levy;Total',
       ...declarationData.map(entry => 
-        `${entry.employee.cnss || 'N/A'};${entry.employee.nom};${entry.employee.prenom};${entry.salaireBrut.toFixed(2)};${entry.assietteCNSS.toFixed(2)};${entry.cotisationSalariale.toFixed(2)};${entry.cotisationPatronale.toFixed(2)};${entry.allocationsFamiliales.toFixed(2)};${entry.taxeFormation.toFixed(2)};${entry.totalCotisations.toFixed(2)}`
+        `${entry.employee.nssfNumber || 'N/A'};${entry.employee.lastName};${entry.employee.firstName};${entry.grossSalary.toFixed(2)};${entry.nssfBase.toFixed(2)};${entry.employeeContribution.toFixed(2)};${entry.employerContribution.toFixed(2)};${entry.housingLevy.toFixed(2)};${entry.trainingLevy.toFixed(2)};${entry.totalContributions.toFixed(2)}`
       )
     ].join('\n');
 
-    const blob = new Blob([cnssContent], { type: 'text/plain;charset=utf-8;' });
+    const blob = new Blob([nssfContent], { type: 'text/plain;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `declaration_cnss_${selectedMonth}.txt`);
+    link.setAttribute('download', `nssf_declaration_${selectedMonth}.txt`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -226,19 +231,19 @@ const CNSSDeclarationPage = () => {
 
   const handleExportExcel = () => {
     const excelData = declarationData.map(entry => ({
-      'Numéro CNSS': entry.employee.cnss || 'N/A',
-      'Matricule': entry.employee.matricule,
-      'Nom': entry.employee.nom,
-      'Prénom': entry.employee.prenom,
-      'Fonction': entry.employee.fonction,
-      'Salaire Brut': entry.salaireBrut,
-      'Plafond CNSS': entry.plafondCNSS,
-      'Assiette CNSS': entry.assietteCNSS,
-      'Cotisation Salariale (0.67%)': entry.cotisationSalariale,
-      'Cotisation Patronale (8.33%)': entry.cotisationPatronale,
-      'Allocations Familiales (6.75%)': entry.allocationsFamiliales,
-      'Taxe Formation (1.6%)': entry.taxeFormation,
-      'Total Cotisations': entry.totalCotisations
+      'NSSF Number': entry.employee.nssfNumber || 'N/A',
+      'Employee ID': entry.employee.employeeId,
+      'Last Name': entry.employee.lastName,
+      'First Name': entry.employee.firstName,
+      'Position': entry.employee.position,
+      'Gross Salary': entry.grossSalary,
+      'NSSF Ceiling': entry.nssfCeiling,
+      'NSSF Base': entry.nssfBase,
+      'Employee Contribution (6%)': entry.employeeContribution,
+      'Employer Contribution (6%)': entry.employerContribution,
+      'Housing Levy (1.5%)': entry.housingLevy,
+      'Training Levy (1.0%)': entry.trainingLevy,
+      'Total Contributions': entry.totalContributions
     }));
 
     const csvContent = [
@@ -250,7 +255,7 @@ const CNSSDeclarationPage = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `declaration_cnss_details_${selectedMonth}.csv`);
+    link.setAttribute('download', `nssf_declaration_details_${selectedMonth}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -258,9 +263,9 @@ const CNSSDeclarationPage = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'MAD',
+      currency: 'KES',
       minimumFractionDigits: 2
     }).format(amount);
   };
@@ -268,7 +273,7 @@ const CNSSDeclarationPage = () => {
   const getMonthLabel = (monthString: string) => {
     const [year, month] = monthString.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long'
     }).format(date);
@@ -279,7 +284,7 @@ const CNSSDeclarationPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Chargement...</div>
+            <div className="text-lg text-gray-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -295,16 +300,16 @@ const CNSSDeclarationPage = () => {
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Retour</span>
+            <span>Back</span>
           </button>
           
           <div className="flex items-center space-x-3 mb-4">
             <Building className="w-8 h-8 text-orange-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Déclaration CNSS</h1>
+            <h1 className="text-3xl font-bold text-gray-900">NSSF Declaration</h1>
           </div>
           
           <p className="text-gray-600 text-lg">
-            Production du fichier ou formulaire mensuel à transmettre à la CNSS selon les cotisations dues.
+            Production of the monthly file or form to be submitted to NSSF for contributions due.
           </p>
         </div>
 
@@ -312,13 +317,13 @@ const CNSSDeclarationPage = () => {
           <>
             {/* Configuration */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Configuration de la déclaration</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Declaration Configuration</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Calendar className="w-4 h-4 inline mr-1" />
-                    Période de déclaration
+                    Declaration Period
                   </label>
                   <input
                     type="month"
@@ -327,33 +332,33 @@ const CNSSDeclarationPage = () => {
                     className="payroll-input"
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Déclaration pour {getMonthLabel(selectedMonth)}
+                    Declaration for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Users className="w-4 h-4 inline mr-1" />
-                    Employés concernés
+                    Employees Included
                   </label>
                   <div className="text-lg font-medium text-gray-900">
-                    {employees.length} employé(s) actif(s)
+                    {employees.length} active employee(s)
                   </div>
                   <p className="text-sm text-gray-500 mt-1">
-                    Tous les employés actifs seront inclus dans la déclaration
+                    All active employees will be included in the declaration
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Informations entreprise */}
+            {/* Company Information */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Informations de l'entreprise</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Company Information</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nom de l'entreprise
+                    Company Name
                   </label>
                   <input
                     type="text"
@@ -365,12 +370,12 @@ const CNSSDeclarationPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Numéro d'affiliation CNSS
+                    NSSF Registration Number
                   </label>
                   <input
                     type="text"
-                    value={companyInfo.cnssNumber}
-                    onChange={(e) => setCompanyInfo(prev => ({ ...prev, cnssNumber: e.target.value }))}
+                    value={companyInfo.nssfNumber}
+                    onChange={(e) => setCompanyInfo(prev => ({ ...prev, nssfNumber: e.target.value }))}
                     className="payroll-input"
                     placeholder="1234567"
                   />
@@ -378,7 +383,7 @@ const CNSSDeclarationPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Adresse
+                    Address
                   </label>
                   <input
                     type="text"
@@ -390,7 +395,7 @@ const CNSSDeclarationPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ville
+                    City
                   </label>
                   <input
                     type="text"
@@ -402,26 +407,26 @@ const CNSSDeclarationPage = () => {
               </div>
             </div>
 
-            {/* Barèmes CNSS */}
+            {/* NSSF Rates */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Barèmes CNSS en vigueur</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Current NSSF Rates</h3>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-lg font-bold text-blue-600">{formatCurrency(CNSS_RATES.plafond)}</div>
-                  <div className="text-sm text-gray-600">Plafond mensuel</div>
+                  <div className="text-lg font-bold text-blue-600">{formatCurrency(NSSF_RATES.ceiling)}</div>
+                  <div className="text-sm text-gray-600">Monthly ceiling</div>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-lg font-bold text-green-600">{(CNSS_RATES.prestationsSalariale * 100).toFixed(2)}%</div>
-                  <div className="text-sm text-gray-600">Cotisation salariale</div>
+                  <div className="text-lg font-bold text-green-600">{(NSSF_RATES.employeeContribution * 100).toFixed(1)}%</div>
+                  <div className="text-sm text-gray-600">Employee contribution</div>
                 </div>
                 <div className="text-center p-4 bg-orange-50 rounded-lg">
-                  <div className="text-lg font-bold text-orange-600">{(CNSS_RATES.prestationsPatronale * 100).toFixed(2)}%</div>
-                  <div className="text-sm text-gray-600">Cotisation patronale</div>
+                  <div className="text-lg font-bold text-orange-600">{(NSSF_RATES.employerContribution * 100).toFixed(1)}%</div>
+                  <div className="text-sm text-gray-600">Employer contribution</div>
                 </div>
                 <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-lg font-bold text-purple-600">{(CNSS_RATES.allocationsFamiliales * 100).toFixed(2)}%</div>
-                  <div className="text-sm text-gray-600">Allocations familiales</div>
+                  <div className="text-lg font-bold text-purple-600">{(NSSF_RATES.housingLevy * 100).toFixed(1)}%</div>
+                  <div className="text-sm text-gray-600">Housing levy</div>
                 </div>
               </div>
               
@@ -429,17 +434,17 @@ const CNSSDeclarationPage = () => {
                 <div className="flex items-center">
                   <AlertCircle className="w-5 h-5 text-yellow-600 mr-2" />
                   <span className="text-sm text-yellow-800">
-                    Taxe de formation professionnelle : {(CNSS_RATES.taxeFormation * 100).toFixed(1)}% sur la totalité du salaire brut
+                    Training levy: {(NSSF_RATES.trainingLevy * 100).toFixed(1)}% on total gross salary
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Aperçu des employés */}
+            {/* Employees Preview */}
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Employés à déclarer
+                  Employees to Declare
                 </h3>
               </div>
               
@@ -451,28 +456,28 @@ const CNSSDeclarationPage = () => {
                         <div className="flex-shrink-0 h-8 w-8">
                           <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
                             <span className="text-xs font-medium text-orange-600">
-                              {employee.prenom.charAt(0)}{employee.nom.charAt(0)}
+                              {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                             </span>
                           </div>
                         </div>
                         <div className="ml-3">
                           <div className="text-sm font-medium text-gray-900">
-                            {employee.prenom} {employee.nom}
+                            {employee.firstName} {employee.lastName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {employee.matricule} • {employee.fonction}
+                            {employee.employeeId} • {employee.position}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-sm font-medium text-gray-900">
-                          {formatCurrency(employee.salaireBase)}
+                          {formatCurrency(employee.baseSalary)}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {employee.cnss ? (
-                            <span className="text-green-600">CNSS: {employee.cnss}</span>
+                          {employee.nssfNumber ? (
+                            <span className="text-green-600">NSSF: {employee.nssfNumber}</span>
                           ) : (
-                            <span className="text-red-600">CNSS manquant</span>
+                            <span className="text-red-600">NSSF missing</span>
                           )}
                         </div>
                       </div>
@@ -482,13 +487,13 @@ const CNSSDeclarationPage = () => {
               </div>
             </div>
 
-            {/* Bouton de génération */}
+            {/* Generate Button */}
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">Générer la déclaration CNSS</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Generate NSSF Declaration</h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    Calcul des cotisations et génération de la déclaration pour {getMonthLabel(selectedMonth)}
+                    Calculate contributions and generate declaration for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
                 <button
@@ -497,23 +502,23 @@ const CNSSDeclarationPage = () => {
                   className="flex items-center space-x-2 bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Building className="w-5 h-5" />
-                  <span>{generating ? 'Génération...' : 'Générer la déclaration'}</span>
+                  <span>{generating ? 'Generating...' : 'Generate Declaration'}</span>
                 </button>
               </div>
             </div>
           </>
         ) : (
           <>
-            {/* Résultats */}
+            {/* Results */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Déclaration CNSS - {getMonthLabel(selectedMonth)}</h3>
+                <h3 className="text-lg font-medium text-gray-900">NSSF Declaration - {getMonthLabel(selectedMonth)}</h3>
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowResults(false)}
                     className="text-sm text-gray-600 hover:text-gray-900"
                   >
-                    Nouvelle déclaration
+                    New Declaration
                   </button>
                   <button
                     onClick={handleExportExcel}
@@ -523,106 +528,106 @@ const CNSSDeclarationPage = () => {
                     <span>Export Excel</span>
                   </button>
                   <button
-                    onClick={handleExportCNSSFile}
+                    onClick={handleExportNSSFFile}
                     className="flex items-center space-x-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
                   >
                     <Download className="w-4 h-4" />
-                    <span>Fichier CNSS</span>
+                    <span>NSSF File</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Résumé */}
+            {/* Summary */}
             {summary && (
               <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Résumé de la déclaration</h4>
+                <h4 className="text-lg font-medium text-gray-900 mb-4">Declaration Summary</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">{summary.totalEmployees}</div>
-                    <div className="text-sm text-gray-600">Employés déclarés</div>
+                    <div className="text-sm text-gray-600">Employees declared</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-green-600">{formatCurrency(summary.totalSalaireBrut)}</div>
-                    <div className="text-sm text-gray-600">Total salaires bruts</div>
+                    <div className="text-lg font-bold text-green-600">{formatCurrency(summary.totalGrossSalary)}</div>
+                    <div className="text-sm text-gray-600">Total gross salaries</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-orange-600">{formatCurrency(summary.totalAssietteCNSS)}</div>
-                    <div className="text-sm text-gray-600">Total assiette CNSS</div>
+                    <div className="text-lg font-bold text-orange-600">{formatCurrency(summary.totalNSSFBase)}</div>
+                    <div className="text-sm text-gray-600">Total NSSF base</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-purple-600">{formatCurrency(summary.totalCotisations)}</div>
-                    <div className="text-sm text-gray-600">Total cotisations</div>
+                    <div className="text-lg font-bold text-purple-600">{formatCurrency(summary.totalContributions)}</div>
+                    <div className="text-sm text-gray-600">Total contributions</div>
                   </div>
                 </div>
 
                 <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
                   <div className="text-center">
-                    <div className="text-lg font-bold text-red-600">{formatCurrency(summary.totalCotisationsSalariales)}</div>
-                    <div className="text-sm text-gray-600">Cotisations salariales</div>
+                    <div className="text-lg font-bold text-red-600">{formatCurrency(summary.totalEmployeeContributions)}</div>
+                    <div className="text-sm text-gray-600">Employee contributions</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-blue-600">{formatCurrency(summary.totalCotisationsPatronales)}</div>
-                    <div className="text-sm text-gray-600">Cotisations patronales</div>
+                    <div className="text-lg font-bold text-blue-600">{formatCurrency(summary.totalEmployerContributions)}</div>
+                    <div className="text-sm text-gray-600">Employer contributions</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-green-600">{formatCurrency(summary.totalAllocationsFamiliales)}</div>
-                    <div className="text-sm text-gray-600">Allocations familiales</div>
+                    <div className="text-lg font-bold text-green-600">{formatCurrency(summary.totalHousingLevy)}</div>
+                    <div className="text-sm text-gray-600">Housing levy</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-yellow-600">{formatCurrency(summary.totalTaxeFormation)}</div>
-                    <div className="text-sm text-gray-600">Taxe formation</div>
+                    <div className="text-lg font-bold text-yellow-600">{formatCurrency(summary.totalTrainingLevy)}</div>
+                    <div className="text-sm text-gray-600">Training levy</div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Informations de la déclaration */}
+            {/* Declaration Information */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Informations de la déclaration</h4>
+              <h4 className="text-lg font-medium text-gray-900 mb-4">Declaration Information</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-600">Entreprise :</span>
+                  <span className="text-gray-600">Company :</span>
                   <div className="font-medium">{companyInfo.name}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Numéro CNSS :</span>
-                  <div className="font-medium">{companyInfo.cnssNumber}</div>
+                  <span className="text-gray-600">NSSF Number :</span>
+                  <div className="font-medium">{companyInfo.nssfNumber}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Période :</span>
+                  <span className="text-gray-600">Period :</span>
                   <div className="font-medium">{getMonthLabel(selectedMonth)}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Date de génération :</span>
-                  <div className="font-medium">{new Date().toLocaleDateString('fr-FR')}</div>
+                  <span className="text-gray-600">Generation date :</span>
+                  <div className="font-medium">{new Date().toLocaleDateString('en-US')}</div>
                 </div>
               </div>
             </div>
 
-            {/* Tableau détaillé */}
+            {/* Detailed Table */}
             <div className="bg-white shadow rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Employé
+                        Employee
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Salaire brut
+                        Gross salary
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Assiette CNSS
+                        NSSF base
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Cotisations salariales
+                        Employee contributions
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Cotisations patronales
+                        Employer contributions
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Total cotisations
+                        Total contributions
                       </th>
                     </tr>
                   </thead>
@@ -634,34 +639,34 @@ const CNSSDeclarationPage = () => {
                             <div className="flex-shrink-0 h-8 w-8">
                               <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
                                 <span className="text-xs font-medium text-orange-600">
-                                  {entry.employee.prenom.charAt(0)}{entry.employee.nom.charAt(0)}
+                                  {entry.employee.firstName.charAt(0)}{entry.employee.lastName.charAt(0)}
                                 </span>
                               </div>
                             </div>
                             <div className="ml-3">
                               <div className="text-sm font-medium text-gray-900">
-                                {entry.employee.prenom} {entry.employee.nom}
+                                {entry.employee.firstName} {entry.employee.lastName}
                               </div>
                               <div className="text-sm text-gray-500">
-                                {entry.employee.matricule} • {entry.employee.cnss || 'CNSS manquant'}
+                                {entry.employee.employeeId} • {entry.employee.nssfNumber || 'NSSF missing'}
                               </div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-green-600">
-                          {formatCurrency(entry.salaireBrut)}
+                          {formatCurrency(entry.grossSalary)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-blue-600">
-                          {formatCurrency(entry.assietteCNSS)}
+                          {formatCurrency(entry.nssfBase)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-red-600">
-                          {formatCurrency(entry.cotisationSalariale)}
+                          {formatCurrency(entry.employeeContribution)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-orange-600">
-                          {formatCurrency(entry.cotisationPatronale + entry.allocationsFamiliales + entry.taxeFormation)}
+                          {formatCurrency(entry.employerContribution + entry.housingLevy + entry.trainingLevy)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-purple-600">
-                          {formatCurrency(entry.totalCotisations)}
+                          {formatCurrency(entry.totalContributions)}
                         </td>
                       </tr>
                     ))}
@@ -669,22 +674,22 @@ const CNSSDeclarationPage = () => {
                   <tfoot className="bg-gray-50">
                     <tr>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                        TOTAUX ({summary?.totalEmployees || 0} employés)
+                        TOTALS ({summary?.totalEmployees || 0} employees)
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">
-                        {formatCurrency(summary?.totalSalaireBrut || 0)}
+                        {formatCurrency(summary?.totalGrossSalary || 0)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-blue-600">
-                        {formatCurrency(summary?.totalAssietteCNSS || 0)}
+                        {formatCurrency(summary?.totalNSSFBase || 0)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-red-600">
-                        {formatCurrency(summary?.totalCotisationsSalariales || 0)}
+                        {formatCurrency(summary?.totalEmployeeContributions || 0)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-orange-600">
-                        {formatCurrency((summary?.totalCotisationsPatronales || 0) + (summary?.totalAllocationsFamiliales || 0) + (summary?.totalTaxeFormation || 0))}
+                        {formatCurrency((summary?.totalEmployerContributions || 0) + (summary?.totalHousingLevy || 0) + (summary?.totalTrainingLevy || 0))}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-purple-600">
-                        {formatCurrency(summary?.totalCotisations || 0)}
+                        {formatCurrency(summary?.totalContributions || 0)}
                       </td>
                     </tr>
                   </tfoot>
@@ -698,4 +703,4 @@ const CNSSDeclarationPage = () => {
   );
 };
 
-export default CNSSDeclarationPage;
+export default NSSFDeclarationPage;

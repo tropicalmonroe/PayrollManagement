@@ -6,196 +6,184 @@ import { generatePayslipPDF, PayslipData } from '../../../../../lib/pdfGenerator
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const { employeeId, mois, annee } = req.body;
+      const { employeeId, month, year } = req.body;
 
-      if (!employeeId || !mois || !annee) {
+      if (!employeeId || !month || !year) {
         return res.status(400).json({ 
-          error: 'Les paramètres employeeId, mois et annee sont requis' 
+          error: 'employeeId, month and year parameters are required' 
         });
       }
 
-      // Vérifier si l'employé existe
+      // Check if employee exists
       const employee = await prisma.employee.findUnique({
         where: { id: employeeId }
       });
 
       if (!employee) {
-        return res.status(404).json({ error: 'Employé non trouvé' });
+        return res.status(404).json({ error: 'Employee not found' });
       }
 
-      // Vérifier si le calcul de paie existe pour cette période
+      // Check if payroll calculation exists for this period
       let payrollCalculation = await prisma.payrollCalculation.findFirst({
         where: {
           employeeId,
-          mois,
-          annee: annee.toString()
+          month,
+          year: year.toString()
         }
       });
 
-      // Si aucun calcul trouvé, créer un calcul de base
+      // If no calculation found, create a basic calculation
       if (!payrollCalculation) {
-        const totalGains = employee.salaireBase + employee.primeAnciennete + employee.indemniteLogement + employee.indemnitePanier + employee.primeTransport + employee.indemniteRepresentation;
-        const cotisationCNSS = Math.round(totalGains * 0.0448 * 100) / 100;
-        const cotisationAMO = Math.round(totalGains * 0.0226 * 100) / 100;
-        const totalRetenues = cotisationCNSS + cotisationAMO;
-        const salaireNet = totalGains - totalRetenues;
+        // Calculate basic payroll components according to Kenyan regulations
+        const grossSalary = employee.baseSalary + employee.housingAllowance + employee.mealAllowance + employee.transportAllowance + employee.representationAllowance;
+        
+        // Kenyan statutory deductions (simplified calculation)
+        const nssfEmployee = Math.min(grossSalary * 0.06, 4320); // 6% up to max of 4320
+        const shif = grossSalary * 0.0275; // 2.75% of gross
+        const housingLevyEmployee = grossSalary * 0.015; // 1.5% of gross
+        
+        // Simplified PAYE calculation (this would need proper tax brackets)
+        const taxableIncome = grossSalary - nssfEmployee - shif - housingLevyEmployee;
+        const paye = Math.max(0, taxableIncome * 0.25 - 2400); // Simplified tax calculation
+        
+        const totalDeductions = nssfEmployee + shif + housingLevyEmployee + paye;
+        const netSalary = grossSalary - totalDeductions;
+
+        // Employer contributions
+        const nssfEmployer = Math.min(grossSalary * 0.06, 4320); // 6% up to max of 4320
+        const housingLevyEmployer = grossSalary * 0.015; // 1.5% of gross
+        const totalEmployerContributions = nssfEmployer + housingLevyEmployer;
 
         payrollCalculation = await prisma.payrollCalculation.create({
           data: {
             employeeId,
-            mois,
-            annee: annee.toString(),
-            salaireBase: employee.salaireBase,
-            tauxAnciennete: employee.tauxAnciennete,
-            primeAnciennete: employee.primeAnciennete,
-            indemniteLogement: employee.indemniteLogement,
-            indemnitePanier: employee.indemnitePanier,
-            primeTransport: employee.primeTransport,
-            indemniteRepresentation: employee.indemniteRepresentation,
-            heuresSupplementaires: 0,
-            primesExceptionnelles: 0,
-            autresGains: 0,
-            totalGains,
-            salaireBrutImposable: totalGains,
-            cnssPrestations: cotisationCNSS,
-            amo: cotisationAMO,
-            retraite: 0,
-            assuranceDivers: 0,
-            impotRevenu: 0,
-            absences: 0,
-            retards: 0,
-            avances: 0,
-            autresRetenues: 0,
-            totalRetenues,
-            cnssPatronale: Math.round(totalGains * 0.1265 * 100) / 100,
-            allocationsFamiliales: Math.round(totalGains * 0.0675 * 100) / 100,
-            taxeFormationProf: Math.round(totalGains * 0.016 * 100) / 100,
-            amoPatronale: Math.round(totalGains * 0.0226 * 100) / 100,
-            participationAMO: 0,
-            accidentTravail: Math.round(totalGains * 0.0012 * 100) / 100,
-            retraitePatronale: 0,
-            assuranceDiversPatronale: 0,
-            totalCotisationsPatronales: Math.round((totalGains * 0.1265 + totalGains * 0.0675 + totalGains * 0.016 + totalGains * 0.0226 + totalGains * 0.0012) * 100) / 100,
-            fraisProfessionnels: Math.min(totalGains * 0.20, 2500),
-            netImposable: totalGains - Math.min(totalGains * 0.20, 2500),
-            interetsCredit: 0,
-            netNetImposable: totalGains - Math.min(totalGains * 0.20, 2500),
-            igrTheorique: 0,
-            salaireNetAPayer: salaireNet,
-            remboursementCredit: 0,
-            creditConso: 0,
-            contributionSociale: 0,
-            remboursementAvance: 0
+            month,
+            year: year.toString(),
+            baseSalary: employee.baseSalary,
+            housingAllowance: employee.housingAllowance,
+            mealAllowance: employee.mealAllowance,
+            transportAllowance: employee.transportAllowance,
+            representationAllowance: employee.representationAllowance,
+            overtimePay: 0,
+            bonuses: 0,
+            otherEarnings: 0,
+            grossSalary,
+            taxableGrossSalary: grossSalary,
+            nssfEmployee,
+            shif,
+            housingLevyEmployee,
+            paye,
+            personalRelief: 2400,
+            helb: 0,
+            otherDeductions: 0,
+            totalDeductions,
+            nssfEmployer,
+            housingLevyEmployer,
+            totalEmployerContributions,
+            taxableIncome,
+            netSalary
           }
         });
       }
 
-      // Vérifier si un bulletin existe déjà pour cette période
+      // Check if a payslip already exists for this period
       const existingDocument = await prisma.document.findFirst({
         where: {
-          type: DocumentType.BULLETIN_PAIE,
+          type: DocumentType.PAYSLIP,
           employeeId,
-          periode: `${mois} ${annee}`
+          period: `${month} ${year}`
         }
       });
 
       if (existingDocument) {
         return res.status(409).json({ 
-          error: 'Un bulletin de paie existe déjà pour cette période',
+          error: 'A payslip already exists for this period',
           document: existingDocument
         });
       }
 
-      // Préparer les données pour le PDF
+      // Prepare data for PDF
       const payslipData: PayslipData = {
         employee: {
-          matricule: employee.matricule,
-          nom: employee.nom,
-          prenom: employee.prenom,
-          fonction: employee.fonction,
-          dateEmbauche: employee.dateEmbauche,
-          anciennete: employee.anciennete,
-          situationFamiliale: employee.situationFamiliale,
-          cin: employee.cin || '',
-          cnss: employee.cnss || ''
+          employeeId: employee.employeeId,
+          lastName: employee.lastName,
+          firstName: employee.firstName,
+          position: employee.position,
+          hireDate: employee.hireDate,
+          seniority: employee.seniority,
+          maritalStatus: employee.maritalStatus,
+          idNumber: employee.idNumber || '',
+          nssfNumber: employee.nssfNumber || ''
         },
         payroll: {
-          mois,
-          annee: annee.toString(),
-          salaireBase: payrollCalculation.salaireBase,
-          primeAnciennete: payrollCalculation.primeAnciennete,
-          indemniteLogement: payrollCalculation.indemniteLogement,
-          indemnitePanier: payrollCalculation.indemnitePanier,
-          primeTransport: payrollCalculation.primeTransport,
-          indemniteRepresentation: payrollCalculation.indemniteRepresentation,
-          heuresSupplementaires: payrollCalculation.heuresSupplementaires,
-          primesExceptionnelles: payrollCalculation.primesExceptionnelles,
-          autresGains: payrollCalculation.autresGains,
-          totalGains: payrollCalculation.totalGains,
-          cnssPrestations: payrollCalculation.cnssPrestations,
-          amo: payrollCalculation.amo,
-          retraite: payrollCalculation.retraite,
-          assuranceDivers: payrollCalculation.assuranceDivers,
-          impotRevenu: payrollCalculation.impotRevenu,
-          absences: payrollCalculation.absences,
-          retards: payrollCalculation.retards,
-          avances: payrollCalculation.avances,
-          autresRetenues: payrollCalculation.autresRetenues,
-          totalRetenues: payrollCalculation.totalRetenues,
-          salaireNetAPayer: payrollCalculation.salaireNetAPayer,
-          cnssPatronale: payrollCalculation.cnssPatronale,
-          allocationsFamiliales: payrollCalculation.allocationsFamiliales,
-          taxeFormationProf: payrollCalculation.taxeFormationProf,
-          amoPatronale: payrollCalculation.amoPatronale,
-          accidentTravail: payrollCalculation.accidentTravail,
-          totalCotisationsPatronales: payrollCalculation.totalCotisationsPatronales,
-          fraisProfessionnels: payrollCalculation.fraisProfessionnels,
-          netImposable: payrollCalculation.netImposable
+          month,
+          year: year.toString(),
+          baseSalary: payrollCalculation.baseSalary,
+          housingAllowance: payrollCalculation.housingAllowance,
+          mealAllowance: payrollCalculation.mealAllowance,
+          transportAllowance: payrollCalculation.transportAllowance,
+          representationAllowance: payrollCalculation.representationAllowance,
+          overtimePay: payrollCalculation.overtimePay,
+          bonuses: payrollCalculation.bonuses,
+          otherEarnings: payrollCalculation.otherEarnings,
+          grossSalary: payrollCalculation.grossSalary,
+          nssfEmployee: payrollCalculation.nssfEmployee,
+          shif: payrollCalculation.shif,
+          housingLevyEmployee: payrollCalculation.housingLevyEmployee,
+          paye: payrollCalculation.paye,
+          personalRelief: payrollCalculation.personalRelief,
+          helb: payrollCalculation.helb,
+          otherDeductions: payrollCalculation.otherDeductions,
+          totalDeductions: payrollCalculation.totalDeductions,
+          netSalary: payrollCalculation.netSalary,
+          nssfEmployer: payrollCalculation.nssfEmployer,
+          housingLevyEmployer: payrollCalculation.housingLevyEmployer,
+          totalEmployerContributions: payrollCalculation.totalEmployerContributions
         }
       };
 
-      // Générer le PDF
+      // Generate PDF
       const pdfBuffer = await generatePayslipPDF(payslipData);
 
-      // Créer le document bulletin de paie
+      // Create payslip document
       const document = await prisma.document.create({
         data: {
-          type: DocumentType.BULLETIN_PAIE,
-          title: `Bulletin de paie - ${employee.prenom} ${employee.nom} - ${mois} ${annee}`,
-          description: `Bulletin de paie pour la période ${mois} ${annee}`,
+          type: DocumentType.PAYSLIP,
+          title: `Payslip - ${employee.firstName} ${employee.lastName} - ${month} ${year}`,
+          description: `Payslip for period ${month} ${year}`,
           employeeId,
-          periode: `${mois} ${annee}`,
-          generatedBy: 'system', // À remplacer par l'ID de l'utilisateur connecté
+          period: `${month} ${year}`,
+          generatedBy: 'system', // Replace with logged-in user ID
           fileSize: pdfBuffer.length,
           status: DocumentStatus.GENERATED,
           metadata: {
             payrollCalculationId: payrollCalculation.id,
-            salaireBrut: payrollCalculation.totalGains,
-            salaireNet: payrollCalculation.salaireNetAPayer,
-            totalRetenues: payrollCalculation.totalRetenues
+            grossSalary: payrollCalculation.grossSalary,
+            netSalary: payrollCalculation.netSalary,
+            totalDeductions: payrollCalculation.totalDeductions
           }
         },
         include: {
           employee: {
             select: {
               id: true,
-              matricule: true,
-              nom: true,
-              prenom: true,
-              fonction: true
+              employeeId: true,
+              lastName: true,
+              firstName: true,
+              position: true
             }
           }
         }
       });
 
-      // Retourner le PDF directement
+      // Return PDF directly
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="bulletin-paie-${employee.matricule}-${mois}-${annee}.pdf"`);
+      res.setHeader('Content-Disposition', `attachment; filename="payslip-${employee.employeeId}-${month}-${year}.pdf"`);
       res.setHeader('Content-Length', pdfBuffer.length);
       res.status(200).send(pdfBuffer);
     } catch (error) {
       console.error('Error generating payslip:', error);
-      res.status(500).json({ error: 'Erreur lors de la génération du bulletin de paie' });
+      res.status(500).json({ error: 'Error generating payslip' });
     }
   } else {
     res.setHeader('Allow', ['POST']);

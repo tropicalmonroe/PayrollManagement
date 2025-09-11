@@ -1,260 +1,228 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../lib/prisma';
-import { calculerPaie, type EmployeePayrollData } from '../../../lib/payrollCalculations';
-import { obtenirEcheanceCourante, calculerStatistiquesEcheancier } from '../../../lib/simpleEcheancier';
+import { prisma } from '../../../../lib/prisma';
+import { calculatePayroll, type EmployeePayrollData, type PayrollResult } from '../../../../lib/payrollCalculations';
+import { getCurrentInstallment, calculateScheduleStatistics } from '../../../../lib/simplePaymentSchedule';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const { employeeId, mois, annee } = req.body;
+      const { employeeId, month, year } = req.body;
 
-      if (!employeeId || !mois || !annee) {
-        return res.status(400).json({ error: 'Paramètres manquants: employeeId, mois, annee requis' });
+      if (!employeeId || !month || !year) {
+        return res.status(400).json({ error: 'Missing parameters: employeeId, month, year required' });
       }
 
-      // Récupérer les données de l'employé
+      // Get employee data
       const employee = await prisma.employee.findUnique({
         where: { id: employeeId },
         include: {
-          credits: {
-            where: { statut: 'ACTIF' },
+          credits: { 
+            where: { status: 'ACTIVE' },
             include: {
-              echeancier: {
-                where: { statut: 'EN_ATTENTE' },
-                orderBy: { numeroEcheance: 'asc' }
+              paymentSchedule: {
+                where: { status: 'PENDING' },
+                orderBy: { installmentNumber: 'asc' }
               }
             }
           },
           advances: {
-            where: { statut: 'EN_COURS' }
+            where: { status: 'IN_PROGRESS' }
           },
           variableElements: {
             where: {
-              mois: mois,
-              annee: annee
+              month: month,
+              year: year
             }
           }
         }
       });
 
       if (!employee) {
-        return res.status(404).json({ error: 'Employé non trouvé' });
+        return res.status(404).json({ error: 'Employee not found' });
       }
 
-      // Calculer les retenues de crédits pour ce mois
-      let totalCreditLogement = 0;
-      let totalCreditConsommation = 0;
-      let totalInteretsCredit = 0;
-      const detailsCredits: any[] = [];
+      // Calculate credit deductions for this month
+      let totalHousingCredit = 0;
+      let totalConsumerCredit = 0;
+      let totalCreditInterest = 0;
+      const creditDetails: any[] = [];
 
       for (const credit of employee.credits) {
-        // Convertir les échéances de la base vers le format SimpleEcheance
-        const echeancesSimples = credit.echeancier.map(e => ({
-          numeroEcheance: e.numeroEcheance,
-          dateEcheance: e.dateEcheance,
-          montantAPayer: e.mensualiteTTC, // Conversion du nom de propriété
-          statut: e.statut as 'EN_ATTENTE' | 'PAYEE' | 'EN_RETARD' | 'ANNULEE',
+        // Convert database installments to SimpleInstallment format
+        const simpleInstallments = credit.paymentSchedule.map(e => ({
+          installmentNumber: e.installmentNumber,
+          dueDate: e.dueDate,
+          amountToPay: e.totalMonthlyPayment, // Property name conversion
+          status: e.status as 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED',
           notes: e.notes || undefined
         }));
         
-        const echeanceCourante = obtenirEcheanceCourante(echeancesSimples);
+        const currentInstallment = getCurrentInstallment(simpleInstallments);
         
-        if (echeanceCourante) {
-          const montantMensuel = echeanceCourante.montantAPayer;
-          const echeanceDB = credit.echeancier.find(e => e.numeroEcheance === echeanceCourante.numeroEcheance);
-          const interets = echeanceDB?.interetsHT || 0;
+        if (currentInstallment) {
+          const monthlyAmount = currentInstallment.amountToPay;
+          const installmentDB = credit.paymentSchedule.find(e => e.installmentNumber === currentInstallment.installmentNumber);
+          const interest = installmentDB?.interest || 0;
           
-          if (credit.type === 'LOGEMENT') {
-            totalCreditLogement += montantMensuel;
-          } else if (credit.type === 'CONSOMMATION') {
-            totalCreditConsommation += montantMensuel;
+          if (credit.type === 'HOUSING') {
+            totalHousingCredit += monthlyAmount;
+          } else if (credit.type === 'CONSUMER') {
+            totalConsumerCredit += monthlyAmount;
           }
           
-          totalInteretsCredit += interets;
+          totalCreditInterest += interest;
           
-          detailsCredits.push({
+          creditDetails.push({
             creditId: credit.id,
             type: credit.type,
-            banque: credit.banque,
-            mensualite: montantMensuel,
-            interets: interets,
-            numeroEcheance: echeanceCourante.numeroEcheance,
-            dateEcheance: echeanceCourante.dateEcheance,
-            capitalRestant: echeanceDB?.capitalRestant || 0
+            bank: credit.bank,
+            monthlyPayment: monthlyAmount,
+            interest: interest,
+            installmentNumber: currentInstallment.installmentNumber,
+            dueDate: currentInstallment.dueDate,
+            remainingPrincipal: installmentDB?.remainingPrincipal || 0
           });
         }
       }
 
-      // Calculer les avances en cours
-      let totalAvances = 0;
-      const detailsAvances: any[] = [];
+      // Calculate ongoing advances
+      let totalAdvances = 0;
+      const advanceDetails: any[] = [];
 
-      for (const avance of employee.advances) {
-        totalAvances += avance.montantMensualite;
-        detailsAvances.push({
-          avanceId: avance.id,
-          montantMensualite: avance.montantMensualite,
-          soldeRestant: avance.soldeRestant,
-          motif: avance.motif
+      for (const advance of employee.advances) {
+        totalAdvances += advance.installmentAmount;
+        advanceDetails.push({
+          advanceId: advance.id,
+          installmentAmount: advance.installmentAmount,
+          remainingBalance: advance.remainingBalance,
+          reason: advance.reason
         });
       }
 
-      // Préparer les données pour le calcul de paie
+      // Prepare data for payroll calculation
       const payrollData: EmployeePayrollData = {
-        nom: employee.nom,
-        prenom: employee.prenom,
-        matricule: employee.matricule,
-        cin: employee.cin || '',
-        cnss: employee.cnss || '',
-        situationFamiliale: employee.situationFamiliale,
-        dateNaissance: employee.dateNaissance || new Date(),
-        dateEmbauche: employee.dateEmbauche,
-        anciennete: employee.anciennete,
-        nbrDeductions: employee.nbrDeductions,
-        nbreJourMois: employee.nbreJourMois,
-        salaireBase: employee.salaireBase,
-        indemniteLogement: employee.indemniteLogement,
-        indemnitePanier: employee.indemnitePanier,
-        primeTransport: employee.primeTransport,
-        indemniteRepresentation: employee.indemniteRepresentation,
-        assurances: {
-          assuranceMaladieComplementaire: false,
-          assuranceMaladieEtranger: false,
-          assuranceInvaliditeRenforcee: false
+        lastName: employee.lastName,
+        firstName: employee.firstName,
+        employeeId: employee.employeeId,
+        idNumber: employee.idNumber || '',
+        nssfNumber: employee.nssfNumber || '',
+        maritalStatus: employee.maritalStatus,
+        dateOfBirth: employee.dateOfBirth || new Date(),
+        hireDate: employee.hireDate,
+        seniority: employee.seniority,
+        numberOfDeductions: employee.numberOfDeductions || 0,
+        numberOfDaysPerMonth: employee.numberOfDaysPerMonth,
+        baseSalary: employee.baseSalary,
+        housingAllowance: employee.housingAllowance,
+        mealAllowance: employee.mealAllowance,
+        transportAllowance: employee.transportAllowance,
+        representationAllowance: employee.representationAllowance || 0,
+        insurances: {
+          comprehensiveHealthInsurance: false,
+          foreignHealthCover: false,
+          enhancedDisabilityCover: false
         },
-        creditImmobilier: totalCreditLogement > 0 ? {
-          montantMensuel: totalCreditLogement,
-          interets: totalInteretsCredit
-        } : undefined,
-        creditConsommation: totalCreditConsommation > 0 ? {
-          montantMensuel: totalCreditConsommation
-        } : undefined,
-        avanceSalaire: totalAvances > 0 ? {
-          montantMensuel: totalAvances
+        salaryAdvance: totalAdvances > 0 ? {
+          monthlyAmount: totalAdvances
         } : undefined,
         variableElements: employee.variableElements.map(ve => ({
           ...ve,
-          heures: ve.heures ?? undefined,
-          taux: ve.taux ?? undefined
+          hours: ve.hours ?? undefined,
+          rate: ve.rate ?? undefined,
+          type: ['OVERTIME', 'ABSENCE', 'EXCEPTIONAL_BONUS', 'LEAVE', 'LATENESS', 'ADVANCE', 'OTHER'].includes(ve.type) ? ve.type : 'OTHER'
+
         })),
-        compteBancaire: employee.compteBancaire || '',
-        agence: employee.agence || '',
-        useCnssPrestation: employee.useCnssPrestation,
-        useAmoSalariale: employee.useAmoSalariale,
-        useRetraiteSalariale: employee.useRetraiteSalariale,
-        useAssuranceDiversSalariale: employee.useAssuranceDiversSalariale
+        bonuses: 0, // or calculate from ve.type === 'EXCEPTIONAL_BONUS'
+        overtimePay: 0, // or calculate from ve.type === 'OVERTIME'
+        loanRepayment: totalHousingCredit + totalConsumerCredit, // combine loans
+        helbLoan: employee.helbLoan || 0,
+        bankAccount: employee.bankAccount || '',
+        bankBranch: employee.bankBranch || '',
+        subjectToNssf: employee.subjectToNssf,
+        subjectToShif: employee.subjectToShif,
+        subjectToHousingLevy: employee.subjectToHousingLevy
       };
 
-      // Calculer la paie avec les crédits intégrés
-      const resultatPaie = calculerPaie(payrollData);
+      // Calculate payroll with integrated credits
+      const payrollResult = calculatePayroll(payrollData);
 
-      // Sauvegarder le calcul de paie
+      // Save payroll calculation
       const payrollCalculation = await prisma.payrollCalculation.upsert({
         where: {
-          employeeId_mois_annee: {
+          employeeId_month_year: {
             employeeId,
-            mois,
-            annee
+            month,
+            year
           }
         },
         update: {
-          salaireBase: resultatPaie.gains.salaireBase,
-          primeAnciennete: resultatPaie.gains.primeAnciennete,
-          indemniteLogement: resultatPaie.gains.indemniteLogement,
-          indemnitePanier: resultatPaie.gains.indemnitePanier,
-          primeTransport: resultatPaie.gains.primeTransport,
-          indemniteRepresentation: resultatPaie.gains.indemniteRepresentation,
-          heuresSupplementaires: resultatPaie.gains.heuresSupplementaires || 0,
-          primesExceptionnelles: resultatPaie.gains.primesExceptionnelles || 0,
-          autresGains: resultatPaie.gains.autresGains || 0,
-          totalGains: resultatPaie.gains.totalGains,
-          salaireBrutImposable: resultatPaie.salaireBrutImposable,
-          cnssPrestations: resultatPaie.cotisationsSalariales.cnssPrestation,
-          amo: resultatPaie.cotisationsSalariales.amoSalariale,
-          retraite: resultatPaie.cotisationsSalariales.retraiteSalariale,
-          assuranceDivers: resultatPaie.cotisationsSalariales.assuranceDiversSalariale,
-          impotRevenu: resultatPaie.calculIGR.impotSurRevenu,
-          totalRetenues: resultatPaie.totalRetenues,
-          cnssPatronale: resultatPaie.cotisationsPatronales.cnssPrestation,
-          allocationsFamiliales: resultatPaie.cotisationsPatronales.allocationsFamiliales,
-          taxeFormationProf: resultatPaie.cotisationsPatronales.taxeFormation,
-          amoPatronale: resultatPaie.cotisationsPatronales.amoPatronale,
-          participationAMO: resultatPaie.cotisationsPatronales.participationAMO,
-          accidentTravail: resultatPaie.cotisationsPatronales.accidentTravail,
-          retraitePatronale: resultatPaie.cotisationsPatronales.retraitePatronale,
-          assuranceDiversPatronale: resultatPaie.cotisationsPatronales.assuranceDiversPatronale,
-          totalCotisationsPatronales: resultatPaie.cotisationsPatronales.totalCotisationsPatronales,
-          fraisProfessionnels: resultatPaie.calculIGR.fraisProfessionnels,
-          netImposable: resultatPaie.calculIGR.netImposable,
-          interetsCredit: totalInteretsCredit,
-          netNetImposable: resultatPaie.calculIGR.netNetImposable,
-          igrTheorique: resultatPaie.calculIGR.igrTheorique,
-          salaireNetAPayer: resultatPaie.salaireNetAPayer,
-          remboursementCredit: totalCreditLogement + totalCreditConsommation,
-          creditConso: totalCreditConsommation,
-          remboursementAvance: totalAvances
+          baseSalary: payrollResult.earnings.baseSalary,
+          housingAllowance: payrollResult.earnings.housingAllowance,
+          mealAllowance: payrollResult.earnings.mealAllowance,
+          transportAllowance: payrollResult.earnings.transportAllowance,
+          overtimePay: payrollResult.earnings.overtimePay ?? 0,
+          bonuses: payrollResult.earnings.exceptionalBonuses ?? 0, // map correctly
+          otherEarnings: payrollResult.earnings.otherEarnings ?? 0,
+          grossSalary: payrollResult.grossSalary,
+          taxableGrossSalary: payrollResult.taxableGrossSalary,
+          nssfEmployee: payrollResult.employeeContributions.nssfEmployee,
+          shif: payrollResult.employeeContributions.shifEmployee,
+          paye: payrollResult.taxCalculation.incomeTax,
+          otherDeductions: payrollResult.otherDeductions.totalOtherDeductions,
+          totalDeductions: payrollResult.totalDeductions,
+          nssfEmployer: payrollResult.employerContributions.nssfEmployer,
+          housingLevyEmployer: payrollResult.employerContributions.housingLevy,
+          totalEmployerContributions: payrollResult.employerContributions.totalEmployerContributions,
+          netSalary: payrollResult.netSalaryPayable,
         },
         create: {
-          employeeId,
-          mois,
-          annee,
-          salaireBase: resultatPaie.gains.salaireBase,
-          primeAnciennete: resultatPaie.gains.primeAnciennete,
-          indemniteLogement: resultatPaie.gains.indemniteLogement,
-          indemnitePanier: resultatPaie.gains.indemnitePanier,
-          primeTransport: resultatPaie.gains.primeTransport,
-          indemniteRepresentation: resultatPaie.gains.indemniteRepresentation,
-          heuresSupplementaires: resultatPaie.gains.heuresSupplementaires || 0,
-          primesExceptionnelles: resultatPaie.gains.primesExceptionnelles || 0,
-          autresGains: resultatPaie.gains.autresGains || 0,
-          totalGains: resultatPaie.gains.totalGains,
-          salaireBrutImposable: resultatPaie.salaireBrutImposable,
-          cnssPrestations: resultatPaie.cotisationsSalariales.cnssPrestation,
-          amo: resultatPaie.cotisationsSalariales.amoSalariale,
-          retraite: resultatPaie.cotisationsSalariales.retraiteSalariale,
-          assuranceDivers: resultatPaie.cotisationsSalariales.assuranceDiversSalariale,
-          impotRevenu: resultatPaie.calculIGR.impotSurRevenu,
-          totalRetenues: resultatPaie.totalRetenues,
-          cnssPatronale: resultatPaie.cotisationsPatronales.cnssPrestation,
-          allocationsFamiliales: resultatPaie.cotisationsPatronales.allocationsFamiliales,
-          taxeFormationProf: resultatPaie.cotisationsPatronales.taxeFormation,
-          amoPatronale: resultatPaie.cotisationsPatronales.amoPatronale,
-          participationAMO: resultatPaie.cotisationsPatronales.participationAMO,
-          accidentTravail: resultatPaie.cotisationsPatronales.accidentTravail,
-          retraitePatronale: resultatPaie.cotisationsPatronales.retraitePatronale,
-          assuranceDiversPatronale: resultatPaie.cotisationsPatronales.assuranceDiversPatronale,
-          totalCotisationsPatronales: resultatPaie.cotisationsPatronales.totalCotisationsPatronales,
-          fraisProfessionnels: resultatPaie.calculIGR.fraisProfessionnels,
-          netImposable: resultatPaie.calculIGR.netImposable,
-          interetsCredit: totalInteretsCredit,
-          netNetImposable: resultatPaie.calculIGR.netNetImposable,
-          igrTheorique: resultatPaie.calculIGR.igrTheorique,
-          salaireNetAPayer: resultatPaie.salaireNetAPayer,
-          remboursementCredit: totalCreditLogement + totalCreditConsommation,
-          creditConso: totalCreditConsommation,
-          remboursementAvance: totalAvances
-        }
+        employeeId,
+        month,
+        year,
+        baseSalary: payrollResult.earnings.baseSalary,
+        housingAllowance: payrollResult.earnings.housingAllowance,
+        mealAllowance: payrollResult.earnings.mealAllowance,
+        transportAllowance: payrollResult.earnings.transportAllowance,
+        overtimePay: payrollResult.earnings.overtimePay ?? 0,
+        bonuses: payrollResult.earnings.bonuses ?? 0,
+        otherEarnings: payrollResult.earnings.otherEarnings ?? 0,
+        grossSalary: payrollResult.grossSalary,
+        taxableGrossSalary: payrollResult.taxableGrossSalary,
+        // ✅ missing ones
+        housingLevyEmployee: payrollResult.employeeContributions.housingLevy ?? 0,
+        taxableIncome: payrollResult.taxCalculation.netTaxable ?? 0,
+        nssfEmployee: payrollResult.employeeContributions.nssfEmployee,
+        shif: payrollResult.employeeContributions.shifEmployee,
+        paye: payrollResult.taxCalculation.incomeTax,
+        otherDeductions: payrollResult.otherDeductions.totalOtherDeductions,
+        totalDeductions: payrollResult.totalDeductions,
+        nssfEmployer: payrollResult.employerContributions.nssfEmployer,
+        housingLevyEmployer: payrollResult.employerContributions.housingLevy ?? 0,
+        totalEmployerContributions: payrollResult.employerContributions.totalEmployerContributions,
+        netSalary: payrollResult.netSalaryPayable,
+}
+
       });
 
       res.status(200).json({
-        message: 'Calcul de paie effectué avec succès',
+        message: 'Payroll calculation completed successfully',
         payrollCalculation,
-        resultatPaie,
-        detailsCredits,
-        detailsAvances,
-        resume: {
-          totalCreditLogement,
-          totalCreditConsommation,
-          totalInteretsCredit,
-          totalAvances,
-          salaireNetAPayer: resultatPaie.salaireNetAPayer,
-          totalRetenues: resultatPaie.totalRetenues
+        payrollResult,
+        creditDetails,
+        advanceDetails,
+        summary: {
+          totalHousingCredit,
+          totalConsumerCredit,
+          totalCreditInterest,
+          totalAdvances,
+          netSalary: payrollResult.netSalaryPayable,
+          totalDeductions: payrollResult.totalDeductions
         }
       });
 
     } catch (error) {
-      console.error('Erreur lors du calcul de paie avec crédits:', error);
-      res.status(500).json({ error: 'Erreur lors du calcul de paie avec crédits' });
+      console.error('Error during payroll calculation with credits:', error);
+      res.status(500).json({ error: 'Error during payroll calculation with credits' });
     }
   } else {
     res.setHeader('Allow', ['POST']);

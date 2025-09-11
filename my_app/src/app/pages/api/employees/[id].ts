@@ -8,7 +8,7 @@ export default async function handler(
   const { id } = req.query
 
   if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'ID employé requis' })
+    return res.status(400).json({ error: 'Employee ID required' })
   }
 
   try {
@@ -39,16 +39,16 @@ async function getEmployee(id: string, res: NextApiResponse) {
           take: 5
         },
         advances: {
-          where: { statut: 'EN_COURS' }
+          where: { status: 'IN_PROGRESS' }
         },
         credits: {
-          where: { statut: 'ACTIF' }
+          where: { status: 'ACTIVE' }
         }
       }
     })
 
     if (!employee) {
-      return res.status(404).json({ error: 'Employé non trouvé' })
+      return res.status(404).json({ error: 'Employee not found' })
     }
 
     return res.status(200).json(employee)
@@ -61,146 +61,136 @@ async function getEmployee(id: string, res: NextApiResponse) {
 async function updateEmployee(id: string, req: NextApiRequest, res: NextApiResponse) {
   try {
     const {
-      matricule,
-      nom,
-      prenom,
-      fonction,
-      cin,
-      cnss,
-      situationFamiliale,
-      dateNaissance,
-      dateEmbauche,
-      nbrDeductions,
-      nbreJourMois,
-      salaireBase,
-      indemniteLogement,
-      indemnitePanier,
-      primeTransport,
-      indemniteRepresentation,
-      compteBancaire,
-      agence,
-      telephone,
+      employeeId,
+      lastName,
+      firstName,
+      position,
+      idNumber,
+      nssfNumber,
+      maritalStatus,
+      dateOfBirth,
+      hireDate,
+      numberOfDeductions,
+      numberOfDaysPerMonth,
+      baseSalary,
+      housingAllowance,
+      mealAllowance,
+      transportAllowance,
+      representationAllowance,
+      bankAccount,
+      bankBranch,
+      phone,
       email,
-      adresse,
+      address,
       status
     } = req.body
 
-    // Vérifier que l'employé existe
+    // Check if employee exists
     const existingEmployee = await prisma.employee.findUnique({
       where: { id }
     })
 
     if (!existingEmployee) {
-      return res.status(404).json({ error: 'Employé non trouvé' })
+      return res.status(404).json({ error: 'Employee not found' })
     }
 
-    // Vérifier l'unicité du matricule si modifié
-    if (matricule && matricule !== existingEmployee.matricule) {
-      const duplicateMatricule = await prisma.employee.findUnique({
-        where: { matricule }
+    // Check employee ID uniqueness if changed
+    if (employeeId && employeeId !== existingEmployee.employeeId) {
+      const duplicateEmployeeId = await prisma.employee.findUnique({
+        where: { employeeId }
       })
 
-      if (duplicateMatricule) {
+      if (duplicateEmployeeId) {
         return res.status(400).json({ 
-          error: 'Un employé avec ce matricule existe déjà' 
+          error: 'An employee with this ID already exists' 
         })
       }
     }
 
-    // Vérifier l'unicité du CIN si modifié
-    if (cin && cin !== existingEmployee.cin) {
-      const duplicateCin = await prisma.employee.findUnique({
-        where: { cin }
+    // Check ID number uniqueness if changed
+    if (idNumber && idNumber !== existingEmployee.idNumber) {
+      const duplicateIdNumber = await prisma.employee.findUnique({
+        where: { idNumber }
       })
 
-      if (duplicateCin) {
+      if (duplicateIdNumber) {
         return res.status(400).json({ 
-          error: 'Un employé avec ce CIN existe déjà' 
+          error: 'An employee with this ID number already exists' 
         })
       }
     }
 
-    // Vérifier l'unicité du CNSS si modifié
-    if (cnss && cnss !== existingEmployee.cnss) {
-      const duplicateCnss = await prisma.employee.findUnique({
-        where: { cnss }
+    // Check NSSF number uniqueness if changed
+    if (nssfNumber && nssfNumber !== existingEmployee.nssfNumber) {
+      const duplicateNssfNumber = await prisma.employee.findUnique({
+        where: { nssfNumber }
       })
 
-      if (duplicateCnss) {
+      if (duplicateNssfNumber) {
         return res.status(400).json({ 
-          error: 'Un employé avec ce numéro CNSS existe déjà' 
+          error: 'An employee with this NSSF number already exists' 
         })
       }
     }
 
-    // Recalculer l'ancienneté si la date d'embauche a changé
-    let anciennete = existingEmployee.anciennete
-    let tauxAnciennete = existingEmployee.tauxAnciennete
-    let primeAnciennete = existingEmployee.primeAnciennete
+    // Recalculate seniority if hire date changed
+    let seniority = existingEmployee.seniority
 
-    if (dateEmbauche && dateEmbauche !== existingEmployee.dateEmbauche.toISOString()) {
-      const dateEmbaucheObj = new Date(dateEmbauche)
+    if (hireDate && hireDate !== existingEmployee.hireDate.toISOString()) {
+      const hireDateObj = new Date(hireDate)
       const today = new Date()
-      anciennete = Math.floor((today.getTime() - dateEmbaucheObj.getTime()) / (1000 * 60 * 60 * 24 * 365.25))
-      tauxAnciennete = Math.min(anciennete * 0.05, 0.25)
+      seniority = Math.floor((today.getTime() - hireDateObj.getTime()) / (1000 * 60 * 60 * 24 * 365.25))
     }
 
-    // Recalculer la prime d'ancienneté si le salaire de base a changé
-    if (salaireBase && salaireBase !== existingEmployee.salaireBase) {
-      primeAnciennete = parseFloat(salaireBase) * tauxAnciennete
-    }
+    // Calculate final values for all required fields
+    const finalHousingAllowance = housingAllowance !== undefined && housingAllowance !== null && housingAllowance !== '' 
+      ? parseFloat(housingAllowance) || 0 
+      : existingEmployee.housingAllowance
+    const finalMealAllowance = mealAllowance !== undefined && mealAllowance !== null && mealAllowance !== '' 
+      ? parseFloat(mealAllowance) || 0 
+      : existingEmployee.mealAllowance
+    const finalTransportAllowance = transportAllowance !== undefined && transportAllowance !== null && transportAllowance !== '' 
+      ? parseFloat(transportAllowance) || 0 
+      : existingEmployee.transportAllowance
+    const finalRepresentationAllowance = representationAllowance !== undefined && representationAllowance !== null && representationAllowance !== '' 
+      ? parseFloat(representationAllowance) || 0 
+      : existingEmployee.representationAllowance
 
-    // Calculer les valeurs finales pour tous les champs requis
-    const finalIndemniteLogement = indemniteLogement !== undefined && indemniteLogement !== null && indemniteLogement !== '' 
-      ? parseFloat(indemniteLogement) || 0 
-      : existingEmployee.indemniteLogement
-    const finalIndemnitePanier = indemnitePanier !== undefined && indemnitePanier !== null && indemnitePanier !== '' 
-      ? parseFloat(indemnitePanier) || 0 
-      : existingEmployee.indemnitePanier
-    const finalPrimeTransport = primeTransport !== undefined && primeTransport !== null && primeTransport !== '' 
-      ? parseFloat(primeTransport) || 0 
-      : existingEmployee.primeTransport
-    const finalIndemniteRepresentation = indemniteRepresentation !== undefined && indemniteRepresentation !== null && indemniteRepresentation !== '' 
-      ? parseFloat(indemniteRepresentation) || 0 
-      : existingEmployee.indemniteRepresentation
-
-    // Calculer le nouveau salaire brut
-    const newSalaireBase = salaireBase !== undefined ? parseFloat(salaireBase) : existingEmployee.salaireBase
-    const salaireBrut = newSalaireBase + primeAnciennete + 
-                       finalIndemniteLogement + 
-                       finalIndemnitePanier + 
-                       finalPrimeTransport + 
-                       finalIndemniteRepresentation
+    // Calculate new gross salary
+    const newBaseSalary = baseSalary !== undefined ? parseFloat(baseSalary) : existingEmployee.baseSalary
+    const grossSalary = newBaseSalary + 
+                      finalHousingAllowance + 
+                      finalMealAllowance + 
+                      finalTransportAllowance + 
+                      finalRepresentationAllowance
 
     const updatedEmployee = await prisma.employee.update({
       where: { id },
       data: {
-        ...(matricule && { matricule }),
-        ...(nom && { nom: nom.toUpperCase() }),
-        ...(prenom && { prenom: prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase() }),
-        ...(fonction && { fonction }),
-        ...(cin !== undefined && { cin }),
-        ...(cnss !== undefined && { cnss }),
-        ...(situationFamiliale && { situationFamiliale }),
-        ...(dateNaissance !== undefined && { dateNaissance: dateNaissance ? new Date(dateNaissance) : null }),
-        ...(dateEmbauche && { dateEmbauche: new Date(dateEmbauche) }),
-        ...(nbrDeductions !== undefined && { nbrDeductions: parseInt(nbrDeductions) }),
-        ...(nbreJourMois !== undefined && { nbreJourMois: parseInt(nbreJourMois) }),
-        ...(salaireBase !== undefined && { salaireBase: newSalaireBase }),
-        anciennete,
-        tauxAnciennete,
-        primeAnciennete,
-        indemniteLogement: finalIndemniteLogement,
-        indemnitePanier: finalIndemnitePanier,
-        primeTransport: finalPrimeTransport,
-        indemniteRepresentation: finalIndemniteRepresentation,
-        salaireBrut,
-        salaireBrutImposable: salaireBrut - finalPrimeTransport, // Transport non imposable
-        ...(compteBancaire !== undefined && { compteBancaire }),
-        ...(agence !== undefined && { agence }),
-        ...(telephone !== undefined && { telephone }),
+        ...(employeeId && { employeeId }),
+        ...(lastName && { lastName: lastName.toUpperCase() }),
+        ...(firstName && { firstName: firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() }),
+        ...(position && { position }),
+        ...(idNumber !== undefined && { idNumber }),
+        ...(nssfNumber !== undefined && { nssfNumber }),
+        ...(maritalStatus && { maritalStatus }),
+        ...(dateOfBirth !== undefined && { dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null }),
+        ...(hireDate && { hireDate: new Date(hireDate) }),
+        ...(numberOfDeductions !== undefined && { numberOfDeductions: parseInt(numberOfDeductions) }),
+        ...(numberOfDaysPerMonth !== undefined && { numberOfDaysPerMonth: parseInt(numberOfDaysPerMonth) }),
+        ...(baseSalary !== undefined && { baseSalary: newBaseSalary }),
+        seniority,
+        housingAllowance: finalHousingAllowance,
+        mealAllowance: finalMealAllowance,
+        transportAllowance: finalTransportAllowance,
+        representationAllowance: finalRepresentationAllowance,
+        grossSalary,
+        taxableGrossSalary: grossSalary,
+        ...(bankAccount !== undefined && { bankAccount }),
+        ...(bankBranch !== undefined && { bankBranch }),
+        ...(phone !== undefined && { phone }),
         ...(email !== undefined && { email }),
-        ...(adresse !== undefined && { adresse }),
+        ...(address !== undefined && { address }),
         ...(status && { status })
       }
     })
@@ -214,21 +204,21 @@ async function updateEmployee(id: string, req: NextApiRequest, res: NextApiRespo
 
 async function deleteEmployee(id: string, res: NextApiResponse) {
   try {
-    // Vérifier que l'employé existe
+    // Check if employee exists
     const existingEmployee = await prisma.employee.findUnique({
       where: { id }
     })
 
     if (!existingEmployee) {
-      return res.status(404).json({ error: 'Employé non trouvé' })
+      return res.status(404).json({ error: 'Employee not found' })
     }
 
-    // Supprimer l'employé (les relations seront supprimées en cascade)
+    // Delete employee (related records will be cascade deleted)
     await prisma.employee.delete({
       where: { id }
     })
 
-    return res.status(200).json({ message: 'Employé supprimé avec succès' })
+    return res.status(200).json({ message: 'Employee deleted successfully' })
   } catch (error) {
     console.error('Error deleting employee:', error)
     return res.status(500).json({ error: 'Failed to delete employee' })

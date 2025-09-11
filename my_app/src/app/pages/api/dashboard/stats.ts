@@ -19,22 +19,22 @@ export default async function handler(
     // Get total active employees
     const totalEmployees = await prisma.employee.count({
       where: {
-        status: 'ACTIF'
+        status: 'ACTIVE'
       }
     })
 
     // Get payroll calculations for current month
     const currentMonthPayrolls = await prisma.payrollCalculation.count({
       where: {
-        mois: currentMonth,
-        annee: currentYear
+        month: currentMonth,
+        year: currentYear
       }
     })
 
     // Get total documents generated this month
     const documentsThisMonth = await prisma.document.count({
       where: {
-        dateGeneration: {
+        generationDate: {
           gte: new Date(parseInt(currentYear), parseInt(currentMonth) - 1, 1),
           lt: new Date(parseInt(currentYear), parseInt(currentMonth), 1)
         }
@@ -44,15 +44,15 @@ export default async function handler(
     // Calculate total payroll amount for current month
     const payrollSum = await prisma.payrollCalculation.aggregate({
       where: {
-        mois: currentMonth,
-        annee: currentYear
+        month: currentMonth,
+        year: currentYear
       },
       _sum: {
-        salaireNetAPayer: true
+        netSalary: true
       }
     })
 
-    const totalPayrollAmount = payrollSum._sum.salaireNetAPayer || 0
+    const totalPayrollAmount = payrollSum._sum.netSalary || 0
 
     // Get advances statistics
     const advances = await prisma.advance.findMany({
@@ -63,10 +63,10 @@ export default async function handler(
 
     const advancesStats = {
       total: advances.length,
-      enCours: advances.filter(a => a.statut === 'EN_COURS').length,
-      rembourses: advances.filter(a => a.statut === 'REMBOURSE').length,
-      montantTotal: advances.reduce((sum, a) => sum + a.montant, 0),
-      soldeRestantTotal: advances.reduce((sum, a) => sum + a.soldeRestant, 0)
+      inProgress: advances.filter(a => a.status === 'IN_PROGRESS').length,
+      repaid: advances.filter(a => a.status === 'REPAID').length,
+      totalAmount: advances.reduce((sum, a) => sum + a.amount, 0),
+      totalRemainingBalance: advances.reduce((sum, a) => sum + a.remainingBalance, 0)
     }
 
     // Get credits statistics
@@ -78,10 +78,10 @@ export default async function handler(
 
     const creditsStats = {
       total: credits.length,
-      actifs: credits.filter(c => c.statut === 'ACTIF').length,
-      soldes: credits.filter(c => c.statut === 'SOLDE').length,
-      montantTotal: credits.reduce((sum, c) => sum + c.montantCredit, 0),
-      soldeRestantTotal: credits.reduce((sum, c) => sum + c.soldeRestant, 0)
+      active: credits.filter(c => c.status === 'ACTIVE').length,
+      paidOff: credits.filter(c => c.status === 'PAID_OFF').length,
+      totalAmount: credits.reduce((sum, c) => sum + c.loanAmount, 0),
+      totalRemainingBalance: credits.reduce((sum, c) => sum + c.remainingBalance, 0)
     }
 
     // Get recent activities (last 5 employees added)
@@ -92,9 +92,9 @@ export default async function handler(
       },
       select: {
         id: true,
-        nom: true,
-        prenom: true,
-        fonction: true,
+        lastName: true,
+        firstName: true,
+        position: true,
         createdAt: true
       }
     })
@@ -109,17 +109,17 @@ export default async function handler(
 
       const monthlySum = await prisma.payrollCalculation.aggregate({
         where: {
-          mois: month,
-          annee: year
+          month: month,
+          year: year
         },
         _sum: {
-          salaireNetAPayer: true
+          netSalary: true
         }
       })
 
       monthlyTrend.push({
         month: `${month}/${year}`,
-        amount: monthlySum._sum.salaireNetAPayer || 0
+        amount: monthlySum._sum.netSalary || 0
       })
     }
 

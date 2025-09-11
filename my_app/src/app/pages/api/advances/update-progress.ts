@@ -10,15 +10,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { advanceId, soldeRestant } = req.body;
+    const { advanceId, remainingBalance } = req.body;
 
     // Validation
     if (!advanceId) {
-      return res.status(400).json({ error: 'ID d\'avance requis' });
+      return res.status(400).json({ error: 'Advance ID required' });
     }
 
-    if (soldeRestant === undefined || soldeRestant < 0) {
-      return res.status(400).json({ error: 'Le solde restant doit être un nombre positif ou zéro' });
+    if (remainingBalance === undefined || remainingBalance < 0) {
+      return res.status(400).json({ error: 'Remaining balance must be a positive number or zero' });
     }
 
     // Check if advance exists
@@ -28,38 +28,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         employee: {
           select: {
             id: true,
-            matricule: true,
-            nom: true,
-            prenom: true,
-            fonction: true
+            employeeId: true,
+            lastName: true,
+            firstName: true,
+            position: true
           }
         }
       }
     });
 
     if (!existingAdvance) {
-      return res.status(404).json({ error: 'Avance non trouvée' });
+      return res.status(404).json({ error: 'Advance not found' });
     }
 
     // Validate that the new remaining balance doesn't exceed the original amount
-    if (parseFloat(soldeRestant) > existingAdvance.montant) {
+    if (parseFloat(remainingBalance) > existingAdvance.amount) {
       return res.status(400).json({ 
-        error: 'Le solde restant ne peut pas être supérieur au montant initial de l\'avance' 
+        error: 'Remaining balance cannot be greater than the initial advance amount' 
       });
     }
 
     // Prepare update data
     const updateData: any = {
-      soldeRestant: parseFloat(soldeRestant)
+      remainingBalance: parseFloat(remainingBalance)
     };
 
     // Auto-update status based on remaining balance
-    if (parseFloat(soldeRestant) === 0) {
-      updateData.statut = 'REMBOURSE';
-      updateData.dateRemboursementComplete = new Date();
-    } else if (existingAdvance.statut !== 'ANNULE') {
-      updateData.statut = 'EN_COURS';
-      updateData.dateRemboursementComplete = null;
+    if (parseFloat(remainingBalance) === 0) {
+      updateData.status = 'REPAID';
+      updateData.fullRepaymentDate = new Date();
+    } else if (existingAdvance.status !== 'CANCELLED') {
+      updateData.status = 'IN_PROGRESS';
+      updateData.fullRepaymentDate = null;
     }
 
     // Update advance
@@ -70,40 +70,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         employee: {
           select: {
             id: true,
-            matricule: true,
-            nom: true,
-            prenom: true,
-            fonction: true
+            employeeId: true,
+            lastName: true,
+            firstName: true,
+            position: true
           }
         }
       }
     });
 
     // Calculate progress information
-    const montantRembourse = updatedAdvance.montant - updatedAdvance.soldeRestant;
-    const progressionPourcentage = (montantRembourse / updatedAdvance.montant) * 100;
+    const amountRepaid = updatedAdvance.amount - updatedAdvance.remainingBalance;
+    const progressPercentage = (amountRepaid / updatedAdvance.amount) * 100;
 
     // Calculate expected progress based on time elapsed
-    const dateDebut = new Date(updatedAdvance.dateAvance);
+    const startDate = new Date(updatedAdvance.advanceDate);
     const now = new Date();
-    const monthsElapsed = Math.floor((now.getTime() - dateDebut.getTime()) / (1000 * 60 * 60 * 24 * 30));
-    const expectedProgress = Math.min(100, (monthsElapsed / updatedAdvance.nombreMensualites) * 100);
-    const isLate = progressionPourcentage < expectedProgress && updatedAdvance.statut === 'EN_COURS';
+    const monthsElapsed = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+    const expectedProgress = Math.min(100, (monthsElapsed / updatedAdvance.numberOfInstallments) * 100);
+    const isLate = progressPercentage < expectedProgress && updatedAdvance.status === 'IN_PROGRESS';
 
     const response = {
       ...updatedAdvance,
-      progressionCalculee: {
-        progressionPourcentage: Math.round(progressionPourcentage * 100) / 100,
-        montantRembourse: montantRembourse,
-        enRetard: isLate,
-        mensualitesEcoulees: monthsElapsed,
-        progressionAttendue: Math.round(expectedProgress * 100) / 100
+      calculatedProgress: {
+        progressPercentage: Math.round(progressPercentage * 100) / 100,
+        amountRepaid: amountRepaid,
+        isLate: isLate,
+        monthsElapsed: monthsElapsed,
+        expectedProgress: Math.round(expectedProgress * 100) / 100
       }
     };
 
     return res.status(200).json(response);
   } catch (error) {
     console.error('Error updating advance progress:', error);
-    return res.status(500).json({ error: 'Erreur lors de la mise à jour de la progression' });
+    return res.status(500).json({ error: 'Error updating progress' });
   }
 }

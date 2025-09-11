@@ -1,40 +1,40 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../../lib/prisma';
+import { prisma } from '../../../../../lib/prisma';
 import { DocumentType, DocumentStatus } from '@prisma/client';
-import { generateSalaryCertificatePDF, SalaryCertificateData } from '../../../../lib/pdfGenerators/salaryCertificatePDF';
+import { generateSalaryCertificatePDF, SalaryCertificateData } from '../../../../../lib/pdfGenerators/salaryCertificatePDF';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const { employeeId, type, dateDebut, dateFin, motif } = req.body;
+      const { employeeId, type, startDate, endDate, reason } = req.body;
 
-      if (!employeeId || !type || !dateDebut || !dateFin) {
+      if (!employeeId || !type || !startDate || !endDate) {
         return res.status(400).json({ 
-          error: 'Les paramètres employeeId, type, dateDebut et dateFin sont requis' 
+          error: 'employeeId, type, startDate and endDate parameters are required' 
         });
       }
 
-      // Vérifier si l'employé existe
+      // Check if employee exists
       const employee = await prisma.employee.findUnique({
         where: { id: employeeId }
       });
 
       if (!employee) {
-        return res.status(404).json({ error: 'Employé non trouvé' });
+        return res.status(404).json({ error: 'Employee not found' });
       }
 
-      // Calculer la période pour l'attestation
-      const startDate = new Date(dateDebut);
-      const endDate = new Date(dateFin);
-      const periode = `${startDate.toLocaleDateString('fr-FR')} - ${endDate.toLocaleDateString('fr-FR')}`;
+      // Calculate period for the certificate
+      const periodStart = new Date(startDate);
+      const periodEnd = new Date(endDate);
+      const period = `${periodStart.toLocaleDateString('en-US')} - ${periodEnd.toLocaleDateString('en-US')}`;
 
-      // Récupérer les calculs de paie pour la période demandée
+      // Get payroll calculations for the requested period
       const payrollCalculations = await prisma.payrollCalculation.findMany({
         where: {
           employeeId,
           createdAt: {
-            gte: startDate,
-            lte: endDate
+            gte: periodStart,
+            lte: periodEnd
           }
         },
         orderBy: {
@@ -42,104 +42,104 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       });
 
-      // Calculer les moyennes et totaux
-      let totalSalaireBrut = 0;
-      let totalSalaireNet = 0;
-      let nombreMois = payrollCalculations.length;
+      // Calculate averages and totals
+      let totalGrossSalary = 0;
+      let totalNetSalary = 0;
+      let numberOfMonths = payrollCalculations.length;
 
       payrollCalculations.forEach(calc => {
-        totalSalaireBrut += calc.totalGains;
-        totalSalaireNet += calc.salaireNetAPayer;
+        totalGrossSalary += calc.grossSalary;
+        totalNetSalary += calc.netSalary;
       });
 
-      const salaireBrutMoyen = nombreMois > 0 ? totalSalaireBrut / nombreMois : employee.salaireBase;
-      const salaireNetMoyen = nombreMois > 0 ? totalSalaireNet / nombreMois : employee.salaireNet;
+      const averageGrossSalary = numberOfMonths > 0 ? totalGrossSalary / numberOfMonths : employee.baseSalary;
+      const averageNetSalary = numberOfMonths > 0 ? totalNetSalary / numberOfMonths : employee.netSalary;
 
-      // Préparer les données pour le PDF
+      // Prepare data for PDF
       const certificateData: SalaryCertificateData = {
         employee: {
-          matricule: employee.matricule,
-          nom: employee.nom,
-          prenom: employee.prenom,
-          fonction: employee.fonction,
-          dateEmbauche: employee.dateEmbauche,
-          anciennete: employee.anciennete,
-          situationFamiliale: employee.situationFamiliale,
-          cin: employee.cin || '',
-          cnss: employee.cnss || '',
-          salaireBase: employee.salaireBase,
-          primeTransport: employee.primeTransport,
-          indemniteRepresentation: employee.indemniteRepresentation,
-          indemniteLogement: employee.indemniteLogement
+          employeeId: employee.employeeId,
+          lastName: employee.lastName,
+          firstName: employee.firstName,
+          position: employee.position,
+          hireDate: employee.hireDate,
+          seniority: employee.seniority,
+          maritalStatus: employee.maritalStatus,
+          idNumber: employee.idNumber || '',
+          nssfNumber: employee.nssfNumber || '',
+          baseSalary: employee.baseSalary,
+          transportAllowance: employee.transportAllowance,
+          representationAllowance: employee.representationAllowance,
+          housingAllowance: employee.housingAllowance
         },
         certificate: {
-          typeAttestation: type,
-          dateDebut: startDate,
-          dateFin: endDate,
-          motif: motif || '',
-          salaireBrutMoyen,
-          salaireNetMoyen,
-          nombreMoisCalcules: nombreMois
+          certificateType: type,
+          startDate: periodStart,
+          endDate: periodEnd,
+          reason: reason || '',
+          averageGrossSalary,
+          averageNetSalary,
+          calculatedMonths: numberOfMonths
         }
       };
 
-      // Générer le PDF
+      // Generate PDF
       const pdfBuffer = await generateSalaryCertificatePDF(certificateData);
 
-      // Créer le document attestation de salaire
-      const document = await prisma.document.create({
+      // Create salary certificate document
+      await prisma.document.create({
         data: {
-          type: DocumentType.ATTESTATION_SALAIRE,
-          title: `Attestation de salaire - ${employee.prenom} ${employee.nom}`,
-          description: `Attestation de ${type} pour la période ${periode}`,
+          type: DocumentType.SALARY_CERTIFICATE,
+          title: `Salary Certificate - ${employee.firstName} ${employee.lastName}`,
+          description: `${type} certificate for period ${period}`,
           employeeId,
-          periode,
-          generatedBy: 'system', // À remplacer par l'ID de l'utilisateur connecté
+          period,
+          generatedBy: 'system', // Replace with logged-in user ID
           fileSize: pdfBuffer.length,
           status: DocumentStatus.GENERATED,
           metadata: {
-            typeAttestation: type,
-            dateDebut,
-            dateFin,
-            motif: motif || '',
-            salaireBrutMoyen,
-            salaireNetMoyen,
-            nombreMoisCalcules: nombreMois,
-            dateEmbauche: employee.dateEmbauche,
-            fonction: employee.fonction,
-            anciennete: employee.anciennete
+            certificateType: type,
+            startDate,
+            endDate,
+            reason: reason || '',
+            averageGrossSalary,
+            averageNetSalary,
+            calculatedMonths: numberOfMonths,
+            hireDate: employee.hireDate,
+            position: employee.position,
+            seniority: employee.seniority
           }
         },
         include: {
           employee: {
             select: {
               id: true,
-              matricule: true,
-              nom: true,
-              prenom: true,
-              fonction: true,
-              dateEmbauche: true,
-              anciennete: true,
-              salaireBase: true,
-              primeTransport: true,
-              indemniteRepresentation: true,
-              indemniteLogement: true,
-              situationFamiliale: true,
-              cin: true,
-              cnss: true
+              employeeId: true,
+              lastName: true,
+              firstName: true,
+              position: true,
+              hireDate: true,
+              seniority: true,
+              baseSalary: true,
+              transportAllowance: true,
+              representationAllowance: true,
+              housingAllowance: true,
+              maritalStatus: true,
+              idNumber: true,
+              nssfNumber: true
             }
           }
         }
       });
 
-      // Retourner le PDF directement
+      // Return PDF directly
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="attestation-salaire-${employee.matricule}-${type}.pdf"`);
+      res.setHeader('Content-Disposition', `attachment; filename="salary-certificate-${employee.employeeId}-${type}.pdf"`);
       res.setHeader('Content-Length', pdfBuffer.length);
       res.status(200).send(pdfBuffer);
     } catch (error) {
       console.error('Error generating salary certificate:', error);
-      res.status(500).json({ error: 'Erreur lors de la génération de l\'attestation de salaire' });
+      res.status(500).json({ error: 'Error generating salary certificate' });
     }
   } else {
     res.setHeader('Allow', ['POST']);

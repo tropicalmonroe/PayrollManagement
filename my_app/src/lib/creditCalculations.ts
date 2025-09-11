@@ -1,182 +1,183 @@
-// Fonctions de calcul pour les crédits
+// Calculation functions for credits
 
 export interface CreditCalculationResult {
-  mensualitesEcoulees: number;
-  montantRembourseDu: number;
-  interetsPayesDus: number;
-  capitalRembourse: number;
-  soldeRestantCalcule: number;
-  progressionPourcentage: number;
-  enRetard: boolean;
-  moisRetard: number;
+  elapsedInstallments: number; // Previously mensualitesEcoulees
+  amountDueRepaid: number; // Previously montantRembourseDu
+  interestPaidDue: number; // Previously interetsPayesDus
+  principalRepaid: number; // Previously capitalRembourse
+  calculatedRemainingBalance: number; // Previously soldeRestantCalcule
+  progressPercentage: number; // Previously progressionPourcentage
+  isLate: boolean; // Previously enRetard
+  lateMonths: number; // Previously moisRetard
 }
 
 export interface AmortizationEntry {
-  numeroEcheance: number;
-  dateEcheance: Date;
-  mensualiteTTC: number;        // Total monthly payment (including taxes)
-  amortissement: number;        // Principal repayment portion
-  interetsHT: number;          // Interest portion (before tax)
-  tvaInterets: number;         // Tax on interest (10% in Morocco)
-  assurance: number;           // Insurance premium
-  capitalRestant: number;      // Remaining loan balance
+  installmentNumber: number; // Previously numeroEcheance
+  dueDate: Date; // Previously dateEcheance
+  totalMonthlyPayment: number; // Previously mensualiteTTC (Total monthly payment including taxes)
+  principalRepayment: number; // Previously amortissement (Principal repayment portion)
+  interestBeforeTax: number; // Previously interetsHT (Interest portion before tax)
+  interestTax: number; // Previously tvaInterets (Tax on interest, 10% in Morocco)
+  insurance: number; // Previously assurance (Insurance premium)
+  remainingPrincipal: number; // Previously capitalRestant (Remaining loan balance)
 }
 
 export function calculateCreditProgress(
-  montantCredit: number,
-  tauxInteret: number,
-  dureeAnnees: number,
-  mensualite: number,
-  dateDebut: Date,
-  montantRembourseCurrent: number = 0
+  loanAmount: number, // Previously montantCredit
+  interestRate: number, // Previously tauxInteret
+  durationYears: number, // Previously dureeAnnees
+  monthlyPayment: number, // Previously mensualite
+  startDate: Date, // Previously dateDebut
+  currentAmountRepaid: number = 0, // Previously montantRembourseCurrent
+  interestPaid: number, // Previously interetsPayesDusCurrent
 ): CreditCalculationResult {
   const now = new Date();
-  const debut = new Date(dateDebut);
+  const start = new Date(startDate);
   
-  // Validation des données d'entrée
-  if (!montantCredit || !dureeAnnees || !mensualite || montantCredit <= 0 || dureeAnnees <= 0 || mensualite <= 0) {
+  // Input data validation
+  if (!loanAmount || !durationYears || !monthlyPayment || loanAmount <= 0 || durationYears <= 0 || monthlyPayment <= 0) {
     return {
-      mensualitesEcoulees: 0,
-      montantRembourseDu: 0,
-      interetsPayesDus: 0,
-      capitalRembourse: 0,
-      soldeRestantCalcule: montantCredit,
-      progressionPourcentage: 0,
-      enRetard: false,
-      moisRetard: 0
+      elapsedInstallments: 0,
+      amountDueRepaid: 0,
+      interestPaidDue: 0,
+      principalRepaid: 0,
+      calculatedRemainingBalance: loanAmount,
+      progressPercentage: 0,
+      isLate: false,
+      lateMonths: 0
     };
   }
   
-  // Calculer le nombre de mois écoulés depuis le début
-  let moisEcoules = 0;
+  // Calculate the number of months elapsed since the start
+  let elapsedMonths = 0;
   
-  // Si la date de début est dans le futur, aucun mois écoulé
-  if (debut > now) {
-    moisEcoules = 0;
+  // If the start date is in the future, no months have elapsed
+  if (start > now) {
+    elapsedMonths = 0;
   } else {
-    // Calcul correct des mois écoulés
-    const anneesDiff = now.getFullYear() - debut.getFullYear();
-    const moisDiff = now.getMonth() - debut.getMonth();
+    // Correct calculation of elapsed months
+    const yearsDiff = now.getFullYear() - start.getFullYear();
+    const monthsDiff = now.getMonth() - start.getMonth();
     
-    moisEcoules = anneesDiff * 12 + moisDiff;
+    elapsedMonths = yearsDiff * 12 + monthsDiff;
     
-    // Si on n'a pas encore atteint le jour du mois, on retire un mois
-    if (now.getDate() < debut.getDate()) {
-      moisEcoules--;
+    // If the day of the month hasn't been reached, subtract one month
+    if (now.getDate() < start.getDate()) {
+      elapsedMonths--;
     }
     
-    // S'assurer que le nombre de mois est positif et raisonnable
-    moisEcoules = Math.max(0, moisEcoules);
+    // Ensure the number of months is positive and reasonable
+    elapsedMonths = Math.max(0, elapsedMonths);
     
-    // Limiter à un maximum raisonnable (par exemple 600 mois = 50 ans)
-    moisEcoules = Math.min(moisEcoules, 600);
+    // Limit to a reasonable maximum (e.g., 600 months = 50 years)
+    elapsedMonths = Math.min(elapsedMonths, 600);
   }
   
-  const totalMensualites = dureeAnnees * 12;
-  const mensualitesEcoulees = Math.min(moisEcoules, totalMensualites);
+  const totalInstallments = durationYears * 12;
+  const elapsedInstallments = Math.min(elapsedMonths, totalInstallments);
   
-  // Calcul du montant qui devrait être remboursé à ce jour
-  const montantRembourseDu = mensualitesEcoulees * mensualite;
+  // Calculate the amount that should have been repaid by now
+  const amountDueRepaid = elapsedInstallments * monthlyPayment;
   
-  // Calcul simple de la progression basée sur le montant remboursé réel
-  const progressionPourcentage = Math.min(100, (montantRembourseCurrent / montantCredit) * 100);
+  // Simple calculation of progress based on the actual amount repaid
+  const progressPercentage = Math.min(100, (currentAmountRepaid / loanAmount) * 100);
   
-  // Calcul du capital remboursé théorique
-  const tauxMensuel = tauxInteret / 100 / 12;
-  let capitalRembourse = 0;
-  let interetsPayesDus = 0;
+  // Calculate the theoretical principal repaid
+  const monthlyRate = interestRate / 100 / 12;
+  let principalRepaid = 0;
+  let interestPaidDue = 0;
   
-  if (mensualitesEcoulees > 0) {
-    // Calcul simplifié pour éviter les erreurs
-    if (tauxMensuel > 0) {
-      // Avec intérêts
-      let soldeRestant = montantCredit;
-      for (let i = 0; i < mensualitesEcoulees && soldeRestant > 0; i++) {
-        const interetsMois = soldeRestant * tauxMensuel;
-        const capitalMois = Math.min(mensualite - interetsMois, soldeRestant);
+  if (elapsedInstallments > 0) {
+    // Simplified calculation to avoid errors
+    if (monthlyRate > 0) {
+      // With interest
+      let remainingBalance = loanAmount;
+      for (let i = 0; i < elapsedInstallments && remainingBalance > 0; i++) {
+        const monthlyInterest = remainingBalance * monthlyRate;
+        const monthlyPrincipal = Math.min(monthlyPayment - monthlyInterest, remainingBalance);
         
-        if (capitalMois > 0) {
-          interetsPayesDus += interetsMois;
-          capitalRembourse += capitalMois;
-          soldeRestant -= capitalMois;
+        if (monthlyPrincipal > 0) {
+          interestPaidDue += monthlyInterest;
+          principalRepaid += monthlyPrincipal;
+          remainingBalance -= monthlyPrincipal;
         }
       }
     } else {
-      // Sans intérêts
-      capitalRembourse = Math.min(mensualitesEcoulees * mensualite, montantCredit);
+      // Without interest
+      principalRepaid = Math.min(elapsedInstallments * monthlyPayment, loanAmount);
     }
   }
   
-  const soldeRestantCalcule = Math.max(0, montantCredit - capitalRembourse);
+  const calculatedRemainingBalance = Math.max(0, loanAmount - principalRepaid);
   
-  // Vérifier si en retard (montant remboursé réel < montant dû)
-  const enRetard = montantRembourseCurrent < montantRembourseDu && mensualitesEcoulees > 0;
-  const moisRetard = enRetard && mensualite > 0 ? 
-    Math.max(0, Math.floor((montantRembourseDu - montantRembourseCurrent) / mensualite)) : 0;
+  // Check if late (actual repaid amount < amount due)
+  const isLate = currentAmountRepaid < amountDueRepaid && elapsedInstallments > 0;
+  const lateMonths = isLate && monthlyPayment > 0 ? 
+    Math.max(0, Math.floor((amountDueRepaid - currentAmountRepaid) / monthlyPayment)) : 0;
   
   return {
-    mensualitesEcoulees,
-    montantRembourseDu: Math.round(montantRembourseDu * 100) / 100,
-    interetsPayesDus: Math.round(interetsPayesDus * 100) / 100,
-    capitalRembourse: Math.round(capitalRembourse * 100) / 100,
-    soldeRestantCalcule: Math.round(soldeRestantCalcule * 100) / 100,
-    progressionPourcentage: Math.round(progressionPourcentage * 100) / 100,
-    enRetard,
-    moisRetard: Math.min(moisRetard, mensualitesEcoulees) // Limiter le retard au nombre de mois écoulés
+    elapsedInstallments,
+    amountDueRepaid: Math.round(amountDueRepaid * 100) / 100,
+    interestPaidDue: Math.round(interestPaidDue * 100) / 100,
+    principalRepaid: Math.round(principalRepaid * 100) / 100,
+    calculatedRemainingBalance: Math.round(calculatedRemainingBalance * 100) / 100,
+    progressPercentage: Math.round(progressPercentage * 100) / 100,
+    isLate,
+    lateMonths: Math.min(lateMonths, elapsedInstallments) // Limit late months to elapsed installments
   };
 }
 
 export function calculateMonthlyPayment(
-  montantCredit: number,
-  tauxInteret: number,
-  dureeAnnees: number
+  loanAmount: number, // Previously montantCredit
+  interestRate: number, // Previously tauxInteret
+  durationYears: number // Previously dureeAnnees
 ): number {
-  const tauxMensuel = tauxInteret / 100 / 12;
-  const nombreMensualites = dureeAnnees * 12;
+  const monthlyRate = interestRate / 100 / 12;
+  const numberOfInstallments = durationYears * 12;
   
-  if (tauxMensuel === 0) {
-    return montantCredit / nombreMensualites;
+  if (monthlyRate === 0) {
+    return loanAmount / numberOfInstallments;
   }
   
-  const mensualite = montantCredit * 
-    (tauxMensuel * Math.pow(1 + tauxMensuel, nombreMensualites)) / 
-    (Math.pow(1 + tauxMensuel, nombreMensualites) - 1);
+  const monthlyPayment = loanAmount * 
+    (monthlyRate * Math.pow(1 + monthlyRate, numberOfInstallments)) / 
+    (Math.pow(1 + monthlyRate, numberOfInstallments) - 1);
     
-  return Math.round(mensualite * 100) / 100;
+  return Math.round(monthlyPayment * 100) / 100;
 }
 
-export function getNextPaymentDate(dateDebut: Date, mensualitesPayees: number): Date {
-  const nextDate = new Date(dateDebut);
-  nextDate.setMonth(nextDate.getMonth() + mensualitesPayees + 1);
+export function getNextPaymentDate(startDate: Date, paidInstallments: number): Date {
+  const nextDate = new Date(startDate);
+  nextDate.setMonth(nextDate.getMonth() + paidInstallments + 1);
   return nextDate;
 }
 
 export function getCreditStatus(
-  dateDebut: Date,
-  dateFin: Date,
-  montantCredit: number,
-  montantRembourse: number,
-  enRetard: boolean,
-  moisRetard: number
-): 'ACTIF' | 'SOLDE' | 'SUSPENDU' {
+  startDate: Date, // Previously dateDebut
+  endDate: Date, // Previously dateFin
+  loanAmount: number, // Previously montantCredit
+  amountRepaid: number, // Previously montantRembourse
+  isLate: boolean, // Previously enRetard
+  lateMonths: number // Previously moisRetard
+): 'ACTIVE' | 'PAID_OFF' | 'SUSPENDED' {
   const now = new Date();
   
-  // Si complètement remboursé
-  if (montantRembourse >= montantCredit) {
-    return 'SOLDE';
+  // If fully repaid
+  if (amountRepaid >= loanAmount) {
+    return 'PAID_OFF';
   }
   
-  // Si en retard de plus de 3 mois
-  if (enRetard && moisRetard > 3) {
-    return 'SUSPENDU';
+  // If late by more than 3 months
+  if (isLate && lateMonths > 3) {
+    return 'SUSPENDED';
   }
   
-  // Si la date de fin est dépassée mais pas complètement remboursé
-  if (now > dateFin && montantRembourse < montantCredit) {
-    return 'SUSPENDU';
+  // If the end date is passed but not fully repaid
+  if (now > endDate && amountRepaid < loanAmount) {
+    return 'SUSPENDED';
   }
   
-  return 'ACTIF';
+  return 'ACTIVE';
 }
 
 /**
@@ -184,80 +185,80 @@ export function getCreditStatus(
  * Based on the provided reference table format - calibrated to match exact banking calculations
  */
 export function generateAmortizationTable(
-  montantCredit: number,
-  tauxInteret: number,
-  dureeMois: number,
-  dateDebut: Date,
-  tauxAssurance: number = 0.809 // Default insurance rate 0.809% as in CFG Bank example
+  loanAmount: number, // Previously montantCredit
+  interestRate: number, // Previously tauxInteret
+  durationMonths: number, // Previously dureeMois
+  startDate: Date, // Previously dateDebut
+  insuranceRate: number = 0.809 // Previously tauxAssurance (Default insurance rate 0.809% as in CFG Bank example)
 ): AmortizationEntry[] {
   const schedule: AmortizationEntry[] = [];
-  const tauxMensuel = tauxInteret / 100 / 12; // Monthly interest rate
-  const tauxTVA = 0.10; // 10% VAT on interest in Morocco
+  const monthlyRate = interestRate / 100 / 12; // Monthly interest rate
+  const taxRate = 0.10; // Previously tauxTVA (10% VAT on interest in Morocco)
   
   // Based on reverse engineering, the base monthly payment should be around 52,844.53
   // This suggests a slightly different calculation or rounding method
-  let mensualiteBase = 0;
-  if (tauxMensuel > 0) {
+  let baseMonthlyPayment = 0;
+  if (monthlyRate > 0) {
     // Standard formula but with banking-specific adjustments
-    mensualiteBase = montantCredit * 
-      (tauxMensuel * Math.pow(1 + tauxMensuel, dureeMois)) / 
-      (Math.pow(1 + tauxMensuel, dureeMois) - 1);
+    baseMonthlyPayment = loanAmount * 
+      (monthlyRate * Math.pow(1 + monthlyRate, durationMonths)) / 
+      (Math.pow(1 + monthlyRate, durationMonths) - 1);
     
     // Adjust to match reference table (calibration based on analysis)
     // The reference shows a base payment of ~52,844.53 vs calculated ~55,955.46
     // This suggests banks may use a different rounding or calculation method
-    const adjustmentFactor = 52844.53 / mensualiteBase;
-    mensualiteBase = mensualiteBase * adjustmentFactor;
+    const adjustmentFactor = 52844.53 / baseMonthlyPayment;
+    baseMonthlyPayment = baseMonthlyPayment * adjustmentFactor;
   } else {
-    mensualiteBase = montantCredit / dureeMois;
+    baseMonthlyPayment = loanAmount / durationMonths;
   }
   
-  let capitalRestant = montantCredit;
+  let remainingPrincipal = loanAmount;
   
-  for (let i = 1; i <= dureeMois; i++) {
-    const dateEcheance = new Date(dateDebut);
-    dateEcheance.setMonth(dateEcheance.getMonth() + i);
+  for (let i = 1; i <= durationMonths; i++) {
+    const dueDate = new Date(startDate);
+    dueDate.setMonth(dueDate.getMonth() + i);
     
-    // Calculate interest on remaining balance: Intérêts = (taux nominal / 12) × capital restant
+    // Calculate interest on remaining balance: Interest = (nominal rate / 12) × remaining principal
     // Apply slight adjustment to match reference (-99.17 MAD difference observed)
-    const interetsHT = capitalRestant * tauxMensuel * 0.9967; // Calibration factor
+    const interestBeforeTax = remainingPrincipal * monthlyRate * 0.9967; // Calibration factor
     
-    // Calculate principal payment
-    const amortissement = mensualiteBase - interetsHT;
+    // Calculate principal repayment
+    const principalRepayment = baseMonthlyPayment - interestBeforeTax;
     
     // Calculate VAT on interest
-    const tvaInterets = interetsHT * tauxTVA;
+    const interestTax = interestBeforeTax * taxRate;
     
     // Calculate insurance - based on reference table pattern
     // The reference shows specific values: 5783.23, 5791.70, 5799.58...
-    let assurance;
+    let insurance;
     if (i === 1) {
-      assurance = 5783.23;
+      insurance = 5783.23;
     } else if (i === 2) {
-      assurance = 5791.70;
+      insurance = 5791.70;
     } else if (i === 3) {
-      assurance = 5799.58;
+      insurance = 5799.58;
     } else {
       // For other months, use progressive increase pattern
-      const assuranceBase = montantCredit * (tauxAssurance / 100) / 12;
-      assurance = assuranceBase + (i - 1) * 8.5; // Adjusted increase rate
+      const baseInsurance = loanAmount * (insuranceRate / 100) / 12;
+      insurance = baseInsurance + (i - 1) * 8.5; // Adjusted increase rate
     }
     
     // Total monthly payment - fixed at 61,619.31 based on reference
-    const mensualiteTTC = 61619.31;
+    const totalMonthlyPayment = 61619.31;
     
     // Update remaining balance
-    capitalRestant = Math.max(0, capitalRestant - amortissement);
+    remainingPrincipal = Math.max(0, remainingPrincipal - principalRepayment);
     
     schedule.push({
-      numeroEcheance: i,
-      dateEcheance,
-      mensualiteTTC: Math.round(mensualiteTTC * 100) / 100,
-      amortissement: Math.round(amortissement * 100) / 100,
-      interetsHT: Math.round(interetsHT * 100) / 100,
-      tvaInterets: Math.round(tvaInterets * 100) / 100,
-      assurance: Math.round(assurance * 100) / 100,
-      capitalRestant: Math.round(capitalRestant * 100) / 100
+      installmentNumber: i,
+      dueDate,
+      totalMonthlyPayment: Math.round(totalMonthlyPayment * 100) / 100,
+      principalRepayment: Math.round(principalRepayment * 100) / 100,
+      interestBeforeTax: Math.round(interestBeforeTax * 100) / 100,
+      interestTax: Math.round(interestTax * 100) / 100,
+      insurance: Math.round(insurance * 100) / 100,
+      remainingPrincipal: Math.round(remainingPrincipal * 100) / 100
     });
   }
   

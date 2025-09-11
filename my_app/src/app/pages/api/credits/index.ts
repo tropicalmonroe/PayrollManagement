@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const { employeeId } = req.query;
       
-      // Construire la requête avec ou sans filtre par employé
+      // Build query with or without employee filter
       const whereClause = employeeId ? { employeeId: employeeId as string } : {};
       
       const credits = await prisma.credit.findMany({
@@ -16,10 +16,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           employee: {
             select: {
               id: true,
-              matricule: true,
-              nom: true,
-              prenom: true,
-              fonction: true
+              employeeId: true,
+              lastName: true,
+              firstName: true,
+              position: true
             }
           }
         },
@@ -28,166 +28,164 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       });
 
-      // Calculer automatiquement les remboursements basés sur le temps écoulé
+      // Calculate automatic repayments based on elapsed time
       const creditsWithProgress = credits.map(credit => {
         const now = new Date();
-        const debut = new Date(credit.dateDebut);
+        const startDate = new Date(credit.startDate);
         
-        // Calcul des mois écoulés depuis le début du crédit
-        let moisEcoules = 0;
-        if (debut <= now) {
-          const diffTime = now.getTime() - debut.getTime();
+        // Calculate months elapsed since credit start
+        let monthsElapsed = 0;
+        if (startDate <= now) {
+          const diffTime = now.getTime() - startDate.getTime();
           const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-          moisEcoules = Math.floor(diffDays / 30.44); // Moyenne de jours par mois
+          monthsElapsed = Math.floor(diffDays / 30.44); // Average days per month
           
-          // Limiter au nombre total de mensualités du crédit
-          const totalMensualites = credit.dureeAnnees * 12;
-          moisEcoules = Math.max(0, Math.min(moisEcoules, totalMensualites));
+          // Limit to total number of credit installments
+          const totalInstallments = credit.durationYears * 12;
+          monthsElapsed = Math.max(0, Math.min(monthsElapsed, totalInstallments));
         }
         
-        // Calcul du montant qui devrait être remboursé automatiquement
-        const montantRembourseDu = moisEcoules * credit.mensualite;
+        // Calculate amount that should be automatically repaid
+        const amountRepaidAuto = monthsElapsed * credit.monthlyPayment;
         
-        // Utiliser le montant remboursé automatique si le montant en base est 0 ou inférieur
-        const montantRembourseFinal = credit.montantRembourse > 0 ? 
-          credit.montantRembourse : 
-          Math.min(montantRembourseDu, credit.montantCredit);
+        // Use automatic repaid amount if database amount is 0 or less
+        const finalAmountRepaid = credit.amountRepaid > 0 ? 
+          credit.amountRepaid : 
+          Math.min(amountRepaidAuto, credit.loanAmount);
         
-        // Calcul de la progression basée sur le montant remboursé final
-        const progressionPourcentage = Math.min(100, (montantRembourseFinal / credit.montantCredit) * 100);
+        // Calculate progress based on final repaid amount
+        const progressPercentage = Math.min(100, (finalAmountRepaid / credit.loanAmount) * 100);
         
-        // Calcul du solde restant
-        const soldeRestantCalcule = Math.max(0, credit.montantCredit - montantRembourseFinal);
+        // Calculate remaining balance
+        const calculatedRemainingBalance = Math.max(0, credit.loanAmount - finalAmountRepaid);
         
-        // Déterminer le statut
-        let newStatus = credit.statut;
-        if (montantRembourseFinal >= credit.montantCredit) {
-          newStatus = 'SOLDE';
-        } else if (now > new Date(credit.dateFin) && montantRembourseFinal < credit.montantCredit) {
-          newStatus = 'SUSPENDU';
+        // Determine status
+        let newStatus = credit.status;
+        if (finalAmountRepaid >= credit.loanAmount) {
+          newStatus = 'PAID_OFF';
+        } else if (now > new Date(credit.endDate) && finalAmountRepaid < credit.loanAmount) {
+          newStatus = 'SUSPENDED';
         } else {
-          newStatus = 'ACTIF';
+          newStatus = 'ACTIVE';
         }
 
         return {
           ...credit,
-          montantRembourse: montantRembourseFinal,
-          soldeRestant: soldeRestantCalcule,
-          statut: newStatus,
-          progressionCalculee: {
-            mensualitesEcoulees: moisEcoules,
-            montantRembourseDu: Math.round(montantRembourseDu * 100) / 100,
-            progressionPourcentage: Math.round(progressionPourcentage * 100) / 100,
-            enRetard: false, // Pas de retard si on suppose tous les paiements effectués
-            moisRetard: 0
+          amountRepaid: finalAmountRepaid,
+          remainingBalance: calculatedRemainingBalance,
+          status: newStatus,
+          calculatedProgress: {
+            installmentsElapsed: monthsElapsed,
+            amountRepaidAuto: Math.round(amountRepaidAuto * 100) / 100,
+            progressPercentage: Math.round(progressPercentage * 100) / 100,
+            isOverdue: false, // No delay if we assume all payments made
+            monthsOverdue: 0
           }
         };
       });
 
       res.status(200).json(creditsWithProgress);
     } catch (error) {
-      console.error('Erreur lors de la récupération des crédits:', error);
-      res.status(500).json({ error: 'Erreur lors de la récupération des crédits' });
+      console.error('Error fetching credits:', error);
+      res.status(500).json({ error: 'Error fetching credits' });
     }
   } else if (req.method === 'POST') {
     try {
       const {
         employeeId,
         type,
-        montantCredit,
-        tauxInteret,
-        dureeAnnees,
-        dateDebut,
-        banque,
-        numeroCompte,
+        loanAmount,
+        interestRate,
+        durationYears,
+        startDate,
+        bank,
+        accountNumber,
         notes,
         createdBy
       } = req.body;
 
-      // Validation des données
-      if (!employeeId || !type || !montantCredit || !tauxInteret || !dateDebut || !banque) {
-        return res.status(400).json({ error: 'Tous les champs obligatoires doivent être remplis' });
+      // Data validation
+      if (!employeeId || !type || !loanAmount || !interestRate || !startDate || !bank) {
+        return res.status(400).json({ error: 'All required fields must be filled' });
       }
 
-      // Validation et conversion des données
-      const montant = parseFloat(montantCredit);
-      const taux = parseFloat(tauxInteret);
-      const duree = parseInt(dureeAnnees) || 1;
+      // Validation and data conversion
+      const amount = parseFloat(loanAmount);
+      const rate = parseFloat(interestRate);
+      const duration = parseInt(durationYears) || 1;
       
-      if (montant <= 0 || taux < 0 || duree <= 0 || duree > 50) {
-        return res.status(400).json({ error: 'Valeurs numériques invalides' });
+      if (amount <= 0 || rate < 0 || duration <= 0 || duration > 50) {
+        return res.status(400).json({ error: 'Invalid numeric values' });
       }
 
-      // Calcul de la mensualité (formule d'amortissement)
-      const tauxMensuel = taux / 100 / 12;
-      const nombreMensualites = duree * 12;
-      let mensualite;
+      // Calculate monthly payment (amortization formula)
+      const monthlyRate = rate / 100 / 12;
+      const numberOfInstallments = duration * 12;
+      let monthlyPayment;
       
-      if (tauxMensuel > 0) {
-        mensualite = montant * (tauxMensuel * Math.pow(1 + tauxMensuel, nombreMensualites)) / 
-                    (Math.pow(1 + tauxMensuel, nombreMensualites) - 1);
+      if (monthlyRate > 0) {
+        monthlyPayment = amount * (monthlyRate * Math.pow(1 + monthlyRate, numberOfInstallments)) / 
+                    (Math.pow(1 + monthlyRate, numberOfInstallments) - 1);
       } else {
-        // Si taux = 0, mensualité = montant / nombre de mois
-        mensualite = montant / nombreMensualites;
+        // If rate = 0, monthly payment = amount / number of months
+        monthlyPayment = amount / numberOfInstallments;
       }
 
-      // Calcul de la date de fin
-      const dateDebutObj = new Date(dateDebut);
-      if (isNaN(dateDebutObj.getTime())) {
-        return res.status(400).json({ error: 'Date de début invalide' });
+      // Calculate end date
+      const startDateObj = new Date(startDate);
+      if (isNaN(startDateObj.getTime())) {
+        return res.status(400).json({ error: 'Invalid start date' });
       }
       
-      const dateFin = new Date(dateDebutObj);
-      dateFin.setFullYear(dateFin.getFullYear() + duree);
+      const endDate = new Date(startDateObj);
+      endDate.setFullYear(endDate.getFullYear() + duration);
       
-      if (isNaN(dateFin.getTime())) {
-        return res.status(400).json({ error: 'Erreur de calcul de la date de fin' });
+      if (isNaN(endDate.getTime())) {
+        return res.status(400).json({ error: 'Error calculating end date' });
       }
 
-      // Générer l'échéancier complet
-      const tauxAssuranceValue = 0.809; // Défaut 0.809%
+      // Generate complete payment schedule
+      const insuranceRateValue = 0.809; // Default 0.809%
       const amortizationSchedule = generateAmortizationTable(
-        montant,
-        taux,
-        nombreMensualites,
-        dateDebutObj,
-        tauxAssuranceValue
+        amount,
+        rate,
+        numberOfInstallments,
+        startDateObj,
+        insuranceRateValue
       );
 
-      // Créer le crédit
+      // Create credit - only include fields that exist in the schema
       const newCredit = await prisma.credit.create({
         data: {
           employeeId,
           type,
-          montantCredit: parseFloat(montantCredit),
-          tauxInteret: parseFloat(tauxInteret),
-          dureeAnnees: parseInt(dureeAnnees) || 1,
-          mensualite: Math.round(mensualite * 100) / 100,
-          dateDebut: new Date(dateDebut),
-          dateFin,
-          soldeRestant: parseFloat(montantCredit),
-          montantRembourse: 0,
-          statut: 'ACTIF',
-          banque,
-          numeroCompte: numeroCompte || null,
+          loanAmount: parseFloat(loanAmount),
+          interestRate: parseFloat(interestRate),
+          durationYears: parseInt(durationYears) || 1,
+          monthlyPayment: Math.round(monthlyPayment * 100) / 100,
+          startDate: new Date(startDate),
+          endDate,
+          remainingBalance: parseFloat(loanAmount),
+          amountRepaid: 0,
+          status: 'ACTIVE',
+          bank,
+          accountNumber: accountNumber || null,
           notes: notes || null,
-          interetsPayes: 0,
-          capitalRestant: parseFloat(montantCredit),
           createdBy: createdBy || 'system'
         }
       });
 
-      // Retourner le crédit avec les informations de l'employé
+      // Return credit with employee information
       const credit = await prisma.credit.findUnique({
         where: { id: newCredit.id },
         include: {
           employee: {
             select: {
               id: true,
-              matricule: true,
-              nom: true,
-              prenom: true,
-              fonction: true
+              employeeId: true,
+              lastName: true,
+              firstName: true,
+              position: true
             }
           }
         }
@@ -195,8 +193,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       res.status(201).json(credit);
     } catch (error) {
-      console.error('Erreur lors de la création du crédit:', error);
-      res.status(500).json({ error: 'Erreur lors de la création du crédit' });
+      console.error('Error creating credit:', error);
+      res.status(500).json({ error: 'Error creating credit' });
     }
   } else {
     res.setHeader('Allow', ['GET', 'POST']);

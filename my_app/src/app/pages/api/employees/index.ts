@@ -39,125 +39,117 @@ async function getEmployees(req: NextApiRequest, res: NextApiResponse) {
 async function createEmployee(req: NextApiRequest, res: NextApiResponse) {
   try {
     const {
-      matricule,
-      nom,
-      prenom,
-      fonction,
-      cin,
-      cnss,
-      situationFamiliale,
-      dateNaissance,
-      dateEmbauche,
-      nbrDeductions,
-      nbreJourMois,
-      salaireBase,
-      indemniteLogement,
-      indemnitePanier,
-      primeTransport,
-      indemniteRepresentation,
-      compteBancaire,
-      agence,
-      telephone,
+      employeeId,
+      lastName,
+      firstName,
+      position,
+      idNumber,
+      nssfNumber,
+      maritalStatus,
+      dateOfBirth,
+      hireDate,
+      numberOfDeductions,
+      numberOfDaysPerMonth,
+      baseSalary,
+      housingAllowance,
+      mealAllowance,
+      transportAllowance,
+      representationAllowance,
+      bankAccount,
+      bankBranch,
+      phone,
       email,
-      adresse,
-      // CNSS Prestations - Part Salariale (optionnelles)
-      useCnssPrestation,
-      useAmoSalariale,
-      useRetraiteSalariale,
-      useAssuranceDiversSalariale
+      address,
+      // Insurance options (optional)
+      subjectToNssf,
+      subjectToShif,
+      subjectToHousingLevy
     } = req.body
 
-    // Validation des champs obligatoires
-    if (!matricule || !nom || !prenom || !fonction || !dateEmbauche || !salaireBase) {
+    // Required field validation
+    if (!employeeId || !lastName || !firstName || !position || !hireDate || !baseSalary) {
       return res.status(400).json({ 
-        error: 'Les champs matricule, nom, prénom, fonction, date d\'embauche et salaire de base sont obligatoires' 
+        error: 'Employee ID, last name, first name, position, hire date and base salary are required fields' 
       })
     }
 
-    // Vérifier l'unicité du matricule
+    // Check employee ID uniqueness
     const existingEmployee = await prisma.employee.findUnique({
-      where: { matricule }
+      where: { employeeId }
     })
 
     if (existingEmployee) {
       return res.status(400).json({ 
-        error: 'Un employé avec ce matricule existe déjà' 
+        error: 'An employee with this ID already exists' 
       })
     }
 
-    // Vérifier l'unicité du CIN si fourni
-    if (cin) {
-      const existingCin = await prisma.employee.findUnique({
-        where: { cin }
+    // Check ID number uniqueness if provided
+    if (idNumber) {
+      const existingIdNumber = await prisma.employee.findUnique({
+        where: { idNumber }
       })
 
-      if (existingCin) {
+      if (existingIdNumber) {
         return res.status(400).json({ 
-          error: 'Un employé avec ce CIN existe déjà' 
+          error: 'An employee with this ID number already exists' 
         })
       }
     }
 
-    // Vérifier l'unicité du CNSS si fourni
-    if (cnss) {
-      const existingCnss = await prisma.employee.findUnique({
-        where: { cnss }
+    // Check NSSF number uniqueness if provided
+    if (nssfNumber) {
+      const existingNssfNumber = await prisma.employee.findUnique({
+        where: { nssfNumber }
       })
 
-      if (existingCnss) {
+      if (existingNssfNumber) {
         return res.status(400).json({ 
-          error: 'Un employé avec ce numéro CNSS existe déjà' 
+          error: 'An employee with this NSSF number already exists' 
         })
       }
     }
 
-    // Calculer l'ancienneté en années
-    const dateEmbaucheObj = new Date(dateEmbauche)
+    // Calculate seniority in years
+    const hireDateObj = new Date(hireDate)
     const today = new Date()
-    const anciennete = Math.floor((today.getTime() - dateEmbaucheObj.getTime()) / (1000 * 60 * 60 * 24 * 365.25))
+    const seniority = Math.floor((today.getTime() - hireDateObj.getTime()) / (1000 * 60 * 60 * 24 * 365.25))
 
-    // Calculer le taux d'ancienneté (exemple: 5% par année, max 25%)
-    const tauxAnciennete = Math.min(anciennete * 0.05, 0.25)
-    const primeAnciennete = salaireBase * tauxAnciennete
-
-    // Calculer le salaire brut
-    const salaireBrut = salaireBase + primeAnciennete + (indemniteLogement || 0) + 
-                       (indemnitePanier || 0) + (primeTransport || 0) + (indemniteRepresentation || 0)
+    // Calculate gross salary
+    const grossSalary = baseSalary + (housingAllowance || 0) + (mealAllowance || 0) + 
+                        (transportAllowance || 0) + (representationAllowance || 0)
 
     const employee = await prisma.employee.create({
       data: {
-        matricule,
-        nom: nom.toUpperCase(),
-        prenom: prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase(),
-        fonction,
-        cin,
-        cnss,
-        situationFamiliale: situationFamiliale || 'CELIBATAIRE',
-        dateNaissance: dateNaissance ? new Date(dateNaissance) : null,
-        dateEmbauche: new Date(dateEmbauche),
-        anciennete,
-        nbrDeductions: nbrDeductions || 0,
-        nbreJourMois: nbreJourMois || 26,
-        salaireBase: parseFloat(salaireBase),
-        tauxAnciennete,
-        primeAnciennete,
-        indemniteLogement: parseFloat(indemniteLogement || 0),
-        indemnitePanier: parseFloat(indemnitePanier || 0),
-        primeTransport: parseFloat(primeTransport || 0),
-        indemniteRepresentation: parseFloat(indemniteRepresentation || 0),
-        salaireBrut,
-        salaireBrutImposable: salaireBrut,
-        salaireNet: 0, // Sera calculé lors du calcul de paie
-        compteBancaire,
-        agence,
-        telephone,
+        employeeId,
+        lastName: lastName.toUpperCase(),
+        firstName: firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase(),
+        position,
+        idNumber,
+        nssfNumber,
+        maritalStatus: maritalStatus || 'SINGLE',
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+        hireDate: new Date(hireDate),
+        seniority,
+        numberOfDeductions: numberOfDeductions || 0,
+        numberOfDaysPerMonth: numberOfDaysPerMonth || 26,
+        baseSalary: parseFloat(baseSalary),
+        housingAllowance: parseFloat(housingAllowance || 0),
+        mealAllowance: parseFloat(mealAllowance || 0),
+        transportAllowance: parseFloat(transportAllowance || 0),
+        representationAllowance: parseFloat(representationAllowance || 0),
+        grossSalary,
+        taxableGrossSalary: grossSalary,
+        netSalary: 0, // Will be calculated during payroll processing
+        bankAccount,
+        bankBranch,
+        phone,
         email,
-        adresse,
-        // CNSS Prestations - Part Salariale (optionnelles)
-        useCnssPrestation: useCnssPrestation !== undefined ? useCnssPrestation : true,
-        useAmoSalariale: useAmoSalariale !== undefined ? useAmoSalariale : true,
-        useRetraiteSalariale: useRetraiteSalariale !== undefined ? useRetraiteSalariale : true,
-        useAssuranceDiversSalariale: useAssuranceDiversSalariale !== undefined ? useAssuranceDiversSalariale : true
+        address,
+        // Insurance options
+        subjectToNssf: subjectToNssf !== undefined ? subjectToNssf : true,
+        subjectToShif: subjectToShif !== undefined ? subjectToShif : true,
+        subjectToHousingLevy: subjectToHousingLevy !== undefined ? subjectToHousingLevy : true
       }
     })
 

@@ -6,7 +6,7 @@ if (req.method === 'GET') {
     try {
     const { id } = req.query;
 
-    // Récupérer le document
+    // Retrieve the document
     const document = await prisma.document.findUnique({
         where: { id: id as string },
         include: {
@@ -15,10 +15,10 @@ if (req.method === 'GET') {
     });
 
     if (!document) {
-        return res.status(404).json({ error: 'Document non trouvé' });
+        return res.status(404).json({ error: 'Document not found' });
     }
 
-    // Récupérer le calcul de paie associé
+    // Retrieve the associated payroll calculation
     const metadata = document.metadata as any;
     const payrollCalculation = await prisma.payrollCalculation.findUnique({
         where: { id: metadata?.payrollCalculationId },
@@ -28,17 +28,17 @@ if (req.method === 'GET') {
     });
 
     if (!payrollCalculation) {
-        return res.status(404).json({ error: 'Calcul de paie non trouvé' });
+        return res.status(404).json({ error: 'Payroll calculation not found' });
     }
 
-    // Générer le HTML du bulletin de paie
+    // Generate the payslip HTML
     const html = generatePayslipHTML(document, payrollCalculation);
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.status(200).send(html);
     } catch (error) {
     console.error('Error generating payslip view:', error);
-    res.status(500).json({ error: 'Erreur lors de la génération du bulletin' });
+    res.status(500).json({ error: 'Error generating payslip' });
     }
 } else {
     res.setHeader('Allow', ['GET']);
@@ -48,46 +48,47 @@ if (req.method === 'GET') {
 
 function generatePayslipHTML(document: any, payrollCalculation: any) {
 const employee = payrollCalculation.employee;
-const [monthName, year] = document.periode.split(' ');
+const [monthName, year] = document.period.split(' ');
 
 const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
+    style: 'currency',
+    currency: 'KES',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
     }).format(amount)
 }
 
 const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric'
     }).format(new Date(date))
 }
 
-const getSituationFamiliale = () => {
-    switch (employee.situationFamiliale) {
-    case 'CELIBATAIRE': return 'Célibataire'
-    case 'MARIE': return 'Marié(e)'
-    case 'DIVORCE': return 'Divorcé(e)'
-    case 'VEUF': return 'Veuf/Veuve'
-    default: return employee.situationFamiliale
+const getMaritalStatus = () => {
+    switch (employee.maritalStatus) {
+    case 'SINGLE': return 'Single'
+    case 'MARRIED': return 'Married'
+    case 'DIVORCED': return 'Divorced'
+    case 'WIDOWED': return 'Widowed'
+    default: return employee.maritalStatus
     }
 }
 
-// Calculer les taux en pourcentage
-const tauxCNSS = 4.48
-const tauxAMO = 2.26
-const tauxAssuranceDivers = 1.26
-const tauxRetraite = 6.00
+// Calculate Kenyan statutory rates
+const nssfRate = 6.00; // 6%
+const shifRate = 2.75; // 2.75%
+const housingLevyRate = 1.50; // 1.5%
 
 return `
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bulletin de Paie - ${employee.prenom} ${employee.nom}</title>
+    <title>Payslip - ${employee.firstName} ${employee.lastName}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -132,7 +133,7 @@ return `
         .items-start { align-items: flex-start; }
         .flex-1 { flex: 1; }
         
-        /* Améliorer la visibilité des lignes du tableau */
+        /* Improve table line visibility */
         .grid.border-2 { border: 2px solid #000 !important; }
         .border-black { border-color: #000 !important; }
         .border-r { border-right: 1px solid #000 !important; }
@@ -151,130 +152,130 @@ return `
 </head>
 <body>
     <div class="payroll-slip">
-        <!-- En-tête avec logo -->
+        <!-- Header with logo -->
         <div class="mb-6">
             <div class="mb-4">
-                <img src="/image001.png" alt="ADACPITAL Logo" style="max-width: 150px; height: auto;" />
+                <img src="/image001.png" alt="Company Logo" style="max-width: 150px; height: auto;" />
             </div>
             <div class="text-center">
                 <h1 class="text-lg font-bold underline">
-                    Bulletin de paie du mois de ${monthName.toUpperCase()} ${year}
+                    Payslip for ${monthName.toUpperCase()} ${year}
                 </h1>
             </div>
         </div>
 
-        <!-- Informations employé -->
+        <!-- Employee information -->
         <div class="mb-6">
-            <h2 class="text-base font-bold mb-3">${employee.prenom} ${employee.nom}</h2>
+            <h2 class="text-base font-bold mb-3">${employee.firstName} ${employee.lastName}</h2>
             
             <div class="grid grid-cols-2 gap-8 text-xs">
                 <div class="space-y-1">
                     <div class="flex">
-                        <span class="w-32">Fonction</span>
+                        <span class="w-32">Position</span>
                         <span class="mr-4">:</span>
-                        <span>${employee.fonction}</span>
+                        <span>${employee.position}</span>
                     </div>
                     <div class="flex">
-                        <span class="w-32">Date de naissance</span>
+                        <span class="w-32">Date of Birth</span>
                         <span class="mr-4">:</span>
-                        <span>${employee.dateNaissance ? formatDate(employee.dateNaissance) : 'Non renseigné'}</span>
+                        <span>${employee.dateOfBirth ? formatDate(employee.dateOfBirth) : 'Not provided'}</span>
                     </div>
                     <div class="flex">
-                        <span class="w-32">Date d'embauche</span>
+                        <span class="w-32">Hire Date</span>
                         <span class="mr-4">:</span>
-                        <span>${formatDate(employee.dateEmbauche)}</span>
+                        <span>${formatDate(employee.hireDate)}</span>
                     </div>
                 </div>
                 
                 <div class="space-y-1">
                     <div class="flex">
-                        <span class="w-32">Matricule</span>
+                        <span class="w-32">Employee ID</span>
                         <span class="mr-4">:</span>
-                        <span>${employee.matricule}</span>
+                        <span>${employee.employeeId}</span>
                     </div>
                     <div class="flex">
-                        <span class="w-32">Situation familiale</span>
+                        <span class="w-32">Marital Status</span>
                         <span class="mr-4">:</span>
-                        <span>${getSituationFamiliale()}</span>
+                        <span>${getMaritalStatus()}</span>
                     </div>
                     <div class="flex">
-                        <span class="w-32">Compte bancaire</span>
+                        <span class="w-32">Bank Account</span>
                         <span class="mr-4">:</span>
-                        <span>${employee.compteBancaire || 'Non renseigné'}</span>
+                        <span>${employee.bankAccount || 'Not provided'}</span>
                     </div>
                     <div class="flex">
-                        <span class="w-32">CIN</span>
+                        <span class="w-32">ID Number</span>
                         <span class="mr-4">:</span>
-                        <span>${employee.cin || 'Non renseigné'}</span>
+                        <span>${employee.idNumber || 'Not provided'}</span>
                     </div>
                     <div class="flex">
-                        <span class="w-32">CNSS</span>
+                        <span class="w-32">NSSF Number</span>
                         <span class="mr-4">:</span>
-                        <span>${employee.cnss || 'Non renseigné'}</span>
+                        <span>${employee.nssfNumber || 'Not provided'}</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tableau de paie -->
+        <!-- Payroll table -->
         <div class="border-2 border-black text-xs">
-            <!-- En-tête du tableau -->
+            <!-- Table header -->
             <div class="grid grid-cols-6 border-b-2 border-black bg-gray-100 font-bold">
-                <div class="border-r border-black p-1 text-center">Rubrique</div>
-                <div class="border-r border-black p-1 text-center">Nb Jours</div>
+                <div class="border-r border-black p-1 text-center">Item</div>
+                <div class="border-r border-black p-1 text-center">Days</div>
                 <div class="border-r border-black p-1 text-center">Base</div>
-                <div class="border-r border-black p-1 text-center">Taux</div>
-                <div class="border-r border-black p-1 text-center">Gains</div>
-                <div class="p-1 text-center">Retenues</div>
+                <div class="border-r border-black p-1 text-center">Rate</div>
+                <div class="border-r border-black p-1 text-center">Earnings</div>
+                <div class="p-1 text-center">Deductions</div>
             </div>
 
-            <!-- Lignes de gains -->
+            <!-- Earnings lines -->
             <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">Salaire de base</div>
-                <div class="border-r border-black p-1 text-center">${employee.nbreJourMois}</div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.salaireBase)}</div>
+                <div class="border-r border-black p-1">Base Salary</div>
+                <div class="border-r border-black p-1 text-center">${employee.numberOfDaysPerMonth}</div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.baseSalary)}</div>
                 <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.salaireBase)}</div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.baseSalary)}</div>
                 <div class="p-1"></div>
             </div>
 
             <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">Prime d'ancienneté</div>
+                <div class="border-r border-black p-1">Housing Allowance</div>
                 <div class="border-r border-black p-1"></div>
                 <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-center">${(employee.tauxAnciennete * 100).toFixed(1)}%</div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.primeAnciennete)}</div>
+                <div class="border-r border-black p-1"></div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.housingAllowance)}</div>
                 <div class="p-1"></div>
             </div>
 
             <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">Indemnité de logement</div>
+                <div class="border-r border-black p-1">Transport Allowance</div>
                 <div class="border-r border-black p-1"></div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.transportAllowance)}</div>
                 <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.indemniteLogement)}</div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.transportAllowance)}</div>
                 <div class="p-1"></div>
             </div>
 
             <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">Prime de transport</div>
+                <div class="border-r border-black p-1">Meal Allowance</div>
                 <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.primeTransport)}</div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.mealAllowance)}</div>
                 <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.primeTransport)}</div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.mealAllowance)}</div>
                 <div class="p-1"></div>
             </div>
 
             <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">Indemnité de représentation</div>
+                <div class="border-r border-black p-1">Representation Allowance</div>
                 <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.indemniteRepresentation)}</div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.representationAllowance)}</div>
                 <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.indemniteRepresentation)}</div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.representationAllowance)}</div>
                 <div class="p-1"></div>
             </div>
 
-            <!-- Ligne vide -->
+            <!-- Empty line -->
             <div class="grid grid-cols-6 border-b border-black">
                 <div class="border-r border-black p-1"></div>
                 <div class="border-r border-black p-1"></div>
@@ -284,134 +285,84 @@ return `
                 <div class="p-1"></div>
             </div>
 
-            <!-- Salaire brut -->
+            <!-- Gross salary -->
             <div class="grid grid-cols-6 border-b border-black font-bold">
-                <div class="border-r border-black p-1">Salaire Brut</div>
+                <div class="border-r border-black p-1">Gross Salary</div>
                 <div class="border-r border-black p-1"></div>
                 <div class="border-r border-black p-1"></div>
                 <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.totalGains)}</div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.grossSalary)}</div>
                 <div class="p-1"></div>
             </div>
 
-            <!-- Salaire brut imposable -->
+            <!-- Taxable gross salary -->
             <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">Salaire brut imposable</div>
+                <div class="border-r border-black p-1">Taxable Gross Salary</div>
                 <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.salaireBrutImposable)}</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1"></div>
-                <div class="p-1"></div>
-            </div>
-
-            <!-- Cotisations salariales -->
-            <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">CNSS Prestations - Part Salariale</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(Math.min(payrollCalculation.salaireBrutImposable, 6000))}</div>
-                <div class="border-r border-black p-1 text-center">${tauxCNSS.toFixed(2)}%</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="p-1 text-right">${formatCurrency(payrollCalculation.cnssPrestations)}</div>
-            </div>
-
-            <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">AMO - Part Salariale</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.salaireBrutImposable)}</div>
-                <div class="border-r border-black p-1 text-center">${tauxAMO.toFixed(2)}%</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="p-1 text-right">${formatCurrency(payrollCalculation.amo)}</div>
-            </div>
-
-            <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">Cotisation Assurance : Décès</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.salaireBrutImposable)}</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1"></div>
-                <div class="p-1 text-right">0,00</div>
-            </div>
-
-            <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">Cotisation Assurance : Incapacité</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.salaireBrutImposable)}</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1"></div>
-                <div class="p-1 text-right">0,00</div>
-            </div>
-
-            <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">Assurance Divers - Part Salariale</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.salaireBrutImposable)}</div>
-                <div class="border-r border-black p-1 text-center">${tauxAssuranceDivers.toFixed(2)}%</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="p-1 text-right">${formatCurrency(payrollCalculation.assuranceDivers)}</div>
-            </div>
-
-            <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">Retraite - Part Salariale</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.salaireBrutImposable)}</div>
-                <div class="border-r border-black p-1 text-center">${tauxRetraite.toFixed(2)}%</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="p-1 text-right">${formatCurrency(payrollCalculation.retraite)}</div>
-            </div>
-
-            <!-- Ligne vide -->
-            <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1"></div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.taxableGrossSalary)}</div>
                 <div class="border-r border-black p-1"></div>
                 <div class="border-r border-black p-1"></div>
                 <div class="p-1"></div>
             </div>
 
-            <!-- IGR -->
+            <!-- Statutory deductions -->
             <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">Impôts sur le revenu</div>
+                <div class="border-r border-black p-1">NSSF Employee Contribution</div>
                 <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.netNetImposable)}</div>
-                <div class="border-r border-black p-1 text-center">37,00%</div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(Math.min(payrollCalculation.taxableGrossSalary, 72000))}</div>
+                <div class="border-r border-black p-1 text-center">${nssfRate.toFixed(2)}%</div>
                 <div class="border-r border-black p-1"></div>
-                <div class="p-1 text-right">${formatCurrency(payrollCalculation.impotRevenu)}</div>
+                <div class="p-1 text-right">${formatCurrency(payrollCalculation.nssfEmployee)}</div>
             </div>
 
-            <!-- Ligne vide -->
             <div class="grid grid-cols-6 border-b border-black">
+                <div class="border-r border-black p-1">SHIF Contribution</div>
                 <div class="border-r border-black p-1"></div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.taxableGrossSalary)}</div>
+                <div class="border-r border-black p-1 text-center">${shifRate.toFixed(2)}%</div>
                 <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1"></div>
-                <div class="p-1"></div>
+                <div class="p-1 text-right">${formatCurrency(payrollCalculation.shif)}</div>
             </div>
 
-            ${payrollCalculation.remboursementCredit > 0 ? `
             <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">Remboursement Crédit</div>
+                <div class="border-r border-black p-1">Housing Levy Employee</div>
+                <div class="border-r border-black p-1"></div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.taxableGrossSalary)}</div>
+                <div class="border-r border-black p-1 text-center">${housingLevyRate.toFixed(2)}%</div>
+                <div class="border-r border-black p-1"></div>
+                <div class="p-1 text-right">${formatCurrency(payrollCalculation.housingLevyEmployee)}</div>
+            </div>
+
+            <div class="grid grid-cols-6 border-b border-black">
+                <div class="border-r border-black p-1">PAYE (Income Tax)</div>
+                <div class="border-r border-black p-1"></div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.taxableIncome)}</div>
+                <div class="border-r border-black p-1 text-center">Progressive</div>
+                <div class="border-r border-black p-1"></div>
+                <div class="p-1 text-right">${formatCurrency(payrollCalculation.paye)}</div>
+            </div>
+
+            <div class="grid grid-cols-6 border-b border-black">
+                <div class="border-r border-black p-1">Personal Relief</div>
+                <div class="border-r border-black p-1"></div>
+                <div class="border-r border-black p-1"></div>
+                <div class="border-r border-black p-1 text-center">Fixed</div>
+                <div class="border-r border-black p-1"></div>
+                <div class="p-1 text-right">-${formatCurrency(payrollCalculation.personalRelief)}</div>
+            </div>
+
+            ${payrollCalculation.helb > 0 ? `
+            <div class="grid grid-cols-6 border-b border-black">
+                <div class="border-r border-black p-1">HELB Loan Repayment</div>
                 <div class="border-r border-black p-1"></div>
                 <div class="border-r border-black p-1"></div>
                 <div class="border-r border-black p-1"></div>
                 <div class="border-r border-black p-1"></div>
-                <div class="p-1 text-right">${formatCurrency(payrollCalculation.remboursementCredit)}</div>
+                <div class="p-1 text-right">${formatCurrency(payrollCalculation.helb)}</div>
             </div>
             ` : ''}
 
-            ${payrollCalculation.avances > 0 ? `
-            <div class="grid grid-cols-6 border-b border-black">
-                <div class="border-r border-black p-1">Remboursement Avance sur salaire</div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1"></div>
-                <div class="p-1 text-right">${formatCurrency(payrollCalculation.avances)}</div>
-            </div>
-            ` : ''}
-
-            <!-- Ligne vide -->
+            <!-- Empty line -->
             <div class="grid grid-cols-6 border-b border-black">
                 <div class="border-r border-black p-1"></div>
                 <div class="border-r border-black p-1"></div>
@@ -421,17 +372,17 @@ return `
                 <div class="p-1"></div>
             </div>
 
-            <!-- Totaux -->
+            <!-- Totals -->
             <div class="grid grid-cols-6 border-b-2 border-black font-bold">
-                <div class="border-r border-black p-1">Totaux</div>
+                <div class="border-r border-black p-1">Totals</div>
                 <div class="border-r border-black p-1"></div>
                 <div class="border-r border-black p-1"></div>
                 <div class="border-r border-black p-1"></div>
-                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.totalGains)}</div>
-                <div class="p-1 text-right">${formatCurrency(payrollCalculation.totalRetenues)}</div>
+                <div class="border-r border-black p-1 text-right">${formatCurrency(payrollCalculation.grossSalary)}</div>
+                <div class="p-1 text-right">${formatCurrency(payrollCalculation.totalDeductions)}</div>
             </div>
 
-            <!-- Ligne vide -->
+            <!-- Empty line -->
             <div class="grid grid-cols-6 border-b border-black">
                 <div class="border-r border-black p-1"></div>
                 <div class="border-r border-black p-1"></div>
@@ -441,13 +392,13 @@ return `
                 <div class="p-1"></div>
             </div>
 
-            <!-- Net à payer -->
+            <!-- Net pay -->
             <div class="grid grid-cols-6 font-bold text-base">
-                <div class="border-r border-black p-2">Net à payer</div>
+                <div class="border-r border-black p-2">Net Pay</div>
                 <div class="border-r border-black p-2"></div>
                 <div class="border-r border-black p-2"></div>
                 <div class="border-r border-black p-2"></div>
-                <div class="border-r border-black p-2 text-right">${formatCurrency(payrollCalculation.salaireNetAPayer)}</div>
+                <div class="border-r border-black p-2 text-right">${formatCurrency(payrollCalculation.netSalary)}</div>
                 <div class="p-2"></div>
             </div>
         </div>

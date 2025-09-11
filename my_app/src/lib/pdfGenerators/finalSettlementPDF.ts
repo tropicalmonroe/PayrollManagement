@@ -2,38 +2,38 @@ import { PDFGenerator, formatCurrency, formatDate } from '../pdfGenerator';
 
 export interface FinalSettlementData {
   employee: {
-    matricule: string;
-    nom: string;
-    prenom: string;
-    fonction: string;
-    dateEmbauche: Date | string;
-    anciennete: number;
+    employeeId: string;
+    lastName: string;
+    firstName: string;
+    position: string;
+    hireDate: Date | string;
+    seniority: number;
   };
   settlement: {
-    dateFin: Date | string;
-    motifDepart: string;
-    salaireBase: number;
-    congesNonPris: number;
-    indemniteDepart: number;
-    autresIndemnites: number;
-    retenues: number;
-    totalAvances: number;
+    endDate: Date | string;
+    departureReason: string;
+    baseSalary: number;
+    unusedLeave: number;
+    severancePay: number;
+    otherAllowances: number;
+    deductions: number;
+    totalAdvances: number;
     totalCredits: number;
-    totalGains: number;
-    totalRetenues: number;
-    soldeNet: number;
+    totalEarnings: number;
+    totalDeductions: number;
+    netBalance: number;
   };
-  avancesNonRemboursees?: Array<{
+  unpaidAdvances?: Array<{
     id: string;
-    montant: number;
-    dateOctroi: Date | string;
-    soldeRestant: number;
+    amount: number;
+    advanceDate: Date | string;
+    remainingBalance: number;
   }>;
-  creditsActifs?: Array<{
+  activeCredits?: Array<{
     id: string;
-    montant: number;
-    dateOctroi: Date | string;
-    soldeRestant: number;
+    amount: number;
+    startDate: Date | string;
+    remainingBalance: number;
   }>;
 }
 
@@ -41,92 +41,92 @@ export async function generateFinalSettlementPDF(data: FinalSettlementData): Pro
   const pdf = new PDFGenerator();
   
   // Header
-  const title = 'SOLDE DE TOUT COMPTE';
-  const subtitle = `Fin de contrat - ${formatDate(data.settlement.dateFin)}`;
+  const title = 'FINAL SETTLEMENT';
+  const subtitle = `End of contract - ${formatDate(data.settlement.endDate)}`;
   
   pdf.addHeader(title, subtitle);
 
   pdf.addSpace(15);
 
   // Employee Information Section
-  pdf.addSectionTitle('INFORMATIONS DU SALARIÉ');
+  pdf.addSectionTitle('EMPLOYEE INFORMATION');
   
-  pdf.addKeyValue('Nom et Prénom', `${data.employee.prenom} ${data.employee.nom}`);
-  pdf.addKeyValue('Matricule', data.employee.matricule);
-  pdf.addKeyValue('Fonction', data.employee.fonction);
-  pdf.addKeyValue('Date d\'embauche', formatDate(data.employee.dateEmbauche));
-  pdf.addKeyValue('Date de fin de contrat', formatDate(data.settlement.dateFin));
-  pdf.addKeyValue('Ancienneté', `${data.employee.anciennete} ans`);
-  pdf.addKeyValue('Motif de départ', data.settlement.motifDepart);
+  pdf.addKeyValue('Full Name', `${data.employee.firstName} ${data.employee.lastName}`);
+  pdf.addKeyValue('Employee ID', data.employee.employeeId);
+  pdf.addKeyValue('Position', data.employee.position);
+  pdf.addKeyValue('Hire Date', formatDate(data.employee.hireDate));
+  pdf.addKeyValue('Contract End Date', formatDate(data.settlement.endDate));
+  pdf.addKeyValue('Seniority', `${data.employee.seniority} years`);
+  pdf.addKeyValue('Departure Reason', data.settlement.departureReason);
 
   pdf.addSpace(15);
 
   // Earnings Section
-  pdf.addSectionTitle('ÉLÉMENTS À PAYER');
+  pdf.addSectionTitle('AMOUNTS PAYABLE');
   
-  const gainsHeaders = ['Désignation', 'Montant (MAD)'];
-  const gainsRows: (string | number)[][] = [
-    ['Salaire de base (prorata)', formatCurrency(data.settlement.salaireBase)]
+  const earningsHeaders = ['Description', 'Amount (KES)'];
+  const earningsRows: (string | number)[][] = [
+    ['Base Salary (prorated)', formatCurrency(data.settlement.baseSalary)]
   ];
 
-  if (data.settlement.congesNonPris > 0) {
-    gainsRows.push(['Congés non pris', formatCurrency(data.settlement.congesNonPris)]);
+  if (data.settlement.unusedLeave > 0) {
+    earningsRows.push(['Unused Leave Days', formatCurrency(data.settlement.unusedLeave)]);
   }
   
-  if (data.settlement.indemniteDepart > 0) {
-    gainsRows.push(['Indemnité de départ', formatCurrency(data.settlement.indemniteDepart)]);
+  if (data.settlement.severancePay > 0) {
+    earningsRows.push(['Severance Pay', formatCurrency(data.settlement.severancePay)]);
   }
   
-  if (data.settlement.autresIndemnites > 0) {
-    gainsRows.push(['Autres indemnités', formatCurrency(data.settlement.autresIndemnites)]);
+  if (data.settlement.otherAllowances > 0) {
+    earningsRows.push(['Other Allowances', formatCurrency(data.settlement.otherAllowances)]);
   }
 
-  pdf.addTable(gainsHeaders, gainsRows, {
+  pdf.addTable(earningsHeaders, earningsRows, {
     alternateRowColor: '#f8fafc'
   });
 
   pdf.addSpace(10);
 
   // Deductions Section
-  pdf.addSectionTitle('ÉLÉMENTS À RETENIR');
+  pdf.addSectionTitle('AMOUNTS DEDUCTIBLE');
   
-  const retenuesHeaders = ['Désignation', 'Montant (MAD)'];
-  const retenuesRows: (string | number)[][] = [];
+  const deductionsHeaders = ['Description', 'Amount (KES)'];
+  const deductionsRows: (string | number)[][] = [];
 
-  if (data.settlement.retenues > 0) {
-    retenuesRows.push(['Retenues diverses', formatCurrency(data.settlement.retenues)]);
+  if (data.settlement.deductions > 0) {
+    deductionsRows.push(['Various Deductions', formatCurrency(data.settlement.deductions)]);
   }
   
-  if (data.settlement.totalAvances > 0) {
-    retenuesRows.push(['Total avances non remboursées', formatCurrency(data.settlement.totalAvances)]);
+  if (data.settlement.totalAdvances > 0) {
+    deductionsRows.push(['Total Unpaid Advances', formatCurrency(data.settlement.totalAdvances)]);
   }
   
   if (data.settlement.totalCredits > 0) {
-    retenuesRows.push(['Total crédits actifs', formatCurrency(data.settlement.totalCredits)]);
+    deductionsRows.push(['Total Active Credits', formatCurrency(data.settlement.totalCredits)]);
   }
 
-  if (retenuesRows.length > 0) {
-    pdf.addTable(retenuesHeaders, retenuesRows, {
+  if (deductionsRows.length > 0) {
+    pdf.addTable(deductionsHeaders, deductionsRows, {
       alternateRowColor: '#f8fafc'
     });
   } else {
-    pdf.addParagraph('Aucune retenue à effectuer', { fontSize: 10, color: '#64748b' });
+    pdf.addParagraph('No deductions to be made', { fontSize: 10, color: '#64748b' });
   }
 
   pdf.addSpace(15);
 
   // Detailed breakdown of advances if any
-  if (data.avancesNonRemboursees && data.avancesNonRemboursees.length > 0) {
-    pdf.addSectionTitle('DÉTAIL DES AVANCES NON REMBOURSÉES');
+  if (data.unpaidAdvances && data.unpaidAdvances.length > 0) {
+    pdf.addSectionTitle('DETAIL OF UNPAID ADVANCES');
     
-    const avancesHeaders = ['Date d\'octroi', 'Montant initial', 'Solde restant'];
-    const avancesRows: (string | number)[][] = data.avancesNonRemboursees.map(avance => [
-      formatDate(avance.dateOctroi),
-      formatCurrency(avance.montant),
-      formatCurrency(avance.soldeRestant)
+    const advancesHeaders = ['Advance Date', 'Initial Amount', 'Remaining Balance'];
+    const advancesRows: (string | number)[][] = data.unpaidAdvances.map(advance => [
+      formatDate(advance.advanceDate),
+      formatCurrency(advance.amount),
+      formatCurrency(advance.remainingBalance)
     ]);
 
-    pdf.addTable(avancesHeaders, avancesRows, {
+    pdf.addTable(advancesHeaders, advancesRows, {
       alternateRowColor: '#f8fafc'
     });
 
@@ -134,14 +134,14 @@ export async function generateFinalSettlementPDF(data: FinalSettlementData): Pro
   }
 
   // Detailed breakdown of credits if any
-  if (data.creditsActifs && data.creditsActifs.length > 0) {
-    pdf.addSectionTitle('DÉTAIL DES CRÉDITS ACTIFS');
+  if (data.activeCredits && data.activeCredits.length > 0) {
+    pdf.addSectionTitle('DETAIL OF ACTIVE CREDITS');
     
-    const creditsHeaders = ['Date d\'octroi', 'Montant initial', 'Solde restant'];
-    const creditsRows: (string | number)[][] = data.creditsActifs.map(credit => [
-      formatDate(credit.dateOctroi),
-      formatCurrency(credit.montant),
-      formatCurrency(credit.soldeRestant)
+    const creditsHeaders = ['Start Date', 'Initial Amount', 'Remaining Balance'];
+    const creditsRows: (string | number)[][] = data.activeCredits.map(credit => [
+      formatDate(credit.startDate),
+      formatCurrency(credit.amount),
+      formatCurrency(credit.remainingBalance)
     ]);
 
     pdf.addTable(creditsHeaders, creditsRows, {
@@ -152,12 +152,12 @@ export async function generateFinalSettlementPDF(data: FinalSettlementData): Pro
   }
 
   // Summary Section
-  pdf.addSummaryBox('RÉCAPITULATIF DU SOLDE', [
-    { label: 'Total des éléments à payer', value: formatCurrency(data.settlement.totalGains) },
-    { label: 'Total des éléments à retenir', value: formatCurrency(data.settlement.totalRetenues) },
+  pdf.addSummaryBox('SETTLEMENT SUMMARY', [
+    { label: 'Total Amounts Payable', value: formatCurrency(data.settlement.totalEarnings) },
+    { label: 'Total Amounts Deductible', value: formatCurrency(data.settlement.totalDeductions) },
     { 
-      label: data.settlement.soldeNet >= 0 ? 'Solde net à payer' : 'Solde net dû par le salarié', 
-      value: formatCurrency(Math.abs(data.settlement.soldeNet)), 
+      label: data.settlement.netBalance >= 0 ? 'Net Balance Payable' : 'Net Balance Owed by Employee', 
+      value: formatCurrency(Math.abs(data.settlement.netBalance)), 
       highlight: true 
     }
   ]);
@@ -166,8 +166,8 @@ export async function generateFinalSettlementPDF(data: FinalSettlementData): Pro
 
   // Legal text
   pdf.addParagraph(
-    'Le présent solde de tout compte fait l\'objet d\'un règlement définitif entre les parties. ' +
-    'Le salarié reconnaît avoir reçu tous les montants qui lui sont dus au titre de son contrat de travail.',
+    'This final settlement constitutes a definitive settlement between the parties. ' +
+    'The employee acknowledges having received all amounts due under their employment contract.',
     { fontSize: 11 }
   );
 
@@ -176,7 +176,7 @@ export async function generateFinalSettlementPDF(data: FinalSettlementData): Pro
   // Signature section
   const currentDate = new Date();
   pdf.addParagraph(
-    `Établi à Casablanca, le ${formatDate(currentDate)}`,
+    `Prepared in Nairobi, on ${formatDate(currentDate)}`,
     { fontSize: 11 }
   );
 
@@ -184,7 +184,7 @@ export async function generateFinalSettlementPDF(data: FinalSettlementData): Pro
 
   // Two column layout for signatures
   pdf.addParagraph(
-    'L\'EMPLOYEUR                                                    LE SALARIÉ',
+    'EMPLOYER                                                    EMPLOYEE',
     { fontSize: 11 }
   );
 
@@ -196,12 +196,12 @@ export async function generateFinalSettlementPDF(data: FinalSettlementData): Pro
   );
 
   pdf.addParagraph(
-    'Signature et cachet                                        Signature précédée de',
+    'Signature and stamp                                        Signature preceded by',
     { fontSize: 9, color: '#64748b' }
   );
 
   pdf.addParagraph(
-    '                                                                    "Lu et approuvé"',
+    '                                                                    "Read and approved"',
     { fontSize: 9, color: '#64748b' }
   );
 
@@ -209,8 +209,8 @@ export async function generateFinalSettlementPDF(data: FinalSettlementData): Pro
 
   // Legal notice
   pdf.addParagraph(
-    'Ce document est établi en deux exemplaires originaux, un pour chaque partie. ' +
-    'Il fait foi entre les parties et clôt définitivement les comptes.',
+    'This document is prepared in two original copies, one for each party. ' +
+    'It constitutes evidence between the parties and definitively closes the accounts.',
     { fontSize: 8, align: 'center', color: '#64748b' }
   );
 

@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { id } = req.query;
 
   if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'ID d\'avance invalide' });
+    return res.status(400).json({ error: 'Invalid advance ID' });
   }
 
   try {
@@ -36,36 +36,36 @@ async function getAdvance(req: NextApiRequest, res: NextApiResponse, id: string)
         employee: {
           select: {
             id: true,
-            matricule: true,
-            nom: true,
-            prenom: true,
-            fonction: true
+            employeeId: true,
+            lastName: true,
+            firstName: true,
+            position: true
           }
         }
       }
     });
 
     if (!advance) {
-      return res.status(404).json({ error: 'Avance non trouvée' });
+      return res.status(404).json({ error: 'Advance not found' });
     }
 
     return res.status(200).json(advance);
   } catch (error) {
     console.error('Error fetching advance:', error);
-    return res.status(500).json({ error: 'Erreur lors du chargement de l\'avance' });
+    return res.status(500).json({ error: 'Error loading advance' });
   }
 }
 
 async function updateAdvance(req: NextApiRequest, res: NextApiResponse, id: string) {
   try {
     const {
-      montant,
-      dateAvance,
-      motif,
-      nombreMensualites,
-      montantMensualite,
-      soldeRestant,
-      statut,
+      amount,
+      advanceDate,
+      reason,
+      numberOfInstallments,
+      installmentAmount,
+      remainingBalance,
+      status,
       notes
     } = req.body;
 
@@ -75,41 +75,41 @@ async function updateAdvance(req: NextApiRequest, res: NextApiResponse, id: stri
     });
 
     if (!existingAdvance) {
-      return res.status(404).json({ error: 'Avance non trouvée' });
+      return res.status(404).json({ error: 'Advance not found' });
     }
 
     // Validation
-    if (montant !== undefined && montant <= 0) {
-      return res.status(400).json({ error: 'Le montant doit être supérieur à 0' });
+    if (amount !== undefined && amount <= 0) {
+      return res.status(400).json({ error: 'Amount must be greater than 0' });
     }
 
-    if (nombreMensualites !== undefined && (nombreMensualites <= 0 || nombreMensualites > 24)) {
-      return res.status(400).json({ error: 'Le nombre de mensualités doit être entre 1 et 24' });
+    if (numberOfInstallments !== undefined && (numberOfInstallments <= 0 || numberOfInstallments > 24)) {
+      return res.status(400).json({ error: 'Number of installments must be between 1 and 24' });
     }
 
-    if (soldeRestant !== undefined && soldeRestant < 0) {
-      return res.status(400).json({ error: 'Le solde restant ne peut pas être négatif' });
+    if (remainingBalance !== undefined && remainingBalance < 0) {
+      return res.status(400).json({ error: 'Remaining balance cannot be negative' });
     }
 
     // Prepare update data
     const updateData: any = {};
     
-    if (montant !== undefined) updateData.montant = parseFloat(montant);
-    if (dateAvance !== undefined) updateData.dateAvance = new Date(dateAvance);
-    if (motif !== undefined) updateData.motif = motif.trim();
-    if (nombreMensualites !== undefined) updateData.nombreMensualites = parseInt(nombreMensualites);
-    if (montantMensualite !== undefined) updateData.montantMensualite = parseFloat(montantMensualite);
-    if (soldeRestant !== undefined) {
-      updateData.soldeRestant = parseFloat(soldeRestant);
+    if (amount !== undefined) updateData.amount = parseFloat(amount);
+    if (advanceDate !== undefined) updateData.advanceDate = new Date(advanceDate);
+    if (reason !== undefined) updateData.reason = reason.trim();
+    if (numberOfInstallments !== undefined) updateData.numberOfInstallments = parseInt(numberOfInstallments);
+    if (installmentAmount !== undefined) updateData.installmentAmount = parseFloat(installmentAmount);
+    if (remainingBalance !== undefined) {
+      updateData.remainingBalance = parseFloat(remainingBalance);
       // Auto-update status based on remaining balance
-      if (parseFloat(soldeRestant) === 0) {
-        updateData.statut = 'REMBOURSE';
-        updateData.dateRemboursementComplete = new Date();
-      } else if (updateData.statut !== 'ANNULE') {
-        updateData.statut = 'EN_COURS';
+      if (parseFloat(remainingBalance) === 0) {
+        updateData.status = 'REPAID';
+        updateData.fullRepaymentDate = new Date();
+      } else if (updateData.status !== 'CANCELLED') {
+        updateData.status = 'IN_PROGRESS';
       }
     }
-    if (statut !== undefined) updateData.statut = statut;
+    if (status !== undefined) updateData.status = status;
     if (notes !== undefined) updateData.notes = notes?.trim() || null;
 
     // Update advance
@@ -120,10 +120,10 @@ async function updateAdvance(req: NextApiRequest, res: NextApiResponse, id: stri
         employee: {
           select: {
             id: true,
-            matricule: true,
-            nom: true,
-            prenom: true,
-            fonction: true
+            employeeId: true,
+            lastName: true,
+            firstName: true,
+            position: true
           }
         }
       }
@@ -132,7 +132,7 @@ async function updateAdvance(req: NextApiRequest, res: NextApiResponse, id: stri
     return res.status(200).json(advance);
   } catch (error) {
     console.error('Error updating advance:', error);
-    return res.status(500).json({ error: 'Erreur lors de la modification de l\'avance' });
+    return res.status(500).json({ error: 'Error updating advance' });
   }
 }
 
@@ -144,7 +144,7 @@ async function deleteAdvance(req: NextApiRequest, res: NextApiResponse, id: stri
     });
 
     if (!existingAdvance) {
-      return res.status(404).json({ error: 'Avance non trouvée' });
+      return res.status(404).json({ error: 'Advance not found' });
     }
 
     // Delete advance
@@ -152,9 +152,9 @@ async function deleteAdvance(req: NextApiRequest, res: NextApiResponse, id: stri
       where: { id }
     });
 
-    return res.status(200).json({ message: 'Avance supprimée avec succès' });
+    return res.status(200).json({ message: 'Advance successfully deleted' });
   } catch (error) {
     console.error('Error deleting advance:', error);
-    return res.status(500).json({ error: 'Erreur lors de la suppression de l\'avance' });
+    return res.status(500).json({ error: 'Error deleting advance' });
   }
 }

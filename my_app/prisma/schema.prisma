@@ -81,6 +81,8 @@ model Employee {
   // Loan & deductions tracking
   loanRepayment             Float               @default(0)
   helbLoan                  Float               @default(0)
+  numberOfDeductions          Int       @default(0)
+
 
   // Flags
   subjectToNssf             Boolean             @default(true)
@@ -246,11 +248,13 @@ model PayrollCalculation {
   housingAllowance            Float
   mealAllowance               Float
   transportAllowance          Float
+  representationAllowance     Float //paid to executives, to cover costs of representing the company
   overtimePay                 Float     @default(0)
   bonuses                     Float     @default(0)
   otherEarnings               Float     @default(0)
   grossSalary                 Float
   taxableGrossSalary          Float
+  seniorityBonus              Float @default(0)
 
   // Employee statutory deductions
   nssfEmployee                Float

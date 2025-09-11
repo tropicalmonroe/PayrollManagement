@@ -10,58 +10,58 @@ const AdministrativeReportsPage = () => {
   const reportSections = [
     {
       id: 'payroll-journal',
-      title: 'Journal de paie',
-      description: 'Regroupement de toutes les lignes de paie du mois par salarié pour usage comptable et RH.',
+      title: 'Payroll Journal',
+      description: 'Consolidation of all payroll entries for the month by employee for accounting and HR purposes.',
       icon: BookOpen,
       color: 'blue',
       href: '/administrative-reports/payroll-journal',
       features: [
-        'Consolidation mensuelle par employé',
-        'Export comptable détaillé',
-        'Récapitulatif des charges sociales',
-        'Format Excel et PDF'
+        'Monthly consolidation by employee',
+        'Detailed accounting export',
+        'Summary of social contributions',
+        'Excel and PDF formats'
       ]
     },
     {
       id: 'bank-transfer',
-      title: 'Virement de masse',
-      description: 'Génération du fichier bancaire ou Excel pour l\'exécution du virement groupé des salaires.',
+      title: 'Bulk Bank Transfer',
+      description: 'Generation of bank or Excel file for executing bulk salary transfers.',
       icon: CreditCard,
       color: 'green',
       href: '/administrative-reports/bank-transfer',
       features: [
-        'Fichier bancaire SEPA/Swift',
-        'Export Excel détaillé',
-        'Validation des comptes',
-        'Récapitulatif des virements'
+        'Bank transfer file format',
+        'Detailed Excel export',
+        'Account validation',
+        'Transfer summary'
       ]
     },
     {
-      id: 'cnss-declaration',
-      title: 'Déclaration CNSS',
-      description: 'Production du fichier ou formulaire mensuel à transmettre à la CNSS selon les cotisations dues.',
+      id: 'nssf-declaration',
+      title: 'NSSF Declaration',
+      description: 'Production of the monthly file or form to be submitted to NSSF for contributions due.',
       icon: Building,
       color: 'orange',
-      href: '/administrative-reports/cnss-declaration',
+      href: '/administrative-reports/nssf-declaration',
       features: [
-        'Déclaration mensuelle CNSS',
-        'Calcul automatique des cotisations',
-        'Format officiel CNSS',
-        'Validation des données'
+        'Monthly NSSF declaration',
+        'Automatic contribution calculation',
+        'Official NSSF format',
+        'Data validation'
       ]
     },
     {
       id: 'tax-statement',
-      title: 'État fiscal IGR',
-      description: 'Détail mensuel et annuel de l\'impôt sur le revenu (IGR) retenu à la source, généré selon le barème fiscal marocain.',
+      title: 'Income Tax Statement',
+      description: 'Monthly and annual detail of income tax withheld, generated according to Kenyan tax rates.',
       icon: Receipt,
       color: 'purple',
       href: '/administrative-reports/tax-statement',
       features: [
-        'État mensuel et annuel IGR',
-        'Barème fiscal marocain',
-        'Détail par employé',
-        'Export pour administration fiscale'
+        'Monthly and annual income tax statement',
+        'Kenyan tax rates',
+        'Detail by employee',
+        'Export for tax administration'
       ]
     }
   ];
@@ -120,21 +120,21 @@ const AdministrativeReportsPage = () => {
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Retour</span>
+            <span>Back</span>
           </button>
           
           <div className="flex items-center space-x-3 mb-4">
             <FileSpreadsheet className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Éditions administratives</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Administrative Reports</h1>
           </div>
           
           <p className="text-gray-600 text-lg max-w-3xl">
-            Génération des documents administratifs et comptables : journaux de paie, virements bancaires, 
-            déclarations CNSS et états fiscaux IGR pour les organismes officiels.
+            Generation of administrative and accounting documents: payroll journals, bank transfers, 
+            NSSF declarations and income tax statements for official organizations.
           </p>
         </div>
 
-        {/* Sections principales */}
+        {/* Main sections */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {reportSections.map((section) => {
             const IconComponent = section.icon;
@@ -151,7 +151,7 @@ const AdministrativeReportsPage = () => {
                   </p>
                   
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-900">Fonctionnalités :</h4>
+                    <h4 className="text-sm font-medium text-gray-900">Features:</h4>
                     <ul className="text-xs text-gray-600 space-y-1">
                       {section.features.map((feature, index) => (
                         <li key={index} className="flex items-center">
@@ -164,7 +164,7 @@ const AdministrativeReportsPage = () => {
                   
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <span className={`text-sm font-medium ${getIconColor(section.color)}`}>
-                      Accéder →
+                      Access →
                     </span>
                   </div>
                 </div>
@@ -173,52 +173,52 @@ const AdministrativeReportsPage = () => {
           })}
         </div>
 
-        {/* Informations complémentaires */}
+        {/* Additional information */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Informations sur les éditions administratives
+            Information about Administrative Reports
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">📊 Processus de génération</h4>
+              <h4 className="font-medium text-gray-900 mb-2">📊 Generation Process</h4>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Sélection de la période et des critères</li>
-                <li>• Calcul automatique des données</li>
-                <li>• Validation et contrôle de cohérence</li>
-                <li>• Export dans le format requis</li>
+                <li>• Selection of period and criteria</li>
+                <li>• Automatic data calculation</li>
+                <li>• Validation and consistency control</li>
+                <li>• Export in required format</li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">🏛️ Conformité réglementaire</h4>
+              <h4 className="font-medium text-gray-900 mb-2">🏛️ Regulatory Compliance</h4>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Formats officiels CNSS et administration fiscale</li>
-                <li>• Barèmes et taux réglementaires à jour</li>
-                <li>• Contrôles de cohérence automatiques</li>
-                <li>• Traçabilité complète des générations</li>
+                <li>• Official NSSF and tax administration formats</li>
+                <li>• Updated regulatory rates and thresholds</li>
+                <li>• Automatic consistency checks</li>
+                <li>• Complete generation traceability</li>
               </ul>
             </div>
           </div>
           
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">💼 Usage comptable</h4>
+              <h4 className="font-medium text-gray-900 mb-2">💼 Accounting Usage</h4>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Journaux détaillés pour la comptabilité</li>
-                <li>• Récapitulatifs des charges sociales</li>
-                <li>• Ventilation par centre de coût</li>
-                <li>• Exports compatibles logiciels comptables</li>
+                <li>• Detailed journals for accounting</li>
+                <li>• Summaries of social contributions</li>
+                <li>• Breakdown by cost center</li>
+                <li>• Compatible with accounting software</li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">🏦 Gestion bancaire</h4>
+              <h4 className="font-medium text-gray-900 mb-2">🏦 Banking Management</h4>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Fichiers de virement SEPA/Swift</li>
-                <li>• Validation des RIB et comptes</li>
-                <li>• Récapitulatifs de contrôle</li>
-                <li>• Historique des virements</li>
+                <li>• Bank transfer files</li>
+                <li>• Account number validation</li>
+                <li>• Control summaries</li>
+                <li>• Transfer history</li>
               </ul>
             </div>
           </div>
@@ -229,11 +229,11 @@ const AdministrativeReportsPage = () => {
                 <FileSpreadsheet className="w-5 h-5 text-blue-600 mt-0.5" />
               </div>
               <div className="ml-3">
-                <h4 className="text-sm font-medium text-blue-900">Note importante</h4>
+                <h4 className="text-sm font-medium text-blue-900">Important Note</h4>
                 <p className="text-sm text-blue-700 mt-1">
-                  Tous les documents générés sont automatiquement archivés dans la section "Coffre" 
-                  pour consultation ultérieure et respect des obligations légales de conservation. 
-                  Les formats respectent les standards officiels des organismes marocains.
+                  All generated documents are automatically archived in the "Vault" section 
+                  for future reference and compliance with legal retention obligations. 
+                  Formats comply with official standards of Kenyan organizations.
                 </p>
               </div>
             </div>

@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { id } = req.query;
 
   if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'ID d\'élément variable invalide' });
+    return res.status(400).json({ error: 'Invalid variable element ID' });
   }
 
   try {
@@ -36,23 +36,23 @@ async function getVariableElement(req: NextApiRequest, res: NextApiResponse, id:
         employee: {
           select: {
             id: true,
-            matricule: true,
-            nom: true,
-            prenom: true,
-            fonction: true
+            employeeId: true,
+            lastName: true,
+            firstName: true,
+            position: true
           }
         }
       }
     });
 
     if (!variableElement) {
-      return res.status(404).json({ error: 'Élément variable non trouvé' });
+      return res.status(404).json({ error: 'Variable element not found' });
     }
 
     return res.status(200).json(variableElement);
   } catch (error) {
     console.error('Error fetching variable element:', error);
-    return res.status(500).json({ error: 'Erreur lors du chargement de l\'élément variable' });
+    return res.status(500).json({ error: 'Error loading variable element' });
   }
 }
 
@@ -62,21 +62,21 @@ async function updateVariableElement(req: NextApiRequest, res: NextApiResponse, 
       employeeId,
       type,
       description,
-      montant,
-      heures,
-      taux,
+      amount,
+      hours,
+      rate,
       date,
-      mois,
-      annee
+      month,
+      year
     } = req.body;
 
-    // Vérifier que l'élément existe
+    // Check if element exists
     const existingElement = await prisma.variableElement.findUnique({
       where: { id }
     });
 
     if (!existingElement) {
-      return res.status(404).json({ error: 'Élément variable non trouvé' });
+      return res.status(404).json({ error: 'Variable element not found' });
     }
 
     // Validation
@@ -86,41 +86,41 @@ async function updateVariableElement(req: NextApiRequest, res: NextApiResponse, 
       });
 
       if (!employee) {
-        return res.status(404).json({ error: 'Employé non trouvé' });
+        return res.status(404).json({ error: 'Employee not found' });
       }
     }
 
-    // Validation selon le type
-    if (type === 'HEURES_SUP' && (!heures || !taux)) {
-      return res.status(400).json({ error: 'Les heures et le taux sont requis pour les heures supplémentaires' });
+    // Validation based on type
+    if (type === 'OVERTIME' && (!hours || !rate)) {
+      return res.status(400).json({ error: 'Hours and rate are required for overtime' });
     }
 
-    if (type && type !== 'HEURES_SUP' && !montant) {
-      return res.status(400).json({ error: 'Le montant est requis pour ce type d\'élément' });
+    if (type && type !== 'OVERTIME' && !amount) {
+      return res.status(400).json({ error: 'Amount is required for this type of element' });
     }
 
-    // Préparer les données de mise à jour
+    // Prepare update data
     const updateData: any = {};
     
     if (employeeId !== undefined) updateData.employeeId = employeeId;
     if (type !== undefined) updateData.type = type;
     if (description !== undefined) updateData.description = description.trim();
     if (date !== undefined) updateData.date = new Date(date);
-    if (mois !== undefined) updateData.mois = mois;
-    if (annee !== undefined) updateData.annee = annee;
+    if (month !== undefined) updateData.month = month;
+    if (year !== undefined) updateData.year = year;
 
-    // Calculer le montant pour les heures supplémentaires
-    if (type === 'HEURES_SUP' && heures && taux) {
-      updateData.montant = parseFloat(heures) * parseFloat(taux);
-      updateData.heures = parseFloat(heures);
-      updateData.taux = parseFloat(taux);
+    // Calculate amount for overtime
+    if (type === 'OVERTIME' && hours && rate) {
+      updateData.amount = parseFloat(hours) * parseFloat(rate);
+      updateData.hours = parseFloat(hours);
+      updateData.rate = parseFloat(rate);
     } else {
-      if (montant !== undefined) updateData.montant = parseFloat(montant);
-      if (heures !== undefined) updateData.heures = heures ? parseFloat(heures) : null;
-      if (taux !== undefined) updateData.taux = taux ? parseFloat(taux) : null;
+      if (amount !== undefined) updateData.amount = parseFloat(amount);
+      if (hours !== undefined) updateData.hours = hours ? parseFloat(hours) : null;
+      if (rate !== undefined) updateData.rate = rate ? parseFloat(rate) : null;
     }
 
-    // Mettre à jour l'élément variable
+    // Update variable element
     const variableElement = await prisma.variableElement.update({
       where: { id },
       data: updateData,
@@ -128,10 +128,10 @@ async function updateVariableElement(req: NextApiRequest, res: NextApiResponse, 
         employee: {
           select: {
             id: true,
-            matricule: true,
-            nom: true,
-            prenom: true,
-            fonction: true
+            employeeId: true,
+            lastName: true,
+            firstName: true,
+            position: true
           }
         }
       }
@@ -140,29 +140,29 @@ async function updateVariableElement(req: NextApiRequest, res: NextApiResponse, 
     return res.status(200).json(variableElement);
   } catch (error) {
     console.error('Error updating variable element:', error);
-    return res.status(500).json({ error: 'Erreur lors de la modification de l\'élément variable' });
+    return res.status(500).json({ error: 'Error updating variable element' });
   }
 }
 
 async function deleteVariableElement(req: NextApiRequest, res: NextApiResponse, id: string) {
   try {
-    // Vérifier que l'élément existe
+    // Check if element exists
     const existingElement = await prisma.variableElement.findUnique({
       where: { id }
     });
 
     if (!existingElement) {
-      return res.status(404).json({ error: 'Élément variable non trouvé' });
+      return res.status(404).json({ error: 'Variable element not found' });
     }
 
-    // Supprimer l'élément variable
+    // Delete variable element
     await prisma.variableElement.delete({
       where: { id }
     });
 
-    return res.status(200).json({ message: 'Élément variable supprimé avec succès' });
+    return res.status(200).json({ message: 'Variable element deleted successfully' });
   } catch (error) {
     console.error('Error deleting variable element:', error);
-    return res.status(500).json({ error: 'Erreur lors de la suppression de l\'élément variable' });
+    return res.status(500).json({ error: 'Error deleting variable element' });
   }
 }

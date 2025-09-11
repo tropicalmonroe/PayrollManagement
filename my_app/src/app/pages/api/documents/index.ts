@@ -1,11 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../lib/prisma';
+import { prisma } from '../../../../lib/prisma';
 import { DocumentType, DocumentStatus } from '@prisma/client';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
-      const { type, employeeId, periode } = req.query;
+      const { type, employeeId, period } = req.query;
 
       const where: any = {};
       
@@ -17,8 +17,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where.employeeId = employeeId as string;
       }
       
-      if (periode) {
-        where.periode = periode as string;
+      if (period) {
+        where.period = period as string;
       }
 
       const documents = await prisma.document.findMany({
@@ -27,22 +27,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           employee: {
             select: {
               id: true,
-              matricule: true,
-              nom: true,
-              prenom: true,
-              fonction: true
+              employeeId: true,
+              lastName: true,
+              firstName: true,
+              position: true
             }
           }
         },
         orderBy: {
-          dateGeneration: 'desc'
+          generationDate: 'desc'
         }
       });
 
       res.status(200).json(documents);
     } catch (error) {
       console.error('Error fetching documents:', error);
-      res.status(500).json({ error: 'Erreur lors de la récupération des documents' });
+      res.status(500).json({ error: 'Error fetching documents' });
     }
   } else if (req.method === 'POST') {
     try {
@@ -51,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         title,
         description,
         employeeId,
-        periode,
+        period,
         generatedBy,
         fileSize,
         fileUrl,
@@ -64,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           title,
           description,
           employeeId: employeeId || null,
-          periode,
+          period,
           generatedBy,
           fileSize: fileSize || 0,
           fileUrl,
@@ -75,10 +75,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           employee: {
             select: {
               id: true,
-              matricule: true,
-              nom: true,
-              prenom: true,
-              fonction: true
+              employeeId: true,
+              lastName: true,
+              firstName: true,
+              position: true
             }
           }
         }
@@ -87,7 +87,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(201).json(document);
     } catch (error) {
       console.error('Error creating document:', error);
-      res.status(500).json({ error: 'Erreur lors de la création du document' });
+      res.status(500).json({ error: 'Error creating document' });
     }
   } else {
     res.setHeader('Allow', ['GET', 'POST']);

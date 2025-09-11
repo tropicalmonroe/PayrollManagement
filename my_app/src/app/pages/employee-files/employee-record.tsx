@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '../../components/Layout';
+import { Layout } from '../../../components/Layout';
 import { Users, ArrowLeft, Plus, Edit, Eye, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/router';
-import EmployeeList from '../../components/EmployeeList';
-import EmployeeForm from '../../components/EmployeeForm';
-import EmployeeDetails from '../../components/EmployeeDetails';
+import EmployeeList from '../../../components/EmployeeList';
+import EmployeeForm from '../../../components/EmployeeForm';
+import EmployeeDetails from '../../../components/EmployeeDetails';
 import { Employee } from '@prisma/client';
 
 const EmployeeRecordPage = () => {

@@ -2,48 +2,40 @@ import { PDFGenerator, formatCurrency, formatDate } from '../pdfGenerator';
 
 export interface PayslipData {
   employee: {
-    matricule: string;
-    nom: string;
-    prenom: string;
-    fonction: string;
-    dateEmbauche: Date | string;
-    anciennete: number;
-    situationFamiliale: string;
-    cin: string;
-    cnss: string;
+    employeeId: string;
+    lastName: string;
+    firstName: string;
+    position: string;
+    hireDate: Date | string;
+    seniority: number;
+    maritalStatus: string;
+    idNumber: string;
+    nssfNumber: string;
   };
   payroll: {
-    mois: number;
-    annee: string;
-    salaireBase: number;
-    primeAnciennete: number;
-    indemniteLogement: number;
-    indemnitePanier: number;
-    primeTransport: number;
-    indemniteRepresentation: number;
-    heuresSupplementaires: number;
-    primesExceptionnelles: number;
-    autresGains: number;
-    totalGains: number;
-    cnssPrestations: number;
-    amo: number;
-    retraite: number;
-    assuranceDivers: number;
-    impotRevenu: number;
-    absences: number;
-    retards: number;
-    avances: number;
-    autresRetenues: number;
-    totalRetenues: number;
-    salaireNetAPayer: number;
-    cnssPatronale: number;
-    allocationsFamiliales: number;
-    taxeFormationProf: number;
-    amoPatronale: number;
-    accidentTravail: number;
-    totalCotisationsPatronales: number;
-    fraisProfessionnels: number;
-    netImposable: number;
+    month: number;
+    year: string;
+    baseSalary: number;
+    housingAllowance: number;
+    mealAllowance: number;
+    transportAllowance: number;
+    representationAllowance: number;
+    overtimePay: number;
+    bonuses: number;
+    otherEarnings: number;
+    grossSalary: number;
+    nssfEmployee: number;
+    shif: number;
+    housingLevyEmployee: number;
+    paye: number;
+    personalRelief: number;
+    helb: number;
+    otherDeductions: number;
+    totalDeductions: number;
+    netSalary: number;
+    nssfEmployer: number;
+    housingLevyEmployer: number;
+    totalEmployerContributions: number;
   };
 }
 
@@ -52,149 +44,120 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
   
   // Header
   const monthNames = [
-    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
   ];
   
-  const monthName = monthNames[data.payroll.mois - 1];
-  const title = 'BULLETIN DE PAIE';
-  const subtitle = `${monthName} ${data.payroll.annee}`;
+  const monthName = monthNames[data.payroll.month - 1];
+  const title = 'PAYSLIP';
+  const subtitle = `${monthName} ${data.payroll.year}`;
   
   pdf.addHeader(title, subtitle);
 
   // Employee Information Section
-  pdf.addSectionTitle('INFORMATIONS SALARIÉ');
+  pdf.addSectionTitle('EMPLOYEE INFORMATION');
   
-  pdf.addKeyValue('Matricule', data.employee.matricule);
-  pdf.addKeyValue('Nom et Prénom', `${data.employee.prenom} ${data.employee.nom}`);
-  pdf.addKeyValue('Fonction', data.employee.fonction);
-  pdf.addKeyValue('Date d\'embauche', formatDate(data.employee.dateEmbauche));
-  pdf.addKeyValue('Ancienneté', `${data.employee.anciennete} ans`);
-  pdf.addKeyValue('Situation familiale', data.employee.situationFamiliale);
-  pdf.addKeyValue('CIN', data.employee.cin);
-  pdf.addKeyValue('N° CNSS', data.employee.cnss);
+  pdf.addKeyValue('Employee ID', data.employee.employeeId);
+  pdf.addKeyValue('Full Name', `${data.employee.firstName} ${data.employee.lastName}`);
+  pdf.addKeyValue('Position', data.employee.position);
+  pdf.addKeyValue('Hire Date', formatDate(data.employee.hireDate));
+  pdf.addKeyValue('Seniority', `${data.employee.seniority} years`);
+  pdf.addKeyValue('Marital Status', data.employee.maritalStatus);
+  pdf.addKeyValue('ID Number', data.employee.idNumber);
+  pdf.addKeyValue('NSSF Number', data.employee.nssfNumber);
 
   pdf.addSpace(10);
 
   // Earnings Section
-  pdf.addSectionTitle('GAINS ET AVANTAGES');
+  pdf.addSectionTitle('EARNINGS AND ALLOWANCES');
   
-  const gainsHeaders = ['Désignation', 'Montant (MAD)'];
-  const gainsRows: (string | number)[][] = [
-    ['Salaire de base', formatCurrency(data.payroll.salaireBase)],
-    ['Prime d\'ancienneté', formatCurrency(data.payroll.primeAnciennete)],
-    ['Indemnité de logement', formatCurrency(data.payroll.indemniteLogement)],
-    ['Indemnité panier', formatCurrency(data.payroll.indemnitePanier)],
-    ['Prime de transport', formatCurrency(data.payroll.primeTransport)],
-    ['Indemnité de représentation', formatCurrency(data.payroll.indemniteRepresentation)]
+  const earningsHeaders = ['Description', 'Amount (KES)'];
+  const earningsRows: (string | number)[][] = [
+    ['Base Salary', formatCurrency(data.payroll.baseSalary)],
+    ['Housing Allowance', formatCurrency(data.payroll.housingAllowance)],
+    ['Meal Allowance', formatCurrency(data.payroll.mealAllowance)],
+    ['Transport Allowance', formatCurrency(data.payroll.transportAllowance)],
+    ['Representation Allowance', formatCurrency(data.payroll.representationAllowance)]
   ];
 
-  if (data.payroll.heuresSupplementaires > 0) {
-    gainsRows.push(['Heures supplémentaires', formatCurrency(data.payroll.heuresSupplementaires)]);
+  if (data.payroll.overtimePay > 0) {
+    earningsRows.push(['Overtime Pay', formatCurrency(data.payroll.overtimePay)]);
   }
   
-  if (data.payroll.primesExceptionnelles > 0) {
-    gainsRows.push(['Primes exceptionnelles', formatCurrency(data.payroll.primesExceptionnelles)]);
+  if (data.payroll.bonuses > 0) {
+    earningsRows.push(['Bonuses', formatCurrency(data.payroll.bonuses)]);
   }
   
-  if (data.payroll.autresGains > 0) {
-    gainsRows.push(['Autres gains', formatCurrency(data.payroll.autresGains)]);
+  if (data.payroll.otherEarnings > 0) {
+    earningsRows.push(['Other Earnings', formatCurrency(data.payroll.otherEarnings)]);
   }
 
-  pdf.addTable(gainsHeaders, gainsRows, {
+  pdf.addTable(earningsHeaders, earningsRows, {
     alternateRowColor: '#f8fafc'
   });
 
   pdf.addSpace(5);
 
   // Deductions Section
-  pdf.addSectionTitle('RETENUES ET COTISATIONS');
+  pdf.addSectionTitle('DEDUCTIONS AND CONTRIBUTIONS');
   
-  const retenuesHeaders = ['Désignation', 'Montant (MAD)'];
-  const retenuesRows: (string | number)[][] = [
-    ['CNSS (Prestations)', formatCurrency(data.payroll.cnssPrestations)],
-    ['AMO', formatCurrency(data.payroll.amo)]
+  const deductionsHeaders = ['Description', 'Amount (KES)'];
+  const deductionsRows: (string | number)[][] = [
+    ['NSSF Employee', formatCurrency(data.payroll.nssfEmployee)],
+    ['SHIF', formatCurrency(data.payroll.shif)],
+    ['Housing Levy Employee', formatCurrency(data.payroll.housingLevyEmployee)],
+    ['PAYE', formatCurrency(data.payroll.paye)],
+    ['Personal Relief', formatCurrency(data.payroll.personalRelief)]
   ];
 
-  if (data.payroll.retraite > 0) {
-    retenuesRows.push(['Retraite', formatCurrency(data.payroll.retraite)]);
+  if (data.payroll.helb > 0) {
+    deductionsRows.push(['HELB Loan', formatCurrency(data.payroll.helb)]);
   }
   
-  if (data.payroll.assuranceDivers > 0) {
-    retenuesRows.push(['Assurance divers', formatCurrency(data.payroll.assuranceDivers)]);
-  }
-  
-  if (data.payroll.impotRevenu > 0) {
-    retenuesRows.push(['Impôt sur le revenu', formatCurrency(data.payroll.impotRevenu)]);
-  }
-  
-  if (data.payroll.absences > 0) {
-    retenuesRows.push(['Absences', formatCurrency(data.payroll.absences)]);
-  }
-  
-  if (data.payroll.retards > 0) {
-    retenuesRows.push(['Retards', formatCurrency(data.payroll.retards)]);
-  }
-  
-  if (data.payroll.avances > 0) {
-    retenuesRows.push(['Avances', formatCurrency(data.payroll.avances)]);
-  }
-  
-  if (data.payroll.autresRetenues > 0) {
-    retenuesRows.push(['Autres retenues', formatCurrency(data.payroll.autresRetenues)]);
+  if (data.payroll.otherDeductions > 0) {
+    deductionsRows.push(['Other Deductions', formatCurrency(data.payroll.otherDeductions)]);
   }
 
-  pdf.addTable(retenuesHeaders, retenuesRows, {
+  pdf.addTable(deductionsHeaders, deductionsRows, {
     alternateRowColor: '#f8fafc'
   });
 
   pdf.addSpace(10);
 
   // Summary Section
-  pdf.addSummaryBox('RÉCAPITULATIF', [
-    { label: 'Total des gains', value: formatCurrency(data.payroll.totalGains) },
-    { label: 'Total des retenues', value: formatCurrency(data.payroll.totalRetenues) },
-    { label: 'Salaire net à payer', value: formatCurrency(data.payroll.salaireNetAPayer), highlight: true }
+  pdf.addSummaryBox('SUMMARY', [
+    { label: 'Total Earnings', value: formatCurrency(data.payroll.grossSalary) },
+    { label: 'Total Deductions', value: formatCurrency(data.payroll.totalDeductions) },
+    { label: 'Net Salary Payable', value: formatCurrency(data.payroll.netSalary), highlight: true }
   ]);
 
   pdf.addSpace(10);
 
   // Employer Contributions Section
-  pdf.addSectionTitle('COTISATIONS PATRONALES');
+  pdf.addSectionTitle('EMPLOYER CONTRIBUTIONS');
   
-  const cotisationsHeaders = ['Désignation', 'Montant (MAD)'];
-  const cotisationsRows: (string | number)[][] = [
-    ['CNSS Patronale', formatCurrency(data.payroll.cnssPatronale)],
-    ['Allocations familiales', formatCurrency(data.payroll.allocationsFamiliales)],
-    ['Taxe formation professionnelle', formatCurrency(data.payroll.taxeFormationProf)],
-    ['AMO Patronale', formatCurrency(data.payroll.amoPatronale)],
-    ['Accident de travail', formatCurrency(data.payroll.accidentTravail)]
+  const contributionsHeaders = ['Description', 'Amount (KES)'];
+  const contributionsRows: (string | number)[][] = [
+    ['NSSF Employer', formatCurrency(data.payroll.nssfEmployer)],
+    ['Housing Levy Employer', formatCurrency(data.payroll.housingLevyEmployer)]
   ];
 
-  pdf.addTable(cotisationsHeaders, cotisationsRows, {
+  pdf.addTable(contributionsHeaders, contributionsRows, {
     alternateRowColor: '#f8fafc'
   });
 
   pdf.addSpace(5);
 
-  pdf.addSummaryBox('TOTAL COTISATIONS PATRONALES', [
-    { label: 'Total', value: formatCurrency(data.payroll.totalCotisationsPatronales), highlight: true }
+  pdf.addSummaryBox('TOTAL EMPLOYER CONTRIBUTIONS', [
+    { label: 'Total', value: formatCurrency(data.payroll.totalEmployerContributions), highlight: true }
   ]);
-
-  pdf.addSpace(10);
-
-  // Tax Information
-  pdf.addSectionTitle('INFORMATIONS FISCALES');
-  
-  pdf.addKeyValue('Frais professionnels', formatCurrency(data.payroll.fraisProfessionnels));
-  pdf.addKeyValue('Net imposable', formatCurrency(data.payroll.netImposable));
 
   pdf.addSpace(15);
 
   // Legal Notice
   pdf.addParagraph(
-    'Ce bulletin de paie est établi conformément à la législation marocaine en vigueur. ' +
-    'Il doit être conservé sans limitation de durée.',
+    'This payslip is issued in accordance with Kenyan legislation in force. ' +
+    'It should be kept without time limitation.',
     { fontSize: 8, align: 'center', color: '#64748b' }
   );
 

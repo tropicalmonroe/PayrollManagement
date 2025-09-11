@@ -97,12 +97,6 @@ export interface SeniorityBracket {
 // Export seniority scale from base data
 export { SENIORITY_SCALE };
 
-// Types of optional insurances
-export interface OptionalInsurances {
-  comprehensiveHealthInsurance: boolean; // 2.5%
-  foreignHealthCover: boolean;           // 0.5%
-  enhancedDisabilityCover: boolean;      // 0.316%
-}
 
 export const OPTIONAL_INSURANCE_RATES = {
   comprehensiveHealthInsurance: 0.025,   // 2.5%
@@ -127,7 +121,7 @@ export const ALLOWANCE_CEILINGS = {
 // Interface for variable elements
 export interface VariableElement {
   id: string;
-  type: 'OVERTIME' | 'ABSENCE' | 'EXCEPTIONAL_BONUS' | 'LEAVE' | 'LATENESS' | 'ADVANCE' | 'OTHER';
+  type: 'OVERTIME' | 'ABSENCE' |  'BONUS' |'EXCEPTIONAL_BONUS' | 'LEAVE' | 'LATENESS' | 'ADVANCE' | 'OTHER';
   description: string;
   amount: number;
   hours?: number;
