@@ -6,19 +6,19 @@ import { ArrowLeft, RefreshCw } from 'lucide-react';
 
 interface Employee {
   id: string;
-  matricule: string;
-  nom: string;
-  prenom: string;
-  fonction: string;
-  dateEmbauche: string;
-  anciennete: number;
-  salaireBase: number;
-  primeTransport: number;
-  indemniteRepresentation: number;
-  indemniteLogement: number;
-  situationFamiliale: string;
-  cin?: string;
-  cnss?: string;
+  employeeId: string; 
+  lastName: string; 
+  firstName: string;
+  position: string; 
+  hireDate: string; 
+  seniority: number;
+  baseSalary: number; 
+  transportAllowance: number; 
+  representationAllowance: number;
+  housingAllowance: number;
+  maritalStatus: string; 
+  idNumber?: string;
+  nssfNumber?: string;
 }
 
 interface Document {
@@ -26,7 +26,7 @@ interface Document {
   type: string;
   employee: Employee;
   metadata: any;
-  dateGeneration: string;
+  generationDate: string; // Previously dateGeneration
 }
 
 export default function SalaryCertificateViewPage() {
@@ -46,8 +46,8 @@ export default function SalaryCertificateViewPage() {
     try {
       setLoading(true);
       
-      // Récupérer tous les documents et filtrer par ID
-      const response = await fetch('/api/documents?type=ATTESTATION_SALAIRE');
+      // Fetch all documents and filter by ID
+      const response = await fetch('/api/documents?type=SALARY_CERTIFICATE'); // Translated ATTESTATION_SALAIRE to SALARY_CERTIFICATE per schema
       
       if (response.ok) {
         const documents = await response.json();
@@ -56,14 +56,14 @@ export default function SalaryCertificateViewPage() {
         if (doc) {
           setDocument(doc);
         } else {
-          setError('Document non trouvé');
+          setError('Document not found'); // Translated Document non trouvé
         }
       } else {
-        setError('Erreur lors du chargement du document');
+        setError('Error loading document'); // Translated Erreur lors du chargement du document
       }
     } catch (error) {
       console.error('Error fetching document:', error);
-      setError('Erreur lors du chargement du document');
+      setError('Error loading document'); // Translated Erreur lors du chargement du document
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ export default function SalaryCertificateViewPage() {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-            <p className="text-gray-600">Chargement de l'attestation...</p>
+            <p className="text-gray-600">Loading certificate...</p> {/* Translated Chargement de l'attestation... */}
           </div>
         </div>
       </Layout>
@@ -92,13 +92,13 @@ export default function SalaryCertificateViewPage() {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="bg-red-50 border border-red-200 rounded-md p-6 max-w-md">
-              <p className="text-red-700 mb-4">{error || 'Document non trouvé'}</p>
+              <p className="text-red-700 mb-4">{error || 'Document not found'}</p> {/* Translated Document non trouvé */}
               <button
                 onClick={handleBack}
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2 mx-auto"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Retour à la liste
+                Back to list {/* Translated Retour à la liste */}
               </button>
             </div>
           </div>
@@ -110,18 +110,18 @@ export default function SalaryCertificateViewPage() {
   return (
     <Layout>
       <div className="space-y-6">
-        {/* Header avec bouton retour */}
+        {/* Header with back button */}
         <div className="print:hidden">
           <button
             onClick={handleBack}
             className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour à la liste
+            Back to list {/* Translated Retour à la liste */}
           </button>
         </div>
 
-        {/* Composant d'attestation */}
+        {/* Certificate component */}
         <SalaryCertificate 
           employee={document.employee} 
           metadata={document.metadata}

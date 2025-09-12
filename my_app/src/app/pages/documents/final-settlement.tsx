@@ -17,12 +17,12 @@ import {
 
 interface Employee {
   id: string;
-  matricule: string;
-  nom: string;
-  prenom: string;
-  fonction: string;
-  dateEmbauche: string;
-  anciennete: number;
+  employeeId: string;
+  lastName: string;
+  firstName: string;
+  position: string;
+  hireDate: string;
+  seniority: number;
 }
 
 interface Document {
@@ -31,8 +31,8 @@ interface Document {
   title: string;
   description: string;
   employee: Employee;
-  periode: string;
-  dateGeneration: string;
+  period: string;
+  generationDate: string;
   status: 'GENERATED' | 'SENT' | 'ARCHIVED';
   downloadCount: number;
   metadata: any;
@@ -42,32 +42,32 @@ export default function FinalSettlementPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<string>('');
-  const [dateFin, setDateFin] = useState<string>('');
-  const [motifDepart, setMotifDepart] = useState<string>('');
-  const [congesNonPris, setCongesNonPris] = useState<string>('');
-  const [indemniteDepart, setIndemniteDepart] = useState<string>('');
-  const [autresIndemnites, setAutresIndemnites] = useState<string>('');
-  const [retenues, setRetenues] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [departureReason, setDepartureReason] = useState<string>('');
+  const [unusedLeave, setUnusedLeave] = useState<string>('');
+  const [severancePay, setSeverancePay] = useState<string>('');
+  const [otherAllowances, setOtherAllowances] = useState<string>('');
+  const [deductions, setDeductions] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [generating, setGenerating] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  const motifsDepart = [
-    { value: 'demission', label: 'Démission' },
-    { value: 'licenciement', label: 'Licenciement' },
-    { value: 'fin_contrat', label: 'Fin de contrat' },
-    { value: 'retraite', label: 'Retraite' },
-    { value: 'mutation', label: 'Mutation' },
-    { value: 'autre', label: 'Autre' }
+  const departureReasons = [
+    { value: 'resignation', label: 'Resignation' },
+    { value: 'dismissal', label: 'Dismissal' },
+    { value: 'contract_end', label: 'Contract End' },
+    { value: 'retirement', label: 'Retirement' },
+    { value: 'transfer', label: 'Transfer' },
+    { value: 'other', label: 'Other' }
   ];
 
-  // Charger les employés
+  // Load employees
   useEffect(() => {
     fetchEmployees();
   }, []);
 
-  // Charger les documents
+  // Load documents
   useEffect(() => {
     fetchDocuments();
   }, [selectedEmployee]);
@@ -88,7 +88,7 @@ export default function FinalSettlementPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      params.append('type', 'SOLDE_COMPTE');
+      params.append('type', 'ACCOUNT_STATEMENT');
       
       if (selectedEmployee) {
         params.append('employeeId', selectedEmployee);
@@ -107,13 +107,13 @@ export default function FinalSettlementPage() {
   };
 
   const generateFinalSettlement = async () => {
-    if (!selectedEmployee || !dateFin || !motifDepart) {
-      setError('Veuillez remplir tous les champs obligatoires');
+    if (!selectedEmployee || !endDate || !departureReason) {
+      setError('Please fill in all required fields');
       return;
     }
 
-    if (new Date(dateFin) > new Date()) {
-      setError('La date de fin ne peut pas être dans le futur');
+    if (new Date(endDate) > new Date()) {
+      setError('End date cannot be in the future');
       return;
     }
 
@@ -128,33 +128,33 @@ export default function FinalSettlementPage() {
         },
         body: JSON.stringify({
           employeeId: selectedEmployee,
-          dateFin,
-          motifDepart,
-          congesNonPris: congesNonPris || '0',
-          indemniteDepart: indemniteDepart || '0',
-          autresIndemnites: autresIndemnites || '0',
-          retenues: retenues || '0'
+          endDate,
+          departureReason,
+          unusedLeave: unusedLeave || '0',
+          severancePay: severancePay || '0',
+          otherAllowances: otherAllowances || '0',
+          deductions: deductions || '0'
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Recharger la liste des documents
+        // Reload document list
         fetchDocuments();
-        // Réinitialiser le formulaire
+        // Reset form
         setSelectedEmployee('');
-        setDateFin('');
-        setMotifDepart('');
-        setCongesNonPris('');
-        setIndemniteDepart('');
-        setAutresIndemnites('');
-        setRetenues('');
+        setEndDate('');
+        setDepartureReason('');
+        setUnusedLeave('');
+        setSeverancePay('');
+        setOtherAllowances('');
+        setDeductions('');
       } else {
-        setError(data.error || 'Erreur lors de la génération du solde de tout compte');
+        setError(data.error || 'Error generating final settlement');
       }
     } catch (error) {
-      setError('Erreur lors de la génération du solde de tout compte');
+      setError('Error generating final settlement');
       console.error('Error generating final settlement:', error);
     } finally {
       setGenerating(false);
@@ -162,16 +162,16 @@ export default function FinalSettlementPage() {
   };
 
   const filteredDocuments = documents.filter(doc =>
-    doc.employee.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.employee.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.employee.matricule.toLowerCase().includes(searchTerm.toLowerCase())
+    doc.employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      GENERATED: { color: 'bg-blue-100 text-blue-800', text: 'Généré' },
-      SENT: { color: 'bg-green-100 text-green-800', text: 'Envoyé' },
-      ARCHIVED: { color: 'bg-gray-100 text-gray-800', text: 'Archivé' }
+      GENERATED: { color: 'bg-blue-100 text-blue-800', text: 'Generated' },
+      SENT: { color: 'bg-green-100 text-green-800', text: 'Sent' },
+      ARCHIVED: { color: 'bg-gray-100 text-gray-800', text: 'Archived' }
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.GENERATED;
@@ -189,16 +189,16 @@ export default function FinalSettlementPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Solde de tout compte</h1>
-            <p className="text-gray-600">Saisie des éléments de rupture et génération du document officiel</p>
+            <h1 className="text-2xl font-bold text-gray-900">Final Settlement</h1>
+            <p className="text-gray-600">Entry of termination elements and generation of official document</p>
           </div>
         </div>
 
-        {/* Génération de solde */}
+        {/* Settlement generation */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             <Plus className="inline-block w-5 h-5 mr-2" />
-            Générer un nouveau solde de tout compte
+            Generate New Final Settlement
           </h2>
           
           {error && (
@@ -211,17 +211,17 @@ export default function FinalSettlementPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Employé *
+                Employee *
               </label>
               <select
                 value={selectedEmployee}
                 onChange={(e) => setSelectedEmployee(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Sélectionner un employé</option>
+                <option value="">Select an employee</option>
                 {employees.map((employee) => (
                   <option key={employee.id} value={employee.id}>
-                    {employee.prenom} {employee.nom} ({employee.matricule})
+                    {employee.firstName} {employee.lastName} ({employee.employeeId})
                   </option>
                 ))}
               </select>
@@ -229,52 +229,52 @@ export default function FinalSettlementPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date de fin de contrat *
+                Contract End Date *
               </label>
               <input
                 type="date"
-                value={dateFin}
-                onChange={(e) => setDateFin(e.target.value)}
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Motif de départ *
+                Departure Reason *
               </label>
               <select
-                value={motifDepart}
-                onChange={(e) => setMotifDepart(e.target.value)}
+                value={departureReason}
+                onChange={(e) => setDepartureReason(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Sélectionner un motif</option>
-                {motifsDepart.map((motif) => (
-                  <option key={motif.value} value={motif.value}>
-                    {motif.label}
+                <option value="">Select a reason</option>
+                {departureReasons.map((reason) => (
+                  <option key={reason.value} value={reason.value}>
+                    {reason.label}
                   </option>
                 ))}
               </select>
             </div>
           </div>
 
-          {/* Éléments financiers */}
+          {/* Financial elements */}
           <div className="border-t pt-6">
             <h3 className="text-md font-semibold text-gray-900 mb-4 flex items-center">
               <DollarSign className="w-5 h-5 mr-2" />
-              Éléments financiers
+              Financial Elements
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Congés non pris (DH)
+                  Unused Leave Days (KES)
                 </label>
                 <input
                   type="number"
                   step="0.01"
-                  value={congesNonPris}
-                  onChange={(e) => setCongesNonPris(e.target.value)}
+                  value={unusedLeave}
+                  onChange={(e) => setUnusedLeave(e.target.value)}
                   placeholder="0.00"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -282,13 +282,13 @@ export default function FinalSettlementPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Indemnité de départ (DH)
+                  Severance Pay (KES)
                 </label>
                 <input
                   type="number"
                   step="0.01"
-                  value={indemniteDepart}
-                  onChange={(e) => setIndemniteDepart(e.target.value)}
+                  value={severancePay}
+                  onChange={(e) => setSeverancePay(e.target.value)}
                   placeholder="0.00"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -296,13 +296,13 @@ export default function FinalSettlementPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Autres indemnités (DH)
+                  Other Allowances (KES)
                 </label>
                 <input
                   type="number"
                   step="0.01"
-                  value={autresIndemnites}
-                  onChange={(e) => setAutresIndemnites(e.target.value)}
+                  value={otherAllowances}
+                  onChange={(e) => setOtherAllowances(e.target.value)}
                   placeholder="0.00"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -310,13 +310,13 @@ export default function FinalSettlementPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Retenues diverses (DH)
+                  Various Deductions (KES)
                 </label>
                 <input
                   type="number"
                   step="0.01"
-                  value={retenues}
-                  onChange={(e) => setRetenues(e.target.value)}
+                  value={deductions}
+                  onChange={(e) => setDeductions(e.target.value)}
                   placeholder="0.00"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -335,12 +335,12 @@ export default function FinalSettlementPage() {
               ) : (
                 <Plus className="w-4 h-4 mr-2" />
               )}
-              {generating ? 'Génération...' : 'Générer le solde'}
+              {generating ? 'Generating...' : 'Generate Settlement'}
             </button>
           </div>
         </div>
 
-        {/* Filtres et recherche */}
+        {/* Filters and search */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -348,7 +348,7 @@ export default function FinalSettlementPage() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Rechercher par nom, prénom ou matricule..."
+                  placeholder="Search by name, first name or employee ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -360,28 +360,28 @@ export default function FinalSettlementPage() {
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 flex items-center"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
-              Actualiser
+              Refresh
             </button>
           </div>
         </div>
 
-        {/* Liste des soldes */}
+        {/* Settlements list */}
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
-              Soldes générés ({filteredDocuments.length})
+              Generated Settlements ({filteredDocuments.length})
             </h2>
           </div>
 
           {loading ? (
             <div className="p-6 text-center">
               <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-gray-400" />
-              <p className="text-gray-500">Chargement...</p>
+              <p className="text-gray-500">Loading...</p>
             </div>
           ) : filteredDocuments.length === 0 ? (
             <div className="p-6 text-center">
               <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-500">Aucun solde de tout compte trouvé</p>
+              <p className="text-gray-500">No final settlements found</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -389,19 +389,19 @@ export default function FinalSettlementPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Employé
+                      Employee
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Motif de départ
+                      Departure Reason
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Solde net
+                      Net Balance
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Statut
+                      Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date génération
+                      Generation Date
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -420,24 +420,24 @@ export default function FinalSettlementPage() {
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {document.employee.prenom} {document.employee.nom}
+                              {document.employee.firstName} {document.employee.lastName}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {document.employee.matricule} • {document.employee.fonction}
+                              {document.employee.employeeId} • {document.employee.position}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {document.metadata?.motifDepart ? 
-                          motifsDepart.find(m => m.value === document.metadata.motifDepart)?.label || 
-                          document.metadata.motifDepart : 
+                        {document.metadata?.departureReason ? 
+                          departureReasons.find(m => m.value === document.metadata.departureReason)?.label || 
+                          document.metadata.departureReason : 
                           'N/A'
                         }
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {document.metadata?.soldeNet ? 
-                          `${document.metadata.soldeNet.toLocaleString()} DH` : 
+                        {document.metadata?.netBalance ? 
+                          `${document.metadata.netBalance.toLocaleString()} KES` : 
                           'N/A'
                         }
                       </td>
@@ -445,7 +445,7 @@ export default function FinalSettlementPage() {
                         {getStatusBadge(document.status)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(document.dateGeneration).toLocaleDateString('fr-FR')}
+                        {new Date(document.generationDate).toLocaleDateString('en-US')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">

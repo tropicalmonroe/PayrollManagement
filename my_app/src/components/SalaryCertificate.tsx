@@ -3,19 +3,19 @@ import { Printer } from 'lucide-react';
 
 interface Employee {
 id: string;
-matricule: string;
-nom: string;
-prenom: string;
-fonction: string;
-dateEmbauche: string;
-anciennete: number;
-salaireBase: number;
-primeTransport: number;
-indemniteRepresentation: number;
-indemniteLogement: number;
-situationFamiliale: string;
-cin?: string;
-cnss?: string;
+employeeId: string; // Previously matricule
+lastName: string; // Previously nom
+firstName: string; // Previously prenom
+position: string; // Previously fonction
+hireDate: string; // Previously dateEmbauche
+seniority: number; // Previously anciennete
+baseSalary: number; // Previously salaireBase
+transportAllowance: number; // Previously primeTransport
+representationAllowance: number; // Previously indemniteRepresentation
+housingAllowance: number; // Previously indemniteLogement
+maritalStatus: string; // Previously situationFamiliale
+idNumber?: string; // Previously cin
+nssfNumber?: string; // Previously cnss
 }
 
 interface SalaryCertificateProps {
@@ -30,36 +30,36 @@ metadata,
 showPrintButton = true 
 }) => {
 const formatCurrency = (amount: number) => {
-    if (!amount || isNaN(amount)) return '0,00';
+    if (!amount || isNaN(amount)) return '0.00';
     
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-MA', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
     }).format(amount);
 };
 
 const formatDate = (date: string | Date) => {
-    if (!date) return 'Non renseigné';
+    if (!date) return 'Not specified'; // Translated Non renseigné
     
     const dateObj = new Date(date);
     if (isNaN(dateObj.getTime())) {
-    return 'Date invalide';
+    return 'Invalid date'; // Translated Date invalide
     }
     
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric'
     }).format(dateObj);
 };
 
-const getSituationFamiliale = () => {
-    switch (employee.situationFamiliale) {
-    case 'CELIBATAIRE': return 'Célibataire';
-    case 'MARIE': return 'Marié(e)';
-    case 'DIVORCE': return 'Divorcé(e)';
-    case 'VEUF': return 'Veuf/Veuve';
-    default: return employee.situationFamiliale;
+const getMaritalStatus = () => {
+    switch (employee.maritalStatus) {
+    case 'SINGLE': return 'Single'; // Translated Célibataire, aligned with MaritalStatus.SINGLE
+    case 'MARRIED': return 'Married'; // Translated Marié(e), aligned with MaritalStatus.MARRIED
+    case 'DIVORCED': return 'Divorced'; // Translated Divorcé(e), aligned with MaritalStatus.DIVORCED
+    case 'WIDOWED': return 'Widowed'; // Translated Veuf/Veuve, aligned with MaritalStatus.WIDOWED
+    default: return employee.maritalStatus;
     }
 };
 
@@ -71,7 +71,7 @@ const today = new Date();
 
 return (
     <div className="bg-white">
-    {/* Bouton d'impression (masqué à l'impression) */}
+    {/* Print button (hidden during printing) */}
     {showPrintButton && (
         <div className="print:hidden mb-4 flex justify-end">
         <button
@@ -79,14 +79,14 @@ return (
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2"
         >
             <Printer className="w-4 h-4" />
-            Imprimer
+            Print {/* Translated Imprimer */}
         </button>
         </div>
     )}
 
-    {/* Document d'attestation */}
+    {/* Salary certificate document */}
     <div className="certificate-container bg-white p-8 max-w-4xl mx-auto border border-gray-300 print:border-0 print:p-6 print:max-w-none print:mx-0">
-        {/* En-tête */}
+        {/* Header */}
         <div className="header flex justify-between items-start mb-6 print:mb-4">
         <div className="logo">
             <img 
@@ -97,109 +97,109 @@ return (
         </div>
         <div className="company-info text-right text-sm print:text-xs">
             <div className="font-bold">ADACPITAL</div>
-            <div>Société de Gestion</div>
-            <div>Casablanca, Maroc</div>
+            <div>Management Company</div> {/* Translated Société de Gestion */}
+            <div>Casablanca, Morocco</div> {/* Translated Casablanca, Maroc */}
         </div>
         </div>
 
-        {/* Titre */}
+        {/* Title */}
         <div className="document-title text-center mb-6 print:mb-4">
         <h1 className="text-xl font-bold uppercase underline print:text-lg">
-            Attestation de Salaire
+            Salary Certificate {/* Translated Attestation de Salaire */}
         </h1>
         </div>
 
-        {/* Contenu */}
+        {/* Content */}
         <div className="content space-y-4 text-sm print:text-xs print:space-y-2">
         <p>
-            Je soussigné(e), Directeur des Ressources Humaines de la société ADACPITAL,
+            I, the undersigned, Human Resources Director of ADACPITAL, {/* Translated Je soussigné(e), Directeur des Ressources Humaines de la société ADACPITAL */}
         </p>
         
         <p className="font-semibold">
-            Atteste par la présente que :
+            Hereby certify that: {/* Translated Atteste par la présente que : */}
         </p>
 
-        {/* Informations employé */}
+        {/* Employee details */}
         <div className="employee-details border border-black p-4 print:p-2 my-4 print:my-2">
             <div className="grid grid-cols-1 gap-2 print:gap-1">
             <div className="detail-line flex">
-                <span className="detail-label font-semibold w-40 print:w-32">Nom et Prénom :</span>
-                <span className="detail-value font-semibold">{employee.prenom} {employee.nom}</span>
+                <span className="detail-label font-semibold w-40 print:w-32">Full Name:</span> {/* Translated Nom et Prénom */}
+                <span className="detail-value font-semibold">{employee.firstName} {employee.lastName}</span>
             </div>
             <div className="detail-line flex">
-                <span className="detail-label font-semibold w-40 print:w-32">Matricule :</span>
-                <span className="detail-value">{employee.matricule}</span>
+                <span className="detail-label font-semibold w-40 print:w-32">Employee ID:</span> {/* Translated Matricule */}
+                <span className="detail-value">{employee.employeeId}</span>
             </div>
             <div className="detail-line flex">
-                <span className="detail-label font-semibold w-40 print:w-32">CIN :</span>
-                <span className="detail-value">{employee.cin || 'Non renseigné'}</span>
+                <span className="detail-label font-semibold w-40 print:w-32">ID Number:</span> {/* Translated CIN */}
+                <span className="detail-value">{employee.idNumber || 'Not specified'}</span> {/* Translated Non renseigné */}
             </div>
             <div className="detail-line flex">
-                <span className="detail-label font-semibold w-40 print:w-32">Fonction :</span>
-                <span className="detail-value">{employee.fonction}</span>
+                <span className="detail-label font-semibold w-40 print:w-32">Position:</span> {/* Translated Fonction */}
+                <span className="detail-value">{employee.position}</span>
             </div>
             <div className="detail-line flex">
-                <span className="detail-label font-semibold w-40 print:w-32">Date d'embauche :</span>
-                <span className="detail-value">{formatDate(employee.dateEmbauche)}</span>
+                <span className="detail-label font-semibold w-40 print:w-32">Hire Date:</span> {/* Translated Date d'embauche */}
+                <span className="detail-value">{formatDate(employee.hireDate)}</span>
             </div>
             <div className="detail-line flex">
-                <span className="detail-label font-semibold w-40 print:w-32">Ancienneté :</span>
-                <span className="detail-value">{employee.anciennete} ans</span>
+                <span className="detail-label font-semibold w-40 print:w-32">Seniority:</span> {/* Translated Ancienneté */}
+                <span className="detail-value">{employee.seniority} years</span> {/* Translated ans */}
             </div>
             <div className="detail-line flex">
-                <span className="detail-label font-semibold w-40 print:w-32">Situation familiale :</span>
-                <span className="detail-value">{getSituationFamiliale()}</span>
+                <span className="detail-label font-semibold w-40 print:w-32">Marital Status:</span> {/* Translated Situation familiale */}
+                <span className="detail-value">{getMaritalStatus()}</span>
             </div>
             <div className="detail-line flex">
-                <span className="detail-label font-semibold w-40 print:w-32">Salaire mensuel brut :</span>
-                <span className="detail-value font-semibold">{formatCurrency(employee.salaireBase)} DH</span>
+                <span className="detail-label font-semibold w-40 print:w-32">Monthly Gross Salary:</span> {/* Translated Salaire mensuel brut */}
+                <span className="detail-value font-semibold">{formatCurrency(employee.baseSalary)} MAD</span> {/* Changed DH to MAD for Moroccan Dirham */}
             </div>
-            {employee.primeTransport > 0 && (
+            {employee.transportAllowance > 0 && (
                 <div className="detail-line flex">
-                <span className="detail-label font-semibold w-40 print:w-32">Prime de transport :</span>
-                <span className="detail-value">{formatCurrency(employee.primeTransport)} DH</span>
+                <span className="detail-label font-semibold w-40 print:w-32">Transport Allowance:</span> {/* Translated Prime de transport */}
+                <span className="detail-value">{formatCurrency(employee.transportAllowance)} MAD</span>
                 </div>
             )}
-            {employee.indemniteRepresentation > 0 && (
+            {employee.representationAllowance > 0 && (
                 <div className="detail-line flex">
-                <span className="detail-label font-semibold w-40 print:w-32">Indemnité de représentation :</span>
-                <span className="detail-value">{formatCurrency(employee.indemniteRepresentation)} DH</span>
+                <span className="detail-label font-semibold w-40 print:w-32">Representation Allowance:</span> {/* Translated Indemnité de représentation */}
+                <span className="detail-value">{formatCurrency(employee.representationAllowance)} MAD</span>
                 </div>
             )}
-            {employee.indemniteLogement > 0 && (
+            {employee.housingAllowance > 0 && (
                 <div className="detail-line flex">
-                <span className="detail-label font-semibold w-40 print:w-32">Indemnité de logement :</span>
-                <span className="detail-value">{formatCurrency(employee.indemniteLogement)} DH</span>
+                <span className="detail-label font-semibold w-40 print:w-32">Housing Allowance:</span> {/* Translated Indemnité de logement */}
+                <span className="detail-value">{formatCurrency(employee.housingAllowance)} MAD</span>
                 </div>
             )}
             <div className="detail-line flex">
-                <span className="detail-label font-semibold w-40 print:w-32">CNSS :</span>
-                <span className="detail-value">{employee.cnss || 'Non renseigné'}</span>
+                <span className="detail-label font-semibold w-40 print:w-32">NSSF Number:</span> {/* Translated CNSS, aligned with nssfNumber */}
+                <span className="detail-value">{employee.nssfNumber || 'Not specified'}</span> {/* Translated Non renseigné */}
             </div>
             </div>
         </div>
 
         <p>
-            Est employé(e) dans notre société en qualité de <span className="font-semibold">{employee.fonction}</span> depuis le <span className="font-semibold">{formatDate(employee.dateEmbauche)}</span>.
+            Is employed by our company as a <span className="font-semibold">{employee.position}</span> since <span className="font-semibold">{formatDate(employee.hireDate)}</span>. {/* Translated Est employé(e) dans notre société en qualité de ... depuis le ... */}
         </p>
 
         <p>
-            Son salaire mensuel brut s'élève à <span className="font-semibold">{formatCurrency(employee.salaireBase)} DH</span>
-            {(employee.primeTransport > 0 || employee.indemniteRepresentation > 0 || employee.indemniteLogement > 0) && 
-            ', auquel s\'ajoutent les indemnités et primes mentionnées ci-dessus'}.
+            Their monthly gross salary amounts to <span className="font-semibold">{formatCurrency(employee.baseSalary)} MAD</span>
+            {(employee.transportAllowance > 0 || employee.representationAllowance > 0 || employee.housingAllowance > 0) && 
+            ', plus the allowances and bonuses mentioned above'}. {/* Translated Son salaire mensuel brut s'élève à ... auquel s'ajoutent les indemnités et primes mentionnées ci-dessus */}
         </p>
 
         <p>
-            L'intéressé(e) est affilié(e) à la Caisse Nationale de Sécurité Sociale sous le numéro <span className="font-semibold">{employee.cnss || '[À COMPLÉTER]'}</span>.
+            The individual is affiliated with the National Social Security Fund under number <span className="font-semibold">{employee.nssfNumber || '[TO BE COMPLETED]'}</span>. {/* Translated L'intéressé(e) est affilié(e) à la Caisse Nationale de Sécurité Sociale sous le numéro ... [À COMPLÉTER] */}
         </p>
 
         <p>
-            Cette attestation est délivrée à l'intéressé(e) pour servir et valoir ce que de droit.
+            This certificate is issued to the individual for all legal purposes. {/* Translated Cette attestation est délivrée à l'intéressé(e) pour servir et valoir ce que de droit */}
         </p>
 
         <div className="text-right mt-6 print:mt-4">
             <p className="font-semibold">
-            Fait à Casablanca, le {formatDate(today)}
+            Issued in Casablanca, on {formatDate(today)} {/* Translated Fait à Casablanca, le ... */}
             </p>
         </div>
         </div>
@@ -207,13 +207,13 @@ return (
         {/* Signatures */}
         <div className="signature-section flex justify-between mt-8 print:mt-6">
         <div className="signature-block text-center w-48">
-            <p className="font-semibold mb-2">L'Employé(e)</p>
+            <p className="font-semibold mb-2">The Employee</p> {/* Translated L'Employé(e) */}
             <div className="signature-line border-b border-black h-16 print:h-12 mb-2"></div>
-            <p className="text-sm print:text-xs">{employee.prenom} {employee.nom}</p>
+            <p className="text-sm print:text-xs">{employee.firstName} {employee.lastName}</p>
         </div>
         
         <div className="signature-block text-center w-48">
-            <p className="font-semibold mb-2">Le Directeur RH</p>
+            <p className="font-semibold mb-2">The HR Director</p> {/* Translated Le Directeur RH */}
             <div className="signature-line border-b border-black h-16 print:h-12 mb-2"></div>
             <p className="text-sm print:text-xs">ADACPITAL</p>
         </div>
@@ -222,12 +222,12 @@ return (
         {/* Footer */}
         <div className="footer text-center mt-8 print:mt-4 pt-4 print:pt-2 border-t border-black">
         <p className="text-xs print:text-[10px] text-gray-600">
-            ADACPITAL - Société de Gestion | Casablanca, Maroc
+            ADACPITAL - Management Company | Casablanca, Morocco {/* Translated ADACPITAL - Société de Gestion | Casablanca, Maroc */}
         </p>
         </div>
     </div>
 
-    {/* Styles d'impression */}
+    {/* Print styles */}
     <style jsx global>{`
         @media print {
         @page {
@@ -241,7 +241,7 @@ return (
             line-height: 1.3;
         }
         
-        /* Masquer tous les éléments sauf l'attestation */
+        /* Hide all elements except the certificate */
         body * {
             visibility: hidden;
         }
@@ -271,7 +271,7 @@ return (
             page-break-inside: avoid;
         }
         
-        /* Masquer la sidebar et navigation */
+        /* Hide sidebar and navigation */
         .sidebar,
         .layout-sidebar,
         nav,
