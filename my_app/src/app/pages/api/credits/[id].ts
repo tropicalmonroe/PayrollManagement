@@ -5,7 +5,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { id } = req.query;
 
   if (typeof id !== 'string') {
-    return res.status(400).json({ error: 'ID invalide' });
+    return res.status(400).json({ error: 'Invalid ID' });
   }
 
   if (req.method === 'GET') {
@@ -16,79 +16,77 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           employee: {
             select: {
               id: true,
-              matricule: true,
-              nom: true,
-              prenom: true,
-              fonction: true
+              employeeId: true,
+              lastName: true,
+              firstName: true,
+              position: true
             }
           }
         }
       });
 
       if (!credit) {
-        return res.status(404).json({ error: 'Crédit non trouvé' });
+        return res.status(404).json({ error: 'Credit not found' });
       }
 
       res.status(200).json(credit);
     } catch (error) {
-      console.error('Erreur lors de la récupération du crédit:', error);
-      res.status(500).json({ error: 'Erreur lors de la récupération du crédit' });
+      console.error('Error fetching credit:', error);
+      res.status(500).json({ error: 'Error fetching credit' });
     }
   } else if (req.method === 'PUT') {
     try {
       const {
         employeeId,
         type,
-        montantCredit,
-        tauxInteret,
-        dureeAnnees,
-        dateDebut,
-        banque,
-        numeroCompte,
+        loanAmount,
+        interestRate,
+        durationYears,
+        startDate,
+        bank,
+        accountNumber,
         notes,
-        statut,
-        montantRembourse,
-        soldeRestant,
-        interetsPayes,
-        capitalRestant
+        status,
+        amountRepaid,
+        remainingBalance
       } = req.body;
 
-      // Recalcul de la mensualité si les paramètres de base ont changé
-      let mensualite;
-      if (montantCredit && tauxInteret !== undefined && dureeAnnees) {
-        const montant = parseFloat(montantCredit);
-        const taux = parseFloat(tauxInteret);
-        const duree = parseInt(dureeAnnees);
+      // Recalculate monthly payment if basic parameters have changed
+      let monthlyPayment;
+      if (loanAmount && interestRate !== undefined && durationYears) {
+        const amount = parseFloat(loanAmount);
+        const rate = parseFloat(interestRate);
+        const duration = parseInt(durationYears);
         
-        if (montant > 0 && taux >= 0 && duree > 0) {
-          const tauxMensuel = taux / 100 / 12;
-          const nombreMensualites = duree * 12;
+        if (amount > 0 && rate >= 0 && duration > 0) {
+          const monthlyRate = rate / 100 / 12;
+          const numberOfInstallments = duration * 12;
           
-          if (tauxMensuel > 0) {
-            mensualite = montant * (tauxMensuel * Math.pow(1 + tauxMensuel, nombreMensualites)) / 
-                        (Math.pow(1 + tauxMensuel, nombreMensualites) - 1);
+          if (monthlyRate > 0) {
+            monthlyPayment = amount * (monthlyRate * Math.pow(1 + monthlyRate, numberOfInstallments)) / 
+                        (Math.pow(1 + monthlyRate, numberOfInstallments) - 1);
           } else {
-            // Si taux = 0, mensualité = montant / nombre de mois
-            mensualite = montant / nombreMensualites;
+            // If rate = 0, monthly payment = amount / number of months
+            monthlyPayment = amount / numberOfInstallments;
           }
-          mensualite = Math.round(mensualite * 100) / 100;
+          monthlyPayment = Math.round(monthlyPayment * 100) / 100;
         }
       }
 
-      // Calcul de la date de fin si nécessaire
-      let dateFin;
-      if (dateDebut && dureeAnnees) {
-        const dateDebutObj = new Date(dateDebut);
-        const duree = parseInt(dureeAnnees);
+      // Calculate end date if necessary
+      let endDate;
+      if (startDate && durationYears) {
+        const startDateObj = new Date(startDate);
+        const duration = parseInt(durationYears);
         
-        // Validation de la date et de la durée
-        if (dateDebutObj instanceof Date && !isNaN(dateDebutObj.getTime()) && duree > 0 && duree <= 50) {
-          dateFin = new Date(dateDebutObj);
-          dateFin.setFullYear(dateFin.getFullYear() + duree);
+        // Validate date and duration
+        if (startDateObj instanceof Date && !isNaN(startDateObj.getTime()) && duration > 0 && duration <= 50) {
+          endDate = new Date(startDateObj);
+          endDate.setFullYear(endDate.getFullYear() + duration);
           
-          // Vérifier que la date calculée est valide
-          if (isNaN(dateFin.getTime())) {
-            dateFin = undefined;
+          // Verify calculated date is valid
+          if (isNaN(endDate.getTime())) {
+            endDate = undefined;
           }
         }
       }
@@ -97,20 +95,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       if (employeeId !== undefined) updateData.employeeId = employeeId;
       if (type !== undefined) updateData.type = type;
-      if (montantCredit !== undefined) updateData.montantCredit = parseFloat(montantCredit);
-      if (tauxInteret !== undefined) updateData.tauxInteret = parseFloat(tauxInteret);
-      if (dureeAnnees !== undefined) updateData.dureeAnnees = parseInt(dureeAnnees);
-      if (mensualite !== undefined) updateData.mensualite = mensualite;
-      if (dateDebut !== undefined) updateData.dateDebut = new Date(dateDebut);
-      if (dateFin !== undefined) updateData.dateFin = dateFin;
-      if (banque !== undefined) updateData.banque = banque;
-      if (numeroCompte !== undefined) updateData.numeroCompte = numeroCompte;
+      if (loanAmount !== undefined) updateData.loanAmount = parseFloat(loanAmount);
+      if (interestRate !== undefined) updateData.interestRate = parseFloat(interestRate);
+      if (durationYears !== undefined) updateData.durationYears = parseInt(durationYears);
+      if (monthlyPayment !== undefined) updateData.monthlyPayment = monthlyPayment;
+      if (startDate !== undefined) updateData.startDate = new Date(startDate);
+      if (endDate !== undefined) updateData.endDate = endDate;
+      if (bank !== undefined) updateData.bank = bank;
+      if (accountNumber !== undefined) updateData.accountNumber = accountNumber;
       if (notes !== undefined) updateData.notes = notes;
-      if (statut !== undefined) updateData.statut = statut;
-      if (montantRembourse !== undefined) updateData.montantRembourse = parseFloat(montantRembourse);
-      if (soldeRestant !== undefined) updateData.soldeRestant = parseFloat(soldeRestant);
-      if (interetsPayes !== undefined) updateData.interetsPayes = parseFloat(interetsPayes);
-      if (capitalRestant !== undefined) updateData.capitalRestant = parseFloat(capitalRestant);
+      if (status !== undefined) updateData.status = status;
+      if (amountRepaid !== undefined) updateData.amountRepaid = parseFloat(amountRepaid);
+      if (remainingBalance !== undefined) updateData.remainingBalance = parseFloat(remainingBalance);
 
       const credit = await prisma.credit.update({
         where: { id },
@@ -119,10 +115,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           employee: {
             select: {
               id: true,
-              matricule: true,
-              nom: true,
-              prenom: true,
-              fonction: true
+              employeeId: true,
+              lastName: true,
+              firstName: true,
+              position: true
             }
           }
         }
@@ -130,8 +126,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       res.status(200).json(credit);
     } catch (error) {
-      console.error('Erreur lors de la mise à jour du crédit:', error);
-      res.status(500).json({ error: 'Erreur lors de la mise à jour du crédit' });
+      console.error('Error updating credit:', error);
+      res.status(500).json({ error: 'Error updating credit' });
     }
   } else if (req.method === 'DELETE') {
     try {
@@ -139,10 +135,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where: { id }
       });
 
-      res.status(200).json({ message: 'Crédit supprimé avec succès' });
+      res.status(200).json({ message: 'Credit deleted successfully' });
     } catch (error) {
-      console.error('Erreur lors de la suppression du crédit:', error);
-      res.status(500).json({ error: 'Erreur lors de la suppression du crédit' });
+      console.error('Error deleting credit:', error);
+      res.status(500).json({ error: 'Error deleting credit' });
     }
   } else {
     res.setHeader('Allow', ['GET', 'PUT', 'DELETE']);

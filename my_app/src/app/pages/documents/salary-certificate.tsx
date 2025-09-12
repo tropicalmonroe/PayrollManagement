@@ -16,12 +16,12 @@ import {
 
 interface Employee {
   id: string;
-  matricule: string;
-  nom: string;
-  prenom: string;
-  fonction: string;
-  dateEmbauche: string;
-  anciennete: number;
+  employeeId: string;
+  lastName: string;
+  firstName: string;
+  position: string;
+  hireDate: string;
+  seniority: number;
 }
 
 interface Document {
@@ -30,8 +30,8 @@ interface Document {
   title: string;
   description: string;
   employee: Employee;
-  periode: string;
-  dateGeneration: string;
+  period: string;
+  generationDate: string;
   status: 'GENERATED' | 'SENT' | 'ARCHIVED';
   downloadCount: number;
   metadata: any;
@@ -42,27 +42,27 @@ export default function SalaryCertificatePage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<string>('');
   const [certificateType, setCertificateType] = useState<string>('');
-  const [dateDebut, setDateDebut] = useState<string>('');
-  const [dateFin, setDateFin] = useState<string>('');
-  const [motif, setMotif] = useState<string>('');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [reason, setReason] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [generating, setGenerating] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
   const certificateTypes = [
-    { value: 'revenu', label: 'Attestation de revenu' },
-    { value: 'presence', label: 'Attestation de présence' },
-    { value: 'travail', label: 'Attestation de travail' },
-    { value: 'salaire', label: 'Attestation de salaire' }
+    { value: 'income', label: 'Income Certificate' },
+    { value: 'presence', label: 'Presence Certificate' },
+    { value: 'employment', label: 'Employment Certificate' },
+    { value: 'salary', label: 'Salary Certificate' }
   ];
 
-  // Charger les employés
+  // Load employees
   useEffect(() => {
     fetchEmployees();
   }, []);
 
-  // Charger les documents
+  // Load documents
   useEffect(() => {
     fetchDocuments();
   }, [selectedEmployee]);
@@ -83,7 +83,7 @@ export default function SalaryCertificatePage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      params.append('type', 'ATTESTATION_SALAIRE');
+      params.append('type', 'SALARY_CERTIFICATE');
       
       if (selectedEmployee) {
         params.append('employeeId', selectedEmployee);
@@ -102,13 +102,13 @@ export default function SalaryCertificatePage() {
   };
 
   const generateCertificate = async () => {
-    if (!selectedEmployee || !certificateType || !dateDebut || !dateFin) {
-      setError('Veuillez remplir tous les champs obligatoires');
+    if (!selectedEmployee || !certificateType || !startDate || !endDate) {
+      setError('Please fill in all required fields');
       return;
     }
 
-    if (new Date(dateDebut) > new Date(dateFin)) {
-      setError('La date de début doit être antérieure à la date de fin');
+    if (new Date(startDate) > new Date(endDate)) {
+      setError('Start date must be before end date');
       return;
     }
 
@@ -124,28 +124,28 @@ export default function SalaryCertificatePage() {
         body: JSON.stringify({
           employeeId: selectedEmployee,
           type: certificateType,
-          dateDebut,
-          dateFin,
-          motif
+          startDate,
+          endDate,
+          reason
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Recharger la liste des documents
+        // Reload document list
         fetchDocuments();
-        // Réinitialiser le formulaire
+        // Reset form
         setSelectedEmployee('');
         setCertificateType('');
-        setDateDebut('');
-        setDateFin('');
-        setMotif('');
+        setStartDate('');
+        setEndDate('');
+        setReason('');
       } else {
-        setError(data.error || 'Erreur lors de la génération de l\'attestation');
+        setError(data.error || 'Error generating certificate');
       }
     } catch (error) {
-      setError('Erreur lors de la génération de l\'attestation');
+      setError('Error generating certificate');
       console.error('Error generating certificate:', error);
     } finally {
       setGenerating(false);
@@ -161,7 +161,7 @@ export default function SalaryCertificatePage() {
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = `attestation-salaire-${documentId}.pdf`;
+        a.download = `salary-certificate-${documentId}.pdf`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -173,16 +173,16 @@ export default function SalaryCertificatePage() {
   };
 
   const filteredDocuments = documents.filter(doc =>
-    doc.employee.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.employee.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.employee.matricule.toLowerCase().includes(searchTerm.toLowerCase())
+    doc.employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      GENERATED: { color: 'bg-blue-100 text-blue-800', text: 'Généré' },
-      SENT: { color: 'bg-green-100 text-green-800', text: 'Envoyé' },
-      ARCHIVED: { color: 'bg-gray-100 text-gray-800', text: 'Archivé' }
+      GENERATED: { color: 'bg-blue-100 text-blue-800', text: 'Generated' },
+      SENT: { color: 'bg-green-100 text-green-800', text: 'Sent' },
+      ARCHIVED: { color: 'bg-gray-100 text-gray-800', text: 'Archived' }
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.GENERATED;
@@ -200,16 +200,16 @@ export default function SalaryCertificatePage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Attestations de salaire</h1>
-            <p className="text-gray-600">Génération d'attestations de revenu ou de présence</p>
+            <h1 className="text-2xl font-bold text-gray-900">Salary Certificates</h1>
+            <p className="text-gray-600">Generate income or presence certificates</p>
           </div>
         </div>
 
-        {/* Génération d'attestation */}
+        {/* Certificate generation */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             <Plus className="inline-block w-5 h-5 mr-2" />
-            Générer une nouvelle attestation
+            Generate New Certificate
           </h2>
           
           {error && (
@@ -222,17 +222,17 @@ export default function SalaryCertificatePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Employé *
+                Employee *
               </label>
               <select
                 value={selectedEmployee}
                 onChange={(e) => setSelectedEmployee(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Sélectionner un employé</option>
+                <option value="">Select an employee</option>
                 {employees.map((employee) => (
                   <option key={employee.id} value={employee.id}>
-                    {employee.prenom} {employee.nom} ({employee.matricule})
+                    {employee.firstName} {employee.lastName} ({employee.employeeId})
                   </option>
                 ))}
               </select>
@@ -240,14 +240,14 @@ export default function SalaryCertificatePage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Type d'attestation *
+                Certificate Type *
               </label>
               <select
                 value={certificateType}
                 onChange={(e) => setCertificateType(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Sélectionner un type</option>
+                <option value="">Select a type</option>
                 {certificateTypes.map((type) => (
                   <option key={type.value} value={type.value}>
                     {type.label}
@@ -258,37 +258,37 @@ export default function SalaryCertificatePage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date de début *
+                Start Date *
               </label>
               <input
                 type="date"
-                value={dateDebut}
-                onChange={(e) => setDateDebut(e.target.value)}
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date de fin *
+                End Date *
               </label>
               <input
                 type="date"
-                value={dateFin}
-                onChange={(e) => setDateFin(e.target.value)}
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Motif (optionnel)
+                Reason (optional)
               </label>
               <textarea
-                value={motif}
-                onChange={(e) => setMotif(e.target.value)}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
                 rows={3}
-                placeholder="Précisez le motif de la demande d'attestation..."
+                placeholder="Specify the reason for the certificate request..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -305,12 +305,12 @@ export default function SalaryCertificatePage() {
               ) : (
                 <Plus className="w-4 h-4 mr-2" />
               )}
-              {generating ? 'Génération...' : 'Générer l\'attestation'}
+              {generating ? 'Generating...' : 'Generate Certificate'}
             </button>
           </div>
         </div>
 
-        {/* Filtres et recherche */}
+        {/* Filters and search */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -318,7 +318,7 @@ export default function SalaryCertificatePage() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Rechercher par nom, prénom ou matricule..."
+                  placeholder="Search by name, first name or employee ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -328,23 +328,23 @@ export default function SalaryCertificatePage() {
           </div>
         </div>
 
-        {/* Liste des attestations */}
+        {/* Certificate list */}
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
-              Attestations générées ({filteredDocuments.length})
+              Generated Certificates ({filteredDocuments.length})
             </h2>
           </div>
 
           {loading ? (
             <div className="p-6 text-center">
               <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-gray-400" />
-              <p className="text-gray-500">Chargement...</p>
+              <p className="text-gray-500">Loading...</p>
             </div>
           ) : filteredDocuments.length === 0 ? (
             <div className="p-6 text-center">
               <Award className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-500">Aucune attestation trouvée</p>
+              <p className="text-gray-500">No certificates found</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -352,19 +352,19 @@ export default function SalaryCertificatePage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Employé
+                      Employee
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Type
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Période
+                      Period
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Statut
+                      Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date génération
+                      Generation Date
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -383,56 +383,56 @@ export default function SalaryCertificatePage() {
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {document.employee.prenom} {document.employee.nom}
+                              {document.employee.firstName} {document.employee.lastName}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {document.employee.matricule} • {document.employee.fonction}
+                              {document.employee.employeeId} • {document.employee.position}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {document.metadata?.typeAttestation ? 
-                          certificateTypes.find(t => t.value === document.metadata.typeAttestation)?.label || 
-                          document.metadata.typeAttestation : 
+                        {document.metadata?.certificateType ? 
+                          certificateTypes.find(t => t.value === document.metadata.certificateType)?.label || 
+                          document.metadata.certificateType : 
                           'N/A'
                         }
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {document.periode}
+                        {document.period}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(document.status)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(document.dateGeneration).toLocaleDateString('fr-FR')}
+                        {new Date(document.generationDate).toLocaleDateString('en-US')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           <button
                             onClick={() => window.open(`/documents/salary-certificate/${document.id}`, '_blank')}
                             className="text-green-600 hover:text-green-800"
-                            title="Visualiser"
+                            title="View"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDownload(document.id)}
                             className="text-blue-600 hover:text-blue-800"
-                            title="Télécharger"
+                            title="Download"
                           >
                             <Download className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => window.print()}
                             className="text-gray-600 hover:text-gray-800"
-                            title="Imprimer"
+                            title="Print"
                           >
                             <Printer className="w-4 h-4" />
                           </button>
                           <button
                             className="text-purple-600 hover:text-purple-800"
-                            title="Envoyer par email"
+                            title="Send by email"
                           >
                             <Mail className="w-4 h-4" />
                           </button>

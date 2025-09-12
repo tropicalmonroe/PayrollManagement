@@ -5,8 +5,8 @@ export default function SettingsPage() {
   return (
     <>
       <Head>
-        <title>Paramètres - AD Capital</title>
-        <meta name="description" content="Configurez les paramètres de l'application" />
+        <title>Settings - AD Capital</title>
+        <meta name="description" content="Configure the settings of your company and payroll" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -14,9 +14,9 @@ export default function SettingsPage() {
       <Layout>
         <div className="space-y-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Paramètres</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
             <p className="mt-1 text-sm text-gray-600">
-              Configurez les paramètres de l'application
+              Configure your company and payroll settings here.
             </p>
           </div>
 
@@ -25,32 +25,32 @@ export default function SettingsPage() {
             <div className="bg-white shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg leading-6 font-medium text-gray-900">
-                  Informations de l'entreprise
+                  Company Informaton
                 </h3>
                 <div className="mt-5 space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      Nom de l'entreprise
+                      Company Name
                     </label>
                     <input
                       type="text"
                       className="payroll-input mt-1"
-                      placeholder="Nom de votre entreprise"
+                      placeholder="Company Name"
                       defaultValue="AD Capital"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      Adresse
+                      Address
                     </label>
                     <textarea
                       className="payroll-input mt-1"
                       rows={3}
-                      placeholder="Adresse de l'entreprise"
+                      placeholder="Your company address"
                     />
                   </div>
                   <button className="payroll-button">
-                    Sauvegarder
+                    Save
                   </button>
                 </div>
               </div>
@@ -60,32 +60,32 @@ export default function SettingsPage() {
             <div className="bg-white shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg leading-6 font-medium text-gray-900">
-                  Paramètres de paie
+                  Payroll Settings
                 </h3>
                 <div className="mt-5 space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      Taux CNSS (%)
+                      NSSF Rate (%)
                     </label>
                     <input
                       type="number"
                       step="0.01"
                       className="payroll-input mt-1"
-                      defaultValue="4.48"
+                      defaultValue="6"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      Plafond CNSS (MAD)
+                      NSSF Ceiling (KES)
                     </label>
                     <input
                       type="number"
                       className="payroll-input mt-1"
-                      defaultValue="6000"
+                      defaultValue="18000"
                     />
                   </div>
                   <button className="payroll-button">
-                    Sauvegarder
+                    Save
                   </button>
                 </div>
               </div>

@@ -6,70 +6,71 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'POST') {
     try {
-      const { montantPaye, datePaiement, notes } = req.body;
+      const { amountPaid, paymentDate, notes } = req.body;
 
-      // Validation des données
-      if (!montantPaye || montantPaye <= 0) {
-        return res.status(400).json({ error: 'Le montant payé doit être supérieur à 0' });
+      // Data validation
+      if (!amountPaid || amountPaid <= 0) {
+        return res.status(400).json({ error: 'Amount paid must be greater than 0' });
       }
 
-      // Récupérer l'échéance
-      const echeance = await prisma.creditEcheance.findUnique({
+      // Get the installment
+      const installment = await prisma.creditInstallment.findUnique({
         where: { id: id as string },
         include: {
           credit: true
         }
       });
 
-      if (!echeance) {
-        return res.status(404).json({ error: 'Échéance non trouvée' });
+      if (!installment) {
+        return res.status(404).json({ error: 'Installment not found' });
       }
 
-      if (echeance.statut === 'PAYEE') {
-        return res.status(400).json({ error: 'Cette échéance a déjà été payée' });
+      if (installment.status === 'PAID') {
+        return res.status(400).json({ error: 'This installment has already been paid' });
       }
 
-      // Mettre à jour l'échéance
-      const echeanceUpdated = await prisma.$transaction(async (prisma) => {
-        // Marquer l'échéance comme payée
-        const updatedEcheance = await prisma.creditEcheance.update({
+      // Update the installment
+      const updatedInstallment = await prisma.$transaction(async (prisma) => {
+        // Mark the installment as paid
+        const updatedInstallment = await prisma.creditInstallment.update({
           where: { id: id as string },
           data: {
-            statut: 'PAYEE',
-            datePaiement: datePaiement ? new Date(datePaiement) : new Date(),
-            montantPaye: parseFloat(montantPaye),
+            status: 'PAID',
+            paymentDate: paymentDate ? new Date(paymentDate) : new Date(),
+            amountPaid: parseFloat(amountPaid),
             notes: notes || null
           }
         });
 
-        // Mettre à jour le crédit
-        const montantRemboursePrecedent = echeance.credit.montantRembourse;
-        const nouveauMontantRembourse = montantRemboursePrecedent + parseFloat(montantPaye);
-        const nouveauSoldeRestant = Math.max(0, echeance.credit.montantCredit - nouveauMontantRembourse);
+        // Update the credit
+        const previousAmountRepaid = installment.credit.amountRepaid;
+        const newAmountRepaid = previousAmountRepaid + parseFloat(amountPaid);
+        const newRemainingBalance = Math.max(0, installment.credit.loanAmount - newAmountRepaid);
 
-        // Déterminer le nouveau statut du crédit
-        let nouveauStatut = echeance.credit.statut;
-        if (nouveauSoldeRestant <= 0) {
-          nouveauStatut = 'SOLDE';
+        // Determine the new credit status
+        let newStatus = installment.credit.status;
+        if (newRemainingBalance <= 0) {
+          newStatus = 'PAID_OFF';
         }
 
         await prisma.credit.update({
-          where: { id: echeance.creditId },
+          where: { id: installment.creditId },
           data: {
-            montantRembourse: nouveauMontantRembourse,
-            soldeRestant: nouveauSoldeRestant,
-            statut: nouveauStatut,
-            interetsPayes: echeance.credit.interetsPayes + echeance.interetsHT
+            amountRepaid: newAmountRepaid,
+            remainingBalance: newRemainingBalance,
+            status: newStatus,
+            // Note: interestPaid field doesn't exist in your schema, so this line is removed
+            // interestPaid: installment.credit.interestPaid + installment.interest
           }
         });
 
-        return updatedEcheance;
+        return updatedInstallment;
       });
 
-      res.status(200).json(echeanceUpdated);
+      res.status(200).json(updatedInstallment);
     } catch (error) {
-      console.error('Erreur lors du paiement de l\'échéance:', error);
-      res.status(500).json({ error: 'Erreur lors du paiement de l\'échéance' });
+      console.error('Error processing installment payment:', error);
+      res.status(500).json({ error: 'Error processing installment payment' });
     }
   } else {
     res.setHeader('Allow', ['POST']);

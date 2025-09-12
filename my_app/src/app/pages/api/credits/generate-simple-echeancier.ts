@@ -1,81 +1,81 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '../../../../lib/prisma';
-import { genererEcheancierSimple, type CreditSimple } from '../../../../lib/simplePaymentSchedule';
+import { generateSimplePaymentSchedule, type SimpleCredit } from '../../../../lib/simplePaymentSchedule';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const { creditId, montantMensuel, nombreEcheances, dateDebut } = req.body;
+      const { creditId, monthlyPayment, numberOfInstallments, startDate } = req.body;
 
-      if (!creditId || !montantMensuel || !nombreEcheances || !dateDebut) {
+      if (!creditId || !monthlyPayment || !numberOfInstallments || !startDate) {
         return res.status(400).json({ 
-          error: 'Paramètres manquants: creditId, montantMensuel, nombreEcheances, dateDebut requis' 
+          error: 'Missing parameters: creditId, monthlyPayment, numberOfInstallments, startDate required' 
         });
       }
 
-      // Vérifier que le crédit existe
+      // Check if the credit exists
       const credit = await prisma.credit.findUnique({
         where: { id: creditId }
       });
 
       if (!credit) {
-        return res.status(404).json({ error: 'Crédit non trouvé' });
+        return res.status(404).json({ error: 'Credit not found' });
       }
 
-      // Vérifier si un échéancier existe déjà
-      const existingEcheancier = await prisma.creditEcheance.findFirst({
+      // Check if a payment schedule already exists
+      const existingSchedule = await prisma.creditInstallment.findFirst({
         where: { creditId }
       });
 
-      if (existingEcheancier) {
+      if (existingSchedule) {
         return res.status(400).json({ 
-          error: 'Un échéancier existe déjà pour ce crédit' 
+          error: 'A payment schedule already exists for this credit' 
         });
       }
 
-      // Créer le crédit simple pour la génération
-      const creditSimple: CreditSimple = {
-        montantTotal: montantMensuel * nombreEcheances,
-        montantMensuel: montantMensuel,
-        nombreEcheances: nombreEcheances,
-        dateDebut: new Date(dateDebut)
+      // Create simple credit for generation
+      const simpleCredit: SimpleCredit = {
+        totalAmount: monthlyPayment * numberOfInstallments,
+        monthlyAmount: monthlyPayment,
+        numberOfInstallments: numberOfInstallments,
+        startDate: new Date(startDate)
       };
 
-      // Générer l'échéancier simple
-      const echeancier = genererEcheancierSimple(creditSimple);
+      // Generate simple payment schedule
+      const paymentSchedule = generateSimplePaymentSchedule(simpleCredit);
 
-      // Sauvegarder l'échéancier en base de données
-      const echeancesData = echeancier.map(echeance => ({
+      // Save payment schedule to database
+      const installmentsData = paymentSchedule.map(installment => ({
         creditId,
-        numeroEcheance: echeance.numeroEcheance,
-        dateEcheance: echeance.dateEcheance,
-        mensualiteTTC: echeance.montantAPayer,
-        amortissement: echeance.montantAPayer, // Pour la compatibilité
-        interetsHT: 0, // Pas d'intérêts dans le mode simple
-        tvaInterets: 0,
-        assurance: 0,
-        capitalRestant: creditSimple.montantTotal - (echeance.numeroEcheance * echeance.montantAPayer),
-        statut: echeance.statut,
-        notes: echeance.notes || null
+        installmentNumber: installment.installmentNumber,
+        dueDate: installment.dueDate,
+        totalMonthlyPayment: installment.amountToPay,
+        principal: installment.amountToPay, // For compatibility
+        interest: 0, // No interest in simple mode
+        interestTax: 0,
+        insurance: 0,
+        remainingPrincipal: simpleCredit.totalAmount - (installment.installmentNumber * installment.amountToPay),
+        status: installment.status,
+        notes: installment.notes || null
       }));
 
-      // Créer toutes les échéances en une seule transaction
-      await prisma.creditEcheance.createMany({
-        data: echeancesData
+      // Create all installments in a single transaction
+      await prisma.creditInstallment.createMany({
+        data: installmentsData
       });
 
       res.status(200).json({
-        message: 'Échéancier simple généré avec succès',
-        totalEcheances: echeancier.length,
-        montantMensuel: montantMensuel,
-        montantTotal: creditSimple.montantTotal,
-        echeancier: echeancier
+        message: 'Simple payment schedule generated successfully',
+        totalInstallments: paymentSchedule.length,
+        monthlyPayment: monthlyPayment,
+        totalAmount: simpleCredit.totalAmount,
+        paymentSchedule: paymentSchedule
       });
 
     } catch (error) {
-      console.error('Erreur lors de la génération de l\'échéancier simple:', error);
+      console.error('Error generating simple payment schedule:', error);
       res.status(500).json({ 
-        error: 'Erreur lors de la génération de l\'échéancier simple' 
+        error: 'Error generating simple payment schedule' 
       });
     }
   } else {

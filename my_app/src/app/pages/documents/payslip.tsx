@@ -17,10 +17,10 @@ import {
 
 interface Employee {
   id: string;
-  matricule: string;
-  nom: string;
-  prenom: string;
-  fonction: string;
+  employeeId: string;
+  lastName: string;
+  firstName: string;
+  position: string;
 }
 
 interface Document {
@@ -29,8 +29,8 @@ interface Document {
   title: string;
   description: string;
   employee: Employee;
-  periode: string;
-  dateGeneration: string;
+  period: string;
+  generationDate: string;
   status: 'GENERATED' | 'SENT' | 'ARCHIVED';
   downloadCount: number;
   metadata: any;
@@ -48,16 +48,16 @@ export default function PayslipPage() {
   const [error, setError] = useState<string>('');
 
   const months = [
-    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  // Charger les employés
+  // Load employees
   useEffect(() => {
     fetchEmployees();
   }, []);
 
-  // Charger les documents
+  // Load documents
   useEffect(() => {
     fetchDocuments();
   }, [selectedEmployee, selectedMonth, selectedYear]);
@@ -78,14 +78,14 @@ export default function PayslipPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      params.append('type', 'BULLETIN_PAIE');
+      params.append('type', 'PAYSLIP');
       
       if (selectedEmployee) {
         params.append('employeeId', selectedEmployee);
       }
       
       if (selectedMonth && selectedYear) {
-        params.append('periode', `${selectedMonth} ${selectedYear}`);
+        params.append('period', `${selectedMonth} ${selectedYear}`);
       }
 
       const response = await fetch(`/api/documents?${params.toString()}`);
@@ -102,7 +102,7 @@ export default function PayslipPage() {
 
   const generatePayslip = async () => {
     if (!selectedEmployee || !selectedMonth || !selectedYear) {
-      setError('Veuillez sélectionner un employé, un mois et une année');
+      setError('Please select an employee, month, and year');
       return;
     }
 
@@ -117,24 +117,24 @@ export default function PayslipPage() {
         },
         body: JSON.stringify({
           employeeId: selectedEmployee,
-          mois: selectedMonth,
-          annee: selectedYear.toString()
+          month: selectedMonth,
+          year: selectedYear.toString()
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Recharger la liste des documents
+        // Reload document list
         fetchDocuments();
-        // Réinitialiser les sélections
+        // Reset selections
         setSelectedEmployee('');
         setSelectedMonth('');
       } else {
-        setError(data.error || 'Erreur lors de la génération du bulletin');
+        setError(data.error || 'Error generating payslip');
       }
     } catch (error) {
-      setError('Erreur lors de la génération du bulletin');
+      setError('Error generating payslip');
       console.error('Error generating payslip:', error);
     } finally {
       setGenerating(false);
@@ -142,16 +142,16 @@ export default function PayslipPage() {
   };
 
   const filteredDocuments = documents.filter(doc =>
-    doc.employee.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.employee.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.employee.matricule.toLowerCase().includes(searchTerm.toLowerCase())
+    doc.employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      GENERATED: { color: 'bg-blue-100 text-blue-800', text: 'Généré' },
-      SENT: { color: 'bg-green-100 text-green-800', text: 'Envoyé' },
-      ARCHIVED: { color: 'bg-gray-100 text-gray-800', text: 'Archivé' }
+      GENERATED: { color: 'bg-blue-100 text-blue-800', text: 'Generated' },
+      SENT: { color: 'bg-green-100 text-green-800', text: 'Sent' },
+      ARCHIVED: { color: 'bg-gray-100 text-gray-800', text: 'Archived' }
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.GENERATED;
@@ -169,16 +169,16 @@ export default function PayslipPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Bulletins de paie</h1>
-            <p className="text-gray-600">Génération et gestion des bulletins de paie individuels</p>
+            <h1 className="text-2xl font-bold text-gray-900">Payslips</h1>
+            <p className="text-gray-600">Generation and management of individual payslips</p>
           </div>
         </div>
 
-        {/* Génération de bulletin */}
+        {/* Payslip generation */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             <Plus className="inline-block w-5 h-5 mr-2" />
-            Générer un nouveau bulletin
+            Generate New Payslip
           </h2>
           
           {error && (
@@ -191,17 +191,17 @@ export default function PayslipPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Employé
+                Employee
               </label>
               <select
                 value={selectedEmployee}
                 onChange={(e) => setSelectedEmployee(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Sélectionner un employé</option>
+                <option value="">Select an employee</option>
                 {employees.map((employee) => (
                   <option key={employee.id} value={employee.id}>
-                    {employee.prenom} {employee.nom} ({employee.matricule})
+                    {employee.firstName} {employee.lastName} ({employee.employeeId})
                   </option>
                 ))}
               </select>
@@ -209,14 +209,14 @@ export default function PayslipPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mois
+                Month
               </label>
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Sélectionner un mois</option>
+                <option value="">Select a month</option>
                 {months.map((month) => (
                   <option key={month} value={month}>
                     {month}
@@ -227,7 +227,7 @@ export default function PayslipPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Année
+                Year
               </label>
               <select
                 value={selectedYear}
@@ -253,13 +253,13 @@ export default function PayslipPage() {
                 ) : (
                   <Plus className="w-4 h-4 mr-2" />
                 )}
-                {generating ? 'Génération...' : 'Générer'}
+                {generating ? 'Generating...' : 'Generate'}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Filtres et recherche */}
+        {/* Filters and search */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -267,7 +267,7 @@ export default function PayslipPage() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Rechercher par nom, prénom ou matricule..."
+                  placeholder="Search by name, first name or employee ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -279,28 +279,28 @@ export default function PayslipPage() {
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 flex items-center"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
-              Actualiser
+              Refresh
             </button>
           </div>
         </div>
 
-        {/* Liste des bulletins */}
+        {/* Payslip list */}
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
-              Bulletins générés ({filteredDocuments.length})
+              Generated Payslips ({filteredDocuments.length})
             </h2>
           </div>
 
           {loading ? (
             <div className="p-6 text-center">
               <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-gray-400" />
-              <p className="text-gray-500">Chargement...</p>
+              <p className="text-gray-500">Loading...</p>
             </div>
           ) : filteredDocuments.length === 0 ? (
             <div className="p-6 text-center">
               <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-500">Aucun bulletin de paie trouvé</p>
+              <p className="text-gray-500">No payslips found</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -308,19 +308,19 @@ export default function PayslipPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Employé
+                      Employee
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Période
+                      Period
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Salaire Net
+                      Net Salary
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Statut
+                      Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date génération
+                      Generation Date
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -339,20 +339,20 @@ export default function PayslipPage() {
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {document.employee.prenom} {document.employee.nom}
+                              {document.employee.firstName} {document.employee.lastName}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {document.employee.matricule} • {document.employee.fonction}
+                              {document.employee.employeeId} • {document.employee.position}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {document.periode}
+                        {document.period}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {document.metadata?.salaireNet ? 
-                          `${document.metadata.salaireNet.toLocaleString()} DH` : 
+                        {document.metadata?.netSalary ? 
+                          `${document.metadata.netSalary.toLocaleString()} KES` : 
                           'N/A'
                         }
                       </td>
@@ -360,21 +360,21 @@ export default function PayslipPage() {
                         {getStatusBadge(document.status)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(document.dateGeneration).toLocaleDateString('fr-FR')}
+                        {new Date(document.generationDate).toLocaleDateString('en-US')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           <button 
                             onClick={() => window.open(`/api/documents/payslip/${document.id}/view`, '_blank')}
                             className="text-blue-600 hover:text-blue-900"
-                            title="Visualiser"
+                            title="View"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button 
                             onClick={() => window.open(`/api/documents/payslip/${document.id}/view`, '_blank')}
                             className="text-green-600 hover:text-green-900"
-                            title="Télécharger"
+                            title="Download"
                           >
                             <Download className="w-4 h-4" />
                           </button>
@@ -384,11 +384,11 @@ export default function PayslipPage() {
                               printWindow?.addEventListener('load', () => printWindow.print());
                             }}
                             className="text-gray-600 hover:text-gray-900"
-                            title="Imprimer"
+                            title="Print"
                           >
                             <Printer className="w-4 h-4" />
                           </button>
-                          <button className="text-purple-600 hover:text-purple-900" title="Envoyer par email">
+                          <button className="text-purple-600 hover:text-purple-900" title="Send by email">
                             <Mail className="w-4 h-4" />
                           </button>
                         </div>

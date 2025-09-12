@@ -212,6 +212,7 @@ export interface PayrollResult {
     exceptionalBonuses?: number;
     otherEarnings?: number;
     totalEarnings: number;
+    bonuses: number;
   };
   
   // Gross salaries
@@ -226,6 +227,7 @@ export interface PayrollResult {
     insuranceDiversifiedEmployee: number;
     optionalInsurances: number;
     totalEmployeeContributions: number;
+    housingLevy: number; // Optional, only if applicable
   };
   
   // Employer contributions
@@ -540,7 +542,8 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
     totalEarnings: employee.baseSalary + seniorityBonus + housingAllowance + 
                 employee.mealAllowance + employee.transportAllowance + representationAllowance +
                 variableElements.overtimePay + variableElements.exceptionalBonuses + 
-                variableElements.otherEarnings
+                variableElements.otherEarnings,
+      bonuses: seniorityBonus + housingAllowance + employee.mealAllowance + employee.transportAllowance + representationAllowance
   };
   
   // 2. Calculate gross salaries
@@ -561,6 +564,7 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
     pensionEmployee: employee.usePensionEmployee ? NSSF_DEFAULTS.pensionEmployee : pensionContributions.pensionEmployee,
     insuranceDiversifiedEmployee: employee.useInsuranceDiversifiedEmployee ? NSSF_DEFAULTS.insuranceDiversifiedEmployee : diversifiedInsurance.insuranceDiversifiedEmployee,
     optionalInsurances,
+    housingLevy: employee.subjectToHousingLevy ? nssfContributions.housingLevy : 0,
     totalEmployeeContributions: 0 // Calculated below
   };
   

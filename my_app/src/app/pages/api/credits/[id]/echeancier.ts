@@ -6,44 +6,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'GET') {
     try {
-      // Récupérer l'échéancier complet du crédit
-      const echeancier = await prisma.creditEcheance.findMany({
+      // Get the complete credit payment schedule
+      const paymentSchedule = await prisma.creditInstallment.findMany({
         where: {
           creditId: id as string
         },
         orderBy: {
-          numeroEcheance: 'asc'
+          installmentNumber: 'asc'
         }
       });
 
-      if (!echeancier.length) {
-        return res.status(404).json({ error: 'Échéancier non trouvé' });
+      if (!paymentSchedule.length) {
+        return res.status(404).json({ error: 'Payment schedule not found' });
       }
 
-      // Calculer les statistiques de l'échéancier
+      // Calculate payment schedule statistics
       const now = new Date();
       const stats = {
-        totalEcheances: echeancier.length,
-        echeancesPayees: echeancier.filter(e => e.statut === 'PAYEE').length,
-        echeancesEnRetard: echeancier.filter(e => 
-          e.statut === 'EN_ATTENTE' && new Date(e.dateEcheance) < now
+        totalInstallments: paymentSchedule.length,
+        paidInstallments: paymentSchedule.filter(e => e.status === 'PAID').length,
+        overdueInstallments: paymentSchedule.filter(e => 
+          e.status === 'PENDING' && new Date(e.dueDate) < now
         ).length,
-        prochainePaiement: echeancier.find(e => e.statut === 'EN_ATTENTE'),
-        montantTotalPaye: echeancier
-          .filter(e => e.statut === 'PAYEE')
-          .reduce((sum, e) => sum + (e.montantPaye || e.mensualiteTTC), 0),
-        montantTotalRestant: echeancier
-          .filter(e => e.statut === 'EN_ATTENTE')
-          .reduce((sum, e) => sum + e.mensualiteTTC, 0)
+        nextPayment: paymentSchedule.find(e => e.status === 'PENDING'),
+        totalAmountPaid: paymentSchedule
+          .filter(e => e.status === 'PAID')
+          .reduce((sum, e) => sum + (e.amountPaid || e.totalMonthlyPayment), 0),
+        totalAmountRemaining: paymentSchedule
+          .filter(e => e.status === 'PENDING')
+          .reduce((sum, e) => sum + e.totalMonthlyPayment, 0)
       };
 
       res.status(200).json({
-        echeancier,
+        paymentSchedule,
         stats
       });
     } catch (error) {
-      console.error('Erreur lors de la récupération de l\'échéancier:', error);
-      res.status(500).json({ error: 'Erreur lors de la récupération de l\'échéancier' });
+      console.error('Error fetching payment schedule:', error);
+      res.status(500).json({ error: 'Error fetching payment schedule' });
     }
   } else {
     res.setHeader('Allow', ['GET']);
