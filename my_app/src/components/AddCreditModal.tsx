@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, CreditCard, Building, Calendar, DollarSign } from 'lucide-react';
+import { Advance } from '@prisma/client';
 
 interface Employee {
 id: string;
@@ -32,6 +33,7 @@ isOpen: boolean;
 onClose: () => void;
 onSuccess: () => void;
 employees: Employee[];
+advances: Advance[];
 editLoan?: Loan;
 }
 

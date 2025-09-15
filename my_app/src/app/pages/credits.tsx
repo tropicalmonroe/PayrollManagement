@@ -74,7 +74,7 @@ const CreditManagement: React.FC = () => {
 
   const fetchLoans = async () => {
     try {
-      const response = await fetch('/api/loans');
+      const response = await fetch('/api/credits');
       if (response.ok) {
         const data = await response.json();
         setLoans(data);

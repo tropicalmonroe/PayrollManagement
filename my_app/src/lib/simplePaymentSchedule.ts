@@ -6,6 +6,11 @@ export interface SimpleInstallment {
   amountToPay: number; // Simple amount to pay
   status: 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
   notes?: string;
+    // optional extra fields
+  amountPaid?: number;
+  interest?: number;
+  insurance?: number;
+
 }
 
 export interface SimpleCredit {

@@ -45,7 +45,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const paymentSchedule = generateSimplePaymentSchedule(simpleCredit);
 
       // Save payment schedule to database
-      const installmentsData = paymentSchedule.map(installment => ({
+      const installmentsData = paymentSchedule.map(installment => {
+      const remainingPrincipal = simpleCredit.totalAmount - (installment.installmentNumber * installment.amountToPay);
+
+      return {
         creditId,
         installmentNumber: installment.installmentNumber,
         dueDate: installment.dueDate,
@@ -54,10 +57,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         interest: 0, // No interest in simple mode
         interestTax: 0,
         insurance: 0,
-        remainingPrincipal: simpleCredit.totalAmount - (installment.installmentNumber * installment.amountToPay),
+        remainingPrincipal,
+        remainingBalance: remainingPrincipal + (installment.interest ?? 0) + (installment.insurance ?? 0) - (installment.amountPaid ?? 0),
         status: installment.status,
         notes: installment.notes || null
-      }));
+      };
+    });
+
 
       // Create all installments in a single transaction
       await prisma.creditInstallment.createMany({

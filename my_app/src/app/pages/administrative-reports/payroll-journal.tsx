@@ -134,6 +134,7 @@ const PayrollJournalPage = () => {
           // Additional payroll fields
           bonuses: 0,
           overtimePay: 0,
+          otherDeductions: 0,
           loanRepayment: employee.loanRepayment,
           helbLoan: employee.helbLoan,
           subjectToNssf: employee.subjectToNssf,

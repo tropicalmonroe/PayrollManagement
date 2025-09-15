@@ -5,21 +5,17 @@ import { useRouter } from 'next/router';
 import EmployeeList from '../../../components/EmployeeList';
 import EmployeeForm from '../../../components/EmployeeForm';
 import EmployeeDetails from '../../../components/EmployeeDetails';
-import { Employee } from '@prisma/client';
+import { Advance, Employee } from '@prisma/client';
 
 const EmployeeRecordPage = () => {
   const router = useRouter();
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [advances, setAdvances] = useState<Advance[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-
-  // Load employees
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
 
   const fetchEmployees = async () => {
     try {
@@ -34,6 +30,26 @@ const EmployeeRecordPage = () => {
       setLoading(false);
     }
   };
+
+  const fetchAdvances = async () => {
+    try {
+      const response = await fetch('/api/advances');
+      if (response.ok) {
+        const data = await response.json();
+        setAdvances(data);
+      } else {
+        throw new Error('Error loading advances');
+      }
+    } catch (error) {
+      console.error('Error loading advances:', error);
+    }
+  };
+
+  // Load employees
+  useEffect(() => {
+    fetchEmployees();
+    fetchAdvances();
+  }, []);
 
   const handleEdit = (employee: Employee) => {
     setSelectedEmployee(employee);
@@ -164,6 +180,7 @@ const EmployeeRecordPage = () => {
         {/* Employee list */}
         <EmployeeList
           employees={employees}
+          advances={advances}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onView={handleView}

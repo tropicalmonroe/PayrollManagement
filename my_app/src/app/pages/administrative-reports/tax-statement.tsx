@@ -120,6 +120,7 @@ const TaxStatementPage = () => {
           subjectToNssf: employee.subjectToNssf,
           subjectToShif: employee.subjectToShif,
           subjectToHousingLevy: employee.subjectToHousingLevy,
+          otherDeductions: 0,
           
           // Bank
           bankAccount: employee.bankAccount || '',
