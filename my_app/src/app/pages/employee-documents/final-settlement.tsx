@@ -6,7 +6,7 @@ import { Employee } from '@prisma/client';
 
 interface SettlementElement {
   id: string;
-  type: 'GAIN' | 'RETENUE';
+  type: 'GAIN' | 'DEDUCTION';
   description: string;
   amount: number;
 }
@@ -42,7 +42,7 @@ const FinalSettlementPage = () => {
         setEmployees(data);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des employés:', error);
+      console.error('Error loading employees:', error);
     } finally {
       setLoading(false);
     }
@@ -71,20 +71,20 @@ const FinalSettlementPage = () => {
   };
 
   const calculateVacationPay = (employee: Employee) => {
-    // Calcul approximatif : salaire journalier * jours de congés non pris
-    const dailySalary = employee.salaireBase / 26; // 26 jours ouvrables par mois
+    // Approximate calculation: daily salary * unused vacation days
+    const dailySalary = employee.baseSalary / 26; // 26 working days per month
     return dailySalary * unusedVacationDays;
   };
 
   const calculateNoticePay = (employee: Employee) => {
-    // Calcul du préavis : salaire journalier * jours de préavis
-    const dailySalary = employee.salaireBase / 26;
+    // Notice period calculation: daily salary * notice days
+    const dailySalary = employee.baseSalary / 26;
     return dailySalary * noticePeriod;
   };
 
   const handleGenerateSettlement = async () => {
     if (!selectedEmployee) {
-      alert('Veuillez sélectionner un employé');
+      alert('Please select an employee');
       return;
     }
 
@@ -93,19 +93,19 @@ const FinalSettlementPage = () => {
     try {
       const employee = employees.find(emp => emp.id === selectedEmployee);
       if (!employee) {
-        throw new Error('Employé non trouvé');
+        throw new Error('Employee not found');
       }
 
       const vacationPay = calculateVacationPay(employee);
       const noticePay = calculateNoticePay(employee);
 
-      // Calcul des totaux
+      // Calculate totals
       const totalGains = vacationPay + noticePay + severanceAmount + 
         customElements.filter(e => e.type === 'GAIN').reduce((sum, e) => sum + e.amount, 0);
       
-      const totalRetenues = customElements.filter(e => e.type === 'RETENUE').reduce((sum, e) => sum + e.amount, 0);
+      const totalDeductions = customElements.filter(e => e.type === 'DEDUCTION').reduce((sum, e) => sum + e.amount, 0);
       
-      const netToPay = totalGains - totalRetenues;
+      const netToPay = totalGains - totalDeductions;
 
       setSettlementData({
         employee,
@@ -118,15 +118,15 @@ const FinalSettlementPage = () => {
         noticePay,
         customElements,
         totalGains,
-        totalRetenues,
+        totalDeductions,
         netToPay,
         generatedDate: new Date()
       });
       setShowPreview(true);
 
     } catch (error) {
-      console.error('Erreur lors de la génération:', error);
-      alert('Erreur lors de la génération du solde de tout compte');
+      console.error('Error during generation:', error);
+      alert('Error generating final settlement');
     } finally {
       setGenerating(false);
     }
@@ -153,30 +153,30 @@ const FinalSettlementPage = () => {
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = `solde_tout_compte_${settlementData.employee.matricule}.pdf`;
+        a.download = `final_settlement_${settlementData.employee.employeeId}.pdf`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
       } else {
-        alert('Erreur lors du téléchargement du PDF');
+        alert('Error downloading PDF');
       }
     } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
-      alert('Erreur lors du téléchargement du PDF');
+      console.error('Error during download:', error);
+      alert('Error downloading PDF');
     }
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'MAD',
+      currency: 'KES',
       minimumFractionDigits: 2
     }).format(amount);
   };
 
   const formatDate = (date: Date | string) => {
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -198,18 +198,18 @@ const FinalSettlementPage = () => {
     const seniorityMonths = totalMonths % 12;
     
     if (seniorityYears === 0) {
-      return `${seniorityMonths} mois`;
+      return `${seniorityMonths} months`;
     } else if (seniorityMonths === 0) {
-      return `${seniorityYears} an${seniorityYears > 1 ? 's' : ''}`;
+      return `${seniorityYears} year${seniorityYears > 1 ? 's' : ''}`;
     } else {
-      return `${seniorityYears} an${seniorityYears > 1 ? 's' : ''} et ${seniorityMonths} mois`;
+      return `${seniorityYears} year${seniorityYears > 1 ? 's' : ''} and ${seniorityMonths} months`;
     }
   };
 
   const filteredEmployees = employees.filter(employee =>
-    employee.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.matricule.toLowerCase().includes(searchTerm.toLowerCase())
+    employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const selectedEmployeeData = employees.find(emp => emp.id === selectedEmployee);
@@ -219,7 +219,7 @@ const FinalSettlementPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Chargement...</div>
+            <div className="text-lg text-gray-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -235,35 +235,35 @@ const FinalSettlementPage = () => {
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Retour</span>
+            <span>Back</span>
           </button>
           
           <div className="flex items-center space-x-3 mb-4">
             <Calculator className="w-8 h-8 text-orange-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Solde de tout compte</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Final Settlement</h1>
           </div>
           
           <p className="text-gray-600 text-lg">
-            Saisie des éléments de rupture (congés non pris, indemnités…) et génération du document officiel de solde.
+            Entry of termination elements (unused leave, allowances...) and generation of official settlement document.
           </p>
         </div>
 
         {!showPreview ? (
           <>
-            {/* Sélection de l'employé */}
+            {/* Employee selection */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Sélection de l'employé</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Employee Selection</h3>
               
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Search className="w-4 h-4 inline mr-1" />
-                  Rechercher un employé
+                  Search employee
                 </label>
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Nom, prénom, matricule..."
+                  placeholder="Name, first name, employee ID..."
                   className="payroll-input"
                 />
               </div>
@@ -271,7 +271,7 @@ const FinalSettlementPage = () => {
               <div className="max-h-48 overflow-y-auto border rounded-lg">
                 {filteredEmployees.length === 0 ? (
                   <div className="p-6 text-center text-gray-500">
-                    Aucun employé trouvé
+                    No employees found
                   </div>
                 ) : (
                   filteredEmployees.map((employee) => (
@@ -290,14 +290,14 @@ const FinalSettlementPage = () => {
                           <div className="flex items-center justify-between">
                             <div>
                               <div className="text-sm font-medium text-gray-900">
-                                {employee.prenom} {employee.nom}
+                                {employee.firstName} {employee.lastName}
                               </div>
                               <div className="text-sm text-gray-500">
-                                {employee.matricule} • {employee.fonction} • {employee.status}
+                                {employee.employeeId} • {employee.position} • {employee.status}
                               </div>
                             </div>
                             <div className="text-sm text-gray-500">
-                              {formatCurrency(employee.salaireBase)}
+                              {formatCurrency(employee.baseSalary)}
                             </div>
                           </div>
                         </label>
@@ -308,17 +308,17 @@ const FinalSettlementPage = () => {
               </div>
             </div>
 
-            {/* Configuration du départ */}
+            {/* Departure configuration */}
             {selectedEmployee && (
               <>
                 <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Informations de départ</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Departure Information</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <Calendar className="w-4 h-4 inline mr-1" />
-                        Date de départ
+                        Departure Date
                       </label>
                       <input
                         type="date"
@@ -330,49 +330,49 @@ const FinalSettlementPage = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Motif de départ
+                        Departure Reason
                       </label>
                       <select
                         value={departureReason}
                         onChange={(e) => setDepartureReason(e.target.value)}
                         className="payroll-input"
                       >
-                        <option value="">Sélectionner un motif</option>
-                        <option value="DEMISSION">Démission</option>
-                        <option value="LICENCIEMENT">Licenciement</option>
-                        <option value="FIN_CONTRAT">Fin de contrat</option>
-                        <option value="RETRAITE">Retraite</option>
-                        <option value="MUTATION">Mutation</option>
-                        <option value="AUTRE">Autre</option>
+                        <option value="">Select a reason</option>
+                        <option value="RESIGNATION">Resignation</option>
+                        <option value="DISMISSAL">Dismissal</option>
+                        <option value="CONTRACT_END">Contract End</option>
+                        <option value="RETIREMENT">Retirement</option>
+                        <option value="TRANSFER">Transfer</option>
+                        <option value="OTHER">Other</option>
                       </select>
                     </div>
                   </div>
 
                   {selectedEmployeeData && (
                     <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-medium text-gray-900 mb-2">Informations employé</h4>
+                      <h4 className="font-medium text-gray-900 mb-2">Employee Information</h4>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <span className="text-gray-600">Date d'embauche :</span>
-                          <span className="ml-2 font-medium">{formatDate(selectedEmployeeData.dateEmbauche)}</span>
+                          <span className="text-gray-600">Hire Date:</span>
+                          <span className="ml-2 font-medium">{formatDate(selectedEmployeeData.hireDate)}</span>
                         </div>
                         <div>
-                          <span className="text-gray-600">Ancienneté :</span>
-                          <span className="ml-2 font-medium">{calculateSeniority(selectedEmployeeData.dateEmbauche, departureDate)}</span>
+                          <span className="text-gray-600">Seniority:</span>
+                          <span className="ml-2 font-medium">{calculateSeniority(selectedEmployeeData.hireDate, departureDate)}</span>
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Éléments de calcul */}
+                {/* Calculation elements */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Éléments de calcul</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Calculation Elements</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Congés non pris (jours)
+                        Unused Vacation (days)
                       </label>
                       <input
                         type="number"
@@ -383,14 +383,14 @@ const FinalSettlementPage = () => {
                       />
                       {selectedEmployeeData && (
                         <p className="text-sm text-gray-500 mt-1">
-                          Valeur : {formatCurrency(calculateVacationPay(selectedEmployeeData))}
+                          Value: {formatCurrency(calculateVacationPay(selectedEmployeeData))}
                         </p>
                       )}
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Préavis (jours)
+                        Notice Period (days)
                       </label>
                       <input
                         type="number"
@@ -401,14 +401,14 @@ const FinalSettlementPage = () => {
                       />
                       {selectedEmployeeData && (
                         <p className="text-sm text-gray-500 mt-1">
-                          Valeur : {formatCurrency(calculateNoticePay(selectedEmployeeData))}
+                          Value: {formatCurrency(calculateNoticePay(selectedEmployeeData))}
                         </p>
                       )}
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Indemnité de licenciement
+                        Severance Pay
                       </label>
                       <input
                         type="number"
@@ -422,22 +422,22 @@ const FinalSettlementPage = () => {
                   </div>
                 </div>
 
-                {/* Éléments personnalisés */}
+                {/* Custom elements */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-medium text-gray-900">Éléments personnalisés</h3>
+                    <h3 className="text-lg font-medium text-gray-900">Custom Elements</h3>
                     <button
                       onClick={addCustomElement}
                       className="flex items-center space-x-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
                     >
                       <Plus className="w-4 h-4" />
-                      <span>Ajouter un élément</span>
+                      <span>Add Element</span>
                     </button>
                   </div>
 
                   {customElements.length === 0 ? (
                     <p className="text-gray-500 text-center py-4">
-                      Aucun élément personnalisé ajouté
+                      No custom elements added
                     </p>
                   ) : (
                     <div className="space-y-3">
@@ -449,7 +449,7 @@ const FinalSettlementPage = () => {
                             className="w-32 payroll-input"
                           >
                             <option value="GAIN">Gain</option>
-                            <option value="RETENUE">Retenue</option>
+                            <option value="DEDUCTION">Deduction</option>
                           </select>
                           
                           <input
@@ -464,7 +464,7 @@ const FinalSettlementPage = () => {
                             type="number"
                             value={element.amount}
                             onChange={(e) => updateCustomElement(element.id, 'amount', Number(e.target.value))}
-                            placeholder="Montant"
+                            placeholder="Amount"
                             step="0.01"
                             className="w-32 payroll-input"
                           />
@@ -481,13 +481,13 @@ const FinalSettlementPage = () => {
                   )}
                 </div>
 
-                {/* Bouton de génération */}
+                {/* Generation button */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900">Générer le solde de tout compte</h3>
+                      <h3 className="text-lg font-medium text-gray-900">Generate Final Settlement</h3>
                       <p className="text-sm text-gray-500 mt-1">
-                        Document officiel de fin de contrat pour {selectedEmployeeData?.prenom} {selectedEmployeeData?.nom}
+                        Official end-of-contract document for {selectedEmployeeData?.firstName} {selectedEmployeeData?.lastName}
                       </p>
                     </div>
                     <button
@@ -496,7 +496,7 @@ const FinalSettlementPage = () => {
                       className="flex items-center space-x-2 bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Calculator className="w-5 h-5" />
-                      <span>{generating ? 'Génération...' : 'Générer le solde'}</span>
+                      <span>{generating ? 'Generating...' : 'Generate Settlement'}</span>
                     </button>
                   </div>
                 </div>
@@ -505,101 +505,101 @@ const FinalSettlementPage = () => {
           </>
         ) : (
           <>
-            {/* Prévisualisation du solde */}
+            {/* Settlement preview */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Prévisualisation du solde de tout compte</h3>
+                <h3 className="text-lg font-medium text-gray-900">Final Settlement Preview</h3>
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowPreview(false)}
                     className="text-sm text-gray-600 hover:text-gray-900"
                   >
-                    Retour à la saisie
+                    Back to entry
                   </button>
                   <button
                     onClick={handleDownloadPDF}
                     className="flex items-center space-x-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
                   >
                     <Download className="w-4 h-4" />
-                    <span>Télécharger PDF</span>
+                    <span>Download PDF</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Document de solde */}
+            {/* Settlement document */}
             <div className="bg-white shadow-lg rounded-lg overflow-hidden">
               <div className="p-8">
-                {/* En-tête */}
+                {/* Header */}
                 <div className="text-center border-b-2 border-gray-200 pb-6 mb-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">SOLDE DE TOUT COMPTE</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">FINAL SETTLEMENT</h2>
                   <p className="text-gray-600">
-                    Établi le {formatDate(settlementData.generatedDate)}
+                    Prepared on {formatDate(settlementData.generatedDate)}
                   </p>
                 </div>
 
-                {/* Informations employé et départ */}
+                {/* Employee and departure information */}
                 <div className="grid grid-cols-2 gap-8 mb-8">
                   <div>
-                    <h3 className="font-medium text-gray-900 mb-3">Informations du salarié</h3>
+                    <h3 className="font-medium text-gray-900 mb-3">Employee Information</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Nom et prénom :</span>
-                        <span className="font-medium">{settlementData.employee.prenom} {settlementData.employee.nom}</span>
+                        <span className="text-gray-600">Full Name:</span>
+                        <span className="font-medium">{settlementData.employee.firstName} {settlementData.employee.lastName}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Matricule :</span>
-                        <span className="font-medium">{settlementData.employee.matricule}</span>
+                        <span className="text-gray-600">Employee ID:</span>
+                        <span className="font-medium">{settlementData.employee.employeeId}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Fonction :</span>
-                        <span className="font-medium">{settlementData.employee.fonction}</span>
+                        <span className="text-gray-600">Position:</span>
+                        <span className="font-medium">{settlementData.employee.position}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Date d'embauche :</span>
-                        <span className="font-medium">{formatDate(settlementData.employee.dateEmbauche)}</span>
+                        <span className="text-gray-600">Hire Date:</span>
+                        <span className="font-medium">{formatDate(settlementData.employee.hireDate)}</span>
                       </div>
                     </div>
                   </div>
                   
                   <div>
-                    <h3 className="font-medium text-gray-900 mb-3">Informations de départ</h3>
+                    <h3 className="font-medium text-gray-900 mb-3">Departure Information</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Date de départ :</span>
+                        <span className="text-gray-600">Departure Date:</span>
                         <span className="font-medium">{formatDate(settlementData.departureDate)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Motif :</span>
+                        <span className="text-gray-600">Reason:</span>
                         <span className="font-medium">{settlementData.departureReason}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Ancienneté :</span>
-                        <span className="font-medium">{calculateSeniority(settlementData.employee.dateEmbauche, settlementData.departureDate)}</span>
+                        <span className="text-gray-600">Seniority:</span>
+                        <span className="font-medium">{calculateSeniority(settlementData.employee.hireDate, settlementData.departureDate)}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Détail des gains */}
+                {/* Gains detail */}
                 <div className="mb-8">
                   <h3 className="font-medium text-gray-900 mb-4 bg-green-50 p-3 rounded">GAINS</h3>
                   <div className="space-y-2 text-sm">
                     {settlementData.vacationPay > 0 && (
                       <div className="flex justify-between">
-                        <span>Congés non pris ({settlementData.unusedVacationDays} jours)</span>
+                        <span>Unused Vacation ({settlementData.unusedVacationDays} days)</span>
                         <span className="font-medium">{formatCurrency(settlementData.vacationPay)}</span>
                       </div>
                     )}
                     {settlementData.noticePay > 0 && (
                       <div className="flex justify-between">
-                        <span>Indemnité de préavis ({settlementData.noticePeriod} jours)</span>
+                        <span>Notice Period Allowance ({settlementData.noticePeriod} days)</span>
                         <span className="font-medium">{formatCurrency(settlementData.noticePay)}</span>
                       </div>
                     )}
                     {settlementData.severanceAmount > 0 && (
                       <div className="flex justify-between">
-                        <span>Indemnité de licenciement</span>
+                        <span>Severance Pay</span>
                         <span className="font-medium">{formatCurrency(settlementData.severanceAmount)}</span>
                       </div>
                     )}
@@ -616,29 +616,29 @@ const FinalSettlementPage = () => {
                   </div>
                 </div>
 
-                {/* Détail des retenues */}
-                {settlementData.totalRetenues > 0 && (
+                {/* Deductions detail */}
+                {settlementData.totalDeductions > 0 && (
                   <div className="mb-8">
-                    <h3 className="font-medium text-gray-900 mb-4 bg-red-50 p-3 rounded">RETENUES</h3>
+                    <h3 className="font-medium text-gray-900 mb-4 bg-red-50 p-3 rounded">DEDUCTIONS</h3>
                     <div className="space-y-2 text-sm">
-                      {settlementData.customElements.filter((e: SettlementElement) => e.type === 'RETENUE').map((element: SettlementElement) => (
+                      {settlementData.customElements.filter((e: SettlementElement) => e.type === 'DEDUCTION').map((element: SettlementElement) => (
                         <div key={element.id} className="flex justify-between">
                           <span>{element.description}</span>
                           <span className="font-medium">{formatCurrency(element.amount)}</span>
                         </div>
                       ))}
                       <div className="border-t border-gray-200 pt-2 flex justify-between font-medium text-lg">
-                        <span>TOTAL RETENUES</span>
-                        <span className="text-red-600">{formatCurrency(settlementData.totalRetenues)}</span>
+                        <span>TOTAL DEDUCTIONS</span>
+                        <span className="text-red-600">{formatCurrency(settlementData.totalDeductions)}</span>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Net à payer */}
+                {/* Net amount payable */}
                 <div className="bg-gray-50 p-6 rounded-lg mb-8">
                   <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-gray-900">NET À PAYER</span>
+                    <span className="text-xl font-bold text-gray-900">NET AMOUNT PAYABLE</span>
                     <span className="text-2xl font-bold text-green-600">
                       {formatCurrency(settlementData.netToPay)}
                     </span>
@@ -649,15 +649,15 @@ const FinalSettlementPage = () => {
                 <div className="grid grid-cols-2 gap-8">
                   <div className="text-center">
                     <div className="border-t border-gray-300 pt-4 mt-8">
-                      <div className="text-sm font-medium text-gray-900">Signature de l'employeur</div>
-                      <div className="text-xs text-gray-600 mt-1">Cachet de l'entreprise</div>
+                      <div className="text-sm font-medium text-gray-900">Employer Signature</div>
+                      <div className="text-xs text-gray-600 mt-1">Company Stamp</div>
                     </div>
                   </div>
                   
                   <div className="text-center">
                     <div className="border-t border-gray-300 pt-4 mt-8">
-                      <div className="text-sm font-medium text-gray-900">Signature du salarié</div>
-                      <div className="text-xs text-gray-600 mt-1">Pour accord et quitus</div>
+                      <div className="text-sm font-medium text-gray-900">Employee Signature</div>
+                      <div className="text-xs text-gray-600 mt-1">For acceptance and receipt</div>
                     </div>
                   </div>
                 </div>

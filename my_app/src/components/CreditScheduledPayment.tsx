@@ -10,117 +10,118 @@ DollarSign,
 Eye,
 CreditCard,
 TrendingUp,
-FileText
 } from 'lucide-react';
 
-interface Echeance {
+interface Installment {
 id: string;
-numeroEcheance: number;
-dateEcheance: Date;
-mensualiteTTC: number;
-amortissement: number;
-interetsHT: number;
-tvaInterets: number;
-assurance: number;
-capitalRestant: number;
-statut: 'EN_ATTENTE' | 'PAYEE' | 'EN_RETARD' | 'ANNULEE';
-datePaiement?: Date;
-montantPaye?: number;
+installmentNumber: number;
+dueDate: Date;
+totalMonthlyPayment: number;
+principal: number;
+interest: number;
+interestTax: number;
+insurance: number;
+remainingPrincipal: number;
+remainingBalance: number;
+status: 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
+paymentDate?: Date;
+amountPaid?: number;
 notes?: string;
 }
 
-interface EcheancierStats {
-totalEcheances: number;
-echeancesPayees: number;
-echeancesEnRetard: number;
-prochainePaiement?: Echeance;
-montantTotalPaye: number;
-montantTotalRestant: number;
+interface ScheduleStats {
+totalInstallments: number;
+paidInstallments: number;
+overdueInstallments: number;
+nextPayment?: Installment;
+totalAmountPaid: number;
+totalAmountRemaining: number;
 }
 
-interface CreditEcheancierProps {
-creditId: string;
+interface LoanScheduledPaymentProps {
+loanId: string;
 isOpen: boolean;
 onClose: () => void;
 }
 
-const CreditScheduledPayment: React.FC<CreditEcheancierProps> = ({
-creditId,
+const CreditScheduledPayment: React.FC<LoanScheduledPaymentProps> = ({
+loanId,
 isOpen,
-onClose
+onClose,
 }) => {
-const [echeancier, setEcheancier] = useState<Echeance[]>([]);
-const [stats, setStats] = useState<EcheancierStats | null>(null);
+const [schedule, setSchedule] = useState<Installment[]>([]);
+const [stats, setStats] = useState<ScheduleStats | null>(null);
 const [loading, setLoading] = useState(true);
-const [selectedEcheance, setSelectedEcheance] = useState<Echeance | null>(null);
+const [selectedInstallment, setSelectedInstallment] = useState<Installment | null>(null);
 const [showPaymentModal, setShowPaymentModal] = useState(false);
 const [paymentData, setPaymentData] = useState({
-    montantPaye: '',
-    datePaiement: '',
-    notes: ''
+    amountPaid: '',
+    paymentDate: '',
+    notes: '',
 });
 
 useEffect(() => {
-    if (isOpen && creditId) {
-    fetchEcheancier();
+    if (isOpen && loanId) {
+    fetchSchedule();
     }
-}, [isOpen, creditId]);
+}, [isOpen, loanId]);
 
-const fetchEcheancier = async () => {
+const fetchSchedule = async () => {
     try {
     setLoading(true);
-    const response = await fetch(`/api/credits/${creditId}/echeancier`);
+    const response = await fetch(`/api/loans/${loanId}/schedule`);
     if (response.ok) {
         const data = await response.json();
-        setEcheancier(data.echeancier);
+        setSchedule(data.schedule);
         setStats(data.stats);
     }
     } catch (error) {
-    console.error('Erreur lors du chargement de l\'échéancier:', error);
+    console.error('Error loading repayment schedule:', error);
     } finally {
     setLoading(false);
     }
 };
 
 const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
     style: 'currency',
-    currency: 'MAD'
+    currency: 'KES',
     }).format(amount);
 };
 
 const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString('fr-FR');
+    return new Date(date).toLocaleDateString('en-KE');
 };
 
-const getStatusBadge = (statut: string, dateEcheance: Date) => {
+const getStatusBadge = (status: string, dueDate: Date) => {
     const now = new Date();
-    const echeanceDate = new Date(dateEcheance);
+    const dueDateObj = new Date(dueDate);
     
-    let status = statut;
+    let badgeStatus = status;
     let color = '';
     let icon = Clock;
     let text = '';
 
-    if (statut === 'PAYEE') {
+    if (status === 'PAID') {
     color = 'bg-green-100 text-green-800';
     icon = CheckCircle;
-    text = 'Payée';
-    } else if (statut === 'EN_ATTENTE' && echeanceDate < now) {
+    text = 'Paid';
+    } else if (status === 'PENDING' && dueDateObj < now) {
     color = 'bg-red-100 text-red-800';
     icon = AlertTriangle;
-    text = 'En retard';
-    } else if (statut === 'EN_ATTENTE') {
+    text = 'Overdue';
+    } else if (status === 'PENDING') {
     color = 'bg-yellow-100 text-yellow-800';
     icon = Clock;
-    text = 'En attente';
-    } else if (statut === 'ANNULEE') {
+    text = 'Pending';
+    } else if (status === 'CANCELLED') {
     color = 'bg-gray-100 text-gray-800';
     icon = Clock;
-    text = 'Annulée';
+    text = 'Cancelled';
     }
 
     const Icon = icon;
+    
     
     return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color}`}>
@@ -130,11 +131,11 @@ const getStatusBadge = (statut: string, dateEcheance: Date) => {
     );
 };
 
-const handlePayEcheance = async () => {
-    if (!selectedEcheance || !paymentData.montantPaye) return;
+const handlePayInstallment = async () => {
+    if (!selectedInstallment || !paymentData.amountPaid) return;
 
     try {
-    const response = await fetch(`/api/credits/echeances/${selectedEcheance.id}/payer`, {
+    const response = await fetch(`/api/credits/echeances/${selectedInstallment.id}/payer`, {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',
@@ -143,18 +144,18 @@ const handlePayEcheance = async () => {
     });
 
     if (response.ok) {
-        await fetchEcheancier(); // Refresh data
+        await fetchSchedule(); // Refresh data
         setShowPaymentModal(false);
-        setSelectedEcheance(null);
-        setPaymentData({ montantPaye: '', datePaiement: '', notes: '' });
-        alert('Paiement enregistré avec succès');
+        setSelectedInstallment(null);
+        setPaymentData({ amountPaid: '', paymentDate: '', notes: '' });
+        alert('Payment recorded successfully');
     } else {
         const error = await response.json();
-        alert(`Erreur: ${error.error}`);
+        alert(`Error: ${error.error}`);
     }
     } catch (error) {
-    console.error('Erreur lors du paiement:', error);
-    alert('Erreur lors de l\'enregistrement du paiement');
+    console.error('Error recording payment:', error);
+    alert('Error recording payment');
     }
 };
 
@@ -168,7 +169,7 @@ return (
         <div className="flex items-center">
             <Calendar className="w-6 h-6 text-[#0063b4] mr-3" />
             <h2 className="text-xl font-semibold text-gray-900">
-            Échéancier du Crédit
+            Loan Repayment Schedule
             </h2>
         </div>
         <button
@@ -195,8 +196,8 @@ return (
                     <div className="flex items-center">
                     <CreditCard className="w-5 h-5 text-blue-600 mr-2" />
                     <div>
-                        <p className="text-sm text-blue-600 font-medium">Total Échéances</p>
-                        <p className="text-lg font-bold text-blue-800">{stats.totalEcheances}</p>
+                        <p className="text-sm text-blue-600 font-medium">Total Installments</p>
+                        <p className="text-lg font-bold text-blue-800">{stats.totalInstallments}</p>
                     </div>
                     </div>
                 </div>
@@ -205,8 +206,8 @@ return (
                     <div className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
                     <div>
-                        <p className="text-sm text-green-600 font-medium">Payées</p>
-                        <p className="text-lg font-bold text-green-800">{stats.echeancesPayees}</p>
+                        <p className="text-sm text-green-600 font-medium">Paid</p>
+                        <p className="text-lg font-bold text-green-800">{stats.paidInstallments}</p>
                     </div>
                     </div>
                 </div>
@@ -215,8 +216,8 @@ return (
                     <div className="flex items-center">
                     <AlertTriangle className="w-5 h-5 text-red-600 mr-2" />
                     <div>
-                        <p className="text-sm text-red-600 font-medium">En Retard</p>
-                        <p className="text-lg font-bold text-red-800">{stats.echeancesEnRetard}</p>
+                        <p className="text-sm text-red-600 font-medium">Overdue</p>
+                        <p className="text-lg font-bold text-red-800">{stats.overdueInstallments}</p>
                     </div>
                     </div>
                 </div>
@@ -225,9 +226,9 @@ return (
                     <div className="flex items-center">
                     <TrendingUp className="w-5 h-5 text-purple-600 mr-2" />
                     <div>
-                        <p className="text-sm text-purple-600 font-medium">Montant Payé</p>
+                        <p className="text-sm text-purple-600 font-medium">Total Amount Paid</p>
                         <p className="text-lg font-bold text-purple-800">
-                        {formatCurrency(stats.montantTotalPaye)}
+                        {formatCurrency(stats.totalAmountPaid)}
                         </p>
                     </div>
                     </div>
@@ -236,38 +237,29 @@ return (
             </div>
             )}
 
-            {/* Échéancier Table */}
+            {/* Repayment Schedule Table */}
             <div className="flex-1 overflow-auto p-6">
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50 sticky top-0">
                     <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        N°
+                        No.
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date Échéance
+                        Due Date
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Mensualité TTC
+                        Monthly Payment
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Capital
+                        Principal
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Intérêts HT
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        TVA
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Assurance
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Capital Restant
+                        Remaining Balance
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Statut
+                        Status
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
@@ -275,60 +267,52 @@ return (
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                    {echeancier.map((echeance) => (
-                    <tr key={echeance.id} className="hover:bg-gray-50">
+                    {schedule.map((installment) => (
+                        
+                    <tr key={installment.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                        {echeance.numeroEcheance}
+                        {installment.installmentNumber}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900">
-                        {formatDate(echeance.dateEcheance)}
+                        {formatDate(installment.dueDate)}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                        {formatCurrency(echeance.mensualiteTTC)}
+                        {formatCurrency(installment.totalMonthlyPayment)}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                        {formatCurrency(echeance.amortissement)}
+                        {formatCurrency(installment.principal)}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                        {formatCurrency(echeance.interetsHT)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                        {formatCurrency(echeance.tvaInterets)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                        {formatCurrency(echeance.assurance)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                        {formatCurrency(echeance.capitalRestant)}
+                        {formatCurrency(installment.remainingBalance)}
                         </td>
                         <td className="px-4 py-3 text-center">
-                        {getStatusBadge(echeance.statut, echeance.dateEcheance)}
+                        {getStatusBadge(installment.status, installment.dueDate)}
                         </td>
                         <td className="px-4 py-3 text-center">
                         <div className="flex items-center justify-center space-x-2">
-                            {echeance.statut === 'EN_ATTENTE' && (
+                            {installment.status === 'PENDING' && (
                             <button
                                 onClick={() => {
-                                setSelectedEcheance(echeance);
+                                setSelectedInstallment(installment);
                                 setPaymentData({
-                                    montantPaye: echeance.mensualiteTTC.toString(),
-                                    datePaiement: new Date().toISOString().split('T')[0],
-                                    notes: ''
+                                    amountPaid: installment.totalMonthlyPayment.toString(),
+                                    paymentDate: new Date().toISOString().split('T')[0],
+                                    notes: '',
                                 });
                                 setShowPaymentModal(true);
                                 }}
                                 className="text-green-600 hover:text-green-900 p-1 rounded"
-                                title="Marquer comme payée"
+                                title="Mark as Paid"
                             >
                                 <DollarSign className="w-4 h-4" />
                             </button>
                             )}
                             <button
                             onClick={() => {
-                                setSelectedEcheance(echeance);
+                                setSelectedInstallment(installment);
                             }}
                             className="text-[#0063b4] hover:text-[#0052a3] p-1 rounded"
-                            title="Voir les détails"
+                            title="View Details"
                             >
                             <Eye className="w-4 h-4" />
                             </button>
@@ -344,50 +328,50 @@ return (
         )}
 
         {/* Payment Modal */}
-        {showPaymentModal && selectedEcheance && (
+        {showPaymentModal && selectedInstallment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
             <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
             <div className="p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Enregistrer le Paiement - Échéance #{selectedEcheance.numeroEcheance}
+                Record Payment - Installment #{selectedInstallment.installmentNumber}
                 </h3>
                 
                 <div className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Montant payé (MAD)
+                    Amount Paid (KES)
                     </label>
                     <input
                     type="number"
                     step="0.01"
-                    value={paymentData.montantPaye}
-                    onChange={(e) => setPaymentData(prev => ({ ...prev, montantPaye: e.target.value }))}
+                    value={paymentData.amountPaid}
+                    onChange={(e) => setPaymentData((prev) => ({ ...prev, amountPaid: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
                     />
                 </div>
                 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date de paiement
+                    Payment Date
                     </label>
                     <input
                     type="date"
-                    value={paymentData.datePaiement}
-                    onChange={(e) => setPaymentData(prev => ({ ...prev, datePaiement: e.target.value }))}
+                    value={paymentData.paymentDate}
+                    onChange={(e) => setPaymentData((prev) => ({ ...prev, paymentDate: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
                     />
                 </div>
                 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Notes (optionnel)
+                    Notes (optional)
                     </label>
                     <textarea
                     value={paymentData.notes}
-                    onChange={(e) => setPaymentData(prev => ({ ...prev, notes: e.target.value }))}
+                    onChange={(e) => setPaymentData((prev) => ({ ...prev, notes: e.target.value }))}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
-                    placeholder="Notes sur le paiement..."
+                    placeholder="Notes about the payment..."
                     />
                 </div>
                 </div>
@@ -396,17 +380,17 @@ return (
                 <button
                     onClick={() => {
                     setShowPaymentModal(false);
-                    setSelectedEcheance(null);
+                    setSelectedInstallment(null);
                     }}
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                 >
-                    Annuler
+                    Cancel
                 </button>
                 <button
-                    onClick={handlePayEcheance}
+                    onClick={handlePayInstallment}
                     className="px-4 py-2 text-sm font-medium text-white bg-[#0063b4] border border-transparent rounded-md hover:bg-[#0052a3]"
                 >
-                    Enregistrer le Paiement
+                    Record Payment
                 </button>
                 </div>
             </div>

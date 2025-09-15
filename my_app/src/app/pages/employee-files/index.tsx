@@ -8,22 +8,22 @@ const EmployeeFilesPage = () => {
 
   const sections = [
     {
-      title: 'Fiche salarié',
-      description: 'Création ou modification du dossier salarié : données personnelles, contrat, salaire, primes, indemnités, échéancier crédit logement.',
+      title: 'Employee Profile',
+      description: 'Create or modify employee profile: personal details, contract, salary, allowances, deductions, housing loan schedule.',
       icon: <FileText className="w-8 h-8" />,
       href: '/employee-files/employee-record',
       color: 'bg-blue-500'
     },
     {
-      title: 'Avances sur salaire',
-      description: 'Enregistrement des avances accordées, suivi, et intégration automatique dans la paie mensuelle.',
+      title: 'Salary Advances',
+      description: 'Record granted advances, track them, and automatically integrate into monthly payroll.',
       icon: <Plus className="w-8 h-8" />,
       href: '/employee-files/salary-advances',
       color: 'bg-green-500'
     },
     {
-      title: 'Consultation fiche salarié',
-      description: 'Visualisation en lecture seule de la fiche complète du salarié (sans modification).',
+      title: 'Employee Profile Review',
+      description: 'Read-only view of the employee’s complete profile (no modifications).',
       icon: <Eye className="w-8 h-8" />,
       href: '/employee-files/consultation',
       color: 'bg-purple-500'
@@ -36,10 +36,10 @@ const EmployeeFilesPage = () => {
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">
             <Users className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Dossier salarié</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Employee Profile</h1>
           </div>
           <p className="text-gray-600 text-lg">
-            Gestion complète des dossiers salariés : création, modification, consultation et gestion des avances.
+            Comprehensive management of employee profiles: creation, modification, review, and salary advance management. 
           </p>
         </div>
 

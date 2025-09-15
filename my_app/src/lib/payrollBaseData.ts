@@ -428,43 +428,73 @@ export interface PayrollCalculationParams {
 
 export interface PayrollCalculationResult {
   // Earnings
-  baseSalary: number;
-  seniorityBonus: number;
-  transportAllowance: number;
-  representationAllowance: number;
+  earnings: {
+    baseSalary: number;
+    seniorityBonus: number;
+    housingAllowance: number;
+    mealAllowance: number;
+    transportAllowance: number;
+    representationAllowance: number;
+    overtimePay?: number;
+    exceptionalBonuses?: number;
+    otherEarnings?: number;
+    totalEarnings: number;
+    bonuses: number;
+  };
+  
+  // Gross salaries
   grossSalary: number;
   taxableGrossSalary: number;
   
   // Employee contributions
-  nssfEmployee: number;
-  shifEmployee: number;
-  pensionEmployee: number;
-  insuranceDiversifiedEmployee: number;
-  totalEmployeeContributions: number;
+  employeeContributions: {
+    nssfEmployee: number;
+    shifEmployee: number;
+    pensionEmployee: number;
+    insuranceDiversifiedEmployee: number;
+    optionalInsurances: number;
+    totalEmployeeContributions: number;
+    housingLevy: number; // Optional, only if applicable
+  };
   
   // Employer contributions
-  pensionEmployer: number;
-  insuranceDiversifiedEmployer: number;
-  nssfEmployer: number;
-  housingLevy: number;
-  trainingLevy: number;
-  shifEmployer: number;
-  participationSHIF: number;
-  workInjury: number;
-  totalEmployerContributions: number;
+  employerContributions: {
+    nssfEmployer: number;
+    housingLevy: number;
+    trainingLevy: number;
+    shifEmployer: number;
+    participationSHIF: number;
+    workInjury: number;
+    pensionEmployer: number;
+    insuranceDiversifiedEmployer: number;
+    totalEmployerContributions: number;
+  };
   
   // Income tax calculation
-  professionalExpenses: number;
-  taxableNet: number;
-  creditInterest: number;
-  netTaxable: number;
-  incomeTax: number;
+  taxCalculation: {
+    professionalExpenses: number;
+    taxableNet: number;
+    netTaxable: number;
+    theoreticalTax: number;
+    incomeTax: number;
+    helb?: number;
+    personalRelief?: number;
+  };
   
-  // Totals
-  otherDeductions: number;
+  // Other deductions
+  otherDeductions: {
+    mortgageCredit: number;
+    consumerCredit: number;
+    salaryAdvance: number;
+    totalOtherDeductions: number;
+  };
+  
+  // Final result
   totalDeductions: number;
   netSalaryPayable: number;
+  totalEmployerCost: number;
 }
+
 
 /**
  * Main calculation function according to base data
@@ -506,8 +536,8 @@ export function calculateCompletePayroll(params: PayrollCalculationParams): Payr
   const workInjury = calculateWorkInjury(taxableGrossSalary);
   
   const totalEmployerContributions = pension.employer + insurance.employer + nssf.employer + 
-                                   housingLevy + trainingLevy + shif.employer + 
-                                   shif.participation + workInjury;
+                                    housingLevy + trainingLevy + shif.employer + 
+                                    shif.participation + workInjury;
   
   // 6. Professional expenses
   const professionalExpenses = calculateProfessionalExpenses(taxableGrossSalary);
@@ -542,22 +572,34 @@ export function calculateCompletePayroll(params: PayrollCalculationParams): Payr
   const netSalaryPayable = calculateNetSalary(grossSalary, totalDeductions);
   
   return {
-    // Earnings
-    baseSalary,
+    earnings: {
+      baseSalary,
     seniorityBonus,
+    housingAllowance,
+    mealAllowance,
     transportAllowance,
     representationAllowance,
-    grossSalary,
-    taxableGrossSalary,
+    totalEarnings: grossSalary, // or sum of components
+    bonuses: 0 // or actual bonuses if you calculate them
+    },
+
+    // Gross salaries
+  grossSalary,
+  taxableGrossSalary,
     
     // Employee contributions
+  employeeContributions: {
     nssfEmployee: nssf.employee,
     shifEmployee: shif.employee,
     pensionEmployee: pension.employee,
     insuranceDiversifiedEmployee: insurance.employee,
+    optionalInsurances: 0,
     totalEmployeeContributions,
+    housingLevy
+  },
     
-    // Employer contributions
+     // Employer contributions
+  employerContributions: {
     pensionEmployer: pension.employer,
     insuranceDiversifiedEmployer: insurance.employer,
     nssfEmployer: nssf.employer,
@@ -566,19 +608,29 @@ export function calculateCompletePayroll(params: PayrollCalculationParams): Payr
     shifEmployer: shif.employer,
     participationSHIF: shif.participation,
     workInjury,
-    totalEmployerContributions,
+    totalEmployerContributions
+  },
     
-    // Income tax calculation
+    // Income tax
+  taxCalculation: {
     professionalExpenses,
     taxableNet,
-    creditInterest,
     netTaxable,
-    incomeTax,
-    
-    // Totals
-    otherDeductions,
-    totalDeductions,
-    netSalaryPayable
+    theoreticalTax: 0, // fill if needed
+    incomeTax
+  },
+
+  // Other deductions
+  otherDeductions: {
+    mortgageCredit: otherDeductions,
+    consumerCredit: 0,
+    salaryAdvance: 0,
+    totalOtherDeductions: otherDeductions
+  },
+
+  totalDeductions,
+  netSalaryPayable,
+  totalEmployerCost: grossSalary + totalEmployerContributions
   };
 }
 

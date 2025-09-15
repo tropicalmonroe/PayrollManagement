@@ -31,10 +31,10 @@ const MonthlyVariablesPage = () => {
       const response = await fetch('/api/employees');
       if (response.ok) {
         const data = await response.json();
-        setEmployees(data.filter((emp: Employee) => emp.status === 'ACTIF'));
+        setEmployees(data.filter((emp: Employee) => emp.status === 'ACTIVE'));
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des employés:', error);
+      console.error('Error loading employees:', error);
     }
   };
 
@@ -46,7 +46,7 @@ const MonthlyVariablesPage = () => {
         setVariableElements(data);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des éléments variables:', error);
+      console.error('Error loading variable elements:', error);
     } finally {
       setLoading(false);
     }
@@ -61,7 +61,7 @@ const MonthlyVariablesPage = () => {
         },
         body: JSON.stringify({
           ...variableData,
-          mois: selectedMonth,
+          month: selectedMonth,
         }),
       });
 
@@ -70,16 +70,16 @@ const MonthlyVariablesPage = () => {
         setVariableElements([newVariable, ...variableElements]);
         setShowAddModal(false);
       } else {
-        alert('Erreur lors de la création de l\'élément variable');
+        alert('Error creating variable element');
       }
     } catch (error) {
-      console.error('Erreur lors de la création de l\'élément variable:', error);
-      alert('Erreur lors de la création de l\'élément variable');
+      console.error('Error creating variable element:', error);
+      alert('Error creating variable element');
     }
   };
 
   const handleDeleteVariable = async (id: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet élément variable ?')) {
+    if (confirm('Are you sure you want to delete this variable element?')) {
       try {
         const response = await fetch(`/api/variable-elements/${id}`, {
           method: 'DELETE',
@@ -88,25 +88,25 @@ const MonthlyVariablesPage = () => {
         if (response.ok) {
           setVariableElements(variableElements.filter(v => v.id !== id));
         } else {
-          alert('Erreur lors de la suppression');
+          alert('Error during deletion');
         }
       } catch (error) {
-        console.error('Erreur lors de la suppression:', error);
-        alert('Erreur lors de la suppression');
+        console.error('Error during deletion:', error);
+        alert('Error during deletion');
       }
     }
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'MAD',
+      currency: 'KES',
       minimumFractionDigits: 2
     }).format(amount);
   };
 
   const formatDate = (date: Date | string) => {
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -115,20 +115,20 @@ const MonthlyVariablesPage = () => {
 
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'HEURES_SUP':
-        return 'Heures supplémentaires';
+      case 'OVERTIME':
+        return 'Overtime';
       case 'ABSENCE':
         return 'Absence';
-      case 'PRIME':
-        return 'Prime exceptionnelle';
-      case 'CONGE':
-        return 'Congé';
-      case 'RETARD':
-        return 'Retard';
-      case 'AVANCE':
-        return 'Avance';
-      case 'AUTRE':
-        return 'Autre';
+      case 'BONUS':
+        return 'Bonus';
+      case 'LEAVE':
+        return 'Leave';
+      case 'LATE':
+        return 'Late';
+      case 'ADVANCE':
+        return 'Advance';
+      case 'OTHER':
+        return 'Other';
       default:
         return type;
     }
@@ -136,17 +136,17 @@ const MonthlyVariablesPage = () => {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'HEURES_SUP':
+      case 'OVERTIME':
         return 'bg-blue-100 text-blue-800';
       case 'ABSENCE':
         return 'bg-red-100 text-red-800';
-      case 'PRIME':
+      case 'BONUS':
         return 'bg-green-100 text-green-800';
-      case 'CONGE':
+      case 'LEAVE':
         return 'bg-yellow-100 text-yellow-800';
-      case 'RETARD':
+      case 'LATE':
         return 'bg-orange-100 text-orange-800';
-      case 'AVANCE':
+      case 'ADVANCE':
         return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -160,7 +160,7 @@ const MonthlyVariablesPage = () => {
   const getMonthLabel = (monthString: string) => {
     const [year, month] = monthString.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long'
     }).format(date);
@@ -171,7 +171,7 @@ const MonthlyVariablesPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Chargement...</div>
+            <div className="text-lg text-gray-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -187,35 +187,35 @@ const MonthlyVariablesPage = () => {
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Retour</span>
+            <span>Back</span> 
           </button>
           
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <Edit className="w-8 h-8 text-orange-600" />
-              <h1 className="text-3xl font-bold text-gray-900">Éléments variables mensuels</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Monthly Variable Elements</h1> 
             </div>
             <button
               onClick={() => setShowAddModal(true)}
               className="flex items-center space-x-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
             >
               <Plus className="w-4 h-4" />
-              <span>Nouvel élément</span>
+              <span>New Element</span> {/* Translated Nouvel élément */}
             </button>
           </div>
           
           <p className="text-gray-600 text-lg">
-            Saisie mensuelle des variables : heures sup., absences, primes exceptionnelles, congés, retards, avances.
+            Monthly entry of variable elements: overtime, absences, bonuses, leaves, lates, advances.
           </p>
         </div>
 
-        {/* Filtres */}
+        {/* Filters */}
         <div className="bg-white p-4 rounded-lg shadow-sm border mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <Calendar className="w-4 h-4 inline mr-1" />
-                Mois
+                Month 
               </label>
               <input
                 type="month"
@@ -228,17 +228,17 @@ const MonthlyVariablesPage = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <User className="w-4 h-4 inline mr-1" />
-                Employé
+                Employee {/* Translated Employé */}
               </label>
               <select
                 value={selectedEmployee}
                 onChange={(e) => setSelectedEmployee(e.target.value)}
                 className="payroll-input"
               >
-                <option value="ALL">Tous les employés</option>
+                <option value="ALL">All Employees</option> 
                 {employees.map((employee) => (
                   <option key={employee.id} value={employee.id}>
-                    {employee.prenom} {employee.nom} - {employee.matricule}
+                    {employee.firstName} {employee.lastName} - {employee.employeeId}
                   </option>
                 ))}
               </select>
@@ -246,23 +246,23 @@ const MonthlyVariablesPage = () => {
 
             <div className="flex items-end">
               <div className="text-sm text-gray-600">
-                {filteredVariables.length} élément(s) pour {getMonthLabel(selectedMonth)}
+                {filteredVariables.length} element(s) for {getMonthLabel(selectedMonth)} 
               </div>
             </div>
           </div>
         </div>
 
-        {/* Liste des éléments variables */}
+        {/* Variable Elements List */}
         {filteredVariables.length === 0 ? (
           <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="text-center py-12">
                 <Edit className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-4 text-lg font-medium text-gray-900">
-                  Aucun élément variable pour {getMonthLabel(selectedMonth)}
+                  No variable elements for {getMonthLabel(selectedMonth)} 
                 </h3>
                 <p className="mt-2 text-sm text-gray-500">
-                  Commencez par ajouter les éléments variables du mois (heures sup., absences, primes, etc.)
+                  Start by adding the month’s variable elements (overtime, absences, bonuses, etc.) 
                 </p>
                 <div className="mt-6">
                   <button
@@ -270,7 +270,7 @@ const MonthlyVariablesPage = () => {
                     className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Nouvel élément
+                    New Element
                   </button>
                 </div>
               </div>
@@ -278,13 +278,13 @@ const MonthlyVariablesPage = () => {
           </div>
         ) : (
           <div className="bg-white shadow rounded-lg overflow-hidden">
-            {/* Version desktop - tableau */}
+            {/* Desktop version - table */}
             <div className="hidden lg:block">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Employé
+                      Employee
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Type
@@ -293,16 +293,16 @@ const MonthlyVariablesPage = () => {
                       Description
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Quantité/Heures
+                      Quantity/Hours
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Montant
+                      Amount
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
+                      Actions 
                     </th>
                   </tr>
                 </thead>
@@ -314,16 +314,16 @@ const MonthlyVariablesPage = () => {
                           <div className="flex-shrink-0 h-10 w-10">
                             <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
                               <span className="text-sm font-medium text-orange-600">
-                                {variable.employee.prenom.charAt(0)}{variable.employee.nom.charAt(0)}
+                                {variable.employee.firstName.charAt(0)}{variable.employee.lastName.charAt(0)}
                               </span>
                             </div>
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {variable.employee.prenom} {variable.employee.nom}
+                              {variable.employee.firstName} {variable.employee.lastName}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {variable.employee.matricule}
+                              {variable.employee.employeeId}
                             </div>
                           </div>
                         </div>
@@ -337,10 +337,10 @@ const MonthlyVariablesPage = () => {
                         {variable.description}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {variable.heures || '-'}
+                        {variable.hours || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {variable.montant ? formatCurrency(variable.montant) : '-'}
+                        {variable.amount ? formatCurrency(variable.amount) : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatDate(variable.date)}
@@ -349,7 +349,7 @@ const MonthlyVariablesPage = () => {
                         <button
                           onClick={() => handleDeleteVariable(variable.id)}
                           className="text-red-600 hover:text-red-900"
-                          title="Supprimer"
+                          title="Delete"
                         >
                           🗑️
                         </button>
@@ -360,7 +360,7 @@ const MonthlyVariablesPage = () => {
               </table>
             </div>
 
-            {/* Version mobile - cartes */}
+            {/* Mobile version - cards */}
             <div className="lg:hidden">
               <div className="divide-y divide-gray-200">
                 {filteredVariables.map((variable) => (
@@ -370,23 +370,23 @@ const MonthlyVariablesPage = () => {
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
                             <span className="text-sm font-medium text-orange-600">
-                              {variable.employee.prenom.charAt(0)}{variable.employee.nom.charAt(0)}
+                              {variable.employee.firstName.charAt(0)}{variable.employee.lastName.charAt(0)}
                             </span>
                           </div>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {variable.employee.prenom} {variable.employee.nom}
+                            {variable.employee.firstName} {variable.employee.lastName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {variable.employee.matricule}
+                            {variable.employee.employeeId}
                           </div>
                         </div>
                       </div>
                       <button
                         onClick={() => handleDeleteVariable(variable.id)}
                         className="text-red-600 hover:text-red-900"
-                        title="Supprimer"
+                        title="Delete"
                       >
                         🗑️
                       </button>
@@ -398,23 +398,23 @@ const MonthlyVariablesPage = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-500">Description:</span>
+                        <span className="text-gray-500">Description:</span> 
                         <div className="font-medium">{variable.description}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Date:</span>
+                        <span className="text-gray-500">Date:</span> 
                         <div className="font-medium">{formatDate(variable.date)}</div>
                       </div>
-                      {variable.heures && (
+                      {variable.hours && (
                         <div>
-                          <span className="text-gray-500">Heures:</span>
-                          <div className="font-medium">{variable.heures}</div>
+                          <span className="text-gray-500">Hours:</span> 
+                          <div className="font-medium">{variable.hours}</div>
                         </div>
                       )}
-                      {variable.montant && (
+                      {variable.amount && (
                         <div>
-                          <span className="text-gray-500">Montant:</span>
-                          <div className="font-medium">{formatCurrency(variable.montant)}</div>
+                          <span className="text-gray-500">Amount:</span> 
+                          <div className="font-medium">{formatCurrency(variable.amount)}</div>
                         </div>
                       )}
                     </div>
@@ -425,18 +425,18 @@ const MonthlyVariablesPage = () => {
           </div>
         )}
 
-        {/* Résumé par employé */}
+        {/* Summary by Employee */}
         {filteredVariables.length > 0 && selectedEmployee === 'ALL' && (
           <div className="mt-8 bg-white shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Résumé par employé pour {getMonthLabel(selectedMonth)}
+              Summary by Employee for {getMonthLabel(selectedMonth)} 
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {employees
                 .filter(emp => variableElements.some(v => v.employeeId === emp.id))
                 .map((employee) => {
                   const employeeVariables = variableElements.filter(v => v.employeeId === employee.id);
-                  const totalMontant = employeeVariables.reduce((sum, v) => sum + (v.montant || 0), 0);
+                  const totalAmount = employeeVariables.reduce((sum, v) => sum + (v.amount || 0), 0);
                   
                   return (
                     <div key={employee.id} className="bg-gray-50 p-4 rounded-lg">
@@ -444,27 +444,27 @@ const MonthlyVariablesPage = () => {
                         <div className="flex-shrink-0 h-8 w-8">
                           <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
                             <span className="text-xs font-medium text-orange-600">
-                              {employee.prenom.charAt(0)}{employee.nom.charAt(0)}
+                              {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                             </span>
                           </div>
                         </div>
                         <div className="ml-3">
                           <div className="text-sm font-medium text-gray-900">
-                            {employee.prenom} {employee.nom}
+                            {employee.firstName} {employee.lastName}
                           </div>
                           <div className="text-xs text-gray-500">
-                            {employee.matricule}
+                            {employee.employeeId}
                           </div>
                         </div>
                       </div>
                       <div className="text-sm">
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Éléments:</span>
+                          <span className="text-gray-600">Elements:</span>
                           <span className="font-medium">{employeeVariables.length}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Total montant:</span>
-                          <span className="font-medium">{formatCurrency(totalMontant)}</span>
+                          <span className="text-gray-600">Total Amount:</span> 
+                          <span className="font-medium">{formatCurrency(totalAmount)}</span>
                         </div>
                       </div>
                     </div>
@@ -474,7 +474,7 @@ const MonthlyVariablesPage = () => {
           </div>
         )}
 
-        {/* Modal pour ajouter un élément variable */}
+        {/* Modal for adding variable element */}
         {showAddModal && (
           <AddVariableElementModal
             isOpen={showAddModal}

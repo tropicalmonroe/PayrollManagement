@@ -2,8 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Layout } from '../../../components/Layout';
 import { Play, ArrowLeft, Calculator, Users, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { useRouter } from 'next/router';
-import { Employee } from '@prisma/client';
-import { calculerPaie, type EmployeePayrollData } from '../../../lib/payrollCalculations';
+import { Employee, VariableElement as PrismaVariableElement, Advance } from '@prisma/client';
+import { calculatePayroll, type EmployeePayrollData } from '../../../lib/payrollCalculations';
+
+interface EmployeeWithRelations extends Employee {
+  variableElements: PrismaVariableElement[];
+  advances: Advance[];
+  otherDeductions?: number;
+}
 
 interface PayrollCalculationResult {
   employeeId: string;
@@ -15,7 +21,7 @@ interface PayrollCalculationResult {
 
 const MonthlyCalculationPage = () => {
   const router = useRouter();
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<EmployeeWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [calculating, setCalculating] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(() => {
@@ -35,13 +41,13 @@ const MonthlyCalculationPage = () => {
       const response = await fetch('/api/employees');
       if (response.ok) {
         const data = await response.json();
-        const activeEmployees = data.filter((emp: Employee) => emp.status === 'ACTIF');
+        const activeEmployees = data.filter((emp: Employee) => emp.status === 'ACTIVE');
         setEmployees(activeEmployees);
-        // Sélectionner tous les employés actifs par défaut
+        // Select all active employees by default
         setSelectedEmployees(activeEmployees.map((emp: Employee) => emp.id));
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des employés:', error);
+      console.error('Error loading employees:', error);
     } finally {
       setLoading(false);
     }
@@ -79,7 +85,7 @@ const MonthlyCalculationPage = () => {
 
   const handleCalculatePayroll = async () => {
     if (selectedEmployees.length === 0) {
-      alert('Veuillez sélectionner au moins un employé');
+      alert('Please select at least one employee');
       return;
     }
 
@@ -94,55 +100,76 @@ const MonthlyCalculationPage = () => {
       if (!employee) continue;
 
       try {
-        // Préparer les données de l'employé pour le calcul
+
+        // Calculate bonuses and overtime from variableElements
+        const bonuses = employee.variableElements
+          ?.filter((v: PrismaVariableElement) => v.type === 'BONUS')
+          .reduce((sum: number, v: PrismaVariableElement) => sum + v.amount, 0) || 0;
+  
+        const overtimePay = employee.variableElements
+          ?.filter((v: PrismaVariableElement) => v.type === 'OVERTIME')
+          .reduce((sum: number, v: PrismaVariableElement) => sum + v.amount, 0) || 0;
+  
+        // Calculate salary advance from advances
+        const salaryAdvance = employee.advances?.length
+          ? { monthlyAmount: employee.advances.reduce((sum: number, a: Advance) => sum + a.installmentAmount, 0) }
+          : undefined;
+
+        // Prepare employee data for calculation
         const employeeData: EmployeePayrollData = {
-          nom: employee.nom,
-          prenom: employee.prenom,
-          matricule: employee.matricule,
-          cin: employee.cin || '',
-          cnss: employee.cnss || '',
-          situationFamiliale: employee.situationFamiliale,
-          dateNaissance: employee.dateNaissance || new Date(),
-          dateEmbauche: employee.dateEmbauche,
-          anciennete: getSeniorityInYears(employee.dateEmbauche),
-          nbrDeductions: employee.nbrDeductions,
-          nbreJourMois: employee.nbreJourMois,
-          salaireBase: employee.salaireBase,
-          indemniteLogement: employee.indemniteLogement,
-          indemnitePanier: employee.indemnitePanier,
-          primeTransport: employee.primeTransport,
-          indemniteRepresentation: employee.indemniteRepresentation,
-          assurances: {
-            assuranceMaladieComplementaire: false,
-            assuranceMaladieEtranger: false,
-            assuranceInvaliditeRenforcee: false,
+          lastName: employee.lastName,
+          firstName: employee.firstName,
+          employeeId: employee.employeeId,
+          idNumber: employee.idNumber || '',
+          nssfNumber: employee.nssfNumber || '',
+          maritalStatus: employee.maritalStatus,
+          dateOfBirth: employee.dateOfBirth || new Date(),
+          hireDate: employee.hireDate,
+          seniority: getSeniorityInYears(employee.hireDate),
+          numberOfDeductions: employee.numberOfDeductions,
+          numberOfDaysPerMonth: employee.numberOfDaysPerMonth || 30,
+          baseSalary: employee.baseSalary,
+          housingAllowance: employee.housingAllowance,
+          mealAllowance: employee.mealAllowance,
+          transportAllowance: employee.transportAllowance,
+          representationAllowance: employee.representationAllowance,
+          loanRepayment: employee.loanRepayment,
+          helbLoan: employee.helbLoan,
+          subjectToHousingLevy: employee.subjectToHousingLevy,
+          subjectToNssf: employee.subjectToNssf,
+          subjectToShif: employee.subjectToShif,
+          insurances: {
+            comprehensiveHealthInsurance: false, // Adjusted for Kenyan context (NHIF)
+            foreignHealthCover: false,
+            enhancedDisabilityCover: false,
           },
-          creditImmobilier: employee.interetsCredit || employee.remboursementCredit ? {
-            montantMensuel: employee.remboursementCredit || 0,
-            interets: employee.interetsCredit || 0,
-          } : undefined,
-          creditConsommation: employee.creditConso ? {
-            montantMensuel: employee.creditConso,
-          } : undefined,
-          avanceSalaire: employee.remboursementAvance ? {
-            montantMensuel: employee.remboursementAvance,
-          } : undefined,
-          compteBancaire: employee.compteBancaire || '',
-          agence: employee.agence || '',
+          mortgageCredit: employee.loanRepayment ? {
+          monthlyAmount: employee.loanRepayment || 0,
+          interest: 0,
+        } : undefined,
+        consumerCredit: employee.helbLoan ? {
+          monthlyAmount: employee.helbLoan,
+        } : undefined,
+        salaryAdvance,
+        bankAccount: employee.bankAccount || '',
+        bankBranch: employee.bankBranch || '',
+        bonuses,
+        overtimePay,
+        otherDeductions: employee.otherDeductions || 0,
         };
 
-        // Calculer la paie directement
-        const payrollResult = calculerPaie(employeeData);
+        // Perform payroll calculation
+        const payrollResult = calculatePayroll(employeeData);
         
-        // Convertir le résultat au format attendu
+        // Convert result to expected format
         const calculation = {
-          totalGains: payrollResult.salaireBrut,
-          totalRetenues: payrollResult.totalRetenues,
-          impotRevenu: payrollResult.calculIGR.impotSurRevenu,
-          salaireNetAPayer: payrollResult.salaireNetAPayer,
-          cotisationsSalariales: payrollResult.cotisationsSalariales.totalCotisationsSalariales,
-          cotisationsPatronales: payrollResult.cotisationsPatronales.totalCotisationsPatronales,
-          coutTotalEmployeur: payrollResult.coutTotalEmployeur,
+          grossSalary: payrollResult.grossSalary,
+          totalDeductions: payrollResult.totalDeductions,
+          payeTax: payrollResult.taxCalculation.incomeTax,
+          netSalary: payrollResult.netSalaryPayable,
+          employeeContributions: payrollResult.employeeContributions.totalEmployeeContributions,
+          employerContributions: payrollResult.employerContributions.totalEmployerContributions,
+          totalEmployerCost: payrollResult.totalEmployerCost,
         };
 
         results.push({
@@ -152,19 +179,19 @@ const MonthlyCalculationPage = () => {
           calculation,
         });
       } catch (error) {
-        console.error(`Erreur lors du calcul pour ${employee.prenom} ${employee.nom}:`, error);
+        console.error(`Error during calculation for ${employee.firstName} ${employee.lastName}:`, error);
         results.push({
           employeeId,
           employee,
           success: false,
-          error: error instanceof Error ? error.message : 'Erreur lors du calcul',
+          error: error instanceof Error ? error.message : 'Error during calculation',
         });
       }
 
-      // Mettre à jour les résultats en temps réel
+      // Update results in real-time
       setCalculationResults([...results]);
       
-      // Petite pause pour l'effet visuel
+      // Small delay for visual effect
       await new Promise(resolve => setTimeout(resolve, 100));
     }
 
@@ -172,9 +199,9 @@ const MonthlyCalculationPage = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'MAD',
+      currency: 'KES',
       minimumFractionDigits: 2
     }).format(amount);
   };
@@ -182,7 +209,7 @@ const MonthlyCalculationPage = () => {
   const getMonthLabel = (monthString: string) => {
     const [year, month] = monthString.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long'
     }).format(date);
@@ -196,7 +223,7 @@ const MonthlyCalculationPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Chargement...</div>
+            <div className="text-lg text-gray-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -212,29 +239,28 @@ const MonthlyCalculationPage = () => {
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Retour</span>
+            <span>Back</span> 
           </button>
           
           <div className="flex items-center space-x-3 mb-4">
             <Play className="w-8 h-8 text-green-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Calcul mensuel</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Monthly Payroll Calculation</h1>
           </div>
           
           <p className="text-gray-600 text-lg">
-            Lancement automatique du calcul de paie avec application des barèmes, cotisations sociales et fiscales selon la situation de chaque salarié.
+            Automatic payroll calculation with application of tax brackets, social security, and tax contributions based on each employee’s situation.
           </p>
         </div>
 
         {!showResults ? (
           <>
-            {/* Configuration du calcul */}
+            {/* Calculation configuration */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Configuration du calcul</h3>
-              
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Calculation Configuration</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Période de calcul
+                    Calculation Period 
                   </label>
                   <input
                     type="month"
@@ -243,32 +269,32 @@ const MonthlyCalculationPage = () => {
                     className="payroll-input"
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Calcul pour {getMonthLabel(selectedMonth)}
+                    Calculation for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Employés sélectionnés
+                    Selected Employees
                   </label>
                   <div className="text-lg font-medium text-gray-900">
-                    {selectedEmployees.length} / {employees.length} employés
+                    {selectedEmployees.length} / {employees.length} employees 
                   </div>
                   <button
                     onClick={handleSelectAll}
                     className="text-sm text-blue-600 hover:text-blue-800 mt-1"
                   >
-                    {selectedEmployees.length === employees.length ? 'Désélectionner tout' : 'Sélectionner tout'}
+                    {selectedEmployees.length === employees.length ? 'Deselect All' : 'Select All'}
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Liste des employés */}
+            {/* Employee selection */}
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Sélection des employés ({employees.length} employés actifs)
+                  Employee Selection ({employees.length} active employees)
                 </h3>
               </div>
               
@@ -289,21 +315,21 @@ const MonthlyCalculationPage = () => {
                             <div className="flex-shrink-0 h-10 w-10">
                               <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
                                 <span className="text-sm font-medium text-green-600">
-                                  {employee.prenom.charAt(0)}{employee.nom.charAt(0)}
+                                  {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                                 </span>
                               </div>
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">
-                                {employee.prenom} {employee.nom}
+                                {employee.firstName} {employee.lastName}
                               </div>
                               <div className="text-sm text-gray-500">
-                                {employee.matricule} • {employee.fonction}
+                                {employee.employeeId} • {employee.position}
                               </div>
                             </div>
                           </div>
                           <div className="text-sm text-gray-500">
-                            {formatCurrency(employee.salaireBase)}
+                            {formatCurrency(employee.baseSalary)}
                           </div>
                         </div>
                       </label>
@@ -313,13 +339,13 @@ const MonthlyCalculationPage = () => {
               </div>
             </div>
 
-            {/* Bouton de lancement */}
+            {/* Start calculation button */}
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">Lancer le calcul</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Start Calculation</h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    Le calcul sera effectué pour {selectedEmployees.length} employé(s) pour la période {getMonthLabel(selectedMonth)}
+                    Calculation will be performed for {selectedEmployees.length} employee(s) for the period {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
                 <button
@@ -328,17 +354,17 @@ const MonthlyCalculationPage = () => {
                   className="flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Calculator className="w-5 h-5" />
-                  <span>Calculer la paie</span>
+                  <span>Calculate Payroll</span> 
                 </button>
               </div>
             </div>
           </>
         ) : (
           <>
-            {/* Résultats du calcul */}
+            {/* Calculation results */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Résultats du calcul</h3>
+                <h3 className="text-lg font-medium text-gray-900">Calculation Results</h3>
                 <button
                   onClick={() => {
                     setShowResults(false);
@@ -346,17 +372,17 @@ const MonthlyCalculationPage = () => {
                   }}
                   className="text-sm text-gray-600 hover:text-gray-900"
                 >
-                  Nouveau calcul
+                  New Calculation
                 </button>
               </div>
 
-              {/* Statistiques */}
+              {/* Statistics */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-white p-4 rounded-lg shadow-sm border">
                   <div className="flex items-center">
                     <Users className="w-8 h-8 text-blue-600" />
                     <div className="ml-3">
-                      <div className="text-sm font-medium text-gray-500">Total employés</div>
+                      <div className="text-sm font-medium text-gray-500">Total Employees</div>
                       <div className="text-2xl font-bold text-gray-900">{selectedEmployees.length}</div>
                     </div>
                   </div>
@@ -366,7 +392,7 @@ const MonthlyCalculationPage = () => {
                   <div className="flex items-center">
                     <CheckCircle className="w-8 h-8 text-green-600" />
                     <div className="ml-3">
-                      <div className="text-sm font-medium text-gray-500">Calculs réussis</div>
+                      <div className="text-sm font-medium text-gray-500">Successful Calculations</div> 
                       <div className="text-2xl font-bold text-green-600">{successfulCalculations.length}</div>
                     </div>
                   </div>
@@ -376,7 +402,7 @@ const MonthlyCalculationPage = () => {
                   <div className="flex items-center">
                     <AlertCircle className="w-8 h-8 text-red-600" />
                     <div className="ml-3">
-                      <div className="text-sm font-medium text-gray-500">Erreurs</div>
+                      <div className="text-sm font-medium text-gray-500">Errors</div> 
                       <div className="text-2xl font-bold text-red-600">{failedCalculations.length}</div>
                     </div>
                   </div>
@@ -384,12 +410,12 @@ const MonthlyCalculationPage = () => {
               </div>
             </div>
 
-            {/* Progression */}
+            {/* Progress bar */}
             {calculating && (
               <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
                 <div className="flex items-center space-x-3 mb-4">
                   <Clock className="w-5 h-5 text-blue-600 animate-spin" />
-                  <span className="text-lg font-medium text-gray-900">Calcul en cours...</span>
+                  <span className="text-lg font-medium text-gray-900">Calculation in Progress...</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
@@ -398,12 +424,12 @@ const MonthlyCalculationPage = () => {
                   ></div>
                 </div>
                 <p className="text-sm text-gray-500 mt-2">
-                  {calculationResults.length} / {selectedEmployees.length} employés traités
+                  {calculationResults.length} / {selectedEmployees.length} employees processed 
                 </p>
               </div>
             )}
 
-            {/* Liste des résultats */}
+            {/* Results list */}
             <div className="space-y-4">
               {calculationResults.map((result) => (
                 <div key={result.employeeId} className="bg-white p-6 rounded-lg shadow-sm border">
@@ -412,16 +438,16 @@ const MonthlyCalculationPage = () => {
                       <div className="flex-shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
                           <span className="text-sm font-medium text-gray-600">
-                            {result.employee.prenom.charAt(0)}{result.employee.nom.charAt(0)}
+                            {result.employee.firstName.charAt(0)}{result.employee.lastName.charAt(0)}
                           </span>
                         </div>
                       </div>
                       <div className="ml-4">
                         <div className="text-lg font-medium text-gray-900">
-                          {result.employee.prenom} {result.employee.nom}
+                          {result.employee.firstName} {result.employee.lastName}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {result.employee.matricule} • {result.employee.fonction}
+                          {result.employee.employeeId} • {result.employee.position}
                         </div>
                       </div>
                     </div>
@@ -437,49 +463,49 @@ const MonthlyCalculationPage = () => {
                   {result.success && result.calculation ? (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-500">Salaire brut:</span>
-                        <div className="font-medium">{formatCurrency(result.calculation.totalGains)}</div>
+                        <span className="text-gray-500">Gross Salary:</span> 
+                        <div className="font-medium">{formatCurrency(result.calculation.grossSalary)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Total retenues:</span>
-                        <div className="font-medium">{formatCurrency(result.calculation.totalRetenues)}</div>
+                        <span className="text-gray-500">Total Deductions:</span> 
+                        <div className="font-medium">{formatCurrency(result.calculation.totalDeductions)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">IGR:</span>
-                        <div className="font-medium">{formatCurrency(result.calculation.impotRevenu)}</div>
+                        <span className="text-gray-500">PAYE Tax:</span> 
+                        <div className="font-medium">{formatCurrency(result.calculation.payeTax)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Salaire net:</span>
-                        <div className="font-medium text-green-600">{formatCurrency(result.calculation.salaireNetAPayer)}</div>
+                        <span className="text-gray-500">Net Salary:</span> 
+                        <div className="font-medium text-green-600">{formatCurrency(result.calculation.netSalary)}</div>
                       </div>
                     </div>
                   ) : (
                     <div className="text-red-600 text-sm">
-                      <strong>Erreur:</strong> {result.error}
+                      <strong>Error:</strong> {result.error} {/* Translated Erreur: */}
                     </div>
                   )}
                 </div>
               ))}
             </div>
 
-            {/* Résumé final */}
+            {/* Final summary */}
             {!calculating && calculationResults.length > 0 && (
               <div className="mt-8 bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Résumé du calcul</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Calculation Summary</h3> 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Statistiques</h4>
+                    <h4 className="font-medium text-gray-900 mb-2">Statistics</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Employés traités:</span>
+                        <span className="text-gray-600">Employees Processed:</span> 
                         <span className="font-medium">{calculationResults.length}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Calculs réussis:</span>
+                        <span className="text-gray-600">Successful Calculations:</span>
                         <span className="font-medium text-green-600">{successfulCalculations.length}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Erreurs:</span>
+                        <span className="text-gray-600">Errors:</span>
                         <span className="font-medium text-red-600">{failedCalculations.length}</span>
                       </div>
                     </div>
@@ -487,24 +513,24 @@ const MonthlyCalculationPage = () => {
 
                   {successfulCalculations.length > 0 && (
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Totaux</h4>
+                      <h4 className="font-medium text-gray-900 mb-2">Totals</h4>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Total salaires bruts:</span>
+                          <span className="text-gray-600">Total Gross Salaries:</span> 
                           <span className="font-medium">
-                            {formatCurrency(successfulCalculations.reduce((sum, r) => sum + (r.calculation?.totalGains || 0), 0))}
+                            {formatCurrency(successfulCalculations.reduce((sum, r) => sum + (r.calculation?.grossSalary || 0), 0))}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Total retenues:</span>
+                          <span className="text-gray-600">Total Deductions:</span> 
                           <span className="font-medium">
-                            {formatCurrency(successfulCalculations.reduce((sum, r) => sum + (r.calculation?.totalRetenues || 0), 0))}
+                            {formatCurrency(successfulCalculations.reduce((sum, r) => sum + (r.calculation?.totalDeductions || 0), 0))}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Total salaires nets:</span>
+                          <span className="text-gray-600">Total Net Salaries:</span>
                           <span className="font-medium text-green-600">
-                            {formatCurrency(successfulCalculations.reduce((sum, r) => sum + (r.calculation?.salaireNetAPayer || 0), 0))}
+                            {formatCurrency(successfulCalculations.reduce((sum, r) => sum + (r.calculation?.netSalary || 0), 0))}
                           </span>
                         </div>
                       </div>
@@ -514,7 +540,7 @@ const MonthlyCalculationPage = () => {
 
                 <div className="mt-6 pt-4 border-t border-gray-200">
                   <p className="text-sm text-gray-600">
-                    Les bulletins de paie ont été générés et sont disponibles dans la section "Documents salariés".
+                    Payslips have been generated and are available in the “Employee Documents” section.
                   </p>
                 </div>
               </div>

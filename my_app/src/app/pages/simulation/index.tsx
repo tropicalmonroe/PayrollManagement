@@ -8,8 +8,8 @@ export default function SimulationIndex() {
   return (
     <>
       <Head>
-        <title>Simulation - Gestion de Paie AD Capital</title>
-        <meta name="description" content="Module de simulation de paie et d'impact fiscal" />
+        <title>Simulation - AD Capital Payroll Management</title>
+        <meta name="description" content="Payroll and tax impact simulation module" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -25,39 +25,39 @@ function SimulationContent() {
   const simulationModules = [
     {
       id: 'salary-simulation',
-      title: 'Simulation salaire',
-      description: 'Simulez les calculs de paie pour différents montants de salaire',
+      title: 'Salary Simulation',
+      description: 'Simulate payroll calculations for different salary amounts',
       icon: Calculator,
       href: '/simulation/salary-simulation',
       color: 'blue',
-      features: ['Calcul brut/net', 'Cotisations sociales', 'IGR', 'Net à payer']
+      features: ['Gross/Net calculation', 'Social contributions', 'Income Tax', 'Net pay']
     },
     {
       id: 'family-tax-impact',
-      title: 'Impact familial/fiscal',
-      description: 'Analysez l\'impact des charges familiales sur la fiscalité',
+      title: 'Family/Tax Impact',
+      description: 'Analyze the impact of family dependents on taxation',
       icon: Users,
       href: '/simulation/family-tax-impact',
       color: 'green',
-      features: ['Situation familiale', 'Nombre d\'enfants', 'Réductions fiscales', 'Comparaisons']
+      features: ['Family situation', 'Number of children', 'Tax reductions', 'Comparisons']
     },
     {
       id: 'regularization-recall',
-      title: 'Régularisation / rappel',
-      description: 'Simulez les régularisations et rappels de salaire',
+      title: 'Regularization / Back Pay',
+      description: 'Simulate salary regularizations and back pay',
       icon: TrendingUp,
       href: '/simulation/regularization-recall',
       color: 'purple',
-      features: ['Rappels de salaire', 'Régularisations IGR', 'Ajustements CNSS', 'Calculs rétroactifs']
+      features: ['Salary back pay', 'Tax regularizations', 'NSSF adjustments', 'Retroactive calculations']
     },
     {
       id: 'housing-credit',
-      title: 'Crédit logement',
-      description: 'Calculez l\'impact des crédits logement sur la paie',
+      title: 'Housing Credit',
+      description: 'Calculate the impact of housing credits on payroll',
       icon: Home,
       href: '/simulation/housing-credit',
       color: 'orange',
-      features: ['Déduction fiscale', 'Plafonds légaux', 'Économies d\'impôt', 'Simulations mensuelles']
+      features: ['Tax deduction', 'Legal limits', 'Tax savings', 'Monthly simulations']
     }
   ];
 
@@ -100,7 +100,7 @@ function SimulationContent() {
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Simulation</h2>
         <p className="mt-1 text-sm text-gray-600">
-          Outils de simulation pour analyser différents scénarios de paie et d'impact fiscal
+          Simulation tools to analyze different payroll and tax impact scenarios
         </p>
       </div>
 
@@ -115,7 +115,7 @@ function SimulationContent() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Simulations ce mois
+                    Simulations this month
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
                     24
@@ -135,10 +135,10 @@ function SimulationContent() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Économies identifiées
+                    Identified savings
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    12 450 MAD
+                    12,450 KES
                   </dd>
                 </dl>
               </div>
@@ -155,7 +155,7 @@ function SimulationContent() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Employés analysés
+                    Employees analyzed
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
                     18
@@ -175,7 +175,7 @@ function SimulationContent() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Rapports générés
+                    Reports generated
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
                     7
@@ -215,7 +215,7 @@ function SimulationContent() {
               </div>
 
               <div className="mt-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Fonctionnalités :</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Features:</h4>
                 <ul className="space-y-1">
                   {module.features.map((feature, index) => (
                     <li key={index} className="flex items-center text-sm text-gray-600">
@@ -230,11 +230,11 @@ function SimulationContent() {
                 <Link href={module.href}>
                   <button className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md ${colorClasses.button} transition-colors duration-200`}>
                     <Play className="h-4 w-4 mr-2" />
-                    Lancer simulation
+                    Start simulation
                   </button>
                 </Link>
                 <span className="text-xs text-gray-500">
-                  Dernière utilisation: il y a 2 jours
+                  Last used: 2 days ago
                 </span>
               </div>
             </div>
@@ -245,30 +245,30 @@ function SimulationContent() {
       {/* Recent Simulations */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Simulations récentes</h3>
+          <h3 className="text-lg font-medium text-gray-900">Recent Simulations</h3>
         </div>
         <div className="divide-y divide-gray-200">
           {[
             {
-              type: 'Simulation salaire',
+              type: 'Salary Simulation',
               employee: 'Ahmed Benali',
-              amount: '15 000 MAD',
+              amount: '15,000 KES',
               date: '2025-01-14',
-              status: 'Terminée'
+              status: 'Completed'
             },
             {
-              type: 'Impact familial',
+              type: 'Family Impact',
               employee: 'Fatima Zahra',
-              amount: '12 500 MAD',
+              amount: '12,500 KES',
               date: '2025-01-13',
-              status: 'Terminée'
+              status: 'Completed'
             },
             {
-              type: 'Crédit logement',
+              type: 'Housing Credit',
               employee: 'Mohamed Alami',
-              amount: '18 000 MAD',
+              amount: '18,000 KES',
               date: '2025-01-12',
-              status: 'En cours'
+              status: 'In Progress'
             }
           ].map((simulation, index) => (
             <div key={index} className="px-6 py-4 hover:bg-gray-50">
@@ -285,7 +285,7 @@ function SimulationContent() {
                         {simulation.type}
                       </h4>
                       <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        simulation.status === 'Terminée' 
+                        simulation.status === 'Completed' 
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-yellow-100 text-yellow-800'
                       }`}>
@@ -301,10 +301,10 @@ function SimulationContent() {
                 </div>
                 <div className="text-right text-sm">
                   <div className="text-gray-900">
-                    {new Date(simulation.date).toLocaleDateString('fr-FR')}
+                    {new Date(simulation.date).toLocaleDateString('en-KE')}
                   </div>
                   <button className="text-blue-600 hover:text-blue-800 font-medium">
-                    Voir détails
+                    View details
                   </button>
                 </div>
               </div>
@@ -313,7 +313,7 @@ function SimulationContent() {
         </div>
         <div className="px-6 py-3 bg-gray-50 text-center">
           <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-            Voir toutes les simulations
+            View all simulations
           </button>
         </div>
       </div>

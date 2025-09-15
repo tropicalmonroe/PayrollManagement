@@ -5,8 +5,8 @@ export default function ReportsPage() {
   return (
     <>
       <Head>
-        <title>Rapports et documents - AD Capital</title>
-        <meta name="description" content="Consultez les rapports de paie et documents" />
+        <title>Reports and Documents - AD Capital</title>
+        <meta name="description" content="View payroll reports and documents" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -14,9 +14,9 @@ export default function ReportsPage() {
       <Layout>
         <div className="space-y-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Rapports et documents</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Reports and Documents</h2>
             <p className="mt-1 text-sm text-gray-600">
-              Consultez les rapports de paie et gérez les documents
+              View payroll reports and manage documents
             </p>
           </div>
 
@@ -24,9 +24,9 @@ export default function ReportsPage() {
             <div className="px-4 py-5 sm:p-6">
               <div className="text-center py-12">
                 <span className="text-6xl">📈</span>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">Aucun rapport disponible</h3>
+                <h3 className="mt-4 text-lg font-medium text-gray-900">No reports available</h3>
                 <p className="mt-2 text-sm text-gray-500">
-                  Les rapports seront disponibles après le calcul des paies
+                  Reports will be available after payroll calculations
                 </p>
               </div>
             </div>

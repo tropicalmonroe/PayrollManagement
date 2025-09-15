@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Layout } from '../../../components/Layout';
 import { Eye, ArrowLeft, Search, Filter } from 'lucide-react';
 import { useRouter } from 'next/router';
-import { Employee, EmployeeStatus, SituationFamiliale } from '@prisma/client';
+import { Employee, EmployeeStatus, MaritalStatus } from '@prisma/client';
 import EmployeeDetails from '../../../components/EmployeeDetails';
-
 
 const EmployeeConsultationPage = () => {
   const router = useRouter();
@@ -15,7 +14,7 @@ const EmployeeConsultationPage = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<EmployeeStatus | 'ALL'>('ALL');
-  const [sortBy, setSortBy] = useState<'nom' | 'dateEmbauche' | 'salaireBase'>('nom');
+  const [sortBy, setSortBy] = useState<'name' | 'hireDate' | 'baseSalary'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
@@ -34,7 +33,7 @@ const EmployeeConsultationPage = () => {
         setEmployees(data);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des employés:', error);
+      console.error('Error loading employees:', error);
     } finally {
       setLoading(false);
     }
@@ -43,10 +42,10 @@ const EmployeeConsultationPage = () => {
   const filterAndSortEmployees = () => {
     let filtered = employees.filter(employee => {
       const matchesSearch = 
-        employee.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.matricule.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.fonction.toLowerCase().includes(searchTerm.toLowerCase());
+        employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.position.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesStatus = statusFilter === 'ALL' || employee.status === statusFilter;
       
@@ -58,17 +57,17 @@ const EmployeeConsultationPage = () => {
       let bValue: any;
       
       switch (sortBy) {
-        case 'nom':
-          aValue = `${a.nom} ${a.prenom}`;
-          bValue = `${b.nom} ${b.prenom}`;
+        case 'name':
+          aValue = `${a.lastName} ${a.firstName}`;
+          bValue = `${b.lastName} ${b.firstName}`;
           break;
-        case 'dateEmbauche':
-          aValue = new Date(a.dateEmbauche);
-          bValue = new Date(b.dateEmbauche);
+        case 'hireDate':
+          aValue = new Date(a.hireDate);
+          bValue = new Date(b.hireDate);
           break;
-        case 'salaireBase':
-          aValue = a.salaireBase;
-          bValue = b.salaireBase;
+        case 'baseSalary':
+          aValue = a.baseSalary;
+          bValue = b.baseSalary;
           break;
         default:
           return 0;
@@ -94,7 +93,7 @@ const EmployeeConsultationPage = () => {
     setSelectedEmployee(null);
   };
 
-  const handleSort = (field: 'nom' | 'dateEmbauche' | 'salaireBase') => {
+  const handleSort = (field: 'name' | 'hireDate' | 'baseSalary') => {
     if (sortBy === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
@@ -103,21 +102,21 @@ const EmployeeConsultationPage = () => {
     }
   };
 
-  const getSortIcon = (field: 'nom' | 'dateEmbauche' | 'salaireBase') => {
+  const getSortIcon = (field: 'name' | 'hireDate' | 'baseSalary') => {
     if (sortBy !== field) return '↕️';
     return sortOrder === 'asc' ? '↑' : '↓';
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'MAD',
+      currency: 'KES',
       minimumFractionDigits: 2
     }).format(amount);
   };
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -126,31 +125,16 @@ const EmployeeConsultationPage = () => {
 
   const getStatusBadge = (status: EmployeeStatus) => {
     switch (status) {
-      case 'ACTIF':
-        return <span className="status-active">Actif</span>;
-      case 'SUSPENDU':
-        return <span className="status-pending">Suspendu</span>;
-      case 'DEMISSIONNAIRE':
-      case 'LICENCIE':
-      case 'RETRAITE':
+      case 'ACTIVE':
+        return <span className="status-active">Active</span>;
+      case 'SUSPENDED':
+        return <span className="status-pending">Suspended</span>;
+      case 'RESIGNED':
+      case 'TERMINATED':
+      case 'RETIRED':
         return <span className="status-inactive">{status.charAt(0) + status.slice(1).toLowerCase()}</span>;
       default:
         return <span className="status-pending">{status}</span>;
-    }
-  };
-
-  const getSituationFamiliale = (situation: SituationFamiliale) => {
-    switch (situation) {
-      case 'CELIBATAIRE':
-        return 'Célibataire';
-      case 'MARIE':
-        return 'Marié(e)';
-      case 'DIVORCE':
-        return 'Divorcé(e)';
-      case 'VEUF':
-        return 'Veuf/Veuve';
-      default:
-        return situation;
     }
   };
 
@@ -159,7 +143,7 @@ const EmployeeConsultationPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Chargement...</div>
+            <div className="text-lg text-gray-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -175,32 +159,32 @@ const EmployeeConsultationPage = () => {
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Retour</span>
+            <span>Back</span> {/* Translated Retour */}
           </button>
           
           <div className="flex items-center space-x-3 mb-4">
             <Eye className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Consultation fiche salarié</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Employee Profile Review</h1>
           </div>
           
           <p className="text-gray-600 text-lg">
-            Visualisation en lecture seule de la fiche complète du salarié (sans modification).
+            Read-only view of the employee’s complete profile (no modifications). 
           </p>
         </div>
 
-        {/* Filtres et recherche */}
+        {/* Filters and search */}
         <div className="bg-white p-4 rounded-lg shadow-sm border mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <Search className="w-4 h-4 inline mr-1" />
-                Rechercher
+                Search 
               </label>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Nom, prénom, matricule, fonction..."
+                placeholder="Name, surname, employee ID, position..."
                 className="payroll-input"
               />
             </div>
@@ -208,84 +192,83 @@ const EmployeeConsultationPage = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <Filter className="w-4 h-4 inline mr-1" />
-                Statut
+                Status {/* Translated Statut */}
               </label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as EmployeeStatus | 'ALL')}
                 className="payroll-input"
               >
-                <option value="ALL">Tous les statuts</option>
-                <option value="ACTIF">Actif</option>
-                <option value="SUSPENDU">Suspendu</option>
-                <option value="DEMISSIONNAIRE">Démissionnaire</option>
-                <option value="LICENCIE">Licencié</option>
-                <option value="RETRAITE">Retraité</option>
+                <option value="ALL">All statuses</option>
+                <option value="ACTIVE">Active</option> 
+                <option value="SUSPENDED">Suspended</option>
+                <option value="RESIGNED">Resigned</option>
+                <option value="TERMINATED">Terminated</option> 
+                <option value="RETIRED">Retired</option>
               </select>
             </div>
 
             <div className="flex items-end">
               <div className="text-sm text-gray-600">
-                {filteredEmployees.length} employé(s) trouvé(s)
+                {filteredEmployees.length} employee(s) found 
               </div>
             </div>
           </div>
         </div>
 
-        {/* Liste des employés */}
+        {/* Employee list */}
         {filteredEmployees.length === 0 ? (
           <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="text-center py-12">
                 <Eye className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-4 text-lg font-medium text-gray-900">
-                  {searchTerm || statusFilter !== 'ALL' ? 'Aucun employé trouvé' : 'Aucun employé'}
+                  {searchTerm || statusFilter !== 'ALL' ? 'No employees found' : 'No employees'}
                 </h3>
                 <p className="mt-2 text-sm text-gray-500">
                   {searchTerm || statusFilter !== 'ALL' 
-                    ? 'Essayez de modifier vos critères de recherche'
-                    : 'Aucun employé disponible pour consultation'
-                  }
+                    ? 'Try adjusting your search criteria' 
+                    : 'No employees available for review'}
                 </p>
               </div>
             </div>
           </div>
         ) : (
           <div className="bg-white shadow rounded-lg overflow-hidden">
-            {/* Version desktop - tableau */}
+            {/* Desktop version - table */}
             <div className="hidden lg:block">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th 
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('nom')}
+                      onClick={() => handleSort('name')}
                     >
-                      Employé {getSortIcon('nom')}
+                      Employee {getSortIcon('name')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Fonction
+                      Position 
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Situation familiale
+                      Marital Status 
                     </th>
                     <th 
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('dateEmbauche')}
+                      onClick={() => handleSort('hireDate')}
                     >
-                      Date d'embauche {getSortIcon('dateEmbauche')}
+                      Hire Date {getSortIcon('hireDate')} 
                     </th>
                     <th 
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('salaireBase')}
+                      onClick={() => handleSort('baseSalary')}
                     >
-                      Salaire de base {getSortIcon('salaireBase')}
+                      Base Salary {getSortIcon('baseSalary')} 
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Statut
+                      Status {/* Translated Statut */}
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Action
+                      Action {/* Translated Action */}
                     </th>
                   </tr>
                 </thead>
@@ -297,36 +280,36 @@ const EmployeeConsultationPage = () => {
                           <div className="flex-shrink-0 h-10 w-10">
                             <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                               <span className="text-sm font-medium text-blue-600">
-                                {employee.prenom.charAt(0)}{employee.nom.charAt(0)}
+                                {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                               </span>
                             </div>
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {employee.prenom} {employee.nom}
+                              {employee.firstName} {employee.lastName}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {employee.matricule}
+                              {employee.employeeId}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {employee.fonction}
+                        {employee.position}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {getSituationFamiliale(employee.situationFamiliale)}
-                        {employee.nbrDeductions > 0 && (
+                        {employee.maritalStatus}
+                        {employee.numberOfDeductions > 0 && (
                           <div className="text-xs text-gray-500">
-                            {employee.nbrDeductions} déduction(s)
+                            {employee.numberOfDeductions} dependent(s) 
                           </div>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(employee.dateEmbauche)}
+                        {formatDate(employee.hireDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatCurrency(employee.salaireBase)}
+                        {formatCurrency(employee.baseSalary)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(employee.status)}
@@ -335,10 +318,10 @@ const EmployeeConsultationPage = () => {
                         <button
                           onClick={() => handleView(employee)}
                           className="text-blue-600 hover:text-blue-900 flex items-center space-x-1"
-                          title="Consulter la fiche complète"
+                          title="View full profile"
                         >
                           <Eye className="w-4 h-4" />
-                          <span>Consulter</span>
+                          <span>View</span>
                         </button>
                       </td>
                     </tr>
@@ -347,7 +330,7 @@ const EmployeeConsultationPage = () => {
               </table>
             </div>
 
-            {/* Version mobile - cartes */}
+            {/* Mobile version - cards */}
             <div className="lg:hidden">
               <div className="divide-y divide-gray-200">
                 {filteredEmployees.map((employee) => (
@@ -357,42 +340,42 @@ const EmployeeConsultationPage = () => {
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                             <span className="text-sm font-medium text-blue-600">
-                              {employee.prenom.charAt(0)}{employee.nom.charAt(0)}
+                              {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                             </span>
                           </div>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {employee.prenom} {employee.nom}
+                            {employee.firstName} {employee.lastName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {employee.matricule} • {employee.fonction}
+                            {employee.employeeId} • {employee.position}
                           </div>
                         </div>
                       </div>
                       <button
                         onClick={() => handleView(employee)}
                         className="text-blue-600 hover:text-blue-900"
-                        title="Consulter"
+                        title="View"
                       >
                         <Eye className="w-5 h-5" />
                       </button>
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-500">Embauché le:</span>
-                        <div className="font-medium">{formatDate(employee.dateEmbauche)}</div>
+                        <span className="text-gray-500">Hired on:</span> 
+                        <div className="font-medium">{formatDate(employee.hireDate)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Salaire de base:</span>
-                        <div className="font-medium">{formatCurrency(employee.salaireBase)}</div>
+                        <span className="text-gray-500">Base Salary:</span> 
+                        <div className="font-medium">{formatCurrency(employee.baseSalary)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Situation:</span>
-                        <div className="font-medium">{getSituationFamiliale(employee.situationFamiliale)}</div>
+                        <span className="text-gray-500">Marital Status:</span> 
+                        <div className="font-medium">{employee.maritalStatus}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Statut:</span>
+                        <span className="text-gray-500">Status:</span> 
                         <div>{getStatusBadge(employee.status)}</div>
                       </div>
                     </div>
@@ -403,12 +386,12 @@ const EmployeeConsultationPage = () => {
           </div>
         )}
 
-        {/* Modal pour les détails de l'employé (lecture seule) */}
+        {/* Modal for employee details (read-only) */}
         {showDetails && selectedEmployee && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-7xl max-h-[95vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">Consultation de la fiche salarié</h2>
+                <h2 className="text-xl font-bold">Employee Profile Review</h2> {/* Translated Consultation de la fiche salarié */}
                 <button
                   onClick={handleCloseDetails}
                   className="text-gray-500 hover:text-gray-700"
@@ -420,8 +403,8 @@ const EmployeeConsultationPage = () => {
                 employee={selectedEmployee} 
                 onClose={handleCloseDetails}
                 onEdit={() => {
-                  // Pas d'édition en mode consultation
-                  alert('Mode consultation uniquement. Utilisez la section "Fiche salarié" pour modifier.');
+                  // No editing in consultation mode
+                  alert('Read-only mode. Use the “Employee Profile” section to edit.'); {/* Translated Mode consultation uniquement. Utilisez la section "Fiche salarié" pour modifier. */}
                 }}
               />
             </div>

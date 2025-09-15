@@ -8,8 +8,8 @@ export default function HousingCredit() {
   return (
     <>
       <Head>
-        <title>Crédit Logement - Gestion de Paie AD Capital</title>
-        <meta name="description" content="Calculez l'impact des crédits logement sur la paie" />
+        <title>Housing Loan - AD Capital Payroll</title>
+        <meta name="description" content="Calculate the impact of housing loans on payroll" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -21,78 +21,84 @@ export default function HousingCredit() {
   );
 }
 
+// Got it 👍 — let’s make it very simple with your gross salary = KSh 50,000.
+// 1. Gross salary = 50,000
+// 2. PAYE (income tax) is calculated on that salary.
+//3. If you pay, say, KSh 10,000 insurance premium in a month:
+//Insurance relief = 15% × 10,000 = KSh 1,500
+//But the max allowed is 5,000, so you’re within limit.
+//4. That 1,500 is subtracted from your PAYE tax, not from your salary directly.
+//👉 Meaning: your tax reduces, so your net (take-home) pay increases by 1,500.
+
+
 function HousingCreditContent() {
-  const [salaireBrut, setSalaireBrut] = useState<number>(20000);
-  const [situationFamiliale, setSituationFamiliale] = useState<string>('marie');
-  const [nombreEnfants, setNombreEnfants] = useState<number>(2);
-  const [fraisProfessionnels, setFraisProfessionnels] = useState<number>(0);
-  const [autresDeductions, setAutresDeductions] = useState<number>(0);
-  const [montantCredit, setMontantCredit] = useState<number>(500000);
-  const [dureeCredit, setDureeCredit] = useState<number>(20);
-  const [tauxInteret, setTauxInteret] = useState<number>(4.5);
-  const [mensualiteCredit, setMensualiteCredit] = useState<number>(3164);
-  const [typeLogement, setTypeLogement] = useState<string>('principal');
+  const [grossSalary, setGrossSalary] = useState<number>(30000); // Adjusted to KES
+  const [familyStatus, setFamilyStatus] = useState<string>('married');
+  const [numberOfDependants, setNumberOfDependants] = useState<number>(2);
+  const [professionalExpenses, setProfessionalExpenses] = useState<number>(0);
+  const [otherDeductions, setOtherDeductions] = useState<number>(0);
+  const [loanAmount, setLoanAmount] = useState<number>(5000000); // Adjusted to KES
+  const [loanTerm, setLoanTerm] = useState<number>(20); // in years
+  const [interestRate, setInterestRate] = useState<number>(4.5);
+  const [monthlyRepayment, setMonthlyRepayment] = useState<number>(31640); // Adjusted to KES
+  const [housingType, setHousingType] = useState<string>('primary');
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     calculateHousingCredit();
-  }, [salaireBrut, situationFamiliale, nombreEnfants, fraisProfessionnels, autresDeductions, montantCredit, dureeCredit, tauxInteret, mensualiteCredit, typeLogement]);
+  }, 
+  [grossSalary, familyStatus, numberOfDependants, professionalExpenses, 
+    otherDeductions, loanAmount, loanTerm, interestRate, monthlyRepayment, housingType]);
 
-  const calculateMensualite = () => {
-    const tauxMensuel = tauxInteret / 100 / 12;
-    const nombreMensualites = dureeCredit * 12;
-    const mensualite = (montantCredit * tauxMensuel) / (1 - Math.pow(1 + tauxMensuel, -nombreMensualites));
-    setMensualiteCredit(Math.round(mensualite));
+  const calculateMonthlyRepayment = () => {
+    const monthlyRate = interestRate / 100 / 12;
+    const numberOfPayments = loanTerm * 12;
+    const repayment = (loanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -numberOfPayments));
+    setMonthlyRepayment(Math.round(repayment));
   };
 
-  const calculateSalary = (deductionCreditLogement: number) => {
-    const salaireImposable = salaireBrut - fraisProfessionnels;
-    const cotisationCNSS = Math.min(salaireBrut * 0.0448, 6000 * 0.0448);
-    const cotisationAMO = Math.min(salaireBrut * 0.0226, 6000 * 0.0226);
+  const calculateSalary = (mortgageInterestRelief: number) => {
+    const taxableSalary = grossSalary - professionalExpenses;
+    const nssfContribution = Math.min(grossSalary * 0.06, 2160); // NSSF: 6%, capped at 2,160 KES
+    const shifContribution = 1700; // Approximated SHIF for 30,000 KES salary
+    const insuranceRelief = Math.min(shifContribution * 0.15, 5000); // 15% of SHIF, capped at 5,000 KES
     
-    let salaireNetImposable = salaireImposable - cotisationCNSS - cotisationAMO;
+    let netTaxableSalary = taxableSalary - nssfContribution - shifContribution;
     
-    // Déductions familiales
-    if (situationFamiliale === 'marie') {
-      salaireNetImposable -= 360;
-    }
-    salaireNetImposable -= nombreEnfants * 300;
-    salaireNetImposable -= autresDeductions;
-    salaireNetImposable -= deductionCreditLogement;
+    // Deductions: Kenyan personal relief (2,400 KES/month)
+    const personalRelief = 2400;
+    netTaxableSalary -= personalRelief + otherDeductions + mortgageInterestRelief;
     
-    // Calcul IGR
-    const salaireAnnuel = Math.max(0, salaireNetImposable * 12);
-    let igr = 0;
+    // Calculate PAYE (2025 Kenyan tax brackets)
+    const annualTaxableSalary = Math.max(0, netTaxableSalary * 12);
+    let paye = 0;
     
-    if (salaireAnnuel > 30000) {
-      if (salaireAnnuel <= 50000) {
-        igr = (salaireAnnuel - 30000) * 0.10;
-      } else if (salaireAnnuel <= 60000) {
-        igr = 20000 * 0.10 + (salaireAnnuel - 50000) * 0.20;
-      } else if (salaireAnnuel <= 80000) {
-        igr = 20000 * 0.10 + 10000 * 0.20 + (salaireAnnuel - 60000) * 0.30;
-      } else if (salaireAnnuel <= 180000) {
-        igr = 20000 * 0.10 + 10000 * 0.20 + 20000 * 0.30 + (salaireAnnuel - 80000) * 0.34;
+    if (annualTaxableSalary > 288000) {
+      if (annualTaxableSalary <= 388000) {
+        paye = (annualTaxableSalary - 288000) * 0.25;
       } else {
-        igr = 20000 * 0.10 + 10000 * 0.20 + 20000 * 0.30 + 100000 * 0.34 + (salaireAnnuel - 180000) * 0.38;
+        paye = 100000 * 0.25 + (annualTaxableSalary - 388000) * 0.30;
       }
     }
     
-    const igrMensuel = igr / 12;
-    const salaireNet = salaireBrut - cotisationCNSS - cotisationAMO - igrMensuel;
+    const monthlyPaye = paye / 12;
+    const netSalary = grossSalary - nssfContribution - shifContribution - monthlyPaye + insuranceRelief;
     
     return {
-      salaireBrut,
-      cotisationCNSS,
-      cotisationAMO,
-      totalCotisations: cotisationCNSS + cotisationAMO,
-      salaireImposable,
-      deductionCreditLogement,
-      salaireNetImposable: Math.max(0, salaireNetImposable),
-      igr: igrMensuel,
-      salaireNet,
-      tauxImposition: salaireImposable > 0 ? (igrMensuel / salaireImposable) * 100 : 0
+      grossSalary,
+      nssfContribution,
+      shifContribution,
+      totalContributions: nssfContribution + shifContribution,
+      taxableSalary,
+      personalRelief,
+      insuranceRelief,
+      mortgageInterestRelief,
+      totalDeductions: personalRelief + otherDeductions + mortgageInterestRelief,
+      netTaxableSalary: Math.max(0, netTaxableSalary),
+      paye: monthlyPaye,
+      netSalary,
+      taxRate: taxableSalary > 0 ? (monthlyPaye / taxableSalary) * 100 : 0
     };
   };
 
@@ -100,53 +106,48 @@ function HousingCreditContent() {
     setLoading(true);
     
     setTimeout(() => {
-      // Calcul de la déduction crédit logement
-      let deductionMensuelle = 0;
+      // Calculate mortgage interest relief
+      let monthlyRelief = 0;
       
-      if (typeLogement === 'principal') {
-        // Pour résidence principale : déduction des intérêts dans la limite de 10% du revenu imposable
-        const interetsMensuels = (montantCredit * (tauxInteret / 100)) / 12;
-        const plafondDeduction = (salaireBrut - fraisProfessionnels) * 0.10;
-        deductionMensuelle = Math.min(interetsMensuels, plafondDeduction);
-      } else if (typeLogement === 'social') {
-        // Pour logement social : déduction plus avantageuse
-        const interetsMensuels = (montantCredit * (tauxInteret / 100)) / 12;
-        const plafondDeduction = (salaireBrut - fraisProfessionnels) * 0.15;
-        deductionMensuelle = Math.min(interetsMensuels, plafondDeduction);
+      if (housingType === 'primary') {
+        // For primary residence: mortgage interest relief up to 9,000 KES/month
+        const monthlyInterest = (loanAmount * (interestRate / 100)) / 12;
+        monthlyRelief = Math.min(monthlyInterest, 9000);
       }
+      // No relief for affordable or secondary housing in Kenya
       
-      const sansCredit = calculateSalary(0);
-      const avecCredit = calculateSalary(deductionMensuelle);
+      const withoutLoan = calculateSalary(0);
+      const withLoan = calculateSalary(monthlyRelief);
       
-      const economie = {
-        igrMensuel: sansCredit.igr - avecCredit.igr,
-        igrAnnuel: (sansCredit.igr - avecCredit.igr) * 12,
-        salaireNetMensuel: avecCredit.salaireNet - sansCredit.salaireNet,
-        salaireNetAnnuel: (avecCredit.salaireNet - sansCredit.salaireNet) * 12
+      const savings = {
+        monthlyPaye: withoutLoan.paye - withLoan.paye,
+        annualPaye: (withoutLoan.paye - withLoan.paye) * 12,
+        monthlyNetSalary: withLoan.netSalary - withoutLoan.netSalary,
+        annualNetSalary: (withLoan.netSalary - withoutLoan.netSalary) * 12
       };
       
-      // Calcul du coût réel du crédit
-      const coutTotalCredit = mensualiteCredit * dureeCredit * 12;
-      const interetsTotal = coutTotalCredit - montantCredit;
-      const economieIGRTotale = economie.igrAnnuel * dureeCredit;
-      const coutReel = interetsTotal - economieIGRTotale;
+      // Calculate actual loan cost
+      const totalLoanCost = monthlyRepayment * loanTerm * 12;
+      const totalInterest = totalLoanCost - loanAmount;
+      const totalPayeSavings = savings.annualPaye * loanTerm;
+      const actualCost = totalInterest - totalPayeSavings;
       
-      // Calcul du taux effectif
-      const tauxEffectif = ((coutReel / montantCredit) / dureeCredit) * 100;
+      // Calculate effective rate
+      const effectiveRate = ((actualCost / loanAmount) / loanTerm) * 100;
       
       setResults({
-        sansCredit,
-        avecCredit,
-        deductionMensuelle,
-        economie,
-        mensualiteCredit,
-        coutTotalCredit,
-        interetsTotal,
-        economieIGRTotale,
-        coutReel,
-        tauxEffectif,
-        capaciteRemboursement: (avecCredit.salaireNet / mensualiteCredit) * 100,
-        restePourVivre: avecCredit.salaireNet - mensualiteCredit
+        withoutLoan,
+        withLoan,
+        monthlyRelief,
+        savings,
+        monthlyRepayment,
+        totalLoanCost,
+        totalInterest,
+        totalPayeSavings,
+        actualCost,
+        effectiveRate,
+        repaymentCapacity: (withLoan.netSalary / monthlyRepayment) * 100,
+        disposableIncome: withLoan.netSalary - monthlyRepayment
       });
       
       setLoading(false);
@@ -154,9 +155,9 @@ function HousingCreditContent() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'MAD'
+      currency: 'KES'
     }).format(amount);
   };
 
@@ -165,16 +166,16 @@ function HousingCreditContent() {
   };
 
   const resetForm = () => {
-    setSalaireBrut(20000);
-    setSituationFamiliale('marie');
-    setNombreEnfants(2);
-    setFraisProfessionnels(0);
-    setAutresDeductions(0);
-    setMontantCredit(500000);
-    setDureeCredit(20);
-    setTauxInteret(4.5);
-    setMensualiteCredit(3164);
-    setTypeLogement('principal');
+    setGrossSalary(30000);
+    setFamilyStatus('married');
+    setNumberOfDependants(2);
+    setProfessionalExpenses(0);
+    setOtherDeductions(0);
+    setLoanAmount(5000000);
+    setLoanTerm(20);
+    setInterestRate(4.5);
+    setMonthlyRepayment(31640);
+    setHousingType('primary');
   };
 
   return (
@@ -185,13 +186,13 @@ function HousingCreditContent() {
           <Link href="/simulation">
             <button className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour
+              Back
             </button>
           </Link>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Simulation crédit logement</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Housing Loan Simulation</h2>
             <p className="mt-1 text-sm text-gray-600">
-              Calculez l'impact fiscal et l'économie d'impôt liée au crédit logement
+              Calculate the tax impact and savings from a housing loan
             </p>
           </div>
         </div>
@@ -201,33 +202,33 @@ function HousingCreditContent() {
             className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
-            Réinitialiser
+            Reset
           </button>
           {results && (
             <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700">
               <Download className="h-4 w-4 mr-2" />
-              Exporter simulation
+              Export Simulation
             </button>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Paramètres du salarié */}
+        {/* Employee Information */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Informations salarié</h3>
+            <h3 className="text-lg font-medium text-gray-900">Employee Information</h3>
           </div>
           <div className="p-6 space-y-6">
             <div>
-              <label htmlFor="salaireBrut" className="block text-sm font-medium text-gray-700 mb-2">
-                Salaire brut mensuel (MAD)
+              <label htmlFor="grossSalary" className="block text-sm font-medium text-gray-700 mb-2">
+                Monthly Gross Salary (KES)
               </label>
               <input
                 type="number"
-                id="salaireBrut"
-                value={salaireBrut}
-                onChange={(e) => setSalaireBrut(Number(e.target.value))}
+                id="grossSalary"
+                value={grossSalary}
+                onChange={(e) => setGrossSalary(Number(e.target.value))}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                 min="0"
                 step="100"
@@ -236,30 +237,30 @@ function HousingCreditContent() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="situationFamiliale" className="block text-sm font-medium text-gray-700 mb-2">
-                  Situation familiale
+                <label htmlFor="familyStatus" className="block text-sm font-medium text-gray-700 mb-2">
+                  Family Status
                 </label>
                 <select
-                  id="situationFamiliale"
-                  value={situationFamiliale}
-                  onChange={(e) => setSituationFamiliale(e.target.value)}
+                  id="familyStatus"
+                  value={familyStatus}
+                  onChange={(e) => setFamilyStatus(e.target.value)}
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                 >
-                  <option value="celibataire">Célibataire</option>
-                  <option value="marie">Marié(e)</option>
-                  <option value="divorce">Divorcé(e)</option>
-                  <option value="veuf">Veuf/Veuve</option>
+                  <option value="single">Single</option>
+                  <option value="married">Married</option>
+                  <option value="divorced">Divorced</option>
+                  <option value="widowed">Widowed</option>
                 </select>
               </div>
               <div>
-                <label htmlFor="nombreEnfants" className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre d'enfants
+                <label htmlFor="numberOfDependants" className="block text-sm font-medium text-gray-700 mb-2">
+                  Number of Dependants
                 </label>
                 <input
                   type="number"
-                  id="nombreEnfants"
-                  value={nombreEnfants}
-                  onChange={(e) => setNombreEnfants(Number(e.target.value))}
+                  id="numberOfDependants"
+                  value={numberOfDependants}
+                  onChange={(e) => setNumberOfDependants(Number(e.target.value))}
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="0"
                   max="10"
@@ -269,28 +270,28 @@ function HousingCreditContent() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="fraisProfessionnels" className="block text-sm font-medium text-gray-700 mb-2">
-                  Frais professionnels (MAD)
+                <label htmlFor="professionalExpenses" className="block text-sm font-medium text-gray-700 mb-2">
+                  Professional Expenses (KES)
                 </label>
                 <input
                   type="number"
-                  id="fraisProfessionnels"
-                  value={fraisProfessionnels}
-                  onChange={(e) => setFraisProfessionnels(Number(e.target.value))}
+                  id="professionalExpenses"
+                  value={professionalExpenses}
+                  onChange={(e) => setProfessionalExpenses(Number(e.target.value))}
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="0"
                   step="50"
                 />
               </div>
               <div>
-                <label htmlFor="autresDeductions" className="block text-sm font-medium text-gray-700 mb-2">
-                  Autres déductions (MAD)
+                <label htmlFor="otherDeductions" className="block text-sm font-medium text-gray-700 mb-2">
+                  Other Deductions (KES)
                 </label>
                 <input
                   type="number"
-                  id="autresDeductions"
-                  value={autresDeductions}
-                  onChange={(e) => setAutresDeductions(Number(e.target.value))}
+                  id="otherDeductions"
+                  value={otherDeductions}
+                  onChange={(e) => setOtherDeductions(Number(e.target.value))}
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="0"
                   step="50"
@@ -300,37 +301,37 @@ function HousingCreditContent() {
           </div>
         </div>
 
-        {/* Paramètres du crédit */}
+        {/* Loan Parameters */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Paramètres du crédit</h3>
+            <h3 className="text-lg font-medium text-gray-900">Loan Parameters</h3>
           </div>
           <div className="p-6 space-y-6">
             <div>
-              <label htmlFor="typeLogement" className="block text-sm font-medium text-gray-700 mb-2">
-                Type de logement
+              <label htmlFor="housingType" className="block text-sm font-medium text-gray-700 mb-2">
+                Housing Type
               </label>
               <select
-                id="typeLogement"
-                value={typeLogement}
-                onChange={(e) => setTypeLogement(e.target.value)}
+                id="housingType"
+                value={housingType}
+                onChange={(e) => setHousingType(e.target.value)}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
               >
-                <option value="principal">Résidence principale</option>
-                <option value="social">Logement social</option>
-                <option value="secondaire">Résidence secondaire</option>
+                <option value="primary">Primary Residence</option>
+                <option value="affordable">Affordable Housing</option>
+                <option value="secondary">Secondary Residence</option>
               </select>
             </div>
 
             <div>
-              <label htmlFor="montantCredit" className="block text-sm font-medium text-gray-700 mb-2">
-                Montant du crédit (MAD)
+              <label htmlFor="loanAmount" className="block text-sm font-medium text-gray-700 mb-2">
+                Loan Amount (KES)
               </label>
               <input
                 type="number"
-                id="montantCredit"
-                value={montantCredit}
-                onChange={(e) => setMontantCredit(Number(e.target.value))}
+                id="loanAmount"
+                value={loanAmount}
+                onChange={(e) => setLoanAmount(Number(e.target.value))}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                 min="0"
                 step="10000"
@@ -339,28 +340,28 @@ function HousingCreditContent() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="dureeCredit" className="block text-sm font-medium text-gray-700 mb-2">
-                  Durée (années)
+                <label htmlFor="loanTerm" className="block text-sm font-medium text-gray-700 mb-2">
+                  Loan Term (Years)
                 </label>
                 <input
                   type="number"
-                  id="dureeCredit"
-                  value={dureeCredit}
-                  onChange={(e) => setDureeCredit(Number(e.target.value))}
+                  id="loanTerm"
+                  value={loanTerm}
+                  onChange={(e) => setLoanTerm(Number(e.target.value))}
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="1"
                   max="30"
                 />
               </div>
               <div>
-                <label htmlFor="tauxInteret" className="block text-sm font-medium text-gray-700 mb-2">
-                  Taux d'intérêt (%)
+                <label htmlFor="interestRate" className="block text-sm font-medium text-gray-700 mb-2">
+                  Interest Rate (%)
                 </label>
                 <input
                   type="number"
-                  id="tauxInteret"
-                  value={tauxInteret}
-                  onChange={(e) => setTauxInteret(Number(e.target.value))}
+                  id="interestRate"
+                  value={interestRate}
+                  onChange={(e) => setInterestRate(Number(e.target.value))}
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="0"
                   max="15"
@@ -371,21 +372,21 @@ function HousingCreditContent() {
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label htmlFor="mensualiteCredit" className="block text-sm font-medium text-gray-700">
-                  Mensualité (MAD)
+                <label htmlFor="monthlyRepayment" className="block text-sm font-medium text-gray-700">
+                  Monthly Repayment (KES)
                 </label>
                 <button
-                  onClick={calculateMensualite}
+                  onClick={calculateMonthlyRepayment}
                   className="text-xs text-orange-600 hover:text-orange-800 font-medium"
                 >
-                  Calculer
+                  Calculate
                 </button>
               </div>
               <input
                 type="number"
-                id="mensualiteCredit"
-                value={mensualiteCredit}
-                onChange={(e) => setMensualiteCredit(Number(e.target.value))}
+                id="monthlyRepayment"
+                value={monthlyRepayment}
+                onChange={(e) => setMonthlyRepayment(Number(e.target.value))}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                 min="0"
                 step="10"
@@ -395,20 +396,20 @@ function HousingCreditContent() {
         </div>
       </div>
 
-      {/* Résultats */}
+      {/* Results */}
       {loading ? (
         <div className="bg-white shadow rounded-lg p-8">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
-            <p className="mt-2 text-sm text-gray-500">Calcul de l'impact en cours...</p>
+            <p className="mt-2 text-sm text-gray-500">Calculating impact...</p>
           </div>
         </div>
       ) : results ? (
         <div className="space-y-6">
-          {/* Impact principal */}
+          {/* Housing Loan Impact */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Impact du crédit logement</h3>
+              <h3 className="text-lg font-medium text-gray-900">Housing Loan Impact</h3>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -417,9 +418,9 @@ function HousingCreditContent() {
                     <TrendingUp className="h-8 w-8 text-green-600" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(results.economie.igrMensuel)}
+                    {formatCurrency(results.savings.monthlyPaye)}
                   </div>
-                  <div className="text-sm text-gray-600">Économie IGR/mois</div>
+                  <div className="text-sm text-gray-600">Monthly PAYE Savings</div>
                 </div>
 
                 <div className="text-center p-6 bg-blue-50 rounded-lg border border-blue-200">
@@ -427,9 +428,9 @@ function HousingCreditContent() {
                     <Calculator className="h-8 w-8 text-blue-600" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(results.economie.igrAnnuel)}
+                    {formatCurrency(results.savings.annualPaye)}
                   </div>
-                  <div className="text-sm text-gray-600">Économie IGR/an</div>
+                  <div className="text-sm text-gray-600">Annual PAYE Savings</div>
                 </div>
 
                 <div className="text-center p-6 bg-orange-50 rounded-lg border border-orange-200">
@@ -437,9 +438,9 @@ function HousingCreditContent() {
                     <Home className="h-8 w-8 text-orange-600" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900">
-                    {formatPercentage(results.tauxEffectif)}
+                    {formatPercentage(results.effectiveRate)}
                   </div>
-                  <div className="text-sm text-gray-600">Taux effectif</div>
+                  <div className="text-sm text-gray-600">Effective Rate</div>
                 </div>
 
                 <div className="text-center p-6 bg-purple-50 rounded-lg border border-purple-200">
@@ -447,18 +448,18 @@ function HousingCreditContent() {
                     <TrendingUp className="h-8 w-8 text-purple-600" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(results.restePourVivre)}
+                    {formatCurrency(results.disposableIncome)}
                   </div>
-                  <div className="text-sm text-gray-600">Reste pour vivre</div>
+                  <div className="text-sm text-gray-600">Disposable Income</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Comparaison avec/sans crédit */}
+          {/* Comparison With/Without Loan */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Comparaison avec/sans crédit</h3>
+              <h3 className="text-lg font-medium text-gray-900">Comparison With/Without Loan</h3>
             </div>
             <div className="p-6">
               <div className="overflow-x-auto">
@@ -466,29 +467,29 @@ function HousingCreditContent() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Élément
+                        Item
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Sans crédit
+                        Without Loan
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Avec crédit
+                        With Loan
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Différence
+                        Difference
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     <tr>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        Salaire brut
+                        Gross Salary
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatCurrency(results.sansCredit.salaireBrut)}
+                        {formatCurrency(results.withoutLoan.grossSalary)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatCurrency(results.avecCredit.salaireBrut)}
+                        {formatCurrency(results.withLoan.grossSalary)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         -
@@ -496,44 +497,44 @@ function HousingCreditContent() {
                     </tr>
                     <tr>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        Déduction crédit logement
+                        Mortgage Interest Relief
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatCurrency(0)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600">
-                        -{formatCurrency(results.deductionMensuelle)}
+                        -{formatCurrency(results.monthlyRelief)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                        +{formatCurrency(results.deductionMensuelle)}
+                        +{formatCurrency(results.monthlyRelief)}
                       </td>
                     </tr>
                     <tr>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        IGR mensuel
+                        Monthly PAYE
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatCurrency(results.sansCredit.igr)}
+                        {formatCurrency(results.withoutLoan.paye)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatCurrency(results.avecCredit.igr)}
+                        {formatCurrency(results.withLoan.paye)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                        -{formatCurrency(results.economie.igrMensuel)}
+                        -{formatCurrency(results.savings.monthlyPaye)}
                       </td>
                     </tr>
                     <tr className="bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                        Salaire net
+                        Net Salary
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {formatCurrency(results.sansCredit.salaireNet)}
+                        {formatCurrency(results.withoutLoan.netSalary)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {formatCurrency(results.avecCredit.salaireNet)}
+                        {formatCurrency(results.withLoan.netSalary)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
-                        +{formatCurrency(results.economie.salaireNetMensuel)}
+                        +{formatCurrency(results.savings.monthlyNetSalary)}
                       </td>
                     </tr>
                   </tbody>
@@ -542,49 +543,49 @@ function HousingCreditContent() {
             </div>
           </div>
 
-          {/* Analyse financière */}
+          {/* Loan Financial Analysis */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Analyse financière du crédit</h3>
+              <h3 className="text-lg font-medium text-gray-900">Loan Financial Analysis</h3>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h4 className="text-sm font-medium text-gray-700">Coûts du crédit</h4>
+                  <h4 className="text-sm font-medium text-gray-700">Loan Costs</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Capital emprunté</span>
-                      <span className="text-sm font-medium">{formatCurrency(montantCredit)}</span>
+                      <span className="text-sm text-gray-600">Loan Amount</span>
+                      <span className="text-sm font-medium">{formatCurrency(loanAmount)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Coût total du crédit</span>
-                      <span className="text-sm font-medium">{formatCurrency(results.coutTotalCredit)}</span>
+                      <span className="text-sm text-gray-600">Total Loan Cost</span>
+                      <span className="text-sm font-medium">{formatCurrency(results.totalLoanCost)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Intérêts totaux</span>
-                      <span className="text-sm text-red-600">{formatCurrency(results.interetsTotal)}</span>
+                      <span className="text-sm text-gray-600">Total Interest</span>
+                      <span className="text-sm text-red-600">{formatCurrency(results.totalInterest)}</span>
                     </div>
                     <div className="flex justify-between border-t pt-2">
-                      <span className="text-sm font-medium text-gray-700">Coût réel (après économie IGR)</span>
-                      <span className="text-sm font-bold text-gray-900">{formatCurrency(results.coutReel)}</span>
+                      <span className="text-sm font-medium text-gray-700">Actual Cost (After PAYE Savings)</span>
+                      <span className="text-sm font-bold text-gray-900">{formatCurrency(results.actualCost)}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-sm font-medium text-gray-700">Économies fiscales</h4>
+                  <h4 className="text-sm font-medium text-gray-700">Tax Savings</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Économie IGR annuelle</span>
-                      <span className="text-sm font-medium text-green-600">{formatCurrency(results.economie.igrAnnuel)}</span>
+                      <span className="text-sm text-gray-600">Annual PAYE Savings</span>
+                      <span className="text-sm font-medium text-green-600">{formatCurrency(results.savings.annualPaye)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Économie IGR totale</span>
-                      <span className="text-sm font-medium text-green-600">{formatCurrency(results.economieIGRTotale)}</span>
+                      <span className="text-sm text-gray-600">Total PAYE Savings</span>
+                      <span className="text-sm font-medium text-green-600">{formatCurrency(results.totalPayeSavings)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Capacité de remboursement</span>
-                      <span className="text-sm font-medium">{formatPercentage(results.capaciteRemboursement)}</span>
+                      <span className="text-sm text-gray-600">Repayment Capacity</span>
+                      <span className="text-sm font-medium">{formatPercentage(results.repaymentCapacity)}</span>
                     </div>
                   </div>
                 </div>
@@ -592,10 +593,10 @@ function HousingCreditContent() {
             </div>
           </div>
 
-          {/* Recommandations */}
+          {/* Recommendations */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Recommandations</h3>
+              <h3 className="text-lg font-medium text-gray-900">Recommendations</h3>
             </div>
             <div className="p-6">
               <div className="space-y-4">
@@ -603,24 +604,24 @@ function HousingCreditContent() {
                   <div className="flex items-start">
                     <Info className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
                     <div className="text-sm text-blue-800">
-                      <p className="font-medium mb-1">Avantages fiscaux :</p>
+                      <p className="font-medium mb-1">Tax Benefits:</p>
                       <ul className="space-y-1 text-xs">
-                        <li>• Déduction des intérêts d'emprunt pour résidence principale</li>
-                        <li>• Plafond de déduction : 10% du revenu imposable</li>
-                        <li>• Économie d'impôt significative sur la durée du crédit</li>
-                        <li>• Réduction du taux effectif du crédit</li>
+                        <li>• Mortgage interest relief for primary residence</li>
+                        <li>• Relief cap: 9,000 KES/month for primary residence</li>
+                        <li>• Significant tax savings over the loan term</li>
+                        <li>• Reduction in effective loan rate</li>
                       </ul>
                     </div>
                   </div>
                 </div>
 
-                {results.capaciteRemboursement > 33 && (
+                {results.repaymentCapacity < 33 && (
                   <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                     <div className="flex items-start">
                       <Info className="h-5 w-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" />
                       <div className="text-sm text-yellow-800">
-                        <p className="font-medium mb-1">Attention :</p>
-                        <p>Le taux d'endettement dépasse 33%. Il est recommandé de revoir les paramètres du crédit.</p>
+                        <p className="font-medium mb-1">Warning:</p>
+                        <p>The debt-to-income ratio exceeds 33%. Consider revising the loan parameters.</p>
                       </div>
                     </div>
                   </div>
@@ -630,8 +631,8 @@ function HousingCreditContent() {
                   <div className="flex items-start">
                     <TrendingUp className="h-5 w-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" />
                     <div className="text-sm text-green-800">
-                      <p className="font-medium mb-1">Optimisation :</p>
-                      <p>Avec ce crédit logement, vous économisez <strong>{formatCurrency(results.economie.igrAnnuel)}</strong> par an en impôts, soit un taux effectif de <strong>{formatPercentage(results.tauxEffectif)}</strong>.</p>
+                      <p className="font-medium mb-1">Optimization:</p>
+                      <p>With this housing loan, you save <strong>{formatCurrency(results.savings.annualPaye)}</strong> per year in taxes, with an effective rate of <strong>{formatPercentage(results.effectiveRate)}</strong>.</p>
                     </div>
                   </div>
                 </div>

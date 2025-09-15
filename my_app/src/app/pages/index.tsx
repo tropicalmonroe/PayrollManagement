@@ -7,8 +7,8 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Gestion de Paie - AD Capital</title>
-        <meta name="description" content="Application de gestion de paie" />
+        <title>Payroll Management - AD Capital</title>
+        <meta name="description" content="Payroll management application" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -21,13 +21,13 @@ export default function Home() {
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <h1 className="text-2xl font-bold text-gray-900">
-                    Gestion de Paie
+                    Payroll Management
                   </h1>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-500">
-                  Application dédiée à la gestion de paie
+                  Dedicated payroll management application
                 </span>
               </div>
             </div>
@@ -39,12 +39,12 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex space-x-8">
               {[
-                { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
-                { id: 'employees', label: 'Employés', icon: '👥' },
-                { id: 'payroll', label: 'Calcul de paie', icon: '💰' },
+                { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+                { id: 'employees', label: 'Employees', icon: '👥' },
+                { id: 'payroll', label: 'Payroll Calculation', icon: '💰' },
                 { id: 'documents', label: 'Documents', icon: '📄' },
-                { id: 'reports', label: 'Rapports', icon: '📈' },
-                { id: 'settings', label: 'Paramètres', icon: '⚙️' }
+                { id: 'reports', label: 'Reports', icon: '📈' },
+                { id: 'settings', label: 'Settings', icon: '⚙️' }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -83,19 +83,19 @@ function DashboardContent() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Tableau de bord</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
         <p className="mt-1 text-sm text-gray-600">
-          Vue d'ensemble de la gestion de paie
+          Overview of payroll management
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { title: 'Employés actifs', value: '0', icon: '👥', color: 'blue' },
-          { title: 'Paies du mois', value: '0', icon: '💰', color: 'green' },
-          { title: 'Documents générés', value: '0', icon: '📄', color: 'purple' },
-          { title: 'Montant total', value: '0 MAD', icon: '💵', color: 'yellow' }
+          { title: 'Active Employees', value: '0', icon: '👥', color: 'blue' },
+          { title: 'This Month Payrolls', value: '0', icon: '💰', color: 'green' },
+          { title: 'Generated Documents', value: '0', icon: '📄', color: 'purple' },
+          { title: 'Total Amount', value: '0 KES', icon: '💵', color: 'yellow' }
         ].map((stat, index) => (
           <div key={index} className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-5">
@@ -123,13 +123,13 @@ function DashboardContent() {
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Actions rapides
+            Quick Actions
           </h3>
           <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { title: 'Ajouter un employé', description: 'Créer une nouvelle fiche employé', icon: '➕' },
-              { title: 'Calculer la paie', description: 'Lancer le calcul de paie mensuel', icon: '🧮' },
-              { title: 'Générer les bulletins', description: 'Créer les bulletins de paie', icon: '📋' }
+              { title: 'Add Employee', description: 'Create a new employee record', icon: '➕' },
+              { title: 'Calculate Payroll', description: 'Run monthly payroll calculation', icon: '🧮' },
+              { title: 'Generate Payslips', description: 'Create payroll slips', icon: '📋' }
             ].map((action, index) => (
               <div key={index} className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300">
                 <div>
@@ -162,13 +162,13 @@ function EmployeesContent() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Gestion des employés</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
           <p className="mt-1 text-sm text-gray-600">
-            Gérez les informations des employés
+            Manage employee information
           </p>
         </div>
         <button className="payroll-button">
-          Ajouter un employé
+          Add Employee
         </button>
       </div>
 
@@ -176,13 +176,13 @@ function EmployeesContent() {
         <div className="px-4 py-5 sm:p-6">
           <div className="text-center py-12">
             <span className="text-6xl">👥</span>
-            <h3 className="mt-4 text-lg font-medium text-gray-900">Aucun employé</h3>
+            <h3 className="mt-4 text-lg font-medium text-gray-900">No Employees</h3>
             <p className="mt-2 text-sm text-gray-500">
-              Commencez par ajouter votre premier employé
+              Start by adding your first employee
             </p>
             <div className="mt-6">
               <button className="payroll-button">
-                Ajouter un employé
+                Add Employee
               </button>
             </div>
           </div>
@@ -196,9 +196,9 @@ function PayrollContent() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Calcul de paie</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Payroll Calculation</h2>
         <p className="mt-1 text-sm text-gray-600">
-          Calculez et gérez les paies des employés
+          Calculate and manage employee payroll
         </p>
       </div>
 
@@ -206,9 +206,9 @@ function PayrollContent() {
         <div className="px-4 py-5 sm:p-6">
           <div className="text-center py-12">
             <span className="text-6xl">💰</span>
-            <h3 className="mt-4 text-lg font-medium text-gray-900">Calcul de paie</h3>
+            <h3 className="mt-4 text-lg font-medium text-gray-900">Payroll Calculation</h3>
             <p className="mt-2 text-sm text-gray-500">
-              Fonctionnalité de calcul de paie disponible prochainement
+              Payroll calculation feature coming soon
             </p>
           </div>
         </div>
@@ -223,7 +223,7 @@ function DocumentsContent() {
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Documents</h2>
         <p className="mt-1 text-sm text-gray-600">
-          Gérez les documents de paie
+          Manage payroll documents
         </p>
       </div>
 
@@ -231,9 +231,9 @@ function DocumentsContent() {
         <div className="px-4 py-5 sm:p-6">
           <div className="text-center py-12">
             <span className="text-6xl">📄</span>
-            <h3 className="mt-4 text-lg font-medium text-gray-900">Aucun document</h3>
+            <h3 className="mt-4 text-lg font-medium text-gray-900">No Documents</h3>
             <p className="mt-2 text-sm text-gray-500">
-              Les documents générés apparaîtront ici
+              Generated documents will appear here
             </p>
           </div>
         </div>
@@ -246,9 +246,9 @@ function ReportsContent() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Rapports</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Reports</h2>
         <p className="mt-1 text-sm text-gray-600">
-          Consultez les rapports de paie
+          View payroll reports
         </p>
       </div>
 
@@ -256,9 +256,9 @@ function ReportsContent() {
         <div className="px-4 py-5 sm:p-6">
           <div className="text-center py-12">
             <span className="text-6xl">📈</span>
-            <h3 className="mt-4 text-lg font-medium text-gray-900">Aucun rapport</h3>
+            <h3 className="mt-4 text-lg font-medium text-gray-900">No Reports</h3>
             <p className="mt-2 text-sm text-gray-500">
-              Les rapports seront disponibles après le calcul des paies
+              Reports will be available after payroll calculations
             </p>
           </div>
         </div>
@@ -271,9 +271,9 @@ function SettingsContent() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Paramètres</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
         <p className="mt-1 text-sm text-gray-600">
-          Configurez les paramètres de l'application
+          Configure application settings
         </p>
       </div>
 
@@ -282,31 +282,31 @@ function SettingsContent() {
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Informations de l'entreprise
+              Company Information
             </h3>
             <div className="mt-5 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Nom de l'entreprise
+                  Company Name
                 </label>
                 <input
                   type="text"
                   className="payroll-input mt-1"
-                  placeholder="Nom de votre entreprise"
+                  placeholder="Your company name"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Adresse
+                  Address
                 </label>
                 <textarea
                   className="payroll-input mt-1"
                   rows={3}
-                  placeholder="Adresse de l'entreprise"
+                  placeholder="Company address"
                 />
               </div>
               <button className="payroll-button">
-                Sauvegarder
+                Save
               </button>
             </div>
           </div>
@@ -316,32 +316,32 @@ function SettingsContent() {
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Paramètres de paie
+              Payroll Settings
             </h3>
             <div className="mt-5 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Taux CNSS (%)
+                  NSSF Rate (%)
                 </label>
                 <input
                   type="number"
                   step="0.01"
                   className="payroll-input mt-1"
-                  defaultValue="4.48"
+                  defaultValue="6.00"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Plafond CNSS (MAD)
+                  NSSF Ceiling (KES)
                 </label>
                 <input
                   type="number"
                   className="payroll-input mt-1"
-                  defaultValue="6000"
+                  defaultValue="4320"
                 />
               </div>
               <button className="payroll-button">
-                Sauvegarder
+                Save
               </button>
             </div>
           </div>

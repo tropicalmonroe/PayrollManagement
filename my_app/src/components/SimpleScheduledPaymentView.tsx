@@ -1,89 +1,87 @@
-"use client"
-
 import React, { useState, useEffect } from 'react';
-import { 
-Calendar, 
-CheckCircle, 
-Clock, 
-AlertTriangle, 
+import {
+Calendar,
+CheckCircle,
+Clock,
+AlertTriangle,
 DollarSign,
 Calculator,
 TrendingUp,
 FileText,
 CreditCard,
-Banknote
+Banknote,
 } from 'lucide-react';
 
-interface SimpleEcheance {
-numeroEcheance: number;
-dateEcheance: Date;
-mensualiteTTC: number;
-amortissement: number;
-interetsHT: number;
-tvaInterets: number;
-assurance: number;
-capitalRestant: number;
-statut: 'EN_ATTENTE' | 'PAYEE' | 'EN_RETARD' | 'ANNULEE';
+interface SimpleInstallment {
+installmentNumber: number;
+dueDate: Date;
+totalMonthlyPayment: number;
+principal: number;
+interestBeforeTax: number;
+interestTax: number;
+insurance: number;
+remainingBalance: number;
+status: 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
 }
 
-interface EcheancierStats {
-totalEcheances: number;
-echeancesPayees: number;
-echeancesEnRetard: number;
-montantTotalPaye: number;
-montantTotalRestant: number;
-prochainePaiement?: SimpleEcheance;
-progressionPourcentage: number;
+interface ScheduleStats {
+totalInstallments: number;
+paidInstallments: number;
+overdueInstallments: number;
+totalAmountPaid: number;
+totalAmountRemaining: number;
+nextPayment?: SimpleInstallment;
+progressPercentage: number;
 }
 
-interface SimpleEcheancierViewProps {
+interface SimpleLoanScheduleViewProps {
 creditId: string;
 employeeId: string;
 isOpen: boolean;
 onClose: () => void;
-onGenerateEcheancier?: () => void;
+onGenerateSchedule?: () => void;
 }
 
-const SimpleEcheancierView: React.FC<SimpleEcheancierViewProps> = ({
+const SimpleLoanScheduleView: React.FC<SimpleLoanScheduleViewProps> = ({
 creditId,
 employeeId,
 isOpen,
 onClose,
-onGenerateEcheancier
+onGenerateSchedule,
 }) => {
-const [echeancier, setEcheancier] = useState<SimpleEcheance[]>([]);
-const [stats, setStats] = useState<EcheancierStats | null>(null);
+const [installments, setInstallments] = useState<SimpleInstallment[]>([]);
+const [stats, setStats] = useState<ScheduleStats | null>(null);
 const [loading, setLoading] = useState(true);
 const [generating, setGenerating] = useState(false);
 const [payrollCalculating, setPayrollCalculating] = useState(false);
 
 useEffect(() => {
     if (isOpen && creditId) {
-    fetchEcheancier();
+    fetchSchedule();
     }
 }, [isOpen, creditId]);
 
-const fetchEcheancier = async () => {
+const fetchSchedule = async () => {
     try {
     setLoading(true);
     const response = await fetch(`/api/credits/${creditId}/echeancier`);
     if (response.ok) {
         const data = await response.json();
-        setEcheancier(data.echeancier || []);
+        setInstallments(data.echeancier || []); // API field name unchanged
         setStats(data.stats);
     } else if (response.status === 404) {
-        // Échéancier n'existe pas encore
-        setEcheancier([]);
+        // Schedule does not exist yet
+        setInstallments([]);
         setStats(null);
     }
     } catch (error) {
-    console.error('Erreur lors du chargement de l\'échéancier:', error);
+    console.error('Error loading loan schedule:', error);
     } finally {
     setLoading(false);
     }
 };
 
-const handleGenerateEcheancier = async () => {
+const handleGenerateSchedule = async () => {
     try {
     setGenerating(true);
     const response = await fetch('/api/credits/generate-echeancier', {
@@ -96,18 +94,18 @@ const handleGenerateEcheancier = async () => {
 
     if (response.ok) {
         const data = await response.json();
-        alert(`Échéancier généré avec succès! ${data.totalEcheances} échéances créées.`);
-        await fetchEcheancier(); // Recharger les données
-        if (onGenerateEcheancier) {
-        onGenerateEcheancier();
+        alert(`Loan schedule generated successfully! ${data.totalEcheances} installments created.`);
+        await fetchSchedule(); // Reload data
+        if (onGenerateSchedule) {
+        onGenerateSchedule();
         }
     } else {
         const error = await response.json();
-        alert(`Erreur: ${error.error}`);
+        alert(`Error: ${error.error}`);
     }
     } catch (error) {
-    console.error('Erreur lors de la génération:', error);
-    alert('Erreur lors de la génération de l\'échéancier');
+    console.error('Error generating schedule:', error);
+    alert('Error generating loan schedule');
     } finally {
     setGenerating(false);
     }
@@ -117,75 +115,79 @@ const handleCalculatePayroll = async () => {
     try {
     setPayrollCalculating(true);
     const currentDate = new Date();
-    const mois = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-    const annee = currentDate.getFullYear().toString();
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+    const year = currentDate.getFullYear().toString();
 
     const response = await fetch('/api/payroll/calculate-with-credits', {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-        employeeId, 
-        mois, 
-        annee 
+        body: JSON.stringify({
+        employeeId,
+        month,
+        year,
         }),
     });
 
     if (response.ok) {
         const data = await response.json();
-        alert(`Paie calculée avec succès! Salaire net: ${formatCurrency(data.resume.salaireNetAPayer)}`);
+        alert(`Payroll calculated successfully! Net salary: ${formatCurrency(data.resume.netSalaryPayable)}`);
     } else {
         const error = await response.json();
-        alert(`Erreur: ${error.error}`);
+        alert(`Error: ${error.error}`);
     }
     } catch (error) {
-    console.error('Erreur lors du calcul de paie:', error);
-    alert('Erreur lors du calcul de paie');
+    console.error('Error calculating payroll:', error);
+    alert('Error calculating payroll');
     } finally {
     setPayrollCalculating(false);
     }
 };
 
 const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
     style: 'currency',
-    currency: 'MAD'
+    currency: 'KES',
     }).format(amount);
 };
 
 const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString('fr-FR');
+    return new Intl.DateTimeFormat('en-KE', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    }).format(new Date(date));
 };
 
-const getStatusBadge = (statut: string, dateEcheance: Date) => {
+const getStatusBadge = (status: string, dueDate: Date) => {
     const now = new Date();
-    const echeanceDate = new Date(dateEcheance);
-    
+    const dueDateObj = new Date(dueDate);
+
     let color = '';
     let icon = Clock;
     let text = '';
 
-    if (statut === 'PAYEE') {
+    if (status === 'PAID') {
     color = 'bg-green-100 text-green-800';
     icon = CheckCircle;
-    text = 'Payée';
-    } else if (statut === 'EN_ATTENTE' && echeanceDate < now) {
+    text = 'Paid';
+    } else if (status === 'PENDING' && dueDateObj < now) {
     color = 'bg-red-100 text-red-800';
     icon = AlertTriangle;
-    text = 'En retard';
-    } else if (statut === 'EN_ATTENTE') {
+    text = 'Overdue';
+    } else if (status === 'PENDING') {
     color = 'bg-yellow-100 text-yellow-800';
     icon = Clock;
-    text = 'En attente';
-    } else if (statut === 'ANNULEE') {
+    text = 'Pending';
+    } else if (status === 'CANCELLED') {
     color = 'bg-gray-100 text-gray-800';
     icon = Clock;
-    text = 'Annulée';
+    text = 'Cancelled';
     }
 
     const Icon = icon;
-    
+
     return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color}`}>
         <Icon className="w-3 h-3 mr-1" />
@@ -204,30 +206,30 @@ return (
         <div className="flex items-center">
             <Calendar className="w-6 h-6 text-[#0063b4] mr-3" />
             <h2 className="text-xl font-semibold text-gray-900">
-            Échéancier Simple du Crédit
+            Simple Loan Repayment Schedule
             </h2>
         </div>
         <div className="flex items-center space-x-3">
-            {echeancier.length === 0 && (
+            {installments.length === 0 && (
             <button
-                onClick={handleGenerateEcheancier}
+                onClick={handleGenerateSchedule}
                 disabled={generating}
                 className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 disabled:opacity-50"
             >
                 {generating ? (
                 <div className="flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Génération...
+                    Generating...
                 </div>
                 ) : (
                 <div className="flex items-center">
                     <Calculator className="w-4 h-4 mr-2" />
-                    Générer l'Échéancier
+                    Generate Schedule
                 </div>
                 )}
             </button>
             )}
-            {echeancier.length > 0 && (
+            {installments.length > 0 && (
             <button
                 onClick={handleCalculatePayroll}
                 disabled={payrollCalculating}
@@ -236,12 +238,12 @@ return (
                 {payrollCalculating ? (
                 <div className="flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Calcul...
+                    Calculating...
                 </div>
                 ) : (
                 <div className="flex items-center">
                     <Banknote className="w-4 h-4 mr-2" />
-                    Calculer Paie
+                    Calculate Payroll
                 </div>
                 )}
             </button>
@@ -261,13 +263,13 @@ return (
         <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0063b4]"></div>
         </div>
-        ) : echeancier.length === 0 ? (
+        ) : installments.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-gray-500">
             <FileText className="w-12 h-12 mb-4" />
-            <h3 className="text-lg font-medium mb-2">Aucun échéancier trouvé</h3>
+            <h3 className="text-lg font-medium mb-2">No Schedule Found</h3>
             <p className="text-sm text-center mb-4">
-            Cliquez sur "Générer l'Échéancier" pour créer automatiquement<br />
-            l'échéancier de ce crédit avec intégration dans la paie.
+            Click "Generate Schedule" to automatically create<br />
+            the repayment schedule for this loan with payroll integration.
             </p>
         </div>
         ) : (
@@ -280,38 +282,38 @@ return (
                     <div className="flex items-center">
                     <CreditCard className="w-5 h-5 text-blue-600 mr-2" />
                     <div>
-                        <p className="text-sm text-blue-600 font-medium">Total Échéances</p>
-                        <p className="text-lg font-bold text-blue-800">{stats.totalEcheances}</p>
+                        <p className="text-sm text-blue-600 font-medium">Total Installments</p>
+                        <p className="text-lg font-bold text-blue-800">{stats.totalInstallments}</p>
                     </div>
                     </div>
                 </div>
-                
+
                 <div className="bg-green-50 p-4 rounded-lg">
                     <div className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
                     <div>
-                        <p className="text-sm text-green-600 font-medium">Payées</p>
-                        <p className="text-lg font-bold text-green-800">{stats.echeancesPayees}</p>
+                        <p className="text-sm text-green-600 font-medium">Paid</p>
+                        <p className="text-lg font-bold text-green-800">{stats.paidInstallments}</p>
                     </div>
                     </div>
                 </div>
-                
+
                 <div className="bg-red-50 p-4 rounded-lg">
                     <div className="flex items-center">
                     <AlertTriangle className="w-5 h-5 text-red-600 mr-2" />
                     <div>
-                        <p className="text-sm text-red-600 font-medium">En Retard</p>
-                        <p className="text-lg font-bold text-red-800">{stats.echeancesEnRetard}</p>
+                        <p className="text-sm text-red-600 font-medium">Overdue</p>
+                        <p className="text-lg font-bold text-red-800">{stats.overdueInstallments}</p>
                     </div>
                     </div>
                 </div>
-                
+
                 <div className="bg-purple-50 p-4 rounded-lg">
                     <div className="flex items-center">
                     <TrendingUp className="w-5 h-5 text-purple-600 mr-2" />
                     <div>
-                        <p className="text-sm text-purple-600 font-medium">Progression</p>
-                        <p className="text-lg font-bold text-purple-800">{stats.progressionPourcentage}%</p>
+                        <p className="text-sm text-purple-600 font-medium">Progress</p>
+                        <p className="text-lg font-bold text-purple-800">{stats.progressPercentage}%</p>
                     </div>
                     </div>
                 </div>
@@ -319,70 +321,70 @@ return (
             </div>
             )}
 
-            {/* Échéancier Table */}
+            {/* Installments Table */}
             <div className="flex-1 overflow-auto p-6">
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50 sticky top-0">
                     <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        N°
+                        No.
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date Échéance
+                        Due Date
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Mensualité TTC
+                        Total Monthly Payment
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Capital
+                        Principal
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Intérêts HT
+                        Interest (Excl. Tax)
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        TVA
+                        Tax
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Assurance
+                        Insurance
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Capital Restant
+                        Remaining Balance
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Statut
+                        Status
                     </th>
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                    {echeancier.map((echeance) => (
-                    <tr key={echeance.numeroEcheance} className="hover:bg-gray-50">
+                    {installments.map((installment) => (
+                    <tr key={installment.installmentNumber} className="hover:bg-gray-50">
                         <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                        {echeance.numeroEcheance}
+                        {installment.installmentNumber}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900">
-                        {formatDate(echeance.dateEcheance)}
+                        {formatDate(installment.dueDate)}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 text-right font-medium">
-                        {formatCurrency(echeance.mensualiteTTC)}
+                        {formatCurrency(installment.totalMonthlyPayment)}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                        {formatCurrency(echeance.amortissement)}
+                        {formatCurrency(installment.principal)}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                        {formatCurrency(echeance.interetsHT)}
+                        {formatCurrency(installment.interestBeforeTax)}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                        {formatCurrency(echeance.tvaInterets)}
+                        {formatCurrency(installment.interestTax)}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                        {formatCurrency(echeance.assurance)}
+                        {formatCurrency(installment.insurance)}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                        {formatCurrency(echeance.capitalRestant)}
+                        {formatCurrency(installment.remainingBalance)}
                         </td>
                         <td className="px-4 py-3 text-center">
-                        {getStatusBadge(echeance.statut, echeance.dateEcheance)}
+                        {getStatusBadge(installment.status, installment.dueDate)}
                         </td>
                     </tr>
                     ))}
@@ -397,4 +399,4 @@ return (
 );
 };
 
-export default SimpleEcheancierView;
+export default SimpleLoanScheduleView;

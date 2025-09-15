@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
-import { Employee } from '@prisma/client'
+import { Advance, Employee } from '@prisma/client'
 import { Layout } from '../../components/Layout'
 import EmployeeForm from '../../components/EmployeeForm'
 import EmployeeList from '../../components/EmployeeList'
@@ -8,6 +8,7 @@ import EmployeeDetails from '../../components/EmployeeDetails'
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<Employee[]>([])
+  const [advances, setAdvances] = useState<Advance[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
@@ -15,29 +16,45 @@ export default function EmployeesPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Charger les employés
+  // Load employees
   const fetchEmployees = async () => {
     try {
       setLoading(true)
       const response = await fetch('/api/employees')
       if (!response.ok) {
-        throw new Error('Erreur lors du chargement des employés')
+        throw new Error('Error loading employees')
       }
       const data = await response.json()
       setEmployees(data)
     } catch (error) {
       console.error('Error fetching employees:', error)
-      setError('Erreur lors du chargement des employés')
+      setError('Error loading employees')
     } finally {
       setLoading(false)
     }
-  }
+  };
+
+  // Load advances
+  const fetchAdvances = async () => {
+    try {
+      const response = await fetch('/api/advances');
+      if (response.ok) {
+        const data = await response.json();
+        setAdvances(data);
+      } else {
+        throw new Error('Error loading advances');
+      }
+    } catch (error) {
+      console.error('Error loading advances:', error);
+    }
+  };
 
   useEffect(() => {
-    fetchEmployees()
+    fetchEmployees();
+    fetchAdvances();
   }, [])
 
-  // Ajouter un employé
+  // Add an employee
   const handleAddEmployee = async (employeeData: any) => {
     try {
       const response = await fetch('/api/employees', {
@@ -50,7 +67,7 @@ export default function EmployeesPage() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Erreur lors de l\'ajout de l\'employé')
+        throw new Error(errorData.error || 'Error adding employee')
       }
 
       const newEmployee = await response.json()
@@ -64,7 +81,7 @@ export default function EmployeesPage() {
     }
   }
 
-  // Modifier un employé
+  // Edit an employee
   const handleEditEmployee = async (employeeData: any) => {
     if (!selectedEmployee) return
 
@@ -79,7 +96,7 @@ export default function EmployeesPage() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Erreur lors de la modification de l\'employé')
+        throw new Error(errorData.error || 'Error updating employee')
       }
 
       const updatedEmployee = await response.json()
@@ -98,9 +115,9 @@ export default function EmployeesPage() {
     }
   }
 
-  // Supprimer un employé
+  // Delete an employee
   const handleDeleteEmployee = async (employeeId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet employé ? Cette action est irréversible.')) {
+    if (!confirm('Are you sure you want to delete this employee? This action cannot be undone.')) {
       return
     }
 
@@ -111,7 +128,7 @@ export default function EmployeesPage() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Erreur lors de la suppression de l\'employé')
+        throw new Error(errorData.error || 'Error deleting employee')
       }
 
       setEmployees(prev => prev.filter(emp => emp.id !== employeeId))
@@ -122,27 +139,27 @@ export default function EmployeesPage() {
     }
   }
 
-  // Voir les détails d'un employé
+  // View employee details
   const handleViewEmployee = (employee: Employee) => {
     setSelectedEmployee(employee)
     setShowDetails(true)
   }
 
-  // Modifier un employé
+  // Edit an employee
   const handleEditClick = (employee: Employee) => {
     setSelectedEmployee(employee)
     setIsEditing(true)
     setShowForm(true)
   }
 
-  // Ouvrir le formulaire d'ajout
+  // Open add form
   const handleAddClick = () => {
     setSelectedEmployee(null)
     setIsEditing(false)
     setShowForm(true)
   }
 
-  // Fermer les modales
+  // Close modals
   const handleCloseForm = () => {
     setShowForm(false)
     setSelectedEmployee(null)
@@ -155,7 +172,7 @@ export default function EmployeesPage() {
     setSelectedEmployee(null)
   }
 
-  // Passer des détails à l'édition
+  // Switch from details to edit
   const handleEditFromDetails = () => {
     setShowDetails(false)
     setIsEditing(true)
@@ -166,8 +183,8 @@ export default function EmployeesPage() {
     return (
       <>
         <Head>
-          <title>Gestion des employés - AD Capital</title>
-          <meta name="description" content="Gérez les informations des employés" />
+          <title>Employee Management - AD Capital</title>
+          <meta name="description" content="Manage employee information" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
@@ -176,9 +193,9 @@ export default function EmployeesPage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Gestion des employés</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
                 <p className="mt-1 text-sm text-gray-600">
-                  Gérez les informations des employés
+                  Manage employee information
                 </p>
               </div>
             </div>
@@ -186,7 +203,7 @@ export default function EmployeesPage() {
               <div className="px-4 py-5 sm:p-6">
                 <div className="text-center py-12">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <p className="mt-2 text-sm text-gray-500">Chargement des employés...</p>
+                  <p className="mt-2 text-sm text-gray-500">Loading employees...</p>
                 </div>
               </div>
             </div>
@@ -199,8 +216,8 @@ export default function EmployeesPage() {
   return (
     <>
       <Head>
-        <title>Gestion des employés - AD Capital</title>
-        <meta name="description" content="Gérez les informations des employés" />
+        <title>Employee Management - AD Capital</title>
+        <meta name="description" content="Manage employee information" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -209,16 +226,16 @@ export default function EmployeesPage() {
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Gestion des employés</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
               <p className="mt-1 text-sm text-gray-600">
-                Gérez les informations des employés ({employees.length} employé{employees.length > 1 ? 's' : ''})
+                Manage employee information ({employees.length} employee{employees.length > 1 ? 's' : ''})
               </p>
             </div>
             <button 
               onClick={handleAddClick}
               className="payroll-button"
             >
-              Ajouter un employé
+              Add Employee
             </button>
           </div>
 
@@ -245,6 +262,7 @@ export default function EmployeesPage() {
 
           <EmployeeList
             employees={employees}
+            advances={advances}
             onEdit={handleEditClick}
             onDelete={handleDeleteEmployee}
             onView={handleViewEmployee}

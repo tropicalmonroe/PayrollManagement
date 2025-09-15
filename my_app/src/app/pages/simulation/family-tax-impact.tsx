@@ -8,8 +8,8 @@ export default function FamilyTaxImpact() {
   return (
     <>
       <Head>
-        <title>Impact Familial/Fiscal - Gestion de Paie AD Capital</title>
-        <meta name="description" content="Analysez l'impact des charges familiales sur la fiscalité" />
+        <title>Family and Tax Impact - AD Capital Payroll</title>
+        <meta name="description" content="Analyze the impact of family status on taxation" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -22,67 +22,60 @@ export default function FamilyTaxImpact() {
 }
 
 function FamilyTaxImpactContent() {
-  const [salaireBrut, setSalaireBrut] = useState<number>(15000);
-  const [situationActuelle, setSituationActuelle] = useState<string>('celibataire');
-  const [enfantsActuels, setEnfantsActuels] = useState<number>(0);
-  const [situationNouvelle, setSituationNouvelle] = useState<string>('marie');
-  const [enfantsNouveaux, setEnfantsNouveaux] = useState<number>(1);
-  const [fraisProfessionnels, setFraisProfessionnels] = useState<number>(0);
-  const [autresDeductions, setAutresDeductions] = useState<number>(0);
+  const [grossSalary, setGrossSalary] = useState<number>(20000); // Adjusted default to KES
+  const [currentStatus, setCurrentStatus] = useState<string>('single');
+  const [currentDependants, setCurrentDependants] = useState<number>(0);
+  const [newStatus, setNewStatus] = useState<string>('married');
+  const [newDependants, setNewDependants] = useState<number>(1);
+  const [professionalExpenses, setProfessionalExpenses] = useState<number>(0);
+  const [otherDeductions, setOtherDeductions] = useState<number>(0);
   const [comparison, setComparison] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     calculateComparison();
-  }, [salaireBrut, situationActuelle, enfantsActuels, situationNouvelle, enfantsNouveaux, fraisProfessionnels, autresDeductions]);
+  }, [grossSalary, currentStatus, currentDependants, newStatus, newDependants, professionalExpenses, otherDeductions]);
 
-  const calculateSalary = (situation: string, enfants: number) => {
-    const salaireImposable = salaireBrut - fraisProfessionnels;
-    const cotisationCNSS = Math.min(salaireBrut * 0.0448, 6000 * 0.0448);
-    const cotisationAMO = Math.min(salaireBrut * 0.0226, 6000 * 0.0226);
+  const calculateSalary = (status: string, dependants: number) => {
+    const taxableSalary = grossSalary - professionalExpenses;
+    const nssfContribution = Math.min(grossSalary * 0.06, 2160); // NSSF: 6%, capped at 2,160 KES
+    const shifContribution = 1700; // Approximated SHIF for typical salary range
+    const insuranceRelief = Math.min(shifContribution * 0.15, 5000); // 15% of NHIF, capped at 5,000 KES
     
-    let salaireNetImposable = salaireImposable - cotisationCNSS - cotisationAMO;
+    let netTaxableSalary = taxableSalary - nssfContribution - shifContribution;
     
-    // Déductions familiales
-    const deductionEpouse = situation === 'marie' ? 360 : 0;
-    const deductionEnfants = enfants * 300;
+    // Deductions: Kenyan personal relief (2,400 KES/month for all taxpayers)
+    const personalRelief = 2400;
+    netTaxableSalary -= personalRelief + otherDeductions;
     
-    salaireNetImposable -= deductionEpouse + deductionEnfants + autresDeductions;
+    // Calculate PAYE (2025 Kenyan tax brackets)
+    const annualTaxableSalary = Math.max(0, netTaxableSalary * 12);
+    let paye = 0;
     
-    // Calcul IGR
-    const salaireAnnuel = Math.max(0, salaireNetImposable * 12);
-    let igr = 0;
-    
-    if (salaireAnnuel > 30000) {
-      if (salaireAnnuel <= 50000) {
-        igr = (salaireAnnuel - 30000) * 0.10;
-      } else if (salaireAnnuel <= 60000) {
-        igr = 20000 * 0.10 + (salaireAnnuel - 50000) * 0.20;
-      } else if (salaireAnnuel <= 80000) {
-        igr = 20000 * 0.10 + 10000 * 0.20 + (salaireAnnuel - 60000) * 0.30;
-      } else if (salaireAnnuel <= 180000) {
-        igr = 20000 * 0.10 + 10000 * 0.20 + 20000 * 0.30 + (salaireAnnuel - 80000) * 0.34;
+    if (annualTaxableSalary > 288000) {
+      if (annualTaxableSalary <= 388000) {
+        paye = (annualTaxableSalary - 288000) * 0.25;
       } else {
-        igr = 20000 * 0.10 + 10000 * 0.20 + 20000 * 0.30 + 100000 * 0.34 + (salaireAnnuel - 180000) * 0.38;
+        paye = 100000 * 0.25 + (annualTaxableSalary - 388000) * 0.30;
       }
     }
-    
-    const igrMensuel = igr / 12;
-    const salaireNet = salaireBrut - cotisationCNSS - cotisationAMO - igrMensuel;
+    // Monthly PAYE
+    const monthlyPaye = paye / 12;
+    const netSalary = grossSalary - nssfContribution - shifContribution - monthlyPaye + insuranceRelief;
     
     return {
-      salaireBrut,
-      cotisationCNSS,
-      cotisationAMO,
-      totalCotisations: cotisationCNSS + cotisationAMO,
-      salaireImposable,
-      deductionEpouse,
-      deductionEnfants,
-      totalDeductions: deductionEpouse + deductionEnfants + autresDeductions,
-      salaireNetImposable: Math.max(0, salaireNetImposable),
-      igr: igrMensuel,
-      salaireNet,
-      tauxImposition: salaireImposable > 0 ? (igrMensuel / salaireImposable) * 100 : 0
+      grossSalary,
+      nssfContribution,
+      shifContribution,
+      totalContributions: nssfContribution + shifContribution,
+      taxableSalary,
+      personalRelief,
+      insuranceRelief,
+      totalDeductions: personalRelief + otherDeductions,
+      netTaxableSalary: Math.max(0, netTaxableSalary),
+      paye: monthlyPaye,
+      netSalary,
+      taxRate: taxableSalary > 0 ? (monthlyPaye / taxableSalary) * 100 : 0
     };
   };
 
@@ -90,21 +83,21 @@ function FamilyTaxImpactContent() {
     setLoading(true);
     
     setTimeout(() => {
-      const situationActuelleCalc = calculateSalary(situationActuelle, enfantsActuels);
-      const situationNouvelleCalc = calculateSalary(situationNouvelle, enfantsNouveaux);
+      const currentStatusCalc = calculateSalary(currentStatus, currentDependants);
+      const newStatusCalc = calculateSalary(newStatus, newDependants);
       
       const difference = {
-        salaireBrut: situationNouvelleCalc.salaireBrut - situationActuelleCalc.salaireBrut,
-        cotisations: situationNouvelleCalc.totalCotisations - situationActuelleCalc.totalCotisations,
-        deductions: situationNouvelleCalc.totalDeductions - situationActuelleCalc.totalDeductions,
-        igr: situationNouvelleCalc.igr - situationActuelleCalc.igr,
-        salaireNet: situationNouvelleCalc.salaireNet - situationActuelleCalc.salaireNet,
-        economieAnnuelle: (situationActuelleCalc.igr - situationNouvelleCalc.igr) * 12
+        grossSalary: newStatusCalc.grossSalary - currentStatusCalc.grossSalary,
+        contributions: newStatusCalc.totalContributions - currentStatusCalc.totalContributions,
+        deductions: newStatusCalc.totalDeductions - currentStatusCalc.totalDeductions,
+        paye: newStatusCalc.paye - currentStatusCalc.paye,
+        netSalary: newStatusCalc.netSalary - currentStatusCalc.netSalary,
+        annualSavings: (currentStatusCalc.paye - newStatusCalc.paye) * 12
       };
       
       setComparison({
-        actuelle: situationActuelleCalc,
-        nouvelle: situationNouvelleCalc,
+        current: currentStatusCalc,
+        new: newStatusCalc,
         difference
       });
       
@@ -113,9 +106,9 @@ function FamilyTaxImpactContent() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'MAD'
+      currency: 'KES'
     }).format(amount);
   };
 
@@ -125,23 +118,23 @@ function FamilyTaxImpactContent() {
   };
 
   const resetForm = () => {
-    setSalaireBrut(15000);
-    setSituationActuelle('celibataire');
-    setEnfantsActuels(0);
-    setSituationNouvelle('marie');
-    setEnfantsNouveaux(1);
-    setFraisProfessionnels(0);
-    setAutresDeductions(0);
+    setGrossSalary(20000);
+    setCurrentStatus('single');
+    setCurrentDependants(0);
+    setNewStatus('married');
+    setNewDependants(1);
+    setProfessionalExpenses(0);
+    setOtherDeductions(0);
   };
 
-  const getSituationLabel = (situation: string) => {
+  const getStatusLabel = (status: string) => {
     const labels = {
-      'celibataire': 'Célibataire',
-      'marie': 'Marié(e)',
-      'divorce': 'Divorcé(e)',
-      'veuf': 'Veuf/Veuve'
+      'single': 'Single',
+      'married': 'Married',
+      'divorced': 'Divorced',
+      'widowed': 'Widowed'
     };
-    return labels[situation as keyof typeof labels] || situation;
+    return labels[status as keyof typeof labels] || status;
   };
 
   return (
@@ -152,13 +145,13 @@ function FamilyTaxImpactContent() {
           <Link href="/simulation">
             <button className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour
+              Back
             </button>
           </Link>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Impact familial/fiscal</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Family and Tax Impact</h2>
             <p className="mt-1 text-sm text-gray-600">
-              Comparez l'impact fiscal de différentes situations familiales
+              Compare the tax impact of different family situations
             </p>
           </div>
         </div>
@@ -168,33 +161,33 @@ function FamilyTaxImpactContent() {
             className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
-            Réinitialiser
+            Reset
           </button>
           {comparison && (
             <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
               <Download className="h-4 w-4 mr-2" />
-              Exporter rapport
+              Export Report
             </button>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Paramètres de base */}
+        {/* Basic Parameters */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Paramètres de base</h3>
+            <h3 className="text-lg font-medium text-gray-900">Basic Parameters</h3>
           </div>
           <div className="p-6 space-y-6">
             <div>
-              <label htmlFor="salaireBrut" className="block text-sm font-medium text-gray-700 mb-2">
-                Salaire brut mensuel (MAD)
+              <label htmlFor="grossSalary" className="block text-sm font-medium text-gray-700 mb-2">
+                Monthly Gross Salary (KES)
               </label>
               <input
                 type="number"
-                id="salaireBrut"
-                value={salaireBrut}
-                onChange={(e) => setSalaireBrut(Number(e.target.value))}
+                id="grossSalary"
+                value={grossSalary}
+                onChange={(e) => setGrossSalary(Number(e.target.value))}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                 min="0"
                 step="100"
@@ -202,14 +195,14 @@ function FamilyTaxImpactContent() {
             </div>
 
             <div>
-              <label htmlFor="fraisProfessionnels" className="block text-sm font-medium text-gray-700 mb-2">
-                Frais professionnels (MAD)
+              <label htmlFor="professionalExpenses" className="block text-sm font-medium text-gray-700 mb-2">
+                Professional Expenses (KES)
               </label>
               <input
                 type="number"
-                id="fraisProfessionnels"
-                value={fraisProfessionnels}
-                onChange={(e) => setFraisProfessionnels(Number(e.target.value))}
+                id="professionalExpenses"
+                value={professionalExpenses}
+                onChange={(e) => setProfessionalExpenses(Number(e.target.value))}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                 min="0"
                 step="50"
@@ -217,14 +210,14 @@ function FamilyTaxImpactContent() {
             </div>
 
             <div>
-              <label htmlFor="autresDeductions" className="block text-sm font-medium text-gray-700 mb-2">
-                Autres déductions (MAD)
+              <label htmlFor="otherDeductions" className="block text-sm font-medium text-gray-700 mb-2">
+                Other Deductions (KES)
               </label>
               <input
                 type="number"
-                id="autresDeductions"
-                value={autresDeductions}
-                onChange={(e) => setAutresDeductions(Number(e.target.value))}
+                id="otherDeductions"
+                value={otherDeductions}
+                onChange={(e) => setOtherDeductions(Number(e.target.value))}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                 min="0"
                 step="50"
@@ -233,38 +226,38 @@ function FamilyTaxImpactContent() {
           </div>
         </div>
 
-        {/* Situation actuelle */}
+        {/* Current Status */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200 bg-red-50">
-            <h3 className="text-lg font-medium text-red-900">Situation actuelle</h3>
+            <h3 className="text-lg font-medium text-red-900">Current Status</h3>
           </div>
           <div className="p-6 space-y-6">
             <div>
-              <label htmlFor="situationActuelle" className="block text-sm font-medium text-gray-700 mb-2">
-                Situation familiale
+              <label htmlFor="currentStatus" className="block text-sm font-medium text-gray-700 mb-2">
+                Family Status
               </label>
               <select
-                id="situationActuelle"
-                value={situationActuelle}
-                onChange={(e) => setSituationActuelle(e.target.value)}
+                id="currentStatus"
+                value={currentStatus}
+                onChange={(e) => setCurrentStatus(e.target.value)}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
               >
-                <option value="celibataire">Célibataire</option>
-                <option value="marie">Marié(e)</option>
-                <option value="divorce">Divorcé(e)</option>
-                <option value="veuf">Veuf/Veuve</option>
+                <option value="single">Single</option>
+                <option value="married">Married</option>
+                <option value="divorced">Divorced</option>
+                <option value="widowed">Widowed</option>
               </select>
             </div>
 
             <div>
-              <label htmlFor="enfantsActuels" className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre d'enfants à charge
+              <label htmlFor="currentDependants" className="block text-sm font-medium text-gray-700 mb-2">
+                Number of Dependants
               </label>
               <input
                 type="number"
-                id="enfantsActuels"
-                value={enfantsActuels}
-                onChange={(e) => setEnfantsActuels(Number(e.target.value))}
+                id="currentDependants"
+                value={currentDependants}
+                onChange={(e) => setCurrentDependants(Number(e.target.value))}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
                 min="0"
                 max="10"
@@ -273,15 +266,15 @@ function FamilyTaxImpactContent() {
 
             {comparison && (
               <div className="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
-                <h4 className="text-sm font-medium text-red-800 mb-2">Résumé actuel</h4>
+                <h4 className="text-sm font-medium text-red-800 mb-2">Current Summary</h4>
                 <div className="space-y-1 text-xs text-red-700">
                   <div className="flex justify-between">
-                    <span>IGR mensuel:</span>
-                    <span className="font-medium">{formatCurrency(comparison.actuelle.igr)}</span>
+                    <span>Monthly PAYE:</span>
+                    <span className="font-medium">{formatCurrency(comparison.current.paye)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Salaire net:</span>
-                    <span className="font-medium">{formatCurrency(comparison.actuelle.salaireNet)}</span>
+                    <span>Net Salary:</span>
+                    <span className="font-medium">{formatCurrency(comparison.current.netSalary)}</span>
                   </div>
                 </div>
               </div>
@@ -289,38 +282,38 @@ function FamilyTaxImpactContent() {
           </div>
         </div>
 
-        {/* Nouvelle situation */}
+        {/* New Status */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200 bg-green-50">
-            <h3 className="text-lg font-medium text-green-900">Nouvelle situation</h3>
+            <h3 className="text-lg font-medium text-green-900">New Status</h3>
           </div>
           <div className="p-6 space-y-6">
             <div>
-              <label htmlFor="situationNouvelle" className="block text-sm font-medium text-gray-700 mb-2">
-                Situation familiale
+              <label htmlFor="newStatus" className="block text-sm font-medium text-gray-700 mb-2">
+                Family Status
               </label>
               <select
-                id="situationNouvelle"
-                value={situationNouvelle}
-                onChange={(e) => setSituationNouvelle(e.target.value)}
+                id="newStatus"
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
               >
-                <option value="celibataire">Célibataire</option>
-                <option value="marie">Marié(e)</option>
-                <option value="divorce">Divorcé(e)</option>
-                <option value="veuf">Veuf/Veuve</option>
+                <option value="single">Single</option>
+                <option value="married">Married</option>
+                <option value="divorced">Divorced</option>
+                <option value="widowed">Widowed</option>
               </select>
             </div>
 
             <div>
-              <label htmlFor="enfantsNouveaux" className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre d'enfants à charge
+              <label htmlFor="newDependants" className="block text-sm font-medium text-gray-700 mb-2">
+                Number of Dependants
               </label>
               <input
                 type="number"
-                id="enfantsNouveaux"
-                value={enfantsNouveaux}
-                onChange={(e) => setEnfantsNouveaux(Number(e.target.value))}
+                id="newDependants"
+                value={newDependants}
+                onChange={(e) => setNewDependants(Number(e.target.value))}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                 min="0"
                 max="10"
@@ -329,15 +322,15 @@ function FamilyTaxImpactContent() {
 
             {comparison && (
               <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-                <h4 className="text-sm font-medium text-green-800 mb-2">Résumé nouveau</h4>
+                <h4 className="text-sm font-medium text-green-800 mb-2">New Summary</h4>
                 <div className="space-y-1 text-xs text-green-700">
                   <div className="flex justify-between">
-                    <span>IGR mensuel:</span>
-                    <span className="font-medium">{formatCurrency(comparison.nouvelle.igr)}</span>
+                    <span>Monthly PAYE:</span>
+                    <span className="font-medium">{formatCurrency(comparison.new.paye)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Salaire net:</span>
-                    <span className="font-medium">{formatCurrency(comparison.nouvelle.salaireNet)}</span>
+                    <span>Net Salary:</span>
+                    <span className="font-medium">{formatCurrency(comparison.new.netSalary)}</span>
                   </div>
                 </div>
               </div>
@@ -346,72 +339,72 @@ function FamilyTaxImpactContent() {
         </div>
       </div>
 
-      {/* Résultats de comparaison */}
+      {/* Comparison Results */}
       {loading ? (
         <div className="bg-white shadow rounded-lg p-8">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-            <p className="mt-2 text-sm text-gray-500">Calcul de l'impact en cours...</p>
+            <p className="mt-2 text-sm text-gray-500">Calculating impact...</p>
           </div>
         </div>
       ) : comparison ? (
         <div className="space-y-6">
-          {/* Impact principal */}
+          {/* Main Impact */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Impact de la nouvelle situation</h3>
+              <h3 className="text-lg font-medium text-gray-900">Impact of New Status</h3>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center p-6 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-center justify-center mb-2">
-                    {comparison.difference.igr < 0 ? (
+                    {comparison.difference.paye < 0 ? (
                       <TrendingDown className="h-8 w-8 text-green-600" />
                     ) : (
                       <TrendingUp className="h-8 w-8 text-red-600" />
                     )}
                   </div>
                   <div className="text-2xl font-bold text-gray-900">
-                    {formatDifference(comparison.difference.igr)}
+                    {formatDifference(comparison.difference.paye)}
                   </div>
-                  <div className="text-sm text-gray-600">IGR mensuel</div>
+                  <div className="text-sm text-gray-600">Monthly PAYE</div>
                 </div>
 
                 <div className="text-center p-6 bg-green-50 rounded-lg border border-green-200">
                   <div className="flex items-center justify-center mb-2">
-                    {comparison.difference.salaireNet > 0 ? (
+                    {comparison.difference.netSalary > 0 ? (
                       <TrendingUp className="h-8 w-8 text-green-600" />
                     ) : (
                       <TrendingDown className="h-8 w-8 text-red-600" />
                     )}
                   </div>
                   <div className="text-2xl font-bold text-gray-900">
-                    {formatDifference(comparison.difference.salaireNet)}
+                    {formatDifference(comparison.difference.netSalary)}
                   </div>
-                  <div className="text-sm text-gray-600">Salaire net mensuel</div>
+                  <div className="text-sm text-gray-600">Monthly Net Salary</div>
                 </div>
 
                 <div className="text-center p-6 bg-yellow-50 rounded-lg border border-yellow-200">
                   <div className="flex items-center justify-center mb-2">
-                    {comparison.difference.economieAnnuelle > 0 ? (
+                    {comparison.difference.annualSavings > 0 ? (
                       <TrendingUp className="h-8 w-8 text-green-600" />
                     ) : (
                       <TrendingDown className="h-8 w-8 text-red-600" />
                     )}
                   </div>
                   <div className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(comparison.difference.economieAnnuelle)}
+                    {formatCurrency(comparison.difference.annualSavings)}
                   </div>
-                  <div className="text-sm text-gray-600">Économie annuelle</div>
+                  <div className="text-sm text-gray-600">Annual Savings</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Détail des déductions */}
+          {/* Deduction Details */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Détail des déductions fiscales</h3>
+              <h3 className="text-lg font-medium text-gray-900">Tax Deduction Details</h3>
             </div>
             <div className="p-6">
               <div className="overflow-x-auto">
@@ -419,65 +412,81 @@ function FamilyTaxImpactContent() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Type de déduction
+                        Deduction Type
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Situation actuelle
+                        Current Status
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Nouvelle situation
+                        New Status
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Différence
+                        Difference
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     <tr>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        Déduction épouse
+                        Personal Relief
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatCurrency(comparison.actuelle.deductionEpouse)}
+                        {formatCurrency(comparison.current.personalRelief)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatCurrency(comparison.nouvelle.deductionEpouse)}
+                        {formatCurrency(comparison.new.personalRelief)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <span className={comparison.nouvelle.deductionEpouse > comparison.actuelle.deductionEpouse ? 'text-green-600' : 'text-gray-500'}>
-                          {formatDifference(comparison.nouvelle.deductionEpouse - comparison.actuelle.deductionEpouse)}
+                        <span className={comparison.new.personalRelief > comparison.current.personalRelief ? 'text-green-600' : 'text-gray-500'}>
+                          {formatDifference(comparison.new.personalRelief - comparison.current.personalRelief)}
                         </span>
                       </td>
                     </tr>
                     <tr>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        Déduction enfants
+                        Insurance Relief
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatCurrency(comparison.actuelle.deductionEnfants)}
+                        {formatCurrency(comparison.current.insuranceRelief)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatCurrency(comparison.nouvelle.deductionEnfants)}
+                        {formatCurrency(comparison.new.insuranceRelief)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <span className={comparison.nouvelle.deductionEnfants > comparison.actuelle.deductionEnfants ? 'text-green-600' : 'text-red-600'}>
-                          {formatDifference(comparison.nouvelle.deductionEnfants - comparison.actuelle.deductionEnfants)}
+                        <span className={comparison.new.insuranceRelief > comparison.current.insuranceRelief ? 'text-green-600' : 'text-gray-500'}>
+                          {formatDifference(comparison.new.insuranceRelief - comparison.current.insuranceRelief)}
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        Other Deductions
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatCurrency(comparison.current.totalDeductions - comparison.current.personalRelief)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatCurrency(comparison.new.totalDeductions - comparison.new.personalRelief)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <span className={(comparison.new.totalDeductions - comparison.new.personalRelief) > (comparison.current.totalDeductions - comparison.current.personalRelief) ? 'text-green-600' : 'text-red-600'}>
+                          {formatDifference((comparison.new.totalDeductions - comparison.new.personalRelief) - (comparison.current.totalDeductions - comparison.current.personalRelief))}
                         </span>
                       </td>
                     </tr>
                     <tr className="bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        Total déductions
+                        Total Deductions
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {formatCurrency(comparison.actuelle.totalDeductions)}
+                        {formatCurrency(comparison.current.totalDeductions)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {formatCurrency(comparison.nouvelle.totalDeductions)}
+                        {formatCurrency(comparison.new.totalDeductions)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
-                        <span className={comparison.nouvelle.totalDeductions > comparison.actuelle.totalDeductions ? 'text-green-600' : 'text-red-600'}>
-                          {formatDifference(comparison.nouvelle.totalDeductions - comparison.actuelle.totalDeductions)}
+                        <span className={comparison.new.totalDeductions > comparison.current.totalDeductions ? 'text-green-600' : 'text-red-600'}>
+                          {formatDifference(comparison.new.totalDeductions - comparison.current.totalDeductions)}
                         </span>
                       </td>
                     </tr>
@@ -487,20 +496,20 @@ function FamilyTaxImpactContent() {
             </div>
           </div>
 
-          {/* Recommandations */}
+          {/* Recommendations */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Recommandations</h3>
+              <h3 className="text-lg font-medium text-gray-900">Recommendations</h3>
             </div>
             <div className="p-6">
               <div className="space-y-4">
-                {comparison.difference.economieAnnuelle > 0 ? (
+                {comparison.difference.annualSavings > 0 ? (
                   <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                     <div className="flex items-start">
                       <Info className="h-5 w-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" />
                       <div className="text-sm text-green-800">
-                        <p className="font-medium mb-1">Situation favorable :</p>
-                        <p>La nouvelle situation familiale vous permettrait d'économiser <strong>{formatCurrency(comparison.difference.economieAnnuelle)}</strong> par an en impôts.</p>
+                        <p className="font-medium mb-1">Favorable Situation:</p>
+                        <p>The new family status would save you <strong>{formatCurrency(comparison.difference.annualSavings)}</strong> annually in taxes.</p>
                       </div>
                     </div>
                   </div>
@@ -509,8 +518,8 @@ function FamilyTaxImpactContent() {
                     <div className="flex items-start">
                       <Info className="h-5 w-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" />
                       <div className="text-sm text-yellow-800">
-                        <p className="font-medium mb-1">Impact neutre ou négatif :</p>
-                        <p>La nouvelle situation n'apporte pas d'avantage fiscal significatif par rapport à votre situation actuelle.</p>
+                        <p className="font-medium mb-1">Neutral or Negative Impact:</p>
+                        <p>The new status does not provide significant tax benefits compared to your current status.</p>
                       </div>
                     </div>
                   </div>
@@ -520,12 +529,12 @@ function FamilyTaxImpactContent() {
                   <div className="flex items-start">
                     <Info className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
                     <div className="text-sm text-blue-800">
-                      <p className="font-medium mb-1">Points à retenir :</p>
+                      <p className="font-medium mb-1">Key Points:</p>
                       <ul className="space-y-1 text-xs">
-                        <li>• Déduction épouse : 360 MAD/mois si marié(e)</li>
-                        <li>• Déduction par enfant : 300 MAD/mois</li>
-                        <li>• Maximum 6 enfants pris en compte</li>
-                        <li>• Les déductions réduisent la base imposable IGR</li>
+                        <li>• Personal Relief: 2,400 KES/month for all taxpayers</li>
+                        <li>• Insurance Relief: Up to 5,000 KES/month (15% of SHIF contributions)</li>
+                        <li>• NSSF: 6% of gross salary, capped at 2,160 KES/month</li>
+                        <li>• Deductions reduce the taxable PAYE base</li>
                       </ul>
                     </div>
                   </div>

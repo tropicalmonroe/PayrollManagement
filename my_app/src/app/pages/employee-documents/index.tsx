@@ -10,44 +10,44 @@ const EmployeeDocumentsPage = () => {
   const documentSections = [
     {
       id: 'payslip',
-      title: 'Bulletin de paie',
-      description: 'Génération du bulletin de paie individuel en PDF, destiné à la remise au salarié.',
+      title: 'Payslip', 
+      description: 'Generation of individual payslip in PDF, intended for delivery to the employee.',
       icon: FileText,
       color: 'blue',
       href: '/employee-documents/payslip',
       features: [
-        'Génération PDF individuelle',
-        'Détail complet des gains et retenues',
-        'Calculs automatiques des cotisations',
-        'Format officiel conforme'
+        'Individual PDF generation', 
+        'Complete details of earnings and deductions',
+        'Automatic calculation of contributions', 
+        'Official compliant format'
       ]
     },
     {
       id: 'salary-certificate',
-      title: 'Attestation de salaire',
-      description: 'Génération d\'attestations de revenu ou de présence à la demande du salarié.',
+      title: 'Salary Certificate', 
+      description: 'Generation of income or attendance certificates upon employee request.',
       icon: Award,
       color: 'green',
       href: '/employee-documents/salary-certificate',
       features: [
-        'Attestation de revenu',
-        'Attestation de présence',
-        'Données personnalisables',
-        'Format PDF officiel'
+        'Income certificate', 
+        'Attendance certificate',
+        'Customizable data',
+        'Official PDF format' 
       ]
     },
     {
       id: 'final-settlement',
-      title: 'Solde de tout compte',
-      description: 'Saisie des éléments de rupture (congés non pris, indemnités…) et génération du document officiel de solde.',
+      title: 'Final Settlement', 
+      description: 'Entry of termination elements (unused leave, indemnities, etc.) and generation of the official settlement document.', 
       icon: Calculator,
       color: 'orange',
       href: '/employee-documents/final-settlement',
       features: [
-        'Calcul des congés non pris',
-        'Indemnités de rupture',
-        'Solde final automatique',
-        'Document officiel PDF'
+        'Calculation of unused leave',
+        'Termination indemnities', 
+        'Automatic final settlement', 
+        'Official PDF document' 
       ]
     }
   ];
@@ -100,21 +100,20 @@ const EmployeeDocumentsPage = () => {
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Retour</span>
+            <span>Back</span>
           </button>
           
           <div className="flex items-center space-x-3 mb-4">
             <FileCheck className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Documents salariés</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Employee Documents</h1>
           </div>
           
           <p className="text-gray-600 text-lg max-w-3xl">
-            Génération et gestion de tous les documents officiels destinés aux salariés : 
-            bulletins de paie, attestations et soldes de tout compte.
+            Generation and management of all official documents for employees: payslips, certificates, and final settlements.
           </p>
         </div>
 
-        {/* Sections principales */}
+        {/* Main sections */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {documentSections.map((section) => {
             const IconComponent = section.icon;
@@ -131,7 +130,7 @@ const EmployeeDocumentsPage = () => {
                   </p>
                   
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-900">Fonctionnalités :</h4>
+                    <h4 className="text-sm font-medium text-gray-900">Features:</h4> 
                     <ul className="text-xs text-gray-600 space-y-1">
                       {section.features.map((feature, index) => (
                         <li key={index} className="flex items-center">
@@ -144,7 +143,7 @@ const EmployeeDocumentsPage = () => {
                   
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <span className={`text-sm font-medium ${getIconColor(section.color)}`}>
-                      Accéder →
+                      Access → 
                     </span>
                   </div>
                 </div>
@@ -153,30 +152,30 @@ const EmployeeDocumentsPage = () => {
           })}
         </div>
 
-        {/* Informations complémentaires */}
+        {/* Additional information */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Informations sur les documents salariés
+            Information on Employee Documents 
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">📋 Processus de génération</h4>
+              <h4 className="font-medium text-gray-900 mb-2">📋 Generation Process</h4> 
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Sélection de l'employé et de la période</li>
-                <li>• Calcul automatique des montants</li>
-                <li>• Génération du document PDF</li>
-                <li>• Archivage automatique dans le coffre</li>
+                <li>• Selection of employee and period</li> 
+                <li>• Automatic calculation of amounts</li>
+                <li>• PDF document generation</li>
+                <li>• Automatic archiving in the vault</li> 
               </ul>
             </div>
             
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">🔒 Sécurité et conformité</h4>
+              <h4 className="font-medium text-gray-900 mb-2">🔒 Security and Compliance</h4> 
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Documents conformes à la réglementation marocaine</li>
-                <li>• Archivage sécurisé et horodaté</li>
-                <li>• Traçabilité complète des générations</li>
-                <li>• Format PDF non modifiable</li>
+                <li>• Documents compliant with Kenyan regulations</li>
+                <li>• Secure and timestamped archiving</li>
+                <li>• Complete traceability of generations</li>
+                <li>• Non-editable PDF format</li>
               </ul>
             </div>
           </div>
@@ -187,10 +186,10 @@ const EmployeeDocumentsPage = () => {
                 <FileCheck className="w-5 h-5 text-blue-600 mt-0.5" />
               </div>
               <div className="ml-3">
-                <h4 className="text-sm font-medium text-blue-900">Note importante</h4>
+                <h4 className="text-sm font-medium text-blue-900">Important Note</h4> 
                 <p className="text-sm text-blue-700 mt-1">
-                  Tous les documents générés sont automatiquement archivés dans la section "Coffre" 
-                  pour consultation ultérieure et respect des obligations légales de conservation.
+                  All generated documents are automatically archived in the "Vault" section 
+                  for future consultation and compliance with legal retention obligations. 
                 </p>
               </div>
             </div>

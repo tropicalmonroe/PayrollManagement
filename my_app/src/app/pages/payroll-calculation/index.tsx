@@ -8,15 +8,15 @@ const PayrollCalculationPage = () => {
 
   const sections = [
     {
-      title: 'Éléments variables mensuels',
-      description: 'Saisie mensuelle des variables : heures sup., absences, primes exceptionnelles, congés, retards, avances.',
+      title: 'Monthly Variable Elements',
+      description: 'Monthly entry of variables: overtime, absences, exceptional bonuses, leave, delays, advances.',
       icon: <Edit className="w-8 h-8" />,
       href: '/payroll-calculation/monthly-variables',
       color: 'bg-orange-500'
     },
     {
-      title: 'Calcul mensuel',
-      description: 'Lancement automatique du calcul de paie avec application des barèmes, cotisations sociales et fiscales selon la situation de chaque salarié.',
+      title: 'Monthly Calculation',
+      description: 'Automatic payroll calculation with application of scales, social contributions and taxes according to each employee\'s situation.',
       icon: <Play className="w-8 h-8" />,
       href: '/payroll-calculation/monthly-calculation',
       color: 'bg-green-500'
@@ -29,10 +29,10 @@ const PayrollCalculationPage = () => {
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">
             <Calculator className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Calcul de la paie</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Payroll Calculation</h1>
           </div>
           <p className="text-gray-600 text-lg">
-            Gestion des éléments variables et lancement du calcul mensuel de la paie avec application automatique des barèmes.
+            Management of variable elements and launch of monthly payroll calculation with automatic application of scales.
           </p>
         </div>
 
@@ -60,23 +60,23 @@ const PayrollCalculationPage = () => {
           ))}
         </div>
 
-        {/* Section d'information */}
+        {/* Information section */}
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
           <div className="flex items-start">
             <Calculator className="w-6 h-6 text-blue-600 mr-3 mt-1" />
             <div>
               <h3 className="text-lg font-medium text-blue-900 mb-2">
-                Processus de calcul de paie
+                Payroll Calculation Process
               </h3>
               <div className="text-blue-800 space-y-2">
                 <p className="text-sm">
-                  <strong>1. Éléments variables :</strong> Saisissez d'abord tous les éléments variables du mois (heures supplémentaires, absences, primes, etc.)
+                  <strong>1. Variable Elements:</strong> First enter all monthly variable elements (overtime, absences, bonuses, etc.)
                 </p>
                 <p className="text-sm">
-                  <strong>2. Calcul automatique :</strong> Lancez ensuite le calcul mensuel qui appliquera automatiquement tous les barèmes et cotisations
+                  <strong>2. Automatic Calculation:</strong> Then launch the monthly calculation which will automatically apply all scales and contributions
                 </p>
                 <p className="text-sm">
-                  <strong>3. Résultats :</strong> Les bulletins de paie seront générés et disponibles dans la section "Documents salariés"
+                  <strong>3. Results:</strong> Payslips will be generated and available in the "Employee Documents" section
                 </p>
               </div>
             </div>

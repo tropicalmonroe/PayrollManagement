@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../../components/Layout';
 import AddAdvanceModal from '../../components/AddAdvanceModal';
@@ -19,29 +21,30 @@ import {
 } from 'lucide-react';
 
 // Types
-type AdvanceStatus = 'EN_COURS' | 'REMBOURSE' | 'ANNULE';
+type AdvanceStatus = 'IN_PROGRESS' | 'REPAID' | 'CANCELLED';
 
 interface Employee {
   id: string;
-  matricule: string;
-  nom: string;
-  prenom: string;
-  fonction: string;
+  employeeId: string;
+  firstName: string;
+  lastName: string;
+  position: string;
 }
 
 interface Advance {
   id: string;
   employee: Employee;
-  montant: number;
-  dateAvance: Date;
-  motif: string;
-  nombreMensualites: number;
-  montantMensualite: number;
-  soldeRestant: number;
-  statut: AdvanceStatus;
-  dateCreation: Date;
+  employeeId: string;
+  amount: number;
+  advanceDate: Date;
+  reason: string;
+  numberOfInstallments: number;
+  installmentAmount: number;
+  remainingBalance: number;
+  status: AdvanceStatus;
+  creationDate: Date;
   createdBy: string;
-  dateRemboursementComplete?: Date;
+  fullRepaymentDate?: Date;
   notes?: string;
   createdAt: Date;
 }
@@ -58,7 +61,7 @@ const AdvanceManagement: React.FC = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
-  const [newSoldeRestant, setNewSoldeRestant] = useState('');
+  const [newRemainingBalance, setNewRemainingBalance] = useState('');
 
   // Fetch data
   useEffect(() => {
@@ -74,7 +77,7 @@ const AdvanceManagement: React.FC = () => {
         setAdvances(data);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des avances:', error);
+      console.error('Error loading advances:', error);
     } finally {
       setLoading(false);
     }
@@ -88,42 +91,42 @@ const AdvanceManagement: React.FC = () => {
         setEmployees(data);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des employés:', error);
+      console.error('Error loading employees:', error);
     }
   };
 
   // Filter advances
   const filteredAdvances = advances.filter(advance => {
     const matchesSearch = 
-      advance.employee.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      advance.employee.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      advance.employee.matricule.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      advance.motif.toLowerCase().includes(searchTerm.toLowerCase());
+      advance.employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      advance.employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      advance.employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      advance.reason.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = filterStatus === 'ALL' || advance.statut === filterStatus;
+    const matchesStatus = filterStatus === 'ALL' || advance.status === filterStatus;
     
     return matchesSearch && matchesStatus;
   });
 
   // Format currency
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'MAD'
+      currency: 'KES'
     }).format(amount);
   };
 
   // Format date
   const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('fr-FR');
+    return new Date(date).toLocaleDateString('en-KE');
   };
 
   // Get status badge
   const getStatusBadge = (status: AdvanceStatus) => {
     const badges = {
-      EN_COURS: { color: 'bg-blue-100 text-blue-800', icon: Clock, text: 'En cours' },
-      REMBOURSE: { color: 'bg-green-100 text-green-800', icon: CheckCircle, text: 'Remboursé' },
-      ANNULE: { color: 'bg-red-100 text-red-800', icon: AlertCircle, text: 'Annulé' }
+      IN_PROGRESS: { color: 'bg-blue-100 text-blue-800', icon: Clock, text: 'In Progress' },
+      REPAID: { color: 'bg-green-100 text-green-800', icon: CheckCircle, text: 'Repaid' },
+      CANCELLED: { color: 'bg-red-100 text-red-800', icon: AlertCircle, text: 'Cancelled' }
     };
     
     const badge = badges[status];
@@ -139,21 +142,21 @@ const AdvanceManagement: React.FC = () => {
 
   // Calculate progress percentage
   const getProgressPercentage = (advance: Advance) => {
-    const montantRembourse = advance.montant - advance.soldeRestant;
-    return ((montantRembourse / advance.montant) * 100);
+    const amountRepaid = advance.amount - advance.remainingBalance;
+    return ((amountRepaid / advance.amount) * 100);
   };
 
   // Get progress info for display
   const getProgressInfo = (advance: Advance) => {
-    const montantRembourse = advance.montant - advance.soldeRestant;
-    const percentage = Math.min(100, (montantRembourse / advance.montant) * 100);
+    const amountRepaid = advance.amount - advance.remainingBalance;
+    const percentage = Math.min(100, (amountRepaid / advance.amount) * 100);
     
     // Calculate expected progress based on time elapsed
-    const dateDebut = new Date(advance.dateAvance);
+    const startDate = new Date(advance.advanceDate);
     const now = new Date();
-    const monthsElapsed = Math.floor((now.getTime() - dateDebut.getTime()) / (1000 * 60 * 60 * 24 * 30));
-    const expectedProgress = Math.min(100, (monthsElapsed / advance.nombreMensualites) * 100);
-    const isLate = percentage < expectedProgress && advance.statut === 'EN_COURS';
+    const monthsElapsed = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+    const expectedProgress = Math.min(100, (monthsElapsed / advance.numberOfInstallments) * 100);
+    const isLate = percentage < expectedProgress && advance.status === 'IN_PROGRESS';
     
     return {
       percentage: percentage,
@@ -165,7 +168,7 @@ const AdvanceManagement: React.FC = () => {
 
   // Handle delete advance
   const handleDeleteAdvance = async (advanceId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette avance ?')) {
+    if (!confirm('Are you sure you want to delete this advance?')) {
       return;
     }
 
@@ -177,13 +180,13 @@ const AdvanceManagement: React.FC = () => {
 
       if (response.ok) {
         await fetchAdvances(); // Refresh the list
-        alert('Avance supprimée avec succès');
+        alert('Advance deleted successfully');
       } else {
-        alert('Erreur lors de la suppression de l\'avance');
+        alert('Error deleting advance');
       }
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
-      alert('Erreur lors de la suppression de l\'avance');
+      console.error('Error deleting advance:', error);
+      alert('Error deleting advance');
     } finally {
       setDeleteLoading(false);
     }
@@ -205,9 +208,9 @@ const AdvanceManagement: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Gestion des Avances sur Salaire</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Salary Advance Management</h1>
             <p className="mt-1 text-sm text-gray-500">
-              Gérez les avances sur salaire des employés
+              Manage employee salary advances
             </p>
           </div>
           <div className="mt-4 sm:mt-0">
@@ -216,7 +219,7 @@ const AdvanceManagement: React.FC = () => {
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#0063b4] hover:bg-[#0052a3] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0063b4]"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Nouvelle Avance
+              New Advance
             </button>
           </div>
         </div>
@@ -232,7 +235,7 @@ const AdvanceManagement: React.FC = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      Total Avances
+                      Total Advances
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
                       {advances.length}
@@ -252,10 +255,10 @@ const AdvanceManagement: React.FC = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      En Cours
+                      In Progress
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      {advances.filter(a => a.statut === 'EN_COURS').length}
+                      {advances.filter(a => a.status === 'IN_PROGRESS').length}
                     </dd>
                   </dl>
                 </div>
@@ -272,10 +275,10 @@ const AdvanceManagement: React.FC = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      Montant Total
+                      Total Amount
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      {formatCurrency(advances.reduce((sum, a) => sum + a.montant, 0))}
+                      {formatCurrency(advances.reduce((sum, a) => sum + a.amount, 0))}
                     </dd>
                   </dl>
                 </div>
@@ -292,10 +295,10 @@ const AdvanceManagement: React.FC = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      Solde Restant
+                      Remaining Balance
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      {formatCurrency(advances.reduce((sum, a) => sum + a.soldeRestant, 0))}
+                      {formatCurrency(advances.reduce((sum, a) => sum + a.remainingBalance, 0))}
                     </dd>
                   </dl>
                 </div>
@@ -316,7 +319,7 @@ const AdvanceManagement: React.FC = () => {
                   <input
                     type="text"
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
-                    placeholder="Rechercher par nom, matricule ou motif..."
+                    placeholder="Search by name, employee ID, or reason..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -329,10 +332,10 @@ const AdvanceManagement: React.FC = () => {
                   onChange={(e) => setFilterStatus(e.target.value as AdvanceStatus | 'ALL')}
                   className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm rounded-md"
                 >
-                  <option value="ALL">Tous les statuts</option>
-                  <option value="EN_COURS">En cours</option>
-                  <option value="REMBOURSE">Remboursé</option>
-                  <option value="ANNULE">Annulé</option>
+                  <option value="ALL">All Statuses</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="REPAID">Repaid</option>
+                  <option value="CANCELLED">Cancelled</option>
                 </select>
               </div>
             </div>
@@ -344,25 +347,25 @@ const AdvanceManagement: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Employé
+                    Employee
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Montant
+                    Amount
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Mensualité
+                    Installment
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Progression
+                    Progress
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Statut
+                    Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Motif
+                    Reason
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -376,24 +379,24 @@ const AdvanceManagement: React.FC = () => {
                       <div className="flex items-center">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
-                            {advance.employee.prenom} {advance.employee.nom}
+                            {advance.employee.firstName} {advance.employee.lastName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {advance.employee.matricule} • {advance.employee.fonction}
+                            {advance.employee.employeeId} • {advance.employee.position}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {formatCurrency(advance.montant)}
+                        {formatCurrency(advance.amount)}
                       </div>
                       <div className="text-sm text-gray-500">
-                        Restant: {formatCurrency(advance.soldeRestant)}
+                        Remaining: {formatCurrency(advance.remainingBalance)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatCurrency(advance.montantMensualite)}
+                      {formatCurrency(advance.installmentAmount)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {(() => {
@@ -412,7 +415,7 @@ const AdvanceManagement: React.FC = () => {
                               </span>
                               {progressInfo.isLate && (
                                 <span className="text-xs text-red-500">
-                                  En retard
+                                  Late
                                 </span>
                               )}
                             </div>
@@ -421,14 +424,14 @@ const AdvanceManagement: React.FC = () => {
                       })()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(advance.statut)}
+                      {getStatusBadge(advance.status)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatDate(advance.dateAvance)}
+                      {formatDate(advance.advanceDate)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div className="max-w-32 truncate" title={advance.motif}>
-                        {advance.motif}
+                      <div className="max-w-32 truncate" title={advance.reason}>
+                        {advance.reason}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -441,7 +444,7 @@ const AdvanceManagement: React.FC = () => {
                             setShowDetailsModal(true);
                           }}
                           className="text-[#0063b4] hover:text-[#0052a3] p-1 rounded"
-                          title="Voir les détails"
+                          title="View details"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
@@ -453,7 +456,7 @@ const AdvanceManagement: React.FC = () => {
                             setShowEditModal(true);
                           }}
                           className="text-gray-600 hover:text-gray-900 p-1 rounded"
-                          title="Modifier"
+                          title="Edit"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
@@ -461,7 +464,7 @@ const AdvanceManagement: React.FC = () => {
                           onClick={() => handleDeleteAdvance(advance.id)}
                           disabled={deleteLoading}
                           className="text-red-600 hover:text-red-900 p-1 rounded disabled:opacity-50"
-                          title="Supprimer"
+                          title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -476,11 +479,11 @@ const AdvanceManagement: React.FC = () => {
           {filteredAdvances.length === 0 && (
             <div className="text-center py-12">
               <TrendingUp className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">Aucune avance trouvée</h3>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No advances found</h3>
               <p className="mt-1 text-sm text-gray-500">
                 {searchTerm || filterStatus !== 'ALL'
-                  ? 'Aucune avance ne correspond aux critères de recherche.'
-                  : 'Commencez par ajouter une nouvelle avance.'}
+                  ? 'No advances match the search criteria.'
+                  : 'Start by adding a new advance.'}
               </p>
             </div>
           )}
@@ -505,7 +508,7 @@ const AdvanceManagement: React.FC = () => {
             <div className="mt-3">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Détails de l'Avance
+                  Advance Details
                 </h3>
                 <button
                   onClick={() => setShowDetailsModal(false)}
@@ -520,50 +523,50 @@ const AdvanceManagement: React.FC = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Employé</label>
+                    <label className="block text-sm font-medium text-gray-700">Employee</label>
                     <p className="mt-1 text-sm text-gray-900">
-                      {selectedAdvance.employee.prenom} {selectedAdvance.employee.nom}
+                      {selectedAdvance.employee.firstName} {selectedAdvance.employee.lastName}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {selectedAdvance.employee.matricule} • {selectedAdvance.employee.fonction}
+                      {selectedAdvance.employee.employeeId} • {selectedAdvance.employee.position}
                     </p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Montant de l'Avance</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedAdvance.montant)}</p>
+                    <label className="block text-sm font-medium text-gray-700">Advance Amount</label>
+                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedAdvance.amount)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Date de l'Avance</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedAdvance.dateAvance)}</p>
+                    <label className="block text-sm font-medium text-gray-700">Advance Date</label>
+                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedAdvance.advanceDate)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Nombre de Mensualités</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedAdvance.nombreMensualites} mois</p>
+                    <label className="block text-sm font-medium text-gray-700">Number of Installments</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedAdvance.numberOfInstallments} months</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Mensualité</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedAdvance.montantMensualite)}</p>
+                    <label className="block text-sm font-medium text-gray-700">Installment Amount</label>
+                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedAdvance.installmentAmount)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Solde Restant</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedAdvance.soldeRestant)}</p>
+                    <label className="block text-sm font-medium text-gray-700">Remaining Balance</label>
+                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedAdvance.remainingBalance)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Statut</label>
+                    <label className="block text-sm font-medium text-gray-700">Status</label>
                     <div className="mt-1">
-                      {getStatusBadge(selectedAdvance.statut)}
+                      {getStatusBadge(selectedAdvance.status)}
                     </div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Motif</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedAdvance.motif}</p>
+                    <label className="block text-sm font-medium text-gray-700">Reason</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedAdvance.reason}</p>
                   </div>
                 </div>
                 
@@ -575,7 +578,7 @@ const AdvanceManagement: React.FC = () => {
                 )}
                 
                 <div className="mt-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Progression du Remboursement</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Repayment Progress</label>
                   <div className="flex items-center">
                     <div className="w-full bg-gray-200 rounded-full h-3 mr-3">
                       <div 
@@ -589,29 +592,29 @@ const AdvanceManagement: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Section de mise à jour du solde restant */}
+                {/* Update Remaining Balance Section */}
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">Mettre à jour le solde restant</h4>
+                  <h4 className="text-sm font-medium text-gray-900 mb-3">Update Remaining Balance</h4>
                   <div className="flex items-end space-x-3">
                     <div className="flex-1">
                       <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Nouveau solde restant (MAD)
+                        New Remaining Balance (KES)
                       </label>
                       <input
                         type="number"
                         step="0.01"
                         min="0"
-                        max={selectedAdvance.montant}
-                        value={newSoldeRestant}
-                        onChange={(e) => setNewSoldeRestant(e.target.value)}
-                        placeholder={selectedAdvance.soldeRestant.toString()}
+                        max={selectedAdvance.amount}
+                        value={newRemainingBalance}
+                        onChange={(e) => setNewRemainingBalance(e.target.value)}
+                        placeholder={selectedAdvance.remainingBalance.toString()}
                         className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4]"
                       />
                     </div>
                     <button
                       onClick={async () => {
-                        if (!newSoldeRestant || parseFloat(newSoldeRestant) < 0) {
-                          alert('Veuillez entrer un montant valide');
+                        if (!newRemainingBalance || parseFloat(newRemainingBalance) < 0) {
+                          alert('Please enter a valid amount');
                           return;
                         }
 
@@ -624,34 +627,34 @@ const AdvanceManagement: React.FC = () => {
                             },
                             body: JSON.stringify({
                               advanceId: selectedAdvance.id,
-                              soldeRestant: parseFloat(newSoldeRestant)
+                              remainingBalance: parseFloat(newRemainingBalance)
                             }),
                           });
 
                           if (response.ok) {
                             await fetchAdvances(); // Refresh the list
-                            setNewSoldeRestant('');
-                            alert('Solde restant mis à jour avec succès');
+                            setNewRemainingBalance('');
+                            alert('Remaining balance updated successfully');
                             setShowDetailsModal(false);
                           } else {
                             const error = await response.json();
-                            alert(`Erreur: ${error.error}`);
+                            alert(`Error: ${error.error}`);
                           }
                         } catch (error) {
-                          console.error('Erreur lors de la mise à jour:', error);
-                          alert('Erreur lors de la mise à jour du solde');
+                          console.error('Error updating balance:', error);
+                          alert('Error updating remaining balance');
                         } finally {
                           setUpdateLoading(false);
                         }
                       }}
-                      disabled={updateLoading || !newSoldeRestant}
+                      disabled={updateLoading || !newRemainingBalance}
                       className="px-4 py-2 bg-[#0063b4] text-white text-sm rounded-md hover:bg-[#0052a3] focus:outline-none focus:ring-2 focus:ring-[#0063b4] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {updateLoading ? 'Mise à jour...' : 'Mettre à jour'}
+                      {updateLoading ? 'Updating...' : 'Update'}
                     </button>
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
-                    Solde actuel: {formatCurrency(selectedAdvance.soldeRestant)} / {formatCurrency(selectedAdvance.montant)}
+                    Current balance: {formatCurrency(selectedAdvance.remainingBalance)} / {formatCurrency(selectedAdvance.amount)}
                   </p>
                 </div>
               </div>
@@ -661,7 +664,7 @@ const AdvanceManagement: React.FC = () => {
                   onClick={() => setShowDetailsModal(false)}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
-                  Fermer
+                  Close
                 </button>
               </div>
             </div>

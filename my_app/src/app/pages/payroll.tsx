@@ -1,125 +1,125 @@
-import { useState, useEffect } from 'react'
-import Head from 'next/head'
-import { Employee, Credit, Advance, VariableElement } from '@prisma/client'
-import { Layout } from '../components/Layout'
-import DetailedPayrollView from '../components/DetailedPayrollView'
+import { useState, useEffect } from 'react';
+import Head from 'next/head';
+import { Employee, Credit, Advance, VariableElement } from '@prisma/client';
+import { Layout } from '../../components/Layout';
+import DetailedPayrollView from '../../components/DetailedPayrollView';
 
 interface EmployeeWithData extends Employee {
-  credits?: Credit[]
-  advances?: Advance[]
-  variableElements?: VariableElement[]
+  credits?: Credit[];
+  advances?: Advance[];
+  variableElements?: VariableElement[];
 }
 
 export default function PayrollPage() {
-  const [employees, setEmployees] = useState<Employee[]>([])
-  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeWithData | null>(null)
-  const [selectedMonth, setSelectedMonth] = useState<string>('')
-  const [selectedYear, setSelectedYear] = useState<string>('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeWithData | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
+  const [selectedYear, setSelectedYear] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Initialiser avec le mois et l'année actuels
+  // Initialize with current month and year
   useEffect(() => {
-    const now = new Date()
-    setSelectedMonth((now.getMonth() + 1).toString().padStart(2, '0'))
-    setSelectedYear(now.getFullYear().toString())
-  }, [])
+    const now = new Date();
+    setSelectedMonth((now.getMonth() + 1).toString().padStart(2, '0'));
+    setSelectedYear(now.getFullYear().toString());
+  }, []);
 
-  // Charger la liste des employés
+  // Fetch the list of employees
   useEffect(() => {
-    fetchEmployees()
-  }, [])
+    fetchEmployees();
+  }, []);
 
   const fetchEmployees = async () => {
     try {
-      setLoading(true)
-      const response = await fetch('/api/employees')
+      setLoading(true);
+      const response = await fetch('/api/employees');
       if (!response.ok) {
-        throw new Error('Erreur lors du chargement des employés')
+        throw new Error('Error loading employees');
       }
-      const data = await response.json()
-      setEmployees(data.filter((emp: Employee) => emp.status === 'ACTIF'))
+      const data = await response.json();
+      setEmployees(data.filter((emp: Employee) => emp.status === 'ACTIVE'));
     } catch (error) {
-      console.error('Erreur:', error)
-      setError('Impossible de charger les employés')
+      console.error('Error:', error);
+      setError('Unable to load employees');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleGeneratePayroll = async (employee: Employee) => {
     try {
-      // Récupérer l'employé avec ses crédits, avances et éléments variables
+      // Fetch employee data with credits, advances, and variable elements
       const [employeeResponse, creditsResponse, advancesResponse, variableElementsResponse] = await Promise.all([
         fetch(`/api/employees/${employee.id}`),
         fetch(`/api/credits?employeeId=${employee.id}`),
         fetch(`/api/advances?employeeId=${employee.id}`),
-        fetch(`/api/variable-elements?employeeId=${employee.id}&mois=${selectedMonth}&annee=${selectedYear}`)
-      ])
+        fetch(`/api/variable-elements?employeeId=${employee.id}&month=${selectedMonth}&year=${selectedYear}`),
+      ]);
 
-      let employeeData = employee
-      let credits = []
-      let advances = []
-      let variableElements = []
+      let employeeData = employee;
+      let credits: Credit[] = [];
+      let advances: Advance[] = [];
+      let variableElements: VariableElement[] = [];
 
       if (employeeResponse.ok) {
-        employeeData = await employeeResponse.json()
+        employeeData = await employeeResponse.json();
       }
 
       if (creditsResponse.ok) {
-        credits = await creditsResponse.json()
+        credits = await creditsResponse.json();
       }
 
       if (advancesResponse.ok) {
-        advances = await advancesResponse.json()
+        advances = await advancesResponse.json();
       }
 
       if (variableElementsResponse.ok) {
-        variableElements = await variableElementsResponse.json()
+        variableElements = await variableElementsResponse.json();
       }
 
       setSelectedEmployee({
         ...employeeData,
         credits,
         advances,
-        variableElements
-      })
+        variableElements,
+      });
     } catch (error) {
-      console.error('Erreur lors du chargement des données:', error)
-      setSelectedEmployee(employee)
+      console.error('Error loading data:', error);
+      setSelectedEmployee(employee);
     }
-  }
+  };
 
   const handleClosePayroll = () => {
-    setSelectedEmployee(null)
-  }
+    setSelectedEmployee(null);
+  };
 
   const months = [
-    { value: '01', label: 'Janvier' },
-    { value: '02', label: 'Février' },
-    { value: '03', label: 'Mars' },
-    { value: '04', label: 'Avril' },
-    { value: '05', label: 'Mai' },
-    { value: '06', label: 'Juin' },
-    { value: '07', label: 'Juillet' },
-    { value: '08', label: 'Août' },
-    { value: '09', label: 'Septembre' },
-    { value: '10', label: 'Octobre' },
-    { value: '11', label: 'Novembre' },
-    { value: '12', label: 'Décembre' }
-  ]
+    { value: '01', label: 'January' },
+    { value: '02', label: 'February' },
+    { value: '03', label: 'March' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'May' },
+    { value: '06', label: 'June' },
+    { value: '07', label: 'July' },
+    { value: '08', label: 'August' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' },
+  ];
 
   const years = Array.from({ length: 10 }, (_, i) => {
-    const year = new Date().getFullYear() - 5 + i
-    return year.toString()
-  })
+    const year = new Date().getFullYear() - 5 + i;
+    return year.toString();
+  });
 
   if (selectedEmployee) {
     return (
       <>
         <Head>
-          <title>Bulletin de paie - AD Capital</title>
-          <meta name="description" content="Bulletin de paie" />
+          <title>Payslip - AD Capital</title>
+          <meta name="description" content="Employee payslip" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
@@ -129,38 +129,38 @@ export default function PayrollPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">
-                  {selectedEmployee.prenom} {selectedEmployee.nom}
+                  {selectedEmployee.firstName} {selectedEmployee.lastName}
                 </h2>
                 <p className="mt-1 text-sm text-gray-600">
-                  {months.find(m => m.value === selectedMonth)?.label} {selectedYear}
+                  {months.find((m) => m.value === selectedMonth)?.label} {selectedYear}
                 </p>
               </div>
               <button
                 onClick={handleClosePayroll}
                 className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
               >
-                Retour
+                Back
               </button>
             </div>
-            
+
             <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
-              <DetailedPayrollView 
-                employee={selectedEmployee} 
-                month={selectedMonth} 
-                year={selectedYear} 
+              <DetailedPayrollView
+                employee={selectedEmployee}
+                month={selectedMonth}
+                year={selectedYear}
               />
             </div>
           </div>
         </Layout>
       </>
-    )
+    );
   }
 
   return (
     <>
       <Head>
-        <title>Calcul de paie - AD Capital</title>
-        <meta name="description" content="Générez des bulletins de paie pour vos employés" />
+        <title>Payroll Calculation - AD Capital</title>
+        <meta name="description" content="Generate payslips for your employees" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -168,19 +168,19 @@ export default function PayrollPage() {
       <Layout>
         <div className="space-y-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Calcul de paie</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Payroll Calculation</h2>
             <p className="mt-1 text-sm text-gray-600">
-              Générez des bulletins de paie pour vos employés
+              Generate payslips for your employees
             </p>
           </div>
 
-          {/* Sélection de période */}
+          {/* Pay Period Selection */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Période de paie</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Pay Period</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="month" className="block text-sm font-medium text-gray-700 mb-2">
-                  Mois
+                  Month
                 </label>
                 <select
                   id="month"
@@ -197,7 +197,7 @@ export default function PayrollPage() {
               </div>
               <div>
                 <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-2">
-                  Année
+                  Year
                 </label>
                 <select
                   id="year"
@@ -215,18 +215,18 @@ export default function PayrollPage() {
             </div>
           </div>
 
-          {/* Liste des employés */}
+          {/* Employee List */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-medium text-gray-900">
-                Employés actifs ({employees.length})
+                Active Employees ({employees.length})
               </h3>
             </div>
 
             {loading ? (
               <div className="p-8 text-center">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="mt-2 text-sm text-gray-500">Chargement des employés...</p>
+                <p className="mt-2 text-sm text-gray-500">Loading employees...</p>
               </div>
             ) : error ? (
               <div className="p-8 text-center">
@@ -235,15 +235,15 @@ export default function PayrollPage() {
                   onClick={fetchEmployees}
                   className="mt-4 payroll-button-secondary"
                 >
-                  Réessayer
+                  Retry
                 </button>
               </div>
             ) : employees.length === 0 ? (
               <div className="p-8 text-center">
                 <span className="text-6xl">👥</span>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">Aucun employé actif</h3>
+                <h3 className="mt-4 text-lg font-medium text-gray-900">No Active Employees</h3>
                 <p className="mt-2 text-sm text-gray-500">
-                  Ajoutez des employés pour commencer à calculer les paies
+                  Add employees to start calculating payroll
                 </p>
               </div>
             ) : (
@@ -255,29 +255,29 @@ export default function PayrollPage() {
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                             <span className="text-sm font-medium text-blue-600">
-                              {employee.prenom.charAt(0)}{employee.nom.charAt(0)}
+                              {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                             </span>
                           </div>
                         </div>
                         <div className="ml-4">
                           <div className="flex items-center">
                             <h4 className="text-sm font-medium text-gray-900">
-                              {employee.prenom} {employee.nom}
+                              {employee.firstName} {employee.lastName}
                             </h4>
                             <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                               {employee.status}
                             </span>
                           </div>
                           <div className="mt-1 flex items-center text-sm text-gray-500">
-                            <span>{employee.matricule}</span>
+                            <span>{employee.employeeId}</span>
                             <span className="mx-2">•</span>
-                            <span>{employee.fonction}</span>
+                            <span>{employee.position}</span>
                             <span className="mx-2">•</span>
                             <span className="font-medium">
-                              {new Intl.NumberFormat('fr-MA', {
+                              {new Intl.NumberFormat('en-KE', {
                                 style: 'currency',
-                                currency: 'MAD'
-                              }).format(employee.salaireBase)} / mois
+                                currency: 'KES',
+                              }).format(employee.baseSalary)} / month
                             </span>
                           </div>
                         </div>
@@ -285,18 +285,18 @@ export default function PayrollPage() {
                       <div className="flex items-center space-x-3">
                         <div className="text-right text-sm">
                           <div className="text-gray-900 font-medium">
-                            {new Intl.NumberFormat('fr-MA', {
+                            {new Intl.NumberFormat('en-KE', {
                               style: 'currency',
-                              currency: 'MAD'
-                            }).format(employee.salaireBrut)}
+                              currency: 'KES',
+                            }).format(employee.grossSalary || employee.baseSalary)}
                           </div>
-                          <div className="text-gray-500">Salaire brut</div>
+                          <div className="text-gray-500">Gross Salary</div>
                         </div>
                         <button
                           onClick={() => handleGeneratePayroll(employee)}
                           className="payroll-button"
                         >
-                          Montrer détails
+                          Show Details
                         </button>
                       </div>
                     </div>
@@ -306,28 +306,28 @@ export default function PayrollPage() {
             )}
           </div>
 
-          {/* Actions en lot */}
+          {/* Batch Actions */}
           {employees.length > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Actions en lot</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Batch Actions</h3>
               <div className="flex space-x-4">
                 <button
                   onClick={() => {
-                    // TODO: Implémenter la génération en lot
-                    alert('Fonctionnalité à venir : génération de tous les bulletins en PDF')
+                    // TODO: Implement batch payslip generation
+                    alert('Feature coming soon: Generate all payslips in PDF');
                   }}
                   className="payroll-button"
                 >
-                  Générer tous les bulletins (PDF)
+                  Generate All Payslips (PDF)
                 </button>
                 <button
                   onClick={() => {
-                    // TODO: Implémenter l'export Excel
-                    alert('Fonctionnalité à venir : export Excel du livre de paie')
+                    // TODO: Implement Excel export
+                    alert('Feature coming soon: Export payroll ledger in Excel');
                   }}
                   className="payroll-button-secondary"
                 >
-                  Exporter livre de paie (Excel)
+                  Export Payroll Ledger (Excel)
                 </button>
               </div>
             </div>
@@ -335,5 +335,5 @@ export default function PayrollPage() {
         </div>
       </Layout>
     </>
-  )
+  );
 }

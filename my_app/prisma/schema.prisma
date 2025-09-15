@@ -188,6 +188,7 @@ model CreditInstallment { //loan installment
   interestTax       Float          // e.g. 10% Withholding Tax
   insurance         Float
   remainingPrincipal Float
+  remainingBalance  Float // remaining balance after this payment
   status            InstallmentStatus @default(PENDING)
   paymentDate       DateTime?
   amountPaid        Float?

@@ -1,250 +1,296 @@
-import { Employee, Credit, Advance, VariableElement } from '@prisma/client'
-import { calculerPaieComplete, type CalculPayrollResult } from '../lib/payrollBaseData'
+import { Employee, Credit, Advance, VariableElement } from '@prisma/client';
+import { calculateCompletePayroll, type  PayrollCalculationResult} from '../lib/payrollBaseData';
+import { EmployeePayrollData } from '@/lib/payrollCalculations';
 
-interface PayrollSlipProps {
+interface PayslipProps {
 employee: Employee & {
-    credits?: Credit[]
-    advances?: Advance[]
-    variableElements?: VariableElement[]
+    credits?: Credit[];
+    advances?: Advance[];
+    variableElements?: VariableElement[];
+};
+month: string;
+year: string;
 }
-month: string
-year: string
-}
 
-export default function PayrollSlip({ employee, month, year }: PayrollSlipProps) {
-// Calculer les retenues de crédit depuis la nouvelle table - FILTRER STRICTEMENT PAR EMPLOYÉ
-const activeCredits = employee.credits?.filter(credit => 
-    credit.statut === 'ACTIF' && credit.employeeId === employee.id
-) || []
-const totalCreditRetenues = activeCredits.reduce((total, credit) => total + credit.mensualite, 0)
+export default function Payslip({ employee, month, year }: PayslipProps) {
+// Calculate credit deductions - FILTER STRICTLY BY EMPLOYEE
+const activeCredits = employee.credits?.filter(
+    (credit) => credit.status === 'ACTIVE' && credit.employeeId === employee.id
+) || [];
+const totalCreditDeductions = activeCredits.reduce((total, credit) => total + credit.monthlyPayment, 0);
 
-// Calculer les avances actives - FILTRER STRICTEMENT PAR EMPLOYÉ
-const activeAdvances = employee.advances?.filter(advance => 
-    advance.statut === 'EN_COURS' && advance.employeeId === employee.id
-) || []
-const totalAdvanceRetenues = activeAdvances.reduce((total, advance) => total + advance.montantMensualite, 0)
+// Calculate active advances - FILTER STRICTLY BY EMPLOYEE
+const activeAdvances = employee.advances?.filter(
+    (advance) => advance.status === 'IN_PROGRESS' && advance.employeeId === employee.id
+) || [];
+const totalAdvanceDeductions = activeAdvances.reduce((total, advance) => total + advance.installmentAmount, 0);
 
-// Traiter les éléments variables - FILTRER STRICTEMENT PAR EMPLOYÉ ET PÉRIODE
-const variableElements = employee.variableElements?.filter(el => 
-    el.employeeId === employee.id && el.mois === month && el.annee === year
-) || []
-const variableGains = variableElements.filter(el => 
-    ['HEURES_SUP', 'PRIME_EXCEPTIONNELLE'].includes(el.type) || 
-    (['CONGE', 'AUTRE'].includes(el.type) && el.montant > 0)
-)
-const variableRetenues = variableElements.filter(el => 
-    ['ABSENCE', 'RETARD', 'AVANCE'].includes(el.type) || 
-    (['CONGE', 'AUTRE'].includes(el.type) && el.montant < 0)
-)
+// Process variable elements - FILTER STRICTLY BY EMPLOYEE AND PERIOD
+const variableElements = employee.variableElements?.filter(
+    (el) => el.employeeId === employee.id && el.month === month && el.year === year
+) || [];
+const variableGains = variableElements.filter(
+    (el) =>
+    ['OVERTIME', 'BONUS'].includes(el.type) ||
+    (['LEAVE', 'OTHER'].includes(el.type) && el.amount > 0)
+);
+const variableDeductions = variableElements.filter(
+    (el) =>
+    ['ABSENCE', 'LATE', 'ADVANCE'].includes(el.type) ||
+    (['LEAVE', 'OTHER'].includes(el.type) && el.amount < 0)
+);
 
-const totalVariableGains = variableGains.reduce((total, el) => total + el.montant, 0)
-const totalVariableRetenues = variableRetenues.reduce((total, el) => total + Math.abs(el.montant), 0)
+const totalVariableGains = variableGains.reduce((total, el) => total + el.amount, 0);
+const totalVariableDeductions = variableDeductions.reduce((total, el) => total + Math.abs(el.amount), 0);
 
-// Calculer les intérêts déductibles (estimation basée sur les notes ou calcul)
-const interetsDeductibles = activeCredits.reduce((total, credit) => {
-    // Si les notes contiennent les intérêts déductibles, les extraire
-    if (credit.notes && credit.notes.includes('Intérêts déductibles:')) {
-    const match = credit.notes.match(/Intérêts déductibles:\s*([\d,]+\.?\d*)/);
+// Calculate deductible interest (based on notes or estimation)
+const deductibleInterest = activeCredits.reduce((total, credit) => {
+    // If notes contain deductible interest, extract it
+    if (credit.notes && credit.notes.includes('Deductible Interest:')) {
+    const match = credit.notes.match(/Deductible Interest:\s*([\d,]+\.?\d*)/);
     if (match) {
         return total + parseFloat(match[1].replace(',', ''));
     }
     }
-    // Sinon, estimer les intérêts (environ 44% de la mensualité pour un crédit immobilier)
-    return total + (credit.type === 'LOGEMENT' ? credit.mensualite * 0.44 : 0);
-}, 0)
+    // Otherwise, estimate interest (approx. 44% of monthly payment for mortgage)
+    return total + (credit.type === 'HOUSING' ? credit.monthlyPayment * 0.44 : 0);
+}, 0);
 
-// Calculer la paie complète avec toutes les cotisations (crédits + avances + éléments variables)
-const totalAutresRetenues = totalCreditRetenues + totalAdvanceRetenues + totalVariableRetenues
-const payrollResult: CalculPayrollResult = calculerPaieComplete({
-    salaireBase: employee.salaireBase + totalVariableGains, // Ajouter les gains variables au salaire de base
-    anciennete: employee.anciennete,
-    primeTransport: employee.primeTransport,
-    indemniteRepresentation: employee.indemniteRepresentation,
-    interetsCredit: interetsDeductibles,
-    autresRetenues: totalAutresRetenues,
-    joursTravailles: employee.nbreJourMois
-})
+// Calculate complete payroll with all deductions (credits + advances + variable elements)
+const totalOtherDeductions = totalCreditDeductions + totalAdvanceDeductions + totalVariableDeductions;
+const payrollResult: PayrollCalculationResult = calculateCompletePayroll({
+    lastName: employee.lastName,
+    firstName: employee.firstName,
+    employeeId: employee.employeeId,
+    idNumber: employee.idNumber || '',
+    nssfNumber: employee.nssfNumber || '',
+    maritalStatus: employee.maritalStatus as 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED',
+    dateOfBirth: employee.dateOfBirth || new Date(),
+    hireDate: employee.hireDate,
+    seniority: employee.seniority || 0,
+    numberOfDeductions: employee.numberOfDeductions || 0,
+    numberOfDaysPerMonth: employee.numberOfDaysPerMonth || 30,
+    baseSalary: employee.baseSalary + totalVariableGains, // Add variable gains to base salary
+    housingAllowance: employee.housingAllowance || 0,
+    mealAllowance: employee.mealAllowance || 0,
+    transportAllowance: employee.transportAllowance || 0,
+    representationAllowance: employee.representationAllowance || 0,
+    insurances: {
+    comprehensiveHealthInsurance: false,
+    foreignHealthCover: false,
+    enhancedDisabilityCover: false,
+    },
+    mortgageCredit: activeCredits.find((c) => c.type === 'HOUSING')
+    ? { monthlyAmount: activeCredits.find((c) => c.type === 'HOUSING')!.monthlyPayment, interest: deductibleInterest }
+    : undefined,
+    consumerCredit: activeCredits.find((c) => c.type === 'CONSUMER')
+    ? { monthlyAmount: activeCredits.find((c) => c.type === 'CONSUMER')!.monthlyPayment }
+    : undefined,
+    salaryAdvance: activeAdvances.length > 0 ? { monthlyAmount: totalAdvanceDeductions } : undefined,
+    variableElements: variableElements.map((el) => ({
+    type: el.type as 'OVERTIME' | 'BONUS' | 'ABSENCE' | 'LATE' | 'ADVANCE' | 'LEAVE' | 'OTHER',
+    amount: el.amount,
+    hours: el.hours || 0,
+    description: el.description || '',
+    })),
+    bankAccount: employee.bankAccount || '',
+    bankBranch: employee.bankBranch || '',
+    useNssfEmployee: employee.subjectToNssf ?? true,
+    useShifEmployee: employee.subjectToShif ?? true,
+    usePensionEmployee: false,
+    useInsuranceDiversifiedEmployee: false,
+    bonuses: totalVariableGains,
+    overtimePay: variableGains.find((el) => el.type === 'OVERTIME')?.amount || 0,
+    loanRepayment: employee.loanRepayment || 0,
+    deductibleInterest,
+    otherDeductions: totalOtherDeductions,
+    helbLoan: employee.helbLoan || 0,
+    subjectToNssf: employee.subjectToNssf ?? true,
+    subjectToShif: employee.subjectToShif ?? true,
+    subjectToHousingLevy: employee.subjectToHousingLevy ?? true,
+} as EmployeePayrollData);
 
 const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
+    style: 'currency',
+    currency: 'KES',
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-    }).format(amount)
-}
+    maximumFractionDigits: 2,
+    }).format(amount);
+};
 
 const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat('en-KE', {
     day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-    }).format(new Date(date))
-}
+    month: 'long',
+    year: 'numeric',
+    }).format(new Date(date));
+};
 
 const getMonthName = (monthNum: string) => {
     const months = [
-    'JANVIER', 'FÉVRIER', 'MARS', 'AVRIL', 'MAI', 'JUIN',
-    'JUILLET', 'AOÛT', 'SEPTEMBRE', 'OCTOBRE', 'NOVEMBRE', 'DÉCEMBRE'
-    ]
-    return months[parseInt(monthNum) - 1] || 'JANVIER'
-}
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    return months[parseInt(monthNum) - 1] || 'January';
+};
 
-const getSituationFamiliale = () => {
-    switch (employee.situationFamiliale) {
-    case 'CELIBATAIRE': return 'Célibataire'
-    case 'MARIE': return 'Marié(e)'
-    case 'DIVORCE': return 'Divorcé(e)'
-    case 'VEUF': return 'Veuf/Veuve'
-    default: return employee.situationFamiliale
+const getMaritalStatus = () => {
+    switch (employee.maritalStatus) {
+    case 'SINGLE': return 'Single';
+    case 'MARRIED': return 'Married';
+    case 'DIVORCED': return 'Divorced';
+    case 'WIDOWED': return 'Widowed';
+    default: return employee.maritalStatus;
     }
-}
+};
 
-// Calculer les taux en pourcentage
-const tauxCNSS = 4.48
-const tauxAMO = 2.26
-const tauxAssuranceDivers = 1.26
-const tauxRetraite = 6.00
+// Kenyan contribution rates
+const nssfRate = 0.06; // 6% (capped as per Kenyan NSSF rules)
+const shifRate = 0.0275; // 2.75% (SHIF contribution)
+const housingLevyRate = 0.015; // 1.5% (Housing Levy)
 
 return (
-    <div className="payroll-slip bg-white p-8 max-w-4xl mx-auto print:p-4" style={{ fontFamily: 'Arial, sans-serif', fontSize: '12px' }}>
-    {/* En-tête */}
+    <div className="payslip bg-white p-8 max-w-4xl mx-auto print:p-4" style={{ fontFamily: 'Arial, sans-serif', fontSize: '12px' }}>
+    {/* Header */}
     <div className="text-center mb-6">
         <h1 className="text-lg font-bold underline">
-        Bulletin de paie du mois de {getMonthName(month)} {year}
+        Payslip for {getMonthName(month)} {year}
         </h1>
     </div>
 
-    {/* Informations employé */}
+    {/* Employee Information */}
     <div className="mb-6">
-        <h2 className="text-base font-bold mb-3">{employee.prenom} {employee.nom}</h2>
-        
+        <h2 className="text-base font-bold mb-3">{employee.firstName} {employee.lastName}</h2>
+
         <div className="grid grid-cols-2 gap-8 text-xs">
         <div className="space-y-1">
             <div className="flex">
-            <span className="w-32">Fonction</span>
+            <span className="w-32">Position</span>
             <span className="mr-4">:</span>
-            <span>{employee.fonction}</span>
+            <span>{employee.position}</span>
             </div>
             <div className="flex">
-            <span className="w-32">Date de naissance</span>
+            <span className="w-32">Date of Birth</span>
             <span className="mr-4">:</span>
-            <span>{employee.dateNaissance ? formatDate(employee.dateNaissance) : 'Non renseigné'}</span>
+            <span>{employee.dateOfBirth ? formatDate(employee.dateOfBirth) : 'Not Provided'}</span>
             </div>
             <div className="flex">
-            <span className="w-32">Date d'embauche</span>
+            <span className="w-32">Hire Date</span>
             <span className="mr-4">:</span>
-            <span>{formatDate(employee.dateEmbauche)}</span>
+            <span>{formatDate(employee.hireDate)}</span>
             </div>
         </div>
-        
+
         <div className="space-y-1">
             <div className="flex">
-            <span className="w-32">Matricule</span>
+            <span className="w-32">Employee ID</span>
             <span className="mr-4">:</span>
-            <span>{employee.matricule}</span>
+            <span>{employee.employeeId}</span>
             </div>
             <div className="flex">
-            <span className="w-32">Situation familiale</span>
+            <span className="w-32">Marital Status</span>
             <span className="mr-4">:</span>
-            <span>{getSituationFamiliale()}</span>
+            <span>{getMaritalStatus()}</span>
             </div>
             <div className="flex">
-            <span className="w-32">Compte bancaire</span>
+            <span className="w-32">Bank Account</span>
             <span className="mr-4">:</span>
-            <span>{employee.compteBancaire || 'Non renseigné'}</span>
+            <span>{employee.bankAccount || 'Not Provided'}</span>
             </div>
             <div className="flex">
-            <span className="w-32">CIN</span>
+            <span className="w-32">ID Number</span>
             <span className="mr-4">:</span>
-            <span>{employee.cin || 'Non renseigné'}</span>
+            <span>{employee.idNumber || 'Not Provided'}</span>
             </div>
             <div className="flex">
-            <span className="w-32">CNSS</span>
+            <span className="w-32">NSSF Number</span>
             <span className="mr-4">:</span>
-            <span>{employee.cnss || 'Non renseigné'}</span>
+            <span>{employee.nssfNumber || 'Not Provided'}</span>
             </div>
         </div>
         </div>
     </div>
 
-    {/* Tableau de paie */}
+    {/* Payslip Table */}
     <div className="border-2 border-black text-xs">
-        {/* En-tête du tableau */}
+        {/* Table Header */}
         <div className="grid grid-cols-6 border-b-2 border-black bg-gray-100 font-bold">
-        <div className="border-r border-black p-1 text-center">Rubrique</div>
-        <div className="border-r border-black p-1 text-center">Nb Jours</div>
+        <div className="border-r border-black p-1 text-center">Item</div>
+        <div className="border-r border-black p-1 text-center">Days</div>
         <div className="border-r border-black p-1 text-center">Base</div>
-        <div className="border-r border-black p-1 text-center">Taux</div>
-        <div className="border-r border-black p-1 text-center">Gains</div>
-        <div className="p-1 text-center">Retenues</div>
+        <div className="border-r border-black p-1 text-center">Rate</div>
+        <div className="border-r border-black p-1 text-center">Earnings</div>
+        <div className="p-1 text-center">Deductions</div>
         </div>
 
-        {/* Lignes de gains */}
+        {/* Earnings Rows */}
         <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1">Salaire de base</div>
-        <div className="border-r border-black p-1 text-center">{employee.nbreJourMois}</div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.salaireBase)}</div>
+        <div className="border-r border-black p-1">Base Salary</div>
+        <div className="border-r border-black p-1 text-center">{employee.numberOfDaysPerMonth}</div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.grossSalary)}</div>
         <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.salaireBase)}</div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.grossSalary)}</div>
         <div className="p-1"></div>
         </div>
 
         <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1">Prime d'ancienneté</div>
+        <div className="border-r border-black p-1">Seniority Bonus</div>
         <div className="border-r border-black p-1"></div>
         <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-center">{(employee.tauxAnciennete * 100).toFixed(1)}%</div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.primeAnciennete)}</div>
+        <div className="border-r border-black p-1 text-center">{(payrollResult.earnings.seniorityBonus / payrollResult.grossSalary * 100).toFixed(1)}%</div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.earnings.seniorityBonus)}</div>
         <div className="p-1"></div>
         </div>
 
         <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1">Indemnité de logement</div>
+        <div className="border-r border-black p-1">Housing Allowance</div>
         <div className="border-r border-black p-1"></div>
         <div className="border-r border-black p-1"></div>
         <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(employee.indemniteLogement)}</div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(employee.housingAllowance || 0)}</div>
         <div className="p-1"></div>
         </div>
 
         <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1">Prime de transport</div>
+        <div className="border-r border-black p-1">Transport Allowance</div>
         <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.primeTransport)}</div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(employee.transportAllowance || 0)}</div>
         <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.primeTransport)}</div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(employee.transportAllowance || 0)}</div>
         <div className="p-1"></div>
         </div>
 
         <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1">Indemnité de représentation</div>
+        <div className="border-r border-black p-1">Representation Allowance</div>
         <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.indemniteRepresentation)}</div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(employee.representationAllowance || 0)}</div>
         <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.indemniteRepresentation)}</div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(employee.representationAllowance || 0)}</div>
         <div className="p-1"></div>
         </div>
 
-        {/* Éléments variables - Gains */}
+        {/* Variable Elements - Earnings */}
         {variableGains.map((element) => (
         <div key={element.id} className="grid grid-cols-6 border-b border-black">
             <div className="border-r border-black p-1">
-            {element.type === 'HEURES_SUP' ? 'Heures supplémentaires' :
-            element.type === 'PRIME_EXCEPTIONNELLE' ? 'Prime exceptionnelle' :
+            {element.type === 'OVERTIME' ? 'Overtime Pay' :
+            element.type === 'BONUS' ? 'Exceptional Bonus' :
             element.description}
             </div>
             <div className="border-r border-black p-1 text-center">
-            {element.heures ? `${element.heures}h` : ''}
+            {element.hours ? `${element.hours}h` : ''}
             </div>
             <div className="border-r border-black p-1 text-right">
-            {element.taux ? formatCurrency(element.taux) : ''}
+            {element.rate ? formatCurrency(element.rate) : ''}
             </div>
             <div className="border-r border-black p-1"></div>
-            <div className="border-r border-black p-1 text-right">{formatCurrency(element.montant)}</div>
+            <div className="border-r border-black p-1 text-right">{formatCurrency(element.amount)}</div>
             <div className="p-1"></div>
         </div>
         ))}
 
-        {/* Ligne vide */}
+        {/* Empty Row */}
         <div className="grid grid-cols-6 border-b border-black">
         <div className="border-r border-black p-1"></div>
         <div className="border-r border-black p-1"></div>
@@ -254,157 +300,108 @@ return (
         <div className="p-1"></div>
         </div>
 
-        {/* Salaire brut */}
+        {/* Gross Salary */}
         <div className="grid grid-cols-6 border-b border-black font-bold">
-        <div className="border-r border-black p-1">Salaire Brut</div>
+        <div className="border-r border-black p-1">Gross Salary</div>
         <div className="border-r border-black p-1"></div>
         <div className="border-r border-black p-1"></div>
         <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.salaireBrut)}</div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.grossSalary)}</div>
         <div className="p-1"></div>
         </div>
 
-        {/* Salaire brut imposable */}
+        {/* Taxable Gross Salary */}
         <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1">Salaire brut imposable</div>
+        <div className="border-r border-black p-1">Taxable Gross Salary</div>
         <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.salaireBrutImposable)}</div>
-        <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1"></div>
-        <div className="p-1"></div>
-        </div>
-
-        {/* Cotisations salariales */}
-        <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1">CNSS Prestations - Part Salariale</div>
-        <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(Math.min(payrollResult.salaireBrutImposable, 6000))}</div>
-        <div className="border-r border-black p-1 text-center">{tauxCNSS.toFixed(2)}%</div>
-        <div className="border-r border-black p-1"></div>
-        <div className="p-1 text-right">{formatCurrency(payrollResult.cnssPrestation)}</div>
-        </div>
-
-        <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1">AMO - Part Salariale</div>
-        <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.salaireBrutImposable)}</div>
-        <div className="border-r border-black p-1 text-center">{tauxAMO.toFixed(2)}%</div>
-        <div className="border-r border-black p-1"></div>
-        <div className="p-1 text-right">{formatCurrency(payrollResult.amoSalariale)}</div>
-        </div>
-
-        <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1">Cotisation Assurance : Décès</div>
-        <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.salaireBrutImposable)}</div>
-        <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1"></div>
-        <div className="p-1 text-right">0,00</div>
-        </div>
-
-        <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1">Cotisation Assurance : Incapacité</div>
-        <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.salaireBrutImposable)}</div>
-        <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1"></div>
-        <div className="p-1 text-right">0,00</div>
-        </div>
-
-        <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1">Assurance Divers - Part Salariale</div>
-        <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.salaireBrutImposable)}</div>
-        <div className="border-r border-black p-1 text-center">{tauxAssuranceDivers.toFixed(2)}%</div>
-        <div className="border-r border-black p-1"></div>
-        <div className="p-1 text-right">{formatCurrency(payrollResult.assuranceDiversSalariale)}</div>
-        </div>
-
-        <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1">Retraite - Part Salariale</div>
-        <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.salaireBrutImposable)}</div>
-        <div className="border-r border-black p-1 text-center">{tauxRetraite.toFixed(2)}%</div>
-        <div className="border-r border-black p-1"></div>
-        <div className="p-1 text-right">{formatCurrency(payrollResult.retraiteSalariale)}</div>
-        </div>
-
-        {/* Ligne vide */}
-        <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1"></div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.taxableGrossSalary)}</div>
         <div className="border-r border-black p-1"></div>
         <div className="border-r border-black p-1"></div>
         <div className="p-1"></div>
         </div>
 
-        {/* IGR */}
+        {/* Employee Contributions */}
         <div className="grid grid-cols-6 border-b border-black">
-        <div className="border-r border-black p-1">Impôts sur le revenu</div>
+        <div className="border-r border-black p-1">NSSF Contribution</div>
         <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.netNetImposable)}</div>
-        <div className="border-r border-black p-1 text-center">37,00%</div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.taxableGrossSalary)}</div>
+        <div className="border-r border-black p-1 text-center">{(nssfRate * 100).toFixed(2)}%</div>
         <div className="border-r border-black p-1"></div>
-        <div className="p-1 text-right">{formatCurrency(payrollResult.igr)}</div>
+        <div className="p-1 text-right">{formatCurrency(payrollResult.employeeContributions.nssfEmployee)}</div>
         </div>
 
-        {/* Ligne vide */}
         <div className="grid grid-cols-6 border-b border-black">
+        <div className="border-r border-black p-1">SHIF Contribution</div>
         <div className="border-r border-black p-1"></div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.taxableGrossSalary)}</div>
+        <div className="border-r border-black p-1 text-center">{(shifRate * 100).toFixed(2)}%</div>
         <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1"></div>
-        <div className="p-1"></div>
+        <div className="p-1 text-right">{formatCurrency(payrollResult.employeeContributions.shifEmployee)}</div>
         </div>
 
-        {/* Autres retenues - Crédits actifs */}
+        <div className="grid grid-cols-6 border-b border-black">
+        <div className="border-r border-black p-1">Housing Levy</div>
+        <div className="border-r border-black p-1"></div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.taxableGrossSalary)}</div>
+        <div className="border-r border-black p-1 text-center">{(housingLevyRate * 100).toFixed(2)}%</div>
+        <div className="border-r border-black p-1"></div>
+        <div className="p-1 text-right">{formatCurrency(payrollResult.employeeContributions.housingLevy)}</div>
+        </div>
+
+        {/* PAYE Tax */}
+        <div className="grid grid-cols-6 border-b border-black">
+        <div className="border-r border-black p-1">PAYE Tax</div>
+        <div className="border-r border-black p-1"></div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.taxCalculation.netTaxable)}</div>
+        <div className="border-r border-black p-1"></div>
+        <div className="border-r border-black p-1"></div>
+        <div className="p-1 text-right">{formatCurrency(payrollResult.taxCalculation.incomeTax)}</div>
+        </div>
+
+        {/* Other Deductions - Active Credits */}
         {activeCredits.map((credit, index) => (
         <div key={credit.id} className="grid grid-cols-6 border-b border-black">
             <div className="border-r border-black p-1">
-            Remboursement Crédit {credit.type === 'LOGEMENT' ? 'immo' : 'conso'}
+            {credit.type === 'HOUSING' ? 'Mortgage Repayment' : 'Consumer Loan Repayment'}
             </div>
             <div className="border-r border-black p-1"></div>
             <div className="border-r border-black p-1"></div>
             <div className="border-r border-black p-1"></div>
             <div className="border-r border-black p-1"></div>
-            <div className="p-1 text-right">{formatCurrency(credit.mensualite)}</div>
+            <div className="p-1 text-right">{formatCurrency(credit.monthlyPayment)}</div>
         </div>
         ))}
 
-        {/* Autres retenues - Avances sur salaire actives */}
+        {/* Other Deductions - Active Advances */}
         {activeAdvances.map((advance, index) => (
         <div key={advance.id} className="grid grid-cols-6 border-b border-black">
-            <div className="border-r border-black p-1">
-            Remboursement Avance sur salaire
-            </div>
+            <div className="border-r border-black p-1">Salary Advance Repayment</div>
             <div className="border-r border-black p-1"></div>
             <div className="border-r border-black p-1"></div>
             <div className="border-r border-black p-1"></div>
             <div className="border-r border-black p-1"></div>
-            <div className="p-1 text-right">{formatCurrency(advance.montantMensualite)}</div>
+            <div className="p-1 text-right">{formatCurrency(advance.installmentAmount)}</div>
         </div>
         ))}
 
-        {/* Éléments variables - Retenues */}
-        {variableRetenues.map((element) => (
+        {/* Variable Elements - Deductions */}
+        {variableDeductions.map((element) => (
         <div key={element.id} className="grid grid-cols-6 border-b border-black">
             <div className="border-r border-black p-1">
-            {element.type === 'ABSENCE' ? 'Retenue absence' :
-            element.type === 'RETARD' ? 'Retenue retard' :
-            element.type === 'AVANCE' ? 'Avance sur salaire' :
+            {element.type === 'ABSENCE' ? 'Absence Deduction' :
+            element.type === 'LATENESS' ? 'Late Deduction' :
+            element.type === 'ADVANCE' ? 'Salary Advance' :
             element.description}
             </div>
             <div className="border-r border-black p-1"></div>
             <div className="border-r border-black p-1"></div>
             <div className="border-r border-black p-1"></div>
             <div className="border-r border-black p-1"></div>
-            <div className="p-1 text-right">{formatCurrency(Math.abs(element.montant))}</div>
+            <div className="p-1 text-right">{formatCurrency(Math.abs(element.amount))}</div>
         </div>
         ))}
 
-        {/* Ligne vide */}
+        {/* Empty Row */}
         <div className="grid grid-cols-6 border-b border-black">
         <div className="border-r border-black p-1"></div>
         <div className="border-r border-black p-1"></div>
@@ -414,17 +411,17 @@ return (
         <div className="p-1"></div>
         </div>
 
-        {/* Totaux */}
+        {/* Totals */}
         <div className="grid grid-cols-6 border-b-2 border-black font-bold">
-        <div className="border-r border-black p-1">Totaux</div>
+        <div className="border-r border-black p-1">Totals</div>
         <div className="border-r border-black p-1"></div>
         <div className="border-r border-black p-1"></div>
         <div className="border-r border-black p-1"></div>
-        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.salaireBrut)}</div>
-        <div className="p-1 text-right">{formatCurrency(payrollResult.totalRetenues)}</div>
+        <div className="border-r border-black p-1 text-right">{formatCurrency(payrollResult.grossSalary)}</div>
+        <div className="p-1 text-right">{formatCurrency(payrollResult.totalDeductions)}</div>
         </div>
 
-        {/* Ligne vide */}
+        {/* Empty Row */}
         <div className="grid grid-cols-6 border-b border-black">
         <div className="border-r border-black p-1"></div>
         <div className="border-r border-black p-1"></div>
@@ -434,38 +431,38 @@ return (
         <div className="p-1"></div>
         </div>
 
-        {/* Net à payer */}
+        {/* Net Payable */}
         <div className="grid grid-cols-6 font-bold text-base">
-        <div className="border-r border-black p-2">Net à payer</div>
+        <div className="border-r border-black p-2">Net Payable</div>
         <div className="border-r border-black p-2"></div>
         <div className="border-r border-black p-2"></div>
         <div className="border-r border-black p-2"></div>
-        <div className="border-r border-black p-2 text-right">{formatCurrency(payrollResult.salaireNetAPayer)}</div>
+        <div className="border-r border-black p-2 text-right">{formatCurrency(payrollResult.netSalaryPayable)}</div>
         <div className="p-2"></div>
         </div>
     </div>
 
-    {/* Boutons d'action pour l'impression */}
+    {/* Action Buttons for Printing */}
     <div className="mt-6 text-center print:hidden">
         <button
         onClick={() => window.print()}
         className="payroll-button mr-4"
         >
-        Imprimer
+        Print
         </button>
         <button
         onClick={() => {
-            const element = document.querySelector('.payroll-slip')
+            const element = document.querySelector('.payslip');
             if (element) {
-            const printWindow = window.open('', '_blank')
+            const printWindow = window.open('', '_blank');
             if (printWindow) {
                 printWindow.document.write(`
                 <html>
                     <head>
-                    <title>Bulletin de paie - ${employee.prenom} ${employee.nom}</title>
+                    <title>Payslip - ${employee.firstName} ${employee.lastName}</title>
                     <style>
                         body { font-family: Arial, sans-serif; margin: 20px; }
-                        .payroll-slip { max-width: none; }
+                        .payslip { max-width: none; }
                         table { border-collapse: collapse; width: 100%; }
                         td, th { border: 1px solid black; padding: 4px; text-align: left; }
                         .text-right { text-align: right; }
@@ -478,17 +475,17 @@ return (
                     ${element.innerHTML}
                     </body>
                 </html>
-                `)
-                printWindow.document.close()
-                printWindow.print()
+                `);
+                printWindow.document.close();
+                printWindow.print();
             }
             }
         }}
         className="payroll-button-secondary"
         >
-        Télécharger PDF
+        Download PDF
         </button>
     </div>
     </div>
-)
+);
 }

@@ -1,54 +1,53 @@
-"use client";
 import React, { useState, useEffect } from 'react';
 import { X, CreditCard, Building, Calendar, DollarSign } from 'lucide-react';
 
 interface Employee {
 id: string;
-matricule: string;
-nom: string;
-prenom: string;
-fonction: string;
-compteBancaire?: string;
-agence?: string;
+employeeId: string;
+lastName: string;
+firstName: string;
+position: string;   
+bankAccount?: string;
+bankBranch?: string;  
 }
 
-interface Credit {
+interface Loan { 
 id: string;
 employee: Employee;
-type: 'LOGEMENT' | 'CONSOMMATION';
-montantCredit: number;
-mensualite: number;
-dateDebut: Date;
-dateFin: Date;
-soldeRestant: number;
-montantRembourse: number;
-statut: 'ACTIF' | 'SOLDE' | 'SUSPENDU';
-banque: string;
+type: 'HOUSING' | 'CONSUMER';
+loanAmount: number;
+monthlyPayment: number; 
+startDate: Date;
+endDate: Date; 
+remainingBalance: number; 
+amountRepaid: number; 
+status: 'ACTIVE' | 'PAID_OFF' | 'SUSPENDED'; 
+bank: string;
 notes?: string;
 createdAt: Date;
 }
 
-interface AddCreditModalProps {
+interface AddLoanModalProps { // 'AddCreditModalProps' translated
 isOpen: boolean;
 onClose: () => void;
 onSuccess: () => void;
 employees: Employee[];
-editCredit?: Credit;
+editLoan?: Loan;
 }
 
-const AddCreditModal: React.FC<AddCreditModalProps> = ({
+const AddCreditModal: React.FC<AddLoanModalProps> = ({ // Component name translated
 isOpen,
 onClose,
 onSuccess,
 employees,
-editCredit
+editLoan                  // 'editCredit' translated
 }) => {
 const [formData, setFormData] = useState({
     employeeId: '',
-    type: 'LOGEMENT' as 'LOGEMENT' | 'CONSOMMATION',
-    montantMensuel: '',
-    dateDebut: '',
-    banque: '',
+    type: 'HOUSING' as 'HOUSING' | 'CONSUMER', // Default type translated
+    monthlyAmount: '',      // 'montantMensuel' translated
+    startDate: '',          // 'dateDebut' translated
+    bank: '',               // 'banque' translated
     notes: ''
 });
 
@@ -60,129 +59,135 @@ useEffect(() => {
     if (!isOpen) {
     setFormData({
         employeeId: '',
-        type: 'LOGEMENT',
-        montantMensuel: '',
-        dateDebut: '',
-        banque: '',
+        type: 'HOUSING',
+        monthlyAmount: '',
+        startDate: '',
+        bank: '',
         notes: ''
     });
     setErrors({});
-    } else if (editCredit) {
-    // Pré-remplir le formulaire avec les données du crédit à modifier
+    } else if (editLoan) {
+    // Pre-fill the form with the loan data to be edited
     setFormData({
-        employeeId: editCredit.employee.id,
-        type: editCredit.type,
-        montantMensuel: editCredit.mensualite.toString(),
-        dateDebut: new Date(editCredit.dateDebut).toISOString().split('T')[0],
-        banque: editCredit.banque,
-        notes: editCredit.notes || ''
+        employeeId: editLoan.employee.id,
+        type: editLoan.type,
+        monthlyAmount: editLoan.monthlyPayment.toString(),
+        startDate: new Date(editLoan.startDate).toISOString().split('T')[0],
+        bank: editLoan.bank,
+        notes: editLoan.notes || ''
     });
     }
-}, [isOpen, editCredit]);
+}, [isOpen, editLoan]);
+
+// Comprehensive Kenyan bank identification function
+function identifyBank(account: string): string {
+    if (!account || typeof account !== 'string' || account.length < 2) {
+        return 'Invalid account number';
+    }
+
+    const prefix = account.substring(0, 2).padStart(2, '0'); // Ensure 2 digits
+    let bankName = 'Bank not identified';
+
+    // Comprehensive mapping of bank codes to names (all major banks in Kenya, 2025)
+    const bankMap: { [key: string]: string } = {
+        '01': 'Kenya Commercial Bank (KCB)',
+        '02': 'National Bank of Kenya (NBK)',
+        '03': 'Absa Bank Kenya',
+        '04': 'Standard Chartered Bank Kenya',
+        '05': 'Co-operative Bank of Kenya',
+        '06': 'Family Bank',
+        '07': 'Gulf African Bank',
+        '08': 'NCBA Bank Kenya (Commercial Bank of Africa)',
+        '11': 'I&M Bank',
+        '12': 'Diamond Trust Bank (DTB) Kenya',
+        '13': 'Consolidated Bank of Kenya',
+        '14': 'Development Bank of Kenya',
+        '15': 'NCBA Bank Kenya (NIC Bank)',
+        '16': 'Middle East Bank Kenya',
+        '17': 'Dubai Islamic Bank Kenya',
+        '18': 'First Community Bank',
+        '19': 'Bank of Africa Kenya',
+        '20': 'Ecobank Kenya',
+        '21': 'Credit Bank',
+        '22': 'United Bank for Africa (UBA) Kenya',
+        '23': 'Guaranty Trust Bank (GTBank) Kenya',
+        '24': 'Paramount Universal Bank',
+        '25': 'Prime Bank',
+        '26': 'Access Bank Kenya',
+        '27': 'Kingdom Bank',
+        '28': 'HF Group (Housing Finance)',
+        '29': 'Stanbic Bank Kenya',
+        '30': 'Trans-National Bank',
+        '31': 'Victoria Commercial Bank',
+        '32': 'Charterhouse Bank',
+        '33': 'Imperial Bank (Legacy/Defunct)',
+        '34': 'Kingdom Bank (Jamii Bora)',
+        '35': 'African Banking Corporation',
+        '52': 'Habib Bank AG Zurich',
+        '53': 'Fidelity Commercial Bank',
+        '55': 'Bank of Baroda (Kenya)',
+        '56': 'Bank of India (Kenya)',
+        '57': 'Consolidated Finance Bank',
+        '62': 'Giro Commercial Bank',
+        '63': 'Equity Bank Kenya',
+        '64': 'Faulu Microfinance Bank',
+        '65': 'Kenya Women Microfinance Bank',
+        '66': 'SME Bank of Kenya',
+        '67': 'Maisha Microfinance Bank',
+        '68': 'United Bank for Africa (UBA) Kenya',
+        '69': 'Dubai Islamic Bank (DIB) Kenya',
+        '70': 'Commercial International Bank (CIB) Kenya',
+        '71': 'M-Oriental Bank Kenya',
+        '72': 'Premier Bank Kenya'
+    };
+
+    bankName = bankMap[prefix] || `Other Kenyan Bank (Prefix: ${prefix} - Verify with CBK)`;
+    return bankName;
+}
 
 const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    
-    // Si un employé est sélectionné, pré-remplir les informations bancaires
+
+    // If an employee is selected, pre-fill bank information
     if (name === 'employeeId' && value) {
-    const selectedEmployee = employees.find(emp => emp.id === value);
-    if (selectedEmployee) {
-        // Extraire le nom de la banque du compte bancaire ou de l'agence
-        let banqueName = '';
-        if (selectedEmployee.agence) {
-        banqueName = selectedEmployee.agence;
-        } else if (selectedEmployee.compteBancaire) {
-        // Déduire la banque selon les codes IBAN marocains (positions 5-7)
-        const compte = selectedEmployee.compteBancaire.replace(/\s/g, ''); // Supprimer les espaces
-        
-        // Extraire le code banque (positions 5-7 de l'IBAN ou début du RIB)
-        let codeBank = '';
-        if (compte.startsWith('MA64') || compte.startsWith('MA')) {
-            // Format IBAN complet
-            codeBank = compte.substring(4, 7);
-        } else {
-            // Format RIB (prendre les 3 premiers chiffres)
-            codeBank = compte.substring(0, 3);
-        }
-        
-        // Mapping des codes bancaires marocains
-        switch (codeBank) {
-            case '225':
-            case '254':
-            case '257':
-            banqueName = 'Crédit Agricole du Maroc';
-            break;
-            case '230':
-            banqueName = 'Crédit Immobilier et Hôtelier (CIH)';
-            break;
-            case '143':
-            case '360': // Code RIB Attijariwafa Bank
-            banqueName = 'Attijariwafa Bank';
-            break;
-            case '101':
-            case '102':
-            case '103':
-            case '104':
-            case '105':
-            case '106':
-            case '107':
-            case '108':
-            case '109':
-            case '110':
-            banqueName = 'Banque Populaire';
-            break;
-            case '136':
-            banqueName = 'BMCI (BNP Paribas)';
-            break;
-            case '609':
-            banqueName = 'Bank of Africa (BMCE)';
-            break;
-            case '160':
-            banqueName = 'Arab Bank PLC';
-            break;
-            case '122':
-            banqueName = 'Société Générale Maroc';
-            break;
-            case '196':
-            banqueName = 'CFG Bank';
-            break;
-            default:
-            // Vérifier si c'est Al Barid Bank (code 101 ou variations)
-            if (codeBank === '101' && compte.includes('barid')) {
-                banqueName = 'Al Barid Bank';
-            } else {
-                banqueName = 'Banque non identifiée';
+        const selectedEmployee = employees.find(emp => emp.id === value);
+        if (selectedEmployee) {
+            // Extract bank name from bank account or branch
+            let bankName = '';
+            if (selectedEmployee.bankBranch) {
+                bankName = selectedEmployee.bankBranch;
+            } else if (selectedEmployee.bankAccount) {
+                // For Kenyan context, infer bank from account number patterns
+                const account = selectedEmployee.bankAccount.replace(/\s/g, ''); // Remove spaces
+                bankName = identifyBank(account); // Use comprehensive bank identification
             }
+
+            setFormData(prev => ({
+                ...prev,
+                [name]: value,
+                bank: bankName
+            }));
         }
-        }
-        
-        setFormData(prev => ({
-        ...prev,
-        [name]: value,
-        banque: banqueName
-        }));
-    }
     } else {
-    setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     }
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
-    setErrors(prev => ({ ...prev, [name]: '' }));
+        setErrors(prev => ({ ...prev, [name]: '' }));
     }
 };
-
 const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.employeeId) newErrors.employeeId = 'Veuillez sélectionner un employé';
-    if (!formData.montantMensuel) newErrors.montantMensuel = 'Le montant mensuel est requis';
-    if (!formData.dateDebut) newErrors.dateDebut = 'La date de début est requise';
-    if (!formData.banque) newErrors.banque = 'La banque est requise';
+    if (!formData.employeeId) newErrors.employeeId = 'Please select an employee';
+    if (!formData.monthlyAmount) newErrors.monthlyAmount = 'Monthly amount is required';
+    if (!formData.startDate) newErrors.startDate = 'Start date is required';
+    if (!formData.bank) newErrors.bank = 'Bank is required';
 
-    // Validation des valeurs numériques
-    if (formData.montantMensuel && parseFloat(formData.montantMensuel) <= 0) {
-    newErrors.montantMensuel = 'Le montant doit être supérieur à 0';
+    // Validate numeric values
+    if (formData.monthlyAmount && parseFloat(formData.monthlyAmount) <= 0) {
+    newErrors.monthlyAmount = 'Amount must be greater than 0';
     }
 
     setErrors(newErrors);
@@ -196,15 +201,15 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     setLoading(true);
     try {
-    const url = editCredit ? `/api/credits/${editCredit.id}` : '/api/credits';
-    const method = editCredit ? 'PUT' : 'POST';
+    const url = editLoan ? `/api/credits/${editLoan.id}` : '/api/credits'; // Adjusted endpoint
+    const method = editLoan ? 'PUT' : 'POST';
     
-    // Calculer des valeurs par défaut pour la compatibilité
-    const montantMensuel = parseFloat(formData.montantMensuel);
-    const montantCredit = montantMensuel * 12; // Estimation sur 1 an par défaut
-    const dateDebut = new Date(formData.dateDebut);
-    const dateFin = new Date(dateDebut);
-    dateFin.setFullYear(dateFin.getFullYear() + 1); // 1 an par défaut
+    // Calculate default values for compatibility
+    const monthlyAmount = parseFloat(formData.monthlyAmount);
+    const loanAmount = monthlyAmount * 12; // Default 1 year estimation
+    const startDate = new Date(formData.startDate);
+    const endDate = new Date(startDate);
+    endDate.setFullYear(endDate.getFullYear() + 1); // 1 year default
     
     const response = await fetch(url, {
         method,
@@ -214,23 +219,23 @@ const handleSubmit = async (e: React.FormEvent) => {
         body: JSON.stringify({
         employeeId: formData.employeeId,
         type: formData.type,
-        montantCredit: montantCredit,
-        tauxInteret: 0, // Pas de calcul d'intérêts
-        dureeAnnees: 1, // 1 an par défaut
-        mensualite: montantMensuel,
-        dateDebut: formData.dateDebut,
-        dateFin: dateFin,
-        soldeRestant: montantCredit,
-        montantRembourse: 0,
-        statut: 'ACTIF',
-        banque: formData.banque,
-        numeroCompte: '',
-        dateCreation: new Date(),
+        loanAmount: loanAmount,
+        interestRate: 0, // No interest calculation
+        durationYears: 1, // 1 year default
+        monthlyPayment: monthlyAmount,
+        startDate: formData.startDate,
+        endDate: endDate,
+        remainingBalance: loanAmount,
+        amountRepaid: 0,
+        status: 'ACTIVE',
+        bank: formData.bank,
+        accountNumber: '',
+        creationDate: new Date(),
         createdBy: 'admin',
         notes: formData.notes,
-        interetsPayes: 0,
-        capitalRestant: montantCredit,
-        tauxAssurance: 0
+        interestPaid: 0,
+        remainingPrincipal: loanAmount,
+        insuranceRate: 0
         }),
     });
 
@@ -239,10 +244,10 @@ const handleSubmit = async (e: React.FormEvent) => {
         onClose();
     } else {
         const errorData = await response.json();
-        setErrors({ submit: errorData.error || `Erreur lors de ${editCredit ? 'la modification' : 'la création'} du crédit` });
+        setErrors({ submit: errorData.error || `Error during ${editLoan ? 'loan modification' : 'loan creation'}` });
     }
     } catch (error) {
-    setErrors({ submit: 'Erreur de connexion' });
+    setErrors({ submit: 'Connection error' });
     } finally {
     setLoading(false);
     }
@@ -258,7 +263,7 @@ return (
         <div className="flex items-center">
             <CreditCard className="w-6 h-6 text-[#0063b4] mr-3" />
             <h2 className="text-xl font-semibold text-gray-900">
-            {editCredit ? 'Modifier le Crédit' : 'Nouveau Crédit Simple'}
+            {editLoan ? 'Edit Loan' : 'New Simple Loan'}
             </h2>
         </div>
         <button
@@ -274,7 +279,7 @@ return (
         {/* Employee Selection */}
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Employé *
+            Employee *
             </label>
             <select
             name="employeeId"
@@ -284,20 +289,20 @@ return (
                 errors.employeeId ? 'border-red-500' : 'border-gray-300'
             }`}
             >
-            <option value="">Sélectionner un employé</option>
+            <option value="">Select an employee</option>
             {employees.map(employee => (
                 <option key={employee.id} value={employee.id}>
-                {employee.matricule} - {employee.prenom} {employee.nom}
+                {employee.employeeId} - {employee.firstName} {employee.lastName}
                 </option>
             ))}
             </select>
             {errors.employeeId && <p className="mt-1 text-sm text-red-600">{errors.employeeId}</p>}
         </div>
 
-        {/* Credit Type */}
+        {/* Loan Type */}
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Type de crédit *
+            Loan type *
             </label>
             <select
             name="type"
@@ -305,82 +310,82 @@ return (
             onChange={handleInputChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
             >
-            <option value="LOGEMENT">Crédit Logement</option>
-            <option value="CONSOMMATION">Crédit Consommation</option>
+            <option value="HOUSING">Housing Loan</option>
+            <option value="CONSUMER">Consumer Loan</option>
             </select>
         </div>
 
-        {/* Montant mensuel */}
+        {/* Monthly amount */}
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Montant mensuel à retenir (MAD) *
+            Monthly deduction amount (KES) *
             </label>
             <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
                 type="number"
-                name="montantMensuel"
-                value={formData.montantMensuel}
+                name="monthlyAmount"
+                value={formData.monthlyAmount}
                 onChange={handleInputChange}
                 step="0.01"
                 min="0"
                 className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
-                errors.montantMensuel ? 'border-red-500' : 'border-gray-300'
+                errors.monthlyAmount ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="Ex: 5000.00"
             />
             </div>
-            {errors.montantMensuel && <p className="mt-1 text-sm text-red-600">{errors.montantMensuel}</p>}
+            {errors.monthlyAmount && <p className="mt-1 text-sm text-red-600">{errors.monthlyAmount}</p>}
             <p className="mt-1 text-xs text-gray-500">
-            Montant qui sera retenu chaque mois sur le salaire
+            Amount that will be deducted each month from salary
             </p>
         </div>
 
-        {/* Date de début */}
+        {/* Start date */}
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Date de début *
+            Start date *
             </label>
             <div className="relative">
             <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
                 type="date"
-                name="dateDebut"
-                value={formData.dateDebut}
+                name="startDate"
+                value={formData.startDate}
                 onChange={handleInputChange}
                 className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
-                errors.dateDebut ? 'border-red-500' : 'border-gray-300'
+                errors.startDate ? 'border-red-500' : 'border-gray-300'
                 }`}
             />
             </div>
-            {errors.dateDebut && <p className="mt-1 text-sm text-red-600">{errors.dateDebut}</p>}
+            {errors.startDate && <p className="mt-1 text-sm text-red-600">{errors.startDate}</p>}
         </div>
 
-        {/* Banque */}
+        {/* Bank */}
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Banque *
+            Bank *
             </label>
             <div className="relative">
             <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
                 type="text"
-                name="banque"
-                value={formData.banque}
+                name="bank"
+                value={formData.bank}
                 onChange={handleInputChange}
                 className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
-                errors.banque ? 'border-red-500' : 'border-gray-300'
+                errors.bank ? 'border-red-500' : 'border-gray-300'
                 }`}
-                placeholder="Ex: Attijariwafa Bank"
+                placeholder="Ex: Equity Bank"
             />
             </div>
-            {errors.banque && <p className="mt-1 text-sm text-red-600">{errors.banque}</p>}
+            {errors.bank && <p className="mt-1 text-sm text-red-600">{errors.bank}</p>}
         </div>
 
         {/* Notes */}
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Notes (optionnel)
+            Notes (optional)
             </label>
             <textarea
             name="notes"
@@ -388,7 +393,7 @@ return (
             onChange={handleInputChange}
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
-            placeholder="Informations supplémentaires sur le crédit..."
+            placeholder="Additional information about the loan..."
             />
         </div>
 
@@ -406,7 +411,7 @@ return (
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
-            Annuler
+            Cancel
             </button>
             <button
             type="submit"
@@ -414,8 +419,8 @@ return (
             className="px-4 py-2 text-sm font-medium text-white bg-[#0063b4] border border-transparent rounded-md hover:bg-[#0052a3] disabled:opacity-50"
             >
             {loading 
-                ? (editCredit ? 'Modification...' : 'Création...') 
-                : (editCredit ? 'Modifier le crédit' : 'Créer le crédit')
+                ? (editLoan ? 'Updating...' : 'Creating...') 
+                : (editLoan ? 'Update loan' : 'Create loan')
             }
             </button>
         </div>

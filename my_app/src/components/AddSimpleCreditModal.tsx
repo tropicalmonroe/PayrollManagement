@@ -1,47 +1,45 @@
-"use client";
-
 import React, { useState } from 'react';
 import { X, Plus, Calendar, DollarSign } from 'lucide-react';
 
-interface AddSimpleCreditModalProps {
+interface AddSimpleLoanModalProps {
 isOpen: boolean;
 onClose: () => void;
 employeeId: string;
-onCreditAdded: () => void;
+onLoanAdded: () => void;
 }
 
-const AddSimpleCreditModal: React.FC<AddSimpleCreditModalProps> = ({
+const AddSimpleCreditModal: React.FC<AddSimpleLoanModalProps> = ({
 isOpen,
 onClose,
 employeeId,
-onCreditAdded
+onLoanAdded,
 }) => {
 const [formData, setFormData] = useState({
-    type: 'LOGEMENT' as 'LOGEMENT' | 'CONSOMMATION',
-    montantMensuel: '',
-    nombreEcheances: '',
-    dateDebut: '',
-    banque: '',
-    description: ''
+    type: 'HOUSING' as 'HOUSING' | 'CONSUMER',
+    monthlyAmount: '',
+    numberOfInstallments: '',
+    startDate: '',
+    bank: '',
+    description: '',
 });
 const [loading, setLoading] = useState(false);
 
 const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.montantMensuel || !formData.nombreEcheances || !formData.dateDebut || !formData.banque) {
-    alert('Veuillez remplir tous les champs obligatoires');
+
+    if (!formData.monthlyAmount || !formData.numberOfInstallments || !formData.startDate || !formData.bank) {
+    alert('Please fill in all required fields');
     return;
     }
 
     try {
     setLoading(true);
-    
-    // Calculer le montant total
-    const montantTotal = parseFloat(formData.montantMensuel) * parseInt(formData.nombreEcheances);
-    
-    // Créer le crédit
-    const creditResponse = await fetch('/api/credits', {
+
+    // Calculate total amount
+    const totalAmount = parseFloat(formData.monthlyAmount) * parseInt(formData.numberOfInstallments);
+
+    // Create the loan
+    const loanResponse = await fetch('/api/credits', {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',
@@ -49,68 +47,67 @@ const handleSubmit = async (e: React.FormEvent) => {
         body: JSON.stringify({
         employeeId,
         type: formData.type,
-        montantCredit: montantTotal,
-        tauxInteret: 0, // Pas de calcul d'intérêts
-        dureeAnnees: Math.ceil(parseInt(formData.nombreEcheances) / 12),
-        mensualite: parseFloat(formData.montantMensuel),
-        dateDebut: formData.dateDebut,
-        dateFin: new Date(new Date(formData.dateDebut).setMonth(
-            new Date(formData.dateDebut).getMonth() + parseInt(formData.nombreEcheances)
+        totalAmount,
+        interestRate: 0, // No interest calculations
+        durationYears: Math.ceil(parseInt(formData.numberOfInstallments) / 12),
+        monthlyAmount: parseFloat(formData.monthlyAmount),
+        startDate: formData.startDate,
+        endDate: new Date(new Date(formData.startDate).setMonth(
+            new Date(formData.startDate).getMonth() + parseInt(formData.numberOfInstallments)
         )),
-        soldeRestant: montantTotal,
-        montantRembourse: 0,
-        statut: 'ACTIF',
-        banque: formData.banque,
-        numeroCompte: '',
-        dateCreation: new Date(),
+        remainingBalance: totalAmount,
+        amountPaid: 0,
+        status: 'ACTIVE',
+        bank: formData.bank,
+        accountNumber: '',
+        dateCreated: new Date(),
         createdBy: 'admin',
         notes: formData.description,
-        interetsPayes: 0,
-        capitalRestant: montantTotal,
-        tauxAssurance: 0
+        paidInterest: 0,
+        remainingCapital: totalAmount,
+        insuranceRate: 0,
         }),
     });
 
-    if (!creditResponse.ok) {
-        const error = await creditResponse.json();
-        throw new Error(error.error || 'Erreur lors de la création du crédit');
+    if (!loanResponse.ok) {
+        const error = await loanResponse.json();
+        throw new Error(error.error || 'Error creating loan');
     }
 
-    const credit = await creditResponse.json();
+    const loan = await loanResponse.json();
 
-    // Générer l'échéancier simple
-    const echeancierResponse = await fetch('/api/credits/generate-simple-echeancier', {
+    // Generate simple repayment schedule
+    const scheduleResponse = await fetch('/api/credits/generate-simple-echeancier', {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-        creditId: credit.id,
-        montantMensuel: parseFloat(formData.montantMensuel),
-        nombreEcheances: parseInt(formData.nombreEcheances),
-        dateDebut: formData.dateDebut
+        loanId: loan.id,
+        monthlyAmount: parseFloat(formData.monthlyAmount),
+        numberOfInstallments: parseInt(formData.numberOfInstallments),
+        startDate: formData.startDate,
         }),
     });
 
-    if (echeancierResponse.ok) {
-        alert('Crédit et échéancier créés avec succès!');
-        onCreditAdded();
+    if (scheduleResponse.ok) {
+        alert('Loan and repayment schedule created successfully!');
+        onLoanAdded();
         onClose();
         setFormData({
-        type: 'LOGEMENT',
-        montantMensuel: '',
-        nombreEcheances: '',
-        dateDebut: '',
-        banque: '',
-        description: ''
+        type: 'HOUSING',
+        monthlyAmount: '',
+        numberOfInstallments: '',
+        startDate: '',
+        bank: '',
+        description: '',
         });
     } else {
-        alert('Crédit créé mais erreur lors de la génération de l\'échéancier');
+        alert('Loan created but error generating repayment schedule');
     }
-
     } catch (error) {
-    console.error('Erreur:', error);
-    alert(`Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    console.error('Error:', error);
+    alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
     setLoading(false);
     }
@@ -126,7 +123,7 @@ return (
         <div className="flex items-center">
             <Plus className="w-6 h-6 text-[#0063b4] mr-3" />
             <h2 className="text-xl font-semibold text-gray-900">
-            Nouveau Crédit Simple
+            New Simple Loan
             </h2>
         </div>
         <button
@@ -139,34 +136,34 @@ return (
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-        {/* Type de crédit */}
+        {/* Loan Type */}
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Type de crédit *
+            Loan Type *
             </label>
             <select
             value={formData.type}
-            onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'LOGEMENT' | 'CONSOMMATION' }))}
+            onChange={(e) => setFormData((prev) => ({ ...prev, type: e.target.value as 'HOUSING' | 'CONSUMER' }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
             required
             >
-            <option value="LOGEMENT">Crédit Logement</option>
-            <option value="CONSOMMATION">Crédit Consommation</option>
+            <option value="MORTGAGE">Mortgage Loan</option>
+            <option value="CONSUMER">Consumer Loan</option>
             </select>
         </div>
 
-        {/* Montant mensuel */}
+        {/* Monthly Amount */}
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Montant mensuel (MAD) *
+            Monthly Amount (KES) *
             </label>
             <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
                 type="number"
                 step="0.01"
-                value={formData.montantMensuel}
-                onChange={(e) => setFormData(prev => ({ ...prev, montantMensuel: e.target.value }))}
+                value={formData.monthlyAmount}
+                onChange={(e) => setFormData((prev) => ({ ...prev, monthlyAmount: e.target.value }))}
                 className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
                 placeholder="Ex: 5000"
                 required
@@ -174,50 +171,50 @@ return (
             </div>
         </div>
 
-        {/* Nombre d'échéances */}
+        {/* Number of Installments */}
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre d'échéances *
+            Number of Installments *
             </label>
             <input
             type="number"
             min="1"
-            value={formData.nombreEcheances}
-            onChange={(e) => setFormData(prev => ({ ...prev, nombreEcheances: e.target.value }))}
+            value={formData.numberOfInstallments}
+            onChange={(e) => setFormData((prev) => ({ ...prev, numberOfInstallments: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
             placeholder="Ex: 24"
             required
             />
         </div>
 
-        {/* Date de début */}
+        {/* Start Date */}
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Date de début *
+            Start Date *
             </label>
             <div className="relative">
             <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
                 type="date"
-                value={formData.dateDebut}
-                onChange={(e) => setFormData(prev => ({ ...prev, dateDebut: e.target.value }))}
+                value={formData.startDate}
+                onChange={(e) => setFormData((prev) => ({ ...prev, startDate: e.target.value }))}
                 className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
                 required
             />
             </div>
         </div>
 
-        {/* Banque */}
+        {/* Bank */}
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Banque *
+            Bank *
             </label>
             <input
             type="text"
-            value={formData.banque}
-            onChange={(e) => setFormData(prev => ({ ...prev, banque: e.target.value }))}
+            value={formData.bank}
+            onChange={(e) => setFormData((prev) => ({ ...prev, bank: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
-            placeholder="Ex: Attijariwafa Bank"
+            placeholder="Ex: KCB Bank"
             required
             />
         </div>
@@ -225,26 +222,26 @@ return (
         {/* Description */}
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Description (optionnel)
+            Description (optional)
             </label>
             <textarea
             value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
-            placeholder="Notes sur le crédit..."
+            placeholder="Notes about the loan..."
             />
         </div>
 
-        {/* Résumé */}
-        {formData.montantMensuel && formData.nombreEcheances && (
+        {/* Summary */}
+        {formData.monthlyAmount && formData.numberOfInstallments && (
             <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium text-blue-800 mb-2">Résumé:</h4>
+            <h4 className="text-sm font-medium text-blue-800 mb-2">Summary:</h4>
             <p className="text-sm text-blue-700">
-                Montant total: {(parseFloat(formData.montantMensuel || '0') * parseInt(formData.nombreEcheances || '0')).toLocaleString('fr-MA')} MAD
+                Total Amount: {(parseFloat(formData.monthlyAmount || '0') * parseInt(formData.numberOfInstallments || '0')).toLocaleString('en-KE')} KES
             </p>
             <p className="text-sm text-blue-700">
-                Durée: {Math.ceil(parseInt(formData.nombreEcheances || '0') / 12)} an(s)
+                Duration: {Math.ceil(parseInt(formData.numberOfInstallments || '0') / 12)} year(s)
             </p>
             </div>
         )}
@@ -256,7 +253,7 @@ return (
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
-            Annuler
+            Cancel
             </button>
             <button
             type="submit"
@@ -266,10 +263,10 @@ return (
             {loading ? (
                 <div className="flex items-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Création...
+                Creating...
                 </div>
             ) : (
-                'Créer le Crédit'
+                'Create Loan'
             )}
             </button>
         </div>

@@ -8,8 +8,8 @@ export default function SalarySimulation() {
   return (
     <>
       <Head>
-        <title>Simulation Salaire - Gestion de Paie AD Capital</title>
-        <meta name="description" content="Simulez les calculs de paie pour différents montants de salaire" />
+        <title>Salary Simulation - AD Capital Payroll</title>
+        <meta name="description" content="Simulate payroll calculations for different salary amounts" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -22,69 +22,64 @@ export default function SalarySimulation() {
 }
 
 function SalarySimulationContent() {
-  const [salaireBrut, setSalaireBrut] = useState<number>(15000);
-  const [situationFamiliale, setSituationFamiliale] = useState<string>('celibataire');
-  const [nombreEnfants, setNombreEnfants] = useState<number>(0);
-  const [fraisProfessionnels, setFraisProfessionnels] = useState<number>(0);
-  const [autresDeductions, setAutresDeductions] = useState<number>(0);
+  const [grossSalary, setGrossSalary] = useState<number>(20000); // Adjusted to KES
+  const [familyStatus, setFamilyStatus] = useState<string>('single');
+  const [numberOfDependants, setNumberOfDependants] = useState<number>(0);
+  const [professionalExpenses, setProfessionalExpenses] = useState<number>(0);
+  const [otherDeductions, setOtherDeductions] = useState<number>(0);
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  // Calcul automatique quand les paramètres changent
+  // Automatic calculation when parameters change
   useEffect(() => {
     calculateSalary();
-  }, [salaireBrut, situationFamiliale, nombreEnfants, fraisProfessionnels, autresDeductions]);
+  }, [grossSalary, familyStatus, numberOfDependants, professionalExpenses, otherDeductions]);
 
   const calculateSalary = () => {
     setLoading(true);
     
-    // Simulation des calculs de paie
+    // Simulate payroll calculations
     setTimeout(() => {
-      const salaireImposable = salaireBrut - fraisProfessionnels;
-      const cotisationCNSS = Math.min(salaireBrut * 0.0448, 6000 * 0.0448);
-      const cotisationAMO = Math.min(salaireBrut * 0.0226, 6000 * 0.0226);
+      const taxableSalary = grossSalary - Math.min(professionalExpenses, grossSalary * 0.2, 15000); // Cap at 20% or 15,000 KES
+      const nssfContribution = Math.min(grossSalary * 0.06, 2160); // NSSF: 6%, capped at 2,160 KES
+      const shifContribution = 1500; // Approximated NHIF for 20,000 KES salary
+      const insuranceRelief = Math.min(shifContribution * 0.15, 5000); // 15% of SHIF, capped at 5,000 KES
       
-      // Calcul IGR simplifié
-      let igr = 0;
-      let salaireNetImposable = salaireImposable - cotisationCNSS - cotisationAMO;
+      let netTaxableSalary = taxableSalary - nssfContribution - shifContribution;
       
-      // Déductions familiales
-      if (situationFamiliale === 'marie') {
-        salaireNetImposable -= 360; // Déduction épouse
-      }
-      salaireNetImposable -= nombreEnfants * 300; // Déduction enfants
-      salaireNetImposable -= autresDeductions;
+      // Kenyan personal relief
+      const personalRelief = 2400; // Universal personal relief
+      netTaxableSalary -= personalRelief + otherDeductions;
       
-      // Barème IGR annuel (simplifié)
-      const salaireAnnuel = salaireNetImposable * 12;
-      if (salaireAnnuel > 30000) {
-        if (salaireAnnuel <= 50000) {
-          igr = (salaireAnnuel - 30000) * 0.10;
-        } else if (salaireAnnuel <= 60000) {
-          igr = 20000 * 0.10 + (salaireAnnuel - 50000) * 0.20;
-        } else if (salaireAnnuel <= 80000) {
-          igr = 20000 * 0.10 + 10000 * 0.20 + (salaireAnnuel - 60000) * 0.30;
-        } else if (salaireAnnuel <= 180000) {
-          igr = 20000 * 0.10 + 10000 * 0.20 + 20000 * 0.30 + (salaireAnnuel - 80000) * 0.34;
+      // Calculate PAYE (2025 Kenyan tax brackets)
+      const annualTaxableSalary = Math.max(0, netTaxableSalary * 12);
+      let paye = 0;
+      
+      if (annualTaxableSalary > 288000) {
+        if (annualTaxableSalary <= 388000) {
+          paye = (annualTaxableSalary - 288000) * 0.25;
         } else {
-          igr = 20000 * 0.10 + 10000 * 0.20 + 20000 * 0.30 + 100000 * 0.34 + (salaireAnnuel - 180000) * 0.38;
+          paye = 100000 * 0.25 + (annualTaxableSalary - 388000) * 0.30;
         }
       }
       
-      const igrMensuel = igr / 12;
-      const salaireNet = salaireBrut - cotisationCNSS - cotisationAMO - igrMensuel;
+      const monthlyPaye = paye / 12;
+      const netSalary = grossSalary - nssfContribution - shifContribution - monthlyPaye + insuranceRelief;
       
       setResults({
-        salaireBrut,
-        cotisationCNSS,
-        cotisationAMO,
-        totalCotisations: cotisationCNSS + cotisationAMO,
-        salaireImposable,
-        salaireNetImposable,
-        igr: igrMensuel,
-        salaireNet,
-        tauxImposition: salaireImposable > 0 ? (igrMensuel / salaireImposable) * 100 : 0,
-        economiesFiscales: (situationFamiliale === 'marie' ? 360 : 0) + (nombreEnfants * 300) + autresDeductions
+        grossSalary,
+        nssfContribution,
+        shifContribution,
+        totalContributions: nssfContribution + shifContribution,
+        taxableSalary,
+        netTaxableSalary: Math.max(0, netTaxableSalary),
+        personalRelief,
+        insuranceRelief,
+        totalDeductions: personalRelief + otherDeductions,
+        paye: monthlyPaye,
+        netSalary,
+        taxRate: taxableSalary > 0 ? (monthlyPaye / taxableSalary) * 100 : 0,
+        taxSavings: personalRelief + insuranceRelief + otherDeductions
       });
       
       setLoading(false);
@@ -92,18 +87,18 @@ function SalarySimulationContent() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'MAD'
+      currency: 'KES'
     }).format(amount);
   };
 
   const resetForm = () => {
-    setSalaireBrut(15000);
-    setSituationFamiliale('celibataire');
-    setNombreEnfants(0);
-    setFraisProfessionnels(0);
-    setAutresDeductions(0);
+    setGrossSalary(20000);
+    setFamilyStatus('single');
+    setNumberOfDependants(0);
+    setProfessionalExpenses(0);
+    setOtherDeductions(0);
   };
 
   return (
@@ -114,13 +109,13 @@ function SalarySimulationContent() {
           <Link href="/simulation">
             <button className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour
+              Back
             </button>
           </Link>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Simulation de salaire</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Salary Simulation</h2>
             <p className="mt-1 text-sm text-gray-600">
-              Calculez le salaire net à partir du salaire brut avec les cotisations et l'IGR
+              Calculate net salary from gross salary with contributions and PAYE
             </p>
           </div>
         </div>
@@ -130,188 +125,188 @@ function SalarySimulationContent() {
             className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
-            Réinitialiser
+            Reset
           </button>
           {results && (
             <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
               <Download className="h-4 w-4 mr-2" />
-              Exporter PDF
+              Export PDF
             </button>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Formulaire de saisie */}
+        {/* Simulation Parameters */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Paramètres de simulation</h3>
+            <h3 className="text-lg font-medium text-gray-900">Simulation Parameters</h3>
           </div>
           <div className="p-6 space-y-6">
-            {/* Salaire brut */}
+            {/* Gross Salary */}
             <div>
-              <label htmlFor="salaireBrut" className="block text-sm font-medium text-gray-700 mb-2">
-                Salaire brut mensuel (MAD)
+              <label htmlFor="grossSalary" className="block text-sm font-medium text-gray-700 mb-2">
+                Monthly Gross Salary (KES)
               </label>
               <input
                 type="number"
-                id="salaireBrut"
-                value={salaireBrut}
-                onChange={(e) => setSalaireBrut(Number(e.target.value))}
+                id="grossSalary"
+                value={grossSalary}
+                onChange={(e) => setGrossSalary(Number(e.target.value))}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 step="100"
               />
             </div>
 
-            {/* Situation familiale */}
+            {/* Family Status */}
             <div>
-              <label htmlFor="situationFamiliale" className="block text-sm font-medium text-gray-700 mb-2">
-                Situation familiale
+              <label htmlFor="familyStatus" className="block text-sm font-medium text-gray-700 mb-2">
+                Family Status
               </label>
               <select
-                id="situationFamiliale"
-                value={situationFamiliale}
-                onChange={(e) => setSituationFamiliale(e.target.value)}
+                id="familyStatus"
+                value={familyStatus}
+                onChange={(e) => setFamilyStatus(e.target.value)}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="celibataire">Célibataire</option>
-                <option value="marie">Marié(e)</option>
-                <option value="divorce">Divorcé(e)</option>
-                <option value="veuf">Veuf/Veuve</option>
+                <option value="single">Single</option>
+                <option value="married">Married</option>
+                <option value="divorced">Divorced</option>
+                <option value="widowed">Widowed</option>
               </select>
             </div>
 
-            {/* Nombre d'enfants */}
+            {/* Number of Dependants */}
             <div>
-              <label htmlFor="nombreEnfants" className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre d'enfants à charge
+              <label htmlFor="numberOfDependants" className="block text-sm font-medium text-gray-700 mb-2">
+                Number of Dependants
               </label>
               <input
                 type="number"
-                id="nombreEnfants"
-                value={nombreEnfants}
-                onChange={(e) => setNombreEnfants(Number(e.target.value))}
+                id="numberOfDependants"
+                value={numberOfDependants}
+                onChange={(e) => setNumberOfDependants(Number(e.target.value))}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 max="10"
               />
             </div>
 
-            {/* Frais professionnels */}
+            {/* Professional Expenses */}
             <div>
-              <label htmlFor="fraisProfessionnels" className="block text-sm font-medium text-gray-700 mb-2">
-                Frais professionnels (MAD)
+              <label htmlFor="professionalExpenses" className="block text-sm font-medium text-gray-700 mb-2">
+                Professional Expenses (KES)
               </label>
               <input
                 type="number"
-                id="fraisProfessionnels"
-                value={fraisProfessionnels}
-                onChange={(e) => setFraisProfessionnels(Number(e.target.value))}
+                id="professionalExpenses"
+                value={professionalExpenses}
+                onChange={(e) => setProfessionalExpenses(Number(e.target.value))}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 step="50"
               />
               <p className="mt-1 text-xs text-gray-500">
-                Maximum 20% du salaire brut ou 2 500 MAD
+                Maximum 20% of gross salary or 15,000 KES
               </p>
             </div>
 
-            {/* Autres déductions */}
+            {/* Other Deductions */}
             <div>
-              <label htmlFor="autresDeductions" className="block text-sm font-medium text-gray-700 mb-2">
-                Autres déductions (MAD)
+              <label htmlFor="otherDeductions" className="block text-sm font-medium text-gray-700 mb-2">
+                Other Deductions (KES)
               </label>
               <input
                 type="number"
-                id="autresDeductions"
-                value={autresDeductions}
-                onChange={(e) => setAutresDeductions(Number(e.target.value))}
+                id="otherDeductions"
+                value={otherDeductions}
+                onChange={(e) => setOtherDeductions(Number(e.target.value))}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 step="50"
               />
               <p className="mt-1 text-xs text-gray-500">
-                Crédit logement, RCAR, etc.
+                Housing credit, pension contributions, etc.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Résultats */}
+        {/* Simulation Results */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Résultats de la simulation</h3>
+            <h3 className="text-lg font-medium text-gray-900">Simulation Results</h3>
           </div>
           <div className="p-6">
             {loading ? (
               <div className="text-center py-8">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="mt-2 text-sm text-gray-500">Calcul en cours...</p>
+                <p className="mt-2 text-sm text-gray-500">Calculating...</p>
               </div>
             ) : results ? (
               <div className="space-y-4">
-                {/* Salaire brut */}
+                {/* Gross Salary */}
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="text-sm font-medium text-gray-700">Salaire brut</span>
-                  <span className="text-sm font-semibold text-gray-900">{formatCurrency(results.salaireBrut)}</span>
+                  <span className="text-sm font-medium text-gray-700">Gross Salary</span>
+                  <span className="text-sm font-semibold text-gray-900">{formatCurrency(results.grossSalary)}</span>
                 </div>
 
-                {/* Cotisations */}
+                {/* Contributions */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center py-1">
-                    <span className="text-sm text-gray-600 ml-4">- CNSS (4.48%)</span>
-                    <span className="text-sm text-red-600">-{formatCurrency(results.cotisationCNSS)}</span>
+                    <span className="text-sm text-gray-600 ml-4">- NSSF (6%)</span>
+                    <span className="text-sm text-red-600">-{formatCurrency(results.nssfContribution)}</span>
                   </div>
                   <div className="flex justify-between items-center py-1">
-                    <span className="text-sm text-gray-600 ml-4">- AMO (2.26%)</span>
-                    <span className="text-sm text-red-600">-{formatCurrency(results.cotisationAMO)}</span>
+                    <span className="text-sm text-gray-600 ml-4">- NHIF</span>
+                    <span className="text-sm text-red-600">-{formatCurrency(results.nhifContribution)}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-sm font-medium text-gray-700">Total cotisations</span>
-                    <span className="text-sm font-semibold text-red-600">-{formatCurrency(results.totalCotisations)}</span>
+                    <span className="text-sm font-medium text-gray-700">Total Contributions</span>
+                    <span className="text-sm font-semibold text-red-600">-{formatCurrency(results.totalContributions)}</span>
                   </div>
                 </div>
 
-                {/* Salaire imposable */}
+                {/* Taxable Salary */}
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="text-sm font-medium text-gray-700">Salaire imposable</span>
-                  <span className="text-sm font-semibold text-gray-900">{formatCurrency(results.salaireImposable)}</span>
+                  <span className="text-sm font-medium text-gray-700">Taxable Salary</span>
+                  <span className="text-sm font-semibold text-gray-900">{formatCurrency(results.taxableSalary)}</span>
                 </div>
 
-                {/* Déductions fiscales */}
-                {results.economiesFiscales > 0 && (
+                {/* Tax Deductions */}
+                {results.taxSavings > 0 && (
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-sm text-gray-600">- Déductions fiscales</span>
-                    <span className="text-sm text-green-600">-{formatCurrency(results.economiesFiscales)}</span>
+                    <span className="text-sm text-gray-600">- Tax Deductions</span>
+                    <span className="text-sm text-green-600">-{formatCurrency(results.taxSavings)}</span>
                   </div>
                 )}
 
-                {/* IGR */}
+                {/* PAYE */}
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm font-medium text-gray-700">
-                    IGR ({results.tauxImposition.toFixed(1)}%)
+                    PAYE ({results.taxRate.toFixed(1)}%)
                   </span>
-                  <span className="text-sm font-semibold text-red-600">-{formatCurrency(results.igr)}</span>
+                  <span className="text-sm font-semibold text-red-600">-{formatCurrency(results.paye)}</span>
                 </div>
 
-                {/* Salaire net */}
+                {/* Net Salary */}
                 <div className="flex justify-between items-center py-3 bg-green-50 px-4 rounded-lg border border-green-200">
-                  <span className="text-lg font-semibold text-green-800">Salaire net</span>
-                  <span className="text-xl font-bold text-green-800">{formatCurrency(results.salaireNet)}</span>
+                  <span className="text-lg font-semibold text-green-800">Net Salary</span>
+                  <span className="text-xl font-bold text-green-800">{formatCurrency(results.netSalary)}</span>
                 </div>
 
-                {/* Informations supplémentaires */}
+                {/* Important Information */}
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-start">
                     <Info className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
                     <div className="text-sm text-blue-800">
-                      <p className="font-medium mb-1">Informations importantes :</p>
+                      <p className="font-medium mb-1">Important Information:</p>
                       <ul className="space-y-1 text-xs">
-                        <li>• Calcul basé sur les barèmes 2025</li>
-                        <li>• Plafond CNSS : 6 000 MAD</li>
-                        <li>• Déduction épouse : 360 MAD/mois</li>
-                        <li>• Déduction par enfant : 300 MAD/mois</li>
+                        <li>• Calculation based on 2025 tax rates</li>
+                        <li>• NSSF cap: 2,160 KES</li>
+                        <li>• Personal relief: 2,400 KES/month</li>
+                        <li>• Insurance relief: Up to 5,000 KES/month</li>
                       </ul>
                     </div>
                   </div>
@@ -321,7 +316,7 @@ function SalarySimulationContent() {
               <div className="text-center py-8">
                 <Calculator className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-sm text-gray-500">
-                  Modifiez les paramètres pour voir les résultats
+                  Adjust the parameters to view results
                 </p>
               </div>
             )}
@@ -329,11 +324,11 @@ function SalarySimulationContent() {
         </div>
       </div>
 
-      {/* Comparaison avec différents salaires */}
+      {/* Comparison with Other Salaries */}
       {results && (
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Comparaison avec d'autres salaires</h3>
+            <h3 className="text-lg font-medium text-gray-900">Comparison with Other Salaries</h3>
           </div>
           <div className="p-6">
             <div className="overflow-x-auto">
@@ -341,64 +336,61 @@ function SalarySimulationContent() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Salaire brut
+                      Gross Salary
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cotisations
+                      Contributions
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      IGR
+                      PAYE
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Salaire net
+                      Net Salary
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Taux net
+                      Net Rate
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {[0.8, 0.9, 1.0, 1.1, 1.2].map((multiplier, index) => {
-                    const testSalaire = Math.round(salaireBrut * multiplier);
-                    const testCotisations = Math.min(testSalaire * 0.0674, 6000 * 0.0674);
-                    const testImposable = testSalaire - fraisProfessionnels - testCotisations;
-                    const testNetImposable = testImposable - (situationFamiliale === 'marie' ? 360 : 0) - (nombreEnfants * 300) - autresDeductions;
-                    const testAnnuel = testNetImposable * 12;
+                    const testSalary = Math.round(grossSalary * multiplier);
+                    const testProfessionalExpenses = Math.min(professionalExpenses, testSalary * 0.2, 15000);
+                    const testNssf = Math.min(testSalary * 0.06, 2160);
+                    const testNhif = 1500; // Approximated NHIF
+                    const testInsuranceRelief = Math.min(testNhif * 0.15, 5000);
+                    const testTaxable = testSalary - testProfessionalExpenses - testNssf - testNhif;
+                    const testNetTaxable = testTaxable - 2400 - otherDeductions; // Personal relief
+                    const testAnnual = Math.max(0, testNetTaxable * 12);
                     
-                    let testIGR = 0;
-                    if (testAnnuel > 30000) {
-                      if (testAnnuel <= 50000) {
-                        testIGR = (testAnnuel - 30000) * 0.10;
-                      } else if (testAnnuel <= 60000) {
-                        testIGR = 20000 * 0.10 + (testAnnuel - 50000) * 0.20;
-                      } else if (testAnnuel <= 80000) {
-                        testIGR = 20000 * 0.10 + 10000 * 0.20 + (testAnnuel - 60000) * 0.30;
-                      } else if (testAnnuel <= 180000) {
-                        testIGR = 20000 * 0.10 + 10000 * 0.20 + 20000 * 0.30 + (testAnnuel - 80000) * 0.34;
+                    let testPaye = 0;
+                    if (testAnnual > 288000) {
+                      if (testAnnual <= 388000) {
+                        testPaye = (testAnnual - 288000) * 0.25;
                       } else {
-                        testIGR = 20000 * 0.10 + 10000 * 0.20 + 20000 * 0.30 + 100000 * 0.34 + (testAnnuel - 180000) * 0.38;
+                        testPaye = 100000 * 0.25 + (testAnnual - 388000) * 0.30;
                       }
                     }
-                    const testIGRMensuel = testIGR / 12;
-                    const testNet = testSalaire - testCotisations - testIGRMensuel;
-                    const tauxNet = (testNet / testSalaire) * 100;
+                    const testMonthlyPaye = testPaye / 12;
+                    const testNet = testSalary - testNssf - testNhif - testMonthlyPaye + testInsuranceRelief;
+                    const netRate = (testNet / testSalary) * 100;
                     
                     return (
                       <tr key={index} className={multiplier === 1.0 ? 'bg-blue-50' : ''}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {formatCurrency(testSalaire)}
+                          {formatCurrency(testSalary)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatCurrency(testCotisations)}
+                          {formatCurrency(testNssf + testNhif)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatCurrency(testIGRMensuel)}
+                          {formatCurrency(testMonthlyPaye)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {formatCurrency(testNet)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {tauxNet.toFixed(1)}%
+                          {netRate.toFixed(1)}%
                         </td>
                       </tr>
                     );

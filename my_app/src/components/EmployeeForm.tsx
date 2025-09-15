@@ -1,269 +1,268 @@
-import { useState } from 'react'
-import { SituationFamiliale, EmployeeStatus } from '@prisma/client'
-import { CreditCard, ExternalLink } from 'lucide-react'
-import Link from 'next/link'
+import { useState } from 'react';
+import { EmployeeStatus, MaritalStatus } from '@prisma/client';
+import { CreditCard, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
 
 interface EmployeeFormProps {
-onSubmit: (employeeData: any) => void
-onCancel: () => void
-initialData?: any
-isEditing?: boolean
+onSubmit: (employeeData: any) => void;
+onCancel: () => void;
+initialData?: any;
+isEditing?: boolean;
 }
 
 export default function EmployeeForm({ onSubmit, onCancel, initialData, isEditing = false }: EmployeeFormProps) {
 const [formData, setFormData] = useState({
-    matricule: initialData?.matricule || '',
-    nom: initialData?.nom || '',
-    prenom: initialData?.prenom || '',
-    fonction: initialData?.fonction || '',
-    cin: initialData?.cin || '',
-    cnss: initialData?.cnss || '',
-    situationFamiliale: initialData?.situationFamiliale || 'CELIBATAIRE',
-    dateNaissance: initialData?.dateNaissance ? new Date(initialData.dateNaissance).toISOString().split('T')[0] : '',
-    dateEmbauche: initialData?.dateEmbauche ? new Date(initialData.dateEmbauche).toISOString().split('T')[0] : '',
-    nbrDeductions: initialData?.nbrDeductions || 0,
-    nbreJourMois: initialData?.nbreJourMois || 26,
-    salaireBase: initialData?.salaireBase || '',
-    indemniteLogement: initialData?.indemniteLogement || '',
-    indemnitePanier: initialData?.indemnitePanier || '',
-    primeTransport: initialData?.primeTransport || '',
-    indemniteRepresentation: initialData?.indemniteRepresentation || '',
-    compteBancaire: initialData?.compteBancaire || '',
-    agence: initialData?.agence || '',
+    employeeId: initialData?.employeeId || '',
+    lastName: initialData?.lastName || '',
+    firstName: initialData?.firstName || '',
+    position: initialData?.position || '',
+    idNumber: initialData?.idNumber || '',
+    nssfNumber: initialData?.nssfNumber || '',
+    maritalStatus: initialData?.maritalStatus || 'SINGLE',
+    dateOfBirth: initialData?.dateOfBirth ? new Date(initialData.dateOfBirth).toISOString().split('T')[0] : '',
+    hireDate: initialData?.hireDate ? new Date(initialData.hireDate).toISOString().split('T')[0] : '',
+    numberOfDeductions: initialData?.numberOfDeductions || 0,
+    numberOfDaysPerMonth: initialData?.numberOfDaysPerMonth || 30,
+    baseSalary: initialData?.baseSalary || '',
+    housingAllowance: initialData?.housingAllowance || '',
+    mealAllowance: initialData?.mealAllowance || '',
+    transportAllowance: initialData?.transportAllowance || '',
+    representationAllowance: initialData?.representationAllowance || '',
+    bankAccount: initialData?.bankAccount || '',
+    bankBranch: initialData?.bankBranch || '',
     telephone: initialData?.telephone || '',
     email: initialData?.email || '',
-    adresse: initialData?.adresse || '',
-    status: initialData?.status || 'ACTIF',
-    // CNSS Prestations - Part Salariale (optionnelles)
-    useCnssPrestation: initialData?.useCnssPrestation !== undefined ? initialData.useCnssPrestation : true,
-    useAmoSalariale: initialData?.useAmoSalariale !== undefined ? initialData.useAmoSalariale : true,
-    useRetraiteSalariale: initialData?.useRetraiteSalariale !== undefined ? initialData.useRetraiteSalariale : true,
-    useAssuranceDiversSalariale: initialData?.useAssuranceDiversSalariale !== undefined ? initialData.useAssuranceDiversSalariale : true
-})
+    address: initialData?.address || '',
+    status: initialData?.status || 'ACTIVE',
+    // Kenyan Contributions (optional)
+    useNssfEmployee: initialData?.useNssfEmployee !== undefined ? initialData.useNssfEmployee : true,
+    useShifEmployee: initialData?.useShifEmployee !== undefined ? initialData.useShifEmployee : true,
+    useHousingLevy: initialData?.useHousingLevy !== undefined ? initialData.useHousingLevy : true,
+});
 
-const [errors, setErrors] = useState<Record<string, string>>({})
-const [isSubmitting, setIsSubmitting] = useState(false)
+const [errors, setErrors] = useState<Record<string, string>>({});
+const [isSubmitting, setIsSubmitting] = useState(false);
 
 const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+    const { name, value } = e.target;
+    setFormData((prev) => ({
     ...prev,
-    [name]: value
-    }))
-    
+    [name]: value,
+    }));
+
     // Clear error when user starts typing
     if (errors[name]) {
-    setErrors(prev => ({
+    setErrors((prev) => ({
         ...prev,
-        [name]: ''
-    }))
+        [name]: '',
+    }));
     }
-}
+};
 
 const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
-    // Champs obligatoires
-    if (!formData.matricule.trim()) {
-    newErrors.matricule = 'Le matricule est obligatoire'
+    // Required fields
+    if (!formData.employeeId.trim()) {
+    newErrors.employeeId = 'Employee ID is required';
     }
-    if (!formData.nom.trim()) {
-    newErrors.nom = 'Le nom est obligatoire'
+    if (!formData.lastName.trim()) {
+    newErrors.lastName = 'Last name is required';
     }
-    if (!formData.prenom.trim()) {
-    newErrors.prenom = 'Le prénom est obligatoire'
+    if (!formData.firstName.trim()) {
+    newErrors.firstName = 'First name is required';
     }
-    if (!formData.fonction.trim()) {
-    newErrors.fonction = 'La fonction est obligatoire'
+    if (!formData.position.trim()) {
+    newErrors.position = 'Position is required';
     }
-    if (!formData.dateEmbauche) {
-    newErrors.dateEmbauche = 'La date d\'embauche est obligatoire'
+    if (!formData.hireDate) {
+    newErrors.hireDate = 'Hire date is required';
     }
-    if (!formData.salaireBase || parseFloat(formData.salaireBase) <= 0) {
-    newErrors.salaireBase = 'Le salaire de base doit être supérieur à 0'
+    if (!formData.baseSalary || parseFloat(formData.baseSalary) <= 0) {
+    newErrors.baseSalary = 'Base salary must be greater than 0';
     }
 
-    // Validation email
+    // Email validation
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-    newErrors.email = 'Format d\'email invalide'
+    newErrors.email = 'Invalid email format';
     }
 
-    // Validation téléphone
-    if (formData.telephone && !/^[0-9+\-\s()]+$/.test(formData.telephone)) {
-    newErrors.telephone = 'Format de téléphone invalide'
+    // Telephone validation
+    if (formData.telephone && !/^[0-9+\-\s()]{10,15}$/.test(formData.telephone)) {
+    newErrors.telephone = 'Invalid phone number format (e.g., +254 7XX XXX XXX)';
     }
 
-    // Validation CIN (format marocain)
-    if (formData.cin && !/^[A-Z]{1,2}[0-9]{1,6}$/.test(formData.cin.toUpperCase())) {
-    newErrors.cin = 'Format CIN invalide (ex: AB123456)'
+    // ID number validation (Kenyan ID: 8-9 digits)
+    if (formData.idNumber && !/^[0-9]{8,9}$/.test(formData.idNumber)) {
+    newErrors.idNumber = 'Invalid ID number format (8-9 digits)';
     }
 
-    // Validation date de naissance
-    if (formData.dateNaissance) {
-    const birthDate = new Date(formData.dateNaissance)
-    const today = new Date()
-    const age = today.getFullYear() - birthDate.getFullYear()
-    
+    // Date of birth validation
+    if (formData.dateOfBirth) {
+    const birthDate = new Date(formData.dateOfBirth);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+
     if (age < 16 || age > 70) {
-        newErrors.dateNaissance = 'L\'âge doit être entre 16 et 70 ans'
+        newErrors.dateOfBirth = 'Age must be between 16 and 70 years';
     }
     }
 
-    // Validation date d'embauche
-    if (formData.dateEmbauche) {
-    const hireDate = new Date(formData.dateEmbauche)
-    const today = new Date()
-    
+    // Hire date validation
+    if (formData.hireDate) {
+    const hireDate = new Date(formData.hireDate);
+    const today = new Date();
+
     if (hireDate > today) {
-        newErrors.dateEmbauche = 'La date d\'embauche ne peut pas être dans le futur'
+        newErrors.hireDate = 'Hire date cannot be in the future';
     }
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-}
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+};
 
 const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!validateForm()) {
-    return
+    return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-    await onSubmit(formData)
+    await onSubmit(formData);
     } catch (error) {
-    console.error('Error submitting form:', error)
+    console.error('Error submitting form:', error);
     } finally {
-    setIsSubmitting(false)
+    setIsSubmitting(false);
     }
-}
+};
 
 return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
     <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-xl font-semibold text-gray-900">
-            {isEditing ? 'Modifier l\'employé' : 'Ajouter un nouvel employé'}
+            {isEditing ? 'Edit Employee' : 'Add New Employee'}
         </h2>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Informations personnelles */}
+            {/* Personal Information */}
             <div className="lg:col-span-3">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Informations personnelles</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Matricule <span className="text-red-500">*</span>
+                Employee ID <span className="text-red-500">*</span>
             </label>
             <input
                 type="text"
-                name="matricule"
-                value={formData.matricule}
+                name="employeeId"
+                value={formData.employeeId}
                 onChange={handleChange}
-                className={`payroll-input ${errors.matricule ? 'input-error' : ''}`}
+                className={`payroll-input ${errors.employeeId ? 'input-error' : ''}`}
                 placeholder="Ex: EMP001"
             />
-            {errors.matricule && <p className="form-error">{errors.matricule}</p>}
+            {errors.employeeId && <p className="form-error">{errors.employeeId}</p>}
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nom <span className="text-red-500">*</span>
+                Last Name <span className="text-red-500">*</span>
             </label>
             <input
                 type="text"
-                name="nom"
-                value={formData.nom}
+                name="lastName"
+                value={formData.lastName}
                 onChange={handleChange}
-                className={`payroll-input ${errors.nom ? 'input-error' : ''}`}
-                placeholder="Nom de famille"
+                className={`payroll-input ${errors.lastName ? 'input-error' : ''}`}
+                placeholder="Last Name"
             />
-            {errors.nom && <p className="form-error">{errors.nom}</p>}
+            {errors.lastName && <p className="form-error">{errors.lastName}</p>}
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Prénom <span className="text-red-500">*</span>
+                First Name <span className="text-red-500">*</span>
             </label>
             <input
                 type="text"
-                name="prenom"
-                value={formData.prenom}
+                name="firstName"
+                value={formData.firstName}
                 onChange={handleChange}
-                className={`payroll-input ${errors.prenom ? 'input-error' : ''}`}
-                placeholder="Prénom"
+                className={`payroll-input ${errors.firstName ? 'input-error' : ''}`}
+                placeholder="First Name"
             />
-            {errors.prenom && <p className="form-error">{errors.prenom}</p>}
+            {errors.firstName && <p className="form-error">{errors.firstName}</p>}
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                CIN
+                ID Number
             </label>
             <input
                 type="text"
-                name="cin"
-                value={formData.cin}
+                name="idNumber"
+                value={formData.idNumber}
                 onChange={handleChange}
-                className={`payroll-input ${errors.cin ? 'input-error' : ''}`}
-                placeholder="Ex: AB123456"
+                className={`payroll-input ${errors.idNumber ? 'input-error' : ''}`}
+                placeholder="Ex: 123456789"
             />
-            {errors.cin && <p className="form-error">{errors.cin}</p>}
+            {errors.idNumber && <p className="form-error">{errors.idNumber}</p>}
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Numéro CNSS
+                NSSF Number
             </label>
             <input
                 type="text"
-                name="cnss"
-                value={formData.cnss}
+                name="nssfNumber"
+                value={formData.nssfNumber}
                 onChange={handleChange}
                 className="payroll-input"
-                placeholder="Numéro CNSS"
+                placeholder="NSSF Number"
             />
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Situation familiale
+                Marital Status
             </label>
             <select
-                name="situationFamiliale"
-                value={formData.situationFamiliale}
+                name="maritalStatus"
+                value={formData.maritalStatus}
                 onChange={handleChange}
                 className="payroll-input"
             >
-                <option value="CELIBATAIRE">Célibataire</option>
-                <option value="MARIE">Marié(e)</option>
-                <option value="DIVORCE">Divorcé(e)</option>
-                <option value="VEUF">Veuf/Veuve</option>
+                <option value="SINGLE">Single</option>
+                <option value="MARRIED">Married</option>
+                <option value="DIVORCED">Divorced</option>
+                <option value="WIDOWED">Widowed</option>
             </select>
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date de naissance
+                Date of Birth
             </label>
             <input
                 type="date"
-                name="dateNaissance"
-                value={formData.dateNaissance}
+                name="dateOfBirth"
+                value={formData.dateOfBirth}
                 onChange={handleChange}
-                className={`payroll-input ${errors.dateNaissance ? 'input-error' : ''}`}
+                className={`payroll-input ${errors.dateOfBirth ? 'input-error' : ''}`}
             />
-            {errors.dateNaissance && <p className="form-error">{errors.dateNaissance}</p>}
+            {errors.dateOfBirth && <p className="form-error">{errors.dateOfBirth}</p>}
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Téléphone
+                Phone Number
             </label>
             <input
                 type="tel"
@@ -271,7 +270,7 @@ return (
                 value={formData.telephone}
                 onChange={handleChange}
                 className={`payroll-input ${errors.telephone ? 'input-error' : ''}`}
-                placeholder="Ex: +212 6 12 34 56 78"
+                placeholder="Ex: +254 7XX XXX XXX"
             />
             {errors.telephone && <p className="form-error">{errors.telephone}</p>}
             </div>
@@ -286,62 +285,62 @@ return (
                 value={formData.email}
                 onChange={handleChange}
                 className={`payroll-input ${errors.email ? 'input-error' : ''}`}
-                placeholder="email@exemple.com"
+                placeholder="email@example.com"
             />
             {errors.email && <p className="form-error">{errors.email}</p>}
             </div>
 
             <div className="lg:col-span-3">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Adresse
+                Address
             </label>
             <textarea
-                name="adresse"
-                value={formData.adresse}
+                name="address"
+                value={formData.address}
                 onChange={handleChange}
                 rows={3}
                 className="payroll-input"
-                placeholder="Adresse complète"
+                placeholder="Full Address"
             />
             </div>
 
-            {/* Informations professionnelles */}
+            {/* Professional Information */}
             <div className="lg:col-span-3 mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Informations professionnelles</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Professional Information</h3>
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fonction <span className="text-red-500">*</span>
+                Position <span className="text-red-500">*</span>
             </label>
             <input
                 type="text"
-                name="fonction"
-                value={formData.fonction}
+                name="position"
+                value={formData.position}
                 onChange={handleChange}
-                className={`payroll-input ${errors.fonction ? 'input-error' : ''}`}
-                placeholder="Ex: Développeur, Comptable..."
+                className={`payroll-input ${errors.position ? 'input-error' : ''}`}
+                placeholder="Ex: Developer, Accountant..."
             />
-            {errors.fonction && <p className="form-error">{errors.fonction}</p>}
+            {errors.position && <p className="form-error">{errors.position}</p>}
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date d'embauche <span className="text-red-500">*</span>
+                Hire Date <span className="text-red-500">*</span>
             </label>
             <input
                 type="date"
-                name="dateEmbauche"
-                value={formData.dateEmbauche}
+                name="hireDate"
+                value={formData.hireDate}
                 onChange={handleChange}
-                className={`payroll-input ${errors.dateEmbauche ? 'input-error' : ''}`}
+                className={`payroll-input ${errors.hireDate ? 'input-error' : ''}`}
             />
-            {errors.dateEmbauche && <p className="form-error">{errors.dateEmbauche}</p>}
+            {errors.hireDate && <p className="form-error">{errors.hireDate}</p>}
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Statut
+                Status
             </label>
             <select
                 name="status"
@@ -349,22 +348,22 @@ return (
                 onChange={handleChange}
                 className="payroll-input"
             >
-                <option value="ACTIF">Actif</option>
-                <option value="SUSPENDU">Suspendu</option>
-                <option value="DEMISSIONNAIRE">Démissionnaire</option>
-                <option value="LICENCIE">Licencié</option>
-                <option value="RETRAITE">Retraité</option>
+                <option value="ACTIVE">Active</option>
+                <option value="SUSPENDED">Suspended</option>
+                <option value="RESIGNED">Resigned</option>
+                <option value="TERMINATED">Terminated</option>
+                <option value="RETIRED">Retired</option>
             </select>
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nombre de déductions
+                Number of Deductions
             </label>
             <input
                 type="number"
-                name="nbrDeductions"
-                value={formData.nbrDeductions}
+                name="numberOfDeductions"
+                value={formData.numberOfDeductions}
                 onChange={handleChange}
                 min="0"
                 className="payroll-input"
@@ -373,12 +372,12 @@ return (
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nombre de jours par mois
+                Working Days per Month
             </label>
             <input
                 type="number"
-                name="nbreJourMois"
-                value={formData.nbreJourMois}
+                name="numberOfDaysPerMonth"
+                value={formData.numberOfDaysPerMonth}
                 onChange={handleChange}
                 min="1"
                 max="31"
@@ -386,52 +385,36 @@ return (
             />
             </div>
 
-            {/* Informations salariales */}
+            {/* Salary Information */}
             <div className="lg:col-span-3 mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Informations salariales</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Salary Information</h3>
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Salaire de base (MAD) <span className="text-red-500">*</span>
+                Base Salary (KES) <span className="text-red-500">*</span>
             </label>
             <input
                 type="number"
-                name="salaireBase"
-                value={formData.salaireBase}
+                name="baseSalary"
+                value={formData.baseSalary}
                 onChange={handleChange}
                 min="0"
                 step="0.01"
-                className={`payroll-input ${errors.salaireBase ? 'input-error' : ''}`}
+                className={`payroll-input ${errors.baseSalary ? 'input-error' : ''}`}
                 placeholder="0.00"
             />
-            {errors.salaireBase && <p className="form-error">{errors.salaireBase}</p>}
+            {errors.baseSalary && <p className="form-error">{errors.baseSalary}</p>}
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Indemnité de logement (MAD)
+                Housing Allowance (KES)
             </label>
             <input
                 type="number"
-                name="indemniteLogement"
-                value={formData.indemniteLogement}
-                onChange={handleChange}
-                min="0"
-                step="0.01"
-                className="payroll-input"
-                placeholder="0.00"
-            />
-            </div>
-
-            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-                Indemnité de panier (MAD)
-            </label>
-            <input
-                type="number"
-                name="indemnitePanier"
-                value={formData.indemnitePanier}
+                name="housingAllowance"
+                value={formData.housingAllowance}
                 onChange={handleChange}
                 min="0"
                 step="0.01"
@@ -442,12 +425,12 @@ return (
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Prime de transport (MAD)
+                Meal Allowance (KES)
             </label>
             <input
                 type="number"
-                name="primeTransport"
-                value={formData.primeTransport}
+                name="mealAllowance"
+                value={formData.mealAllowance}
                 onChange={handleChange}
                 min="0"
                 step="0.01"
@@ -458,12 +441,12 @@ return (
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Indemnité de représentation (MAD)
+                Transport Allowance (KES)
             </label>
             <input
                 type="number"
-                name="indemniteRepresentation"
-                value={formData.indemniteRepresentation}
+                name="transportAllowance"
+                value={formData.transportAllowance}
                 onChange={handleChange}
                 min="0"
                 step="0.01"
@@ -472,12 +455,27 @@ return (
             />
             </div>
 
-            {/* CNSS Prestations - Part Salariale (optionnelles) */}
+            <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+                Representation Allowance (KES)
+            </label>
+            <input
+                type="number"
+                name="representationAllowance"
+                value={formData.representationAllowance}
+                onChange={handleChange}
+                min="0"
+                step="0.01"
+                className="payroll-input"
+                placeholder="0.00"
+            />
+            </div>
+
+            {/* Kenyan Contributions (optional) */}
             <div className="lg:col-span-3 mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">CNSS Prestations - Part Salariale (optionnelles)</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Kenyan Contributions (optional)</h3>
             <p className="text-sm text-gray-600 mb-4">
-                Cochez les prestations à appliquer avec les montants par défaut. 
-                Si non cochées, les calculs automatiques basés sur le salaire seront utilisés.
+                Check the contributions to apply with standard rates. If unchecked, automatic calculations based on salary will be used.
             </p>
             </div>
 
@@ -486,122 +484,103 @@ return (
                 <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
                 <input
                     type="checkbox"
-                    name="useCnssPrestation"
-                    checked={formData.useCnssPrestation}
-                    onChange={(e) => setFormData(prev => ({ ...prev, useCnssPrestation: e.target.checked }))}
+                    name="useNssfEmployee"
+                    checked={formData.useNssfEmployee}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, useNssfEmployee: e.target.checked }))}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <div className="flex-1">
                     <label className="text-sm font-medium text-gray-700">
-                    CNSS Prestations
+                    NSSF Contribution
                     </label>
-                    <p className="text-xs text-gray-500">268,80 MAD</p>
+                    <p className="text-xs text-gray-500">6% of pensionable salary (capped)</p>
                 </div>
                 </div>
 
                 <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
                 <input
                     type="checkbox"
-                    name="useAmoSalariale"
-                    checked={formData.useAmoSalariale}
-                    onChange={(e) => setFormData(prev => ({ ...prev, useAmoSalariale: e.target.checked }))}
+                    name="useShifEmployee"
+                    checked={formData.useShifEmployee}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, useShifEmployee: e.target.checked }))}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <div className="flex-1">
                     <label className="text-sm font-medium text-gray-700">
-                    AMO - Part Salariale
+                    SHIF Contribution
                     </label>
-                    <p className="text-xs text-gray-500">180,16 MAD</p>
+                    <p className="text-xs text-gray-500">2.75% of gross salary</p>
                 </div>
                 </div>
 
                 <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
                 <input
                     type="checkbox"
-                    name="useRetraiteSalariale"
-                    checked={formData.useRetraiteSalariale}
-                    onChange={(e) => setFormData(prev => ({ ...prev, useRetraiteSalariale: e.target.checked }))}
+                    name="useHousingLevy"
+                    checked={formData.useHousingLevy}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, useHousingLevy: e.target.checked }))}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <div className="flex-1">
                     <label className="text-sm font-medium text-gray-700">
-                    Retraite - Part Salariale
+                    Housing Levy
                     </label>
-                    <p className="text-xs text-gray-500">478,29 MAD</p>
-                </div>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
-                <input
-                    type="checkbox"
-                    name="useAssuranceDiversSalariale"
-                    checked={formData.useAssuranceDiversSalariale}
-                    onChange={(e) => setFormData(prev => ({ ...prev, useAssuranceDiversSalariale: e.target.checked }))}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <div className="flex-1">
-                    <label className="text-sm font-medium text-gray-700">
-                    Assurance Divers - Part Salariale
-                    </label>
-                    <p className="text-xs text-gray-500">100,14 MAD</p>
+                    <p className="text-xs text-gray-500">1.5% of gross salary</p>
                 </div>
                 </div>
             </div>
             </div>
 
-            {/* Informations bancaires */}
+            {/* Banking Information */}
             <div className="lg:col-span-3 mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Informations bancaires</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Banking Information</h3>
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Compte bancaire
+                Bank Account
             </label>
             <input
                 type="text"
-                name="compteBancaire"
-                value={formData.compteBancaire}
+                name="bankAccount"
+                value={formData.bankAccount}
                 onChange={handleChange}
                 className="payroll-input"
-                placeholder="Numéro de compte"
+                placeholder="Bank Account Number"
             />
             </div>
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-                Agence
+                Bank Branch
             </label>
             <input
                 type="text"
-                name="agence"
-                value={formData.agence}
+                name="bankBranch"
+                value={formData.bankBranch}
                 onChange={handleChange}
                 className="payroll-input"
-                placeholder="Nom de l'agence bancaire"
+                placeholder="Bank Branch Name"
             />
             </div>
 
-            {/* Notice pour la gestion des crédits */}
+            {/* Credit Management Notice */}
             <div className="lg:col-span-3 mt-6">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-start">
                 <CreditCard className="w-5 h-5 text-blue-600 mr-3 mt-0.5" />
                 <div className="flex-1">
                     <h4 className="text-sm font-medium text-blue-800 mb-2">
-                    Gestion des crédits et retenues
+                    Loan and Deduction Management
                     </h4>
                     <p className="text-sm text-blue-700 mb-3">
-                    Pour assigner un crédit en cours ou qui va commencer à cet employé, 
-                    utilisez la section dédiée à la gestion des crédits. Les retenues 
-                    apparaîtront automatiquement dans les bulletins de paie jusqu'au 
-                    paiement complet.
+                    To assign an ongoing or upcoming loan to this employee, use the dedicated loan management section. Deductions will automatically appear in payslips until fully paid.
                     </p>
-                    <Link 
-                    href="/credits" 
+                    <Link
+                    href="/loans"
                     className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
                     >
-                    Gérer les crédits
+                    Manage Loans
                     <ExternalLink className="w-4 h-4 ml-1" />
                     </Link>
                 </div>
@@ -610,7 +589,7 @@ return (
             </div>
         </div>
 
-        {/* Boutons d'action */}
+        {/* Action Buttons */}
         <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
             <button
             type="button"
@@ -618,7 +597,7 @@ return (
             className="payroll-button-secondary"
             disabled={isSubmitting}
             >
-            Annuler
+            Cancel
             </button>
             <button
             type="submit"
@@ -628,15 +607,15 @@ return (
             {isSubmitting ? (
                 <>
                 <span className="spinner mr-2"></span>
-                {isEditing ? 'Modification...' : 'Ajout...'}
+                {isEditing ? 'Updating...' : 'Adding...'}
                 </>
             ) : (
-                isEditing ? 'Modifier' : 'Ajouter'
+                isEditing ? 'Update' : 'Add'
             )}
             </button>
         </div>
         </form>
     </div>
     </div>
-)
+);
 }

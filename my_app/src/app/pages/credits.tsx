@@ -19,72 +19,68 @@ import {
   Clock,
   FileText
 } from 'lucide-react';
+import { Advance } from '@prisma/client';
 
 // Types
-type CreditType = 'LOGEMENT' | 'CONSOMMATION';
-type CreditStatus = 'ACTIF' | 'SOLDE' | 'SUSPENDU';
+type LoanType = 'HOUSING' | 'CONSUMER';
+type LoanStatus = 'ACTIVE' | 'PAID_OFF' | 'SUSPENDED';
 
 interface Employee {
   id: string;
-  matricule: string;
-  nom: string;
-  prenom: string;
-  fonction: string;
+  employeeId: string; // 'matricule' translated to 'employeeId'
+  lastName: string;    // 'nom' translated to 'lastName'
+  firstName: string;   // 'prenom' translated to 'firstName'
+  position: string;    // 'fonction' translated to 'position'
 }
 
-interface Credit {
+interface Loan { // 'Credit' translated to 'Loan'
   id: string;
   employee: Employee;
-  type: CreditType;
-  montantCredit: number;
-  tauxInteret: number;
-  dureeAnnees: number;
-  mensualite: number;
-  dateDebut: Date;
-  dateFin: Date;
-  soldeRestant: number;
-  montantRembourse: number;
-  statut: CreditStatus;
-  banque: string;
-  numeroCompte?: string;
+  type: LoanType;
+  loanAmount: number;
+  interestRate: number;
+  durationYears: number;
+  monthlyPayment: number;
+  startDate: Date;
+  endDate: Date;
+  remainingBalance: number;
+  amountRepaid: number;
+  status: LoanStatus;
+  bank: string;
+  accountNumber?: string;
   notes?: string;
-  interetsPayes: number;
-  capitalRestant: number;
+  interestPaid: number;
+  remainingPrincipal: number;
   createdAt: Date;
 }
 
 const CreditManagement: React.FC = () => {
-  const [credits, setCredits] = useState<Credit[]>([]);
+  const [loans, setLoans] = useState<Loan[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [advances, setAdvances] = useState<Advance[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<CreditStatus | 'ALL'>('ALL');
-  const [filterType, setFilterType] = useState<CreditType | 'ALL'>('ALL');
+  const [filterStatus, setFilterStatus] = useState<LoanStatus | 'ALL'>('ALL');
+  const [filterType, setFilterType] = useState<LoanType | 'ALL'>('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedCredit, setSelectedCredit] = useState<Credit | null>(null);
+  const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
-  const [newMontantRembourse, setNewMontantRembourse] = useState('');
-  const [showEcheancier, setShowEcheancier] = useState(false);
-  const [selectedCreditForEcheancier, setSelectedCreditForEcheancier] = useState<string | null>(null);
+  const [newAmountRepaid, setNewAmountRepaid] = useState('');
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [selectedLoanForSchedule, setSelectedLoanForSchedule] = useState<string | null>(null);
 
-  // Fetch data
-  useEffect(() => {
-    fetchCredits();
-    fetchEmployees();
-  }, []);
-
-  const fetchCredits = async () => {
+  const fetchLoans = async () => {
     try {
-      const response = await fetch('/api/credits');
+      const response = await fetch('/api/loans');
       if (response.ok) {
         const data = await response.json();
-        setCredits(data);
+        setLoans(data);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des crédits:', error);
+      console.error('Error loading loans:', error);
     } finally {
       setLoading(false);
     }
@@ -98,43 +94,64 @@ const CreditManagement: React.FC = () => {
         setEmployees(data);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des employés:', error);
+      console.error('Error loading employees:', error);
     }
   };
 
-  // Filter credits
-  const filteredCredits = credits.filter(credit => {
+  const fetchAdvances = async () => {
+    try {
+      const response = await fetch('/api/advances');
+      if (response.ok) {
+        const data = await response.json();
+        setAdvances(data);
+      } else {
+        throw new Error('Error loading advances');
+      }
+    } catch (error) {
+      console.error('Error loading advances:', error);
+    }
+  };
+
+    // Fetch data
+  useEffect(() => {
+    fetchLoans();
+    fetchEmployees();
+    fetchAdvances();
+  }, []);
+
+  // Filter loans
+  const filteredLoans = loans.filter(loan => {
     const matchesSearch = 
-      credit.employee.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      credit.employee.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      credit.employee.matricule.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      credit.banque.toLowerCase().includes(searchTerm.toLowerCase());
+      loan.employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      loan.employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      loan.employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      loan.bank.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = filterStatus === 'ALL' || credit.statut === filterStatus;
-    const matchesType = filterType === 'ALL' || credit.type === filterType;
+    const matchesStatus = filterStatus === 'ALL' || loan.status === filterStatus;
+    const matchesType = filterType === 'ALL' || loan.type === filterType;
     
     return matchesSearch && matchesStatus && matchesType;
   });
 
   // Format currency
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'MAD'
+      currency: 'KES'
     }).format(amount);
   };
 
   // Format date
   const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('fr-FR');
+    return new Date(date).toLocaleDateString('en-KE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
   // Get status badge
-  const getStatusBadge = (status: CreditStatus) => {
+  const getStatusBadge = (status: LoanStatus) => {
     const badges = {
-      ACTIF: { color: 'bg-green-100 text-green-800', icon: CheckCircle, text: 'Actif' },
-      SOLDE: { color: 'bg-gray-100 text-gray-800', icon: CheckCircle, text: 'Soldé' },
-      SUSPENDU: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, text: 'Suspendu' }
+      ACTIVE: { color: 'bg-green-100 text-green-800', icon: CheckCircle, text: 'Active' },
+      PAID_OFF: { color: 'bg-gray-100 text-gray-800', icon: CheckCircle, text: 'Paid Off' },
+      SUSPENDED: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, text: 'Suspended' }
     };
     
     const badge = badges[status];
@@ -149,10 +166,10 @@ const CreditManagement: React.FC = () => {
   };
 
   // Get type badge
-  const getTypeBadge = (type: CreditType) => {
+  const getTypeBadge = (type: LoanType) => {
     const badges = {
-      LOGEMENT: { color: 'bg-blue-100 text-blue-800', text: 'Logement' },
-      CONSOMMATION: { color: 'bg-purple-100 text-purple-800', text: 'Consommation' }
+      HOUSING: { color: 'bg-blue-100 text-blue-800', text: 'Housing' },
+      CONSUMER: { color: 'bg-purple-100 text-purple-800', text: 'Consumer' }
     };
     
     const badge = badges[type];
@@ -164,28 +181,28 @@ const CreditManagement: React.FC = () => {
     );
   };
 
-  // Calculate progress percentage - utilise la progression calculée si disponible
-  const getProgressPercentage = (credit: any) => {
-    if (credit.progressionCalculee) {
-      return credit.progressionCalculee.progressionPourcentage;
+  // Calculate progress percentage - uses calculated progress if available
+  const getProgressPercentage = (loan: any) => {
+    if (loan.calculatedProgress) {
+      return loan.calculatedProgress.progressPercentage;
     }
-    return ((credit.montantRembourse / credit.montantCredit) * 100);
+    return ((loan.amountRepaid / loan.loanAmount) * 100);
   };
 
   // Get progress info for display
-  const getProgressInfo = (credit: any) => {
-    if (credit.progressionCalculee) {
+  const getProgressInfo = (loan: any) => {
+    if (loan.calculatedProgress) {
       return {
-        percentage: credit.progressionCalculee.progressionPourcentage,
-        isLate: credit.progressionCalculee.enRetard,
-        monthsLate: credit.progressionCalculee.moisRetard,
-        monthsElapsed: credit.progressionCalculee.mensualitesEcoulees,
-        amountDue: credit.progressionCalculee.montantRembourseDu
+        percentage: loan.calculatedProgress.progressPercentage,
+        isLate: loan.calculatedProgress.isLate,
+        monthsLate: loan.calculatedProgress.monthsLate,
+        monthsElapsed: loan.calculatedProgress.monthsElapsed,
+        amountDue: loan.calculatedProgress.amountDue
       };
     }
     
-    // Fallback si pas de progression calculée
-    const percentage = Math.min(100, (credit.montantRembourse / credit.montantCredit) * 100);
+    // Fallback if no calculated progress
+    const percentage = Math.min(100, (loan.amountRepaid / loan.loanAmount) * 100);
     return {
       percentage: percentage,
       isLate: false,
@@ -195,27 +212,27 @@ const CreditManagement: React.FC = () => {
     };
   };
 
-  // Handle delete credit
-  const handleDeleteCredit = async (creditId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce crédit ?')) {
+  // Handle delete loan
+  const handleDeleteLoan = async (loanId: string) => {
+    if (!confirm('Are you sure you want to delete this loan?')) {
       return;
     }
 
     setDeleteLoading(true);
     try {
-      const response = await fetch(`/api/credits/${creditId}`, {
+      const response = await fetch(`/api/loans/${loanId}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        await fetchCredits(); // Refresh the list
-        alert('Crédit supprimé avec succès');
+        await fetchLoans(); // Refresh the list
+        alert('Loan deleted successfully');
       } else {
-        alert('Erreur lors de la suppression du crédit');
+        alert('Error deleting loan');
       }
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
-      alert('Erreur lors de la suppression du crédit');
+      console.error('Error during deletion:', error);
+      alert('Error deleting loan');
     } finally {
       setDeleteLoading(false);
     }
@@ -237,9 +254,9 @@ const CreditManagement: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Gestion des Crédits</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Loan Management</h1>
             <p className="mt-1 text-sm text-gray-500">
-              Gérez les crédits logement et consommation des employés
+              Manage employee housing and consumer loans
             </p>
           </div>
           <div className="mt-4 sm:mt-0">
@@ -248,7 +265,7 @@ const CreditManagement: React.FC = () => {
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#0063b4] hover:bg-[#0052a3] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0063b4]"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Nouveau Crédit
+              New Loan
             </button>
           </div>
         </div>
@@ -264,10 +281,10 @@ const CreditManagement: React.FC = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      Total Crédits
+                      Total Loans
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      {credits.length}
+                      {loans.length}
                     </dd>
                   </dl>
                 </div>
@@ -284,10 +301,10 @@ const CreditManagement: React.FC = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      Crédits Actifs
+                      Active Loans
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      {credits.filter(c => c.statut === 'ACTIF').length}
+                      {loans.filter(c => c.status === 'ACTIVE').length}
                     </dd>
                   </dl>
                 </div>
@@ -304,10 +321,10 @@ const CreditManagement: React.FC = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      Montant Total
+                      Total Amount
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      {formatCurrency(credits.reduce((sum, c) => sum + c.montantCredit, 0))}
+                      {formatCurrency(loans.reduce((sum, c) => sum + c.loanAmount, 0))}
                     </dd>
                   </dl>
                 </div>
@@ -324,10 +341,10 @@ const CreditManagement: React.FC = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      Solde Restant
+                      Remaining Balance
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      {formatCurrency(credits.reduce((sum, c) => sum + c.soldeRestant, 0))}
+                      {formatCurrency(loans.reduce((sum, c) => sum + c.remainingBalance, 0))}
                     </dd>
                   </dl>
                 </div>
@@ -348,7 +365,7 @@ const CreditManagement: React.FC = () => {
                   <input
                     type="text"
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
-                    placeholder="Rechercher par nom, matricule ou banque..."
+                    placeholder="Search by name, employee ID or bank..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -358,53 +375,53 @@ const CreditManagement: React.FC = () => {
               <div className="flex space-x-4">
                 <select
                   value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value as CreditStatus | 'ALL')}
+                  onChange={(e) => setFilterStatus(e.target.value as LoanStatus | 'ALL')}
                   className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm rounded-md"
                 >
-                  <option value="ALL">Tous les statuts</option>
-                  <option value="ACTIF">Actif</option>
-                  <option value="SOLDE">Soldé</option>
-                  <option value="SUSPENDU">Suspendu</option>
+                  <option value="ALL">All Statuses</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="PAID_OFF">Paid Off</option>
+                  <option value="SUSPENDED">Suspended</option>
                 </select>
                 
                 <select
                   value={filterType}
-                  onChange={(e) => setFilterType(e.target.value as CreditType | 'ALL')}
+                  onChange={(e) => setFilterType(e.target.value as LoanType | 'ALL')}
                   className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm rounded-md"
                 >
-                  <option value="ALL">Tous les types</option>
-                  <option value="LOGEMENT">Logement</option>
-                  <option value="CONSOMMATION">Consommation</option>
+                  <option value="ALL">All Types</option>
+                  <option value="HOUSING">Housing</option>
+                  <option value="CONSUMER">Consumer</option>
                 </select>
               </div>
             </div>
           </div>
 
-          {/* Credits Table */}
+          {/* Loans Table */}
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Employé
+                    Employee
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Type
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Montant
+                    Amount
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Mensualité
+                    Monthly Payment
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Progression
+                    Progress
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Statut
+                    Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Banque
+                    Bank
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -412,37 +429,37 @@ const CreditManagement: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredCredits.map((credit) => (
-                  <tr key={credit.id} className="hover:bg-gray-50">
+                {filteredLoans.map((loan) => (
+                  <tr key={loan.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
-                            {credit.employee.prenom} {credit.employee.nom}
+                            {loan.employee.firstName} {loan.employee.lastName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {credit.employee.matricule} • {credit.employee.fonction}
+                            {loan.employee.employeeId} • {loan.employee.position}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {getTypeBadge(credit.type)}
+                      {getTypeBadge(loan.type)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {formatCurrency(credit.montantCredit)}
+                        {formatCurrency(loan.loanAmount)}
                       </div>
                       <div className="text-sm text-gray-500">
-                        Restant: {formatCurrency(credit.soldeRestant)}
+                        Remaining: {formatCurrency(loan.remainingBalance)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatCurrency(credit.mensualite)}
+                      {formatCurrency(loan.monthlyPayment)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {(() => {
-                        const progressInfo = getProgressInfo(credit);
+                        const progressInfo = getProgressInfo(loan);
                         return (
                           <div className="flex items-center">
                             <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
@@ -457,7 +474,7 @@ const CreditManagement: React.FC = () => {
                               </span>
                               {progressInfo.isLate && progressInfo.monthsLate > 0 && (
                                 <span className="text-xs text-red-500">
-                                  {progressInfo.monthsLate} mois retard
+                                  {progressInfo.monthsLate} months late
                                 </span>
                               )}
                             </div>
@@ -466,52 +483,52 @@ const CreditManagement: React.FC = () => {
                       })()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(credit.statut)}
+                      {getStatusBadge(loan.status)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {credit.banque}
+                      {loan.bank}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
                         <button
                           onClick={() => {
-                            setSelectedCreditForEcheancier(credit.id);
-                            setShowEcheancier(true);
+                            setSelectedLoanForSchedule(loan.id);
+                            setShowSchedule(true);
                           }}
                           className="text-purple-600 hover:text-purple-900 p-1 rounded"
-                          title="Voir l'échéancier"
+                          title="View payment schedule"
                         >
                           <FileText className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => {
-                            setSelectedCredit(credit);
-                            setShowAddModal(false); // Fermer le modal d'ajout s'il est ouvert
-                            setShowEditModal(false); // Fermer le modal d'édition s'il est ouvert
+                            setSelectedLoan(loan);
+                            setShowAddModal(false); // Close add modal if open
+                            setShowEditModal(false); // Close edit modal if open
                             setShowDetailsModal(true);
                           }}
                           className="text-[#0063b4] hover:text-[#0052a3] p-1 rounded"
-                          title="Voir les détails"
+                          title="View details"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => {
-                            setSelectedCredit(credit);
-                            setShowAddModal(false); // Fermer le modal d'ajout s'il est ouvert
-                            setShowDetailsModal(false); // Fermer le modal de détails s'il est ouvert
+                            setSelectedLoan(loan);
+                            setShowAddModal(false); // Close add modal if open
+                            setShowDetailsModal(false); // Close details modal if open
                             setShowEditModal(true);
                           }}
                           className="text-gray-600 hover:text-gray-900 p-1 rounded"
-                          title="Modifier"
+                          title="Edit"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDeleteCredit(credit.id)}
+                          onClick={() => handleDeleteLoan(loan.id)}
                           disabled={deleteLoading}
                           className="text-red-600 hover:text-red-900 p-1 rounded disabled:opacity-50"
-                          title="Supprimer"
+                          title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -523,39 +540,40 @@ const CreditManagement: React.FC = () => {
             </table>
           </div>
 
-          {filteredCredits.length === 0 && (
+          {filteredLoans.length === 0 && (
             <div className="text-center py-12">
               <CreditCard className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">Aucun crédit trouvé</h3>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No loans found</h3>
               <p className="mt-1 text-sm text-gray-500">
                 {searchTerm || filterStatus !== 'ALL' || filterType !== 'ALL'
-                  ? 'Aucun crédit ne correspond aux critères de recherche.'
-                  : 'Commencez par ajouter un nouveau crédit.'}
+                  ? 'No loans match the search criteria.'
+                  : 'Start by adding a new loan.'}
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Add Credit Modal */}
+      {/* Add Loan Modal */}
       <AddCreditModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSuccess={() => {
-          fetchCredits();
+          fetchLoans();
           setShowAddModal(false);
         }}
         employees={employees}
+        advances={advances}
       />
 
-      {/* Credit Details Modal */}
-      {showDetailsModal && selectedCredit && (
+      {/* Loan Details Modal */}
+      {showDetailsModal && selectedLoan && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Détails du Crédit
+                  Loan Details
                 </h3>
                 <button
                   onClick={() => setShowDetailsModal(false)}
@@ -570,167 +588,167 @@ const CreditManagement: React.FC = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Employé</label>
+                    <label className="block text-sm font-medium text-gray-700">Employee</label>
                     <p className="mt-1 text-sm text-gray-900">
-                      {selectedCredit.employee.prenom} {selectedCredit.employee.nom}
+                      {selectedLoan.employee.firstName} {selectedLoan.employee.lastName}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {selectedCredit.employee.matricule} • {selectedCredit.employee.fonction}
+                      {selectedLoan.employee.employeeId} • {selectedLoan.employee.position}
                     </p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Type de Crédit</label>
+                    <label className="block text-sm font-medium text-gray-700">Loan Type</label>
                     <div className="mt-1">
-                      {getTypeBadge(selectedCredit.type)}
+                      {getTypeBadge(selectedLoan.type)}
                     </div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Montant du Crédit</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedCredit.montantCredit)}</p>
+                    <label className="block text-sm font-medium text-gray-700">Loan Amount</label>
+                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedLoan.loanAmount)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Taux d'Intérêt</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedCredit.tauxInteret}%</p>
+                    <label className="block text-sm font-medium text-gray-700">Interest Rate</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedLoan.interestRate}%</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Durée</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedCredit.dureeAnnees} années</p>
+                    <label className="block text-sm font-medium text-gray-700">Duration</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedLoan.durationYears} years</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Mensualité</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedCredit.mensualite)}</p>
+                    <label className="block text-sm font-medium text-gray-700">Monthly Payment</label>
+                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedLoan.monthlyPayment)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Date de Début</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedCredit.dateDebut)}</p>
+                    <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedLoan.startDate)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Date de Fin</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedCredit.dateFin)}</p>
+                    <label className="block text-sm font-medium text-gray-700">End Date</label>
+                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedLoan.endDate)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Montant Remboursé</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedCredit.montantRembourse)}</p>
+                    <label className="block text-sm font-medium text-gray-700">Amount Repaid</label>
+                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedLoan.amountRepaid)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Solde Restant</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedCredit.soldeRestant)}</p>
+                    <label className="block text-sm font-medium text-gray-700">Remaining Balance</label>
+                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedLoan.remainingBalance)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Statut</label>
+                    <label className="block text-sm font-medium text-gray-700">Status</label>
                     <div className="mt-1">
-                      {getStatusBadge(selectedCredit.statut)}
+                      {getStatusBadge(selectedLoan.status)}
                     </div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Banque</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedCredit.banque}</p>
+                    <label className="block text-sm font-medium text-gray-700">Bank</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedLoan.bank}</p>
                   </div>
                 </div>
                 
-                {selectedCredit.numeroCompte && (
+                {selectedLoan.accountNumber && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Numéro de Compte</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedCredit.numeroCompte}</p>
+                    <label className="block text-sm font-medium text-gray-700">Account Number</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedLoan.accountNumber}</p>
                   </div>
                 )}
                 
-                {selectedCredit.notes && (
+                {selectedLoan.notes && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Notes</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedCredit.notes}</p>
+                    <p className="mt-1 text-sm text-gray-900">{selectedLoan.notes}</p>
                   </div>
                 )}
                 
                 <div className="mt-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Progression du Remboursement</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Repayment Progress</label>
                   <div className="flex items-center">
                     <div className="w-full bg-gray-200 rounded-full h-3 mr-3">
                       <div 
                         className="bg-[#0063b4] h-3 rounded-full" 
-                        style={{ width: `${Math.min(getProgressPercentage(selectedCredit), 100)}%` }}
+                        style={{ width: `${Math.min(getProgressPercentage(selectedLoan), 100)}%` }}
                       ></div>
                     </div>
                     <span className="text-sm text-gray-600 min-w-[3rem]">
-                      {Math.round(getProgressPercentage(selectedCredit))}%
+                      {Math.round(getProgressPercentage(selectedLoan))}%
                     </span>
                   </div>
                 </div>
 
-                {/* Section de mise à jour du montant remboursé */}
+                {/* Repayment amount update section */}
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">Mettre à jour le montant remboursé</h4>
+                  <h4 className="text-sm font-medium text-gray-900 mb-3">Update Repayment Amount</h4>
                   <div className="flex items-end space-x-3">
                     <div className="flex-1">
                       <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Nouveau montant remboursé (MAD)
+                        New amount repaid (KES)
                       </label>
                       <input
                         type="number"
                         step="0.01"
                         min="0"
-                        max={selectedCredit.montantCredit}
-                        value={newMontantRembourse}
-                        onChange={(e) => setNewMontantRembourse(e.target.value)}
-                        placeholder={selectedCredit.montantRembourse.toString()}
+                        max={selectedLoan.loanAmount}
+                        value={newAmountRepaid}
+                        onChange={(e) => setNewAmountRepaid(e.target.value)}
+                        placeholder={selectedLoan.amountRepaid.toString()}
                         className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4]"
                       />
                     </div>
                     <button
                       onClick={async () => {
-                        if (!newMontantRembourse || parseFloat(newMontantRembourse) < 0) {
-                          alert('Veuillez entrer un montant valide');
+                        if (!newAmountRepaid || parseFloat(newAmountRepaid) < 0) {
+                          alert('Please enter a valid amount');
                           return;
                         }
 
                         setUpdateLoading(true);
                         try {
-                          const response = await fetch('/api/credits/update-progress', {
+                          const response = await fetch('/api/loans/update-progress', {
                             method: 'POST',
                             headers: {
                               'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                              creditId: selectedCredit.id,
-                              montantRembourse: parseFloat(newMontantRembourse)
+                              loanId: selectedLoan.id,
+                              amountRepaid: parseFloat(newAmountRepaid)
                             }),
                           });
 
                           if (response.ok) {
-                            await fetchCredits(); // Refresh the list
-                            setNewMontantRembourse('');
-                            alert('Montant remboursé mis à jour avec succès');
+                            await fetchLoans(); // Refresh the list
+                            setNewAmountRepaid('');
+                            alert('Repayment amount updated successfully');
                             setShowDetailsModal(false);
                           } else {
                             const error = await response.json();
-                            alert(`Erreur: ${error.error}`);
+                            alert(`Error: ${error.error}`);
                           }
                         } catch (error) {
-                          console.error('Erreur lors de la mise à jour:', error);
-                          alert('Erreur lors de la mise à jour du montant');
+                          console.error('Error during update:', error);
+                          alert('Error updating repayment amount');
                         } finally {
                           setUpdateLoading(false);
                         }
                       }}
-                      disabled={updateLoading || !newMontantRembourse}
+                      disabled={updateLoading || !newAmountRepaid}
                       className="px-4 py-2 bg-[#0063b4] text-white text-sm rounded-md hover:bg-[#0052a3] focus:outline-none focus:ring-2 focus:ring-[#0063b4] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {updateLoading ? 'Mise à jour...' : 'Mettre à jour'}
+                      {updateLoading ? 'Updating...' : 'Update'}
                     </button>
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
-                    Montant actuel: {formatCurrency(selectedCredit.montantRembourse)} / {formatCurrency(selectedCredit.montantCredit)}
+                    Current amount: {formatCurrency(selectedLoan.amountRepaid)} / {formatCurrency(selectedLoan.loanAmount)}
                   </p>
                 </div>
               </div>
@@ -740,7 +758,7 @@ const CreditManagement: React.FC = () => {
                   onClick={() => setShowDetailsModal(false)}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
-                  Fermer
+                  Close
                 </button>
               </div>
             </div>
@@ -748,32 +766,33 @@ const CreditManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Edit Credit Modal */}
-      {showEditModal && selectedCredit && (
+      {/* Edit Loan Modal */}
+      {showEditModal && selectedLoan && (
         <AddCreditModal
           isOpen={showEditModal}
           onClose={() => {
             setShowEditModal(false);
-            setSelectedCredit(null);
+            setSelectedLoan(null);
           }}
           onSuccess={() => {
-            fetchCredits();
+            fetchLoans();
             setShowEditModal(false);
-            setSelectedCredit(null);
+            setSelectedLoan(null);
           }}
           employees={employees}
-          editCredit={selectedCredit}
+          advances={advances}
+          editLoan={selectedLoan}
         />
       )}
 
-      {/* Credit Echeancier Modal */}
-      {selectedCreditForEcheancier && (
+      {/* Loan Schedule Modal */}
+      {selectedLoanForSchedule && (
         <CreditScheduledPayment
-          creditId={selectedCreditForEcheancier}
-          isOpen={showEcheancier}
+          loanId={selectedLoanForSchedule}
+          isOpen={showSchedule}
           onClose={() => {
-            setShowEcheancier(false);
-            setSelectedCreditForEcheancier(null);
+            setShowSchedule(false);
+            setSelectedLoanForSchedule(null);
           }}
         />
       )}

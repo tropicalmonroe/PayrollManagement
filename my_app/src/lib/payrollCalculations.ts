@@ -192,6 +192,8 @@ export interface EmployeePayrollData {
   bonuses: number;
   overtimePay: number;
   loanRepayment: number;
+  deductibleInterest?: number;
+  otherDeductions: number;
   helbLoan: number;
   subjectToNssf: boolean;
   subjectToShif: boolean;
@@ -250,6 +252,8 @@ export interface PayrollResult {
     netTaxable: number;
     theoreticalTax: number;
     incomeTax: number;
+    helb?: number;
+    personalRelief?: number;
   };
   
   // Other deductions

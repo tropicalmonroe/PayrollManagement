@@ -136,6 +136,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         overtimePay: 0, // or calculate from ve.type === 'OVERTIME'
         loanRepayment: totalHousingCredit + totalConsumerCredit, // combine loans
         helbLoan: employee.helbLoan || 0,
+        otherDeductions: 0,
         bankAccount: employee.bankAccount || '',
         bankBranch: employee.bankBranch || '',
         subjectToNssf: employee.subjectToNssf,
@@ -183,17 +184,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         housingAllowance: payrollResult.earnings.housingAllowance,
         mealAllowance: payrollResult.earnings.mealAllowance,
         transportAllowance: payrollResult.earnings.transportAllowance,
+        representationAllowance: payrollResult.earnings.representationAllowance ?? 0,
         overtimePay: payrollResult.earnings.overtimePay ?? 0,
         bonuses: payrollResult.earnings.bonuses ?? 0,
         otherEarnings: payrollResult.earnings.otherEarnings ?? 0,
         grossSalary: payrollResult.grossSalary,
         taxableGrossSalary: payrollResult.taxableGrossSalary,
+        seniorityBonus: payrollResult.earnings.seniorityBonus ?? 0,
         // ✅ missing ones
         housingLevyEmployee: payrollResult.employeeContributions.housingLevy ?? 0,
         taxableIncome: payrollResult.taxCalculation.netTaxable ?? 0,
         nssfEmployee: payrollResult.employeeContributions.nssfEmployee,
         shif: payrollResult.employeeContributions.shifEmployee,
         paye: payrollResult.taxCalculation.incomeTax,
+        // personalRelief -  ✅ required (default 2400, so optional in TS if you don’t supply)
+        personalRelief: payrollResult.taxCalculation.personalRelief ?? 2400,
+        helb: payrollResult.taxCalculation.helb ?? 0,
         otherDeductions: payrollResult.otherDeductions.totalOtherDeductions,
         totalDeductions: payrollResult.totalDeductions,
         nssfEmployer: payrollResult.employerContributions.nssfEmployer,

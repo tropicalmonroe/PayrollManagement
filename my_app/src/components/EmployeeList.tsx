@@ -1,289 +1,312 @@
-import { useState } from 'react'
-import { Employee, EmployeeStatus, SituationFamiliale } from '@prisma/client'
-import { calculerPaie, type EmployeePayrollData } from '../lib/payrollCalculations'
+import { useState } from 'react';
+import { Employee, EmployeeStatus, MaritalStatus, Advance } from '@prisma/client';
+import { calculatePayroll, type EmployeePayrollData, type PayrollResult } from '../lib/payrollCalculations';
 
 interface EmployeeListProps {
-employees: Employee[]
-onEdit: (employee: Employee) => void
-onDelete: (employeeId: string) => void
-onView: (employee: Employee) => void
+employees: Employee[];
+advances: Advance[];
+onEdit: (employee: Employee) => void;
+onDelete: (employeeId: string) => void;
+onView: (employee: Employee) => void;
 }
 
-export default function EmployeeList({ employees, onEdit, onDelete, onView }: EmployeeListProps) {
-const [searchTerm, setSearchTerm] = useState('')
-const [statusFilter, setStatusFilter] = useState<EmployeeStatus | 'ALL'>('ALL')
-const [sortBy, setSortBy] = useState<'nom' | 'dateEmbauche' | 'salaireBase'>('nom')
-const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+export default function EmployeeList({ employees, advances, onEdit, onDelete, onView }: EmployeeListProps) {
+const [searchTerm, setSearchTerm] = useState('');
+const [statusFilter, setStatusFilter] = useState<EmployeeStatus | 'ALL'>('ALL');
+const [sortBy, setSortBy] = useState<'name' | 'hireDate' | 'baseSalary'>('name');
+const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-// Filtrer et trier les employés
+// Filter and sort employees
 const filteredAndSortedEmployees = employees
-    .filter(employee => {
-    const matchesSearch = 
-        employee.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.matricule.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.fonction.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesStatus = statusFilter === 'ALL' || employee.status === statusFilter
-    
-    return matchesSearch && matchesStatus
+    .filter((employee) => {
+    const matchesSearch =
+        employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.position.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = statusFilter === 'ALL' || employee.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
-    let aValue: any
-    let bValue: any
-    
+    let aValue: any;
+    let bValue: any;
+
     switch (sortBy) {
-        case 'nom':
-        aValue = `${a.nom} ${a.prenom}`
-        bValue = `${b.nom} ${b.prenom}`
-        break
-        case 'dateEmbauche':
-        aValue = new Date(a.dateEmbauche)
-        bValue = new Date(b.dateEmbauche)
-        break
-        case 'salaireBase':
-        aValue = a.salaireBase
-        bValue = b.salaireBase
-        break
+        case 'name':
+        aValue = `${a.lastName} ${a.firstName}`;
+        bValue = `${b.lastName} ${b.firstName}`;
+        break;
+        case 'hireDate':
+        aValue = new Date(a.hireDate);
+        bValue = new Date(b.hireDate);
+        break;
+        case 'baseSalary':
+        aValue = a.baseSalary;
+        bValue = b.baseSalary;
+        break;
         default:
-        return 0
+        return 0;
     }
-    
+
     if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : -1
+        return aValue > bValue ? 1 : -1;
     } else {
-        return aValue < bValue ? 1 : -1
+        return aValue < bValue ? 1 : -1;
     }
-    })
+    });
 
 const getStatusBadge = (status: EmployeeStatus) => {
     switch (status) {
-    case 'ACTIF':
-        return <span className="status-active">Actif</span>
-    case 'SUSPENDU':
-        return <span className="status-pending">Suspendu</span>
-    case 'DEMISSIONNAIRE':
-    case 'LICENCIE':
-    case 'RETRAITE':
-        return <span className="status-inactive">{status.charAt(0) + status.slice(1).toLowerCase()}</span>
+    case 'ACTIVE':
+        return <span className="status-active">Active</span>;
+    case 'SUSPENDED':
+        return <span className="status-pending">Suspended</span>;
+    case 'RESIGNED':
+    case 'TERMINATED':
+    case 'RETIRED':
+        return <span className="status-inactive">{status.charAt(0) + status.slice(1).toLowerCase()}</span>;
     default:
-        return <span className="status-pending">{status}</span>
+        return <span className="status-pending">{status}</span>;
     }
-}
+};
 
-const getSituationFamiliale = (situation: SituationFamiliale) => {
-    switch (situation) {
-    case 'CELIBATAIRE':
-        return 'Célibataire'
-    case 'MARIE':
-        return 'Marié(e)'
-    case 'DIVORCE':
-        return 'Divorcé(e)'
-    case 'VEUF':
-        return 'Veuf/Veuve'
+const getMaritalStatus = (status: MaritalStatus) => {
+    switch (status) {
+    case 'SINGLE':
+        return 'Single';
+    case 'MARRIED':
+        return 'Married';
+    case 'DIVORCED':
+        return 'Divorced';
+    case 'WIDOWED':
+        return 'Widowed';
     default:
-        return situation
+        return status;
     }
-}
+};
 
 const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat('en-KE', {
     style: 'currency',
-    currency: 'MAD',
-    minimumFractionDigits: 2
-    }).format(amount)
-}
+    currency: 'KES',
+    minimumFractionDigits: 2,
+    }).format(amount);
+};
 
 const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat('en-KE', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
-    }).format(new Date(date))
-}
+    day: 'numeric',
+    }).format(new Date(date));
+};
 
 const calculateAge = (birthDate: Date | null) => {
-    if (!birthDate) return 'N/A'
-    const today = new Date()
-    const birth = new Date(birthDate)
-    const age = today.getFullYear() - birth.getFullYear()
-    const monthDiff = today.getMonth() - birth.getMonth()
-    
+    if (!birthDate) return 'N/A';
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    return age - 1
+    age--;
     }
-    return age
-}
+    return age.toString();
+};
 
 const calculateSeniority = (hireDate: Date) => {
-    const today = new Date()
-    const hire = new Date(hireDate)
-    const years = today.getFullYear() - hire.getFullYear()
-    const months = today.getMonth() - hire.getMonth()
-    
-    let totalMonths = years * 12 + months
+    const today = new Date();
+    const hire = new Date(hireDate);
+    const years = today.getFullYear() - hire.getFullYear();
+    const months = today.getMonth() - hire.getMonth();
+
+    let totalMonths = years * 12 + months;
     if (today.getDate() < hire.getDate()) {
-    totalMonths--
+    totalMonths--;
     }
-    
-    const seniorityYears = Math.floor(totalMonths / 12)
-    const seniorityMonths = totalMonths % 12
-    
-    return seniorityYears + (seniorityMonths / 12)
-}
+
+    const seniorityYears = Math.floor(totalMonths / 12);
+    const seniorityMonths = totalMonths % 12;
+
+    return seniorityYears + seniorityMonths / 12;
+};
+
+// Calculate monthly advance deduction (sum of installmentAmount for active advances)
+
+
 
 const calculateNetSalary = (employee: Employee) => {
     try {
+
+        // Calculate total salary advance from active advances
+        const salaryAdvance = advances
+            ?.filter(advance => advance.status === 'IN_PROGRESS')
+            .reduce((sum, advance) => sum + advance.installmentAmount, 0) || 0;
+
     const employeeData: EmployeePayrollData = {
-        nom: employee.nom,
-        prenom: employee.prenom,
-        matricule: employee.matricule,
-        cin: employee.cin || '',
-        cnss: employee.cnss || '',
-        situationFamiliale: employee.situationFamiliale,
-        dateNaissance: employee.dateNaissance || new Date(),
-        dateEmbauche: employee.dateEmbauche,
-        anciennete: calculateSeniority(employee.dateEmbauche),
-        nbrDeductions: employee.nbrDeductions,
-        nbreJourMois: employee.nbreJourMois,
-        salaireBase: employee.salaireBase,
-        indemniteLogement: employee.indemniteLogement,
-        indemnitePanier: employee.indemnitePanier,
-        primeTransport: employee.primeTransport,
-        indemniteRepresentation: employee.indemniteRepresentation,
-        assurances: {
-        assuranceMaladieComplementaire: false,
-        assuranceMaladieEtranger: false,
-        assuranceInvaliditeRenforcee: false,
+        lastName: employee.lastName,
+        firstName: employee.firstName,
+        employeeId: employee.employeeId,
+        idNumber: employee.idNumber || '',
+        nssfNumber: employee.nssfNumber || '',
+        maritalStatus: employee.maritalStatus as 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED',
+        dateOfBirth: employee.dateOfBirth || new Date(),
+        hireDate: employee.hireDate,
+        seniority: calculateSeniority(employee.hireDate),
+        numberOfDeductions: employee.numberOfDeductions || 0,
+        numberOfDaysPerMonth: employee.numberOfDaysPerMonth || 30,
+        baseSalary: employee.baseSalary,
+        housingAllowance: employee.housingAllowance || 0,
+        mealAllowance: employee.mealAllowance || 0,
+        transportAllowance: employee.transportAllowance || 0,
+        representationAllowance: employee.representationAllowance || 0,
+        insurances: {
+        comprehensiveHealthInsurance: false,
+        foreignHealthCover: false,
+        enhancedDisabilityCover: false,
         },
-        creditImmobilier: employee.interetsCredit || employee.remboursementCredit ? {
-        montantMensuel: employee.remboursementCredit || 0,
-        interets: employee.interetsCredit || 0,
+        mortgageCredit: employee.loanRepayment ? {
+        monthlyAmount: employee.loanRepayment,
+        interest: 0,
         } : undefined,
-        creditConsommation: employee.creditConso ? {
-        montantMensuel: employee.creditConso,
+        consumerCredit: employee.helbLoan ? {
+        monthlyAmount: employee.helbLoan,
         } : undefined,
-        avanceSalaire: employee.remboursementAvance ? {
-        montantMensuel: employee.remboursementAvance,
-        } : undefined,
-        compteBancaire: employee.compteBancaire || '',
-        agence: employee.agence || '',
-    }
+        salaryAdvance:{
+        monthlyAmount: salaryAdvance,
+        },
+        variableElements: [],
+        bankAccount: employee.bankAccount || '',
+        bankBranch: employee.bankBranch || '',
+        useNssfEmployee: employee.subjectToNssf ?? true,
+        useShifEmployee: employee.subjectToShif ?? true,
+        usePensionEmployee: false,
+        useInsuranceDiversifiedEmployee: false,
+        bonuses: 0,
+        overtimePay: 0,
+        loanRepayment: employee.loanRepayment || 0,
+        otherDeductions: 0,
+        helbLoan: employee.helbLoan || 0,
+        subjectToNssf: employee.subjectToNssf ?? true,
+        subjectToShif: employee.subjectToShif ?? true,
+        subjectToHousingLevy: employee.subjectToHousingLevy ?? true,
+    };
 
-    const payrollResult = calculerPaie(employeeData)
-    return payrollResult.salaireNetAPayer
+    const payrollResult: PayrollResult = calculatePayroll(employeeData);
+    return payrollResult.netSalaryPayable;
     } catch (error) {
-    console.error('Error calculating net salary for employee:', employee.matricule, error)
-    return employee.salaireBase // Fallback to base salary if calculation fails
+    console.error('Error calculating net salary for employee:', employee.employeeId, error);
+    return employee.baseSalary; // Fallback to base salary if calculation fails
     }
-}
+};
 
-const handleSort = (field: 'nom' | 'dateEmbauche' | 'salaireBase') => {
+const handleSort = (field: 'name' | 'hireDate' | 'baseSalary') => {
     if (sortBy === field) {
-    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
-    setSortBy(field)
-    setSortOrder('asc')
+    setSortBy(field);
+    setSortOrder('asc');
     }
-}
+};
 
-const getSortIcon = (field: 'nom' | 'dateEmbauche' | 'salaireBase') => {
-    if (sortBy !== field) return '↕️'
-    return sortOrder === 'asc' ? '↑' : '↓'
-}
+const getSortIcon = (field: 'name' | 'hireDate' | 'baseSalary') => {
+    if (sortBy !== field) return '↕️';
+    return sortOrder === 'asc' ? '↑' : '↓';
+};
 
 return (
     <div className="space-y-6">
-    {/* Filtres et recherche */}
+    {/* Filters and Search */}
     <div className="bg-white p-4 rounded-lg shadow-sm border">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Rechercher
+            Search
             </label>
             <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Nom, prénom, matricule, fonction..."
+            placeholder="Name, ID, position..."
             className="payroll-input"
             />
         </div>
-        
+
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-            Statut
+            Status
             </label>
             <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as EmployeeStatus | 'ALL')}
             className="payroll-input"
             >
-            <option value="ALL">Tous les statuts</option>
-            <option value="ACTIF">Actif</option>
-            <option value="SUSPENDU">Suspendu</option>
-            <option value="DEMISSIONNAIRE">Démissionnaire</option>
-            <option value="LICENCIE">Licencié</option>
-            <option value="RETRAITE">Retraité</option>
+            <option value="ALL">All Statuses</option>
+            <option value="ACTIVE">Active</option>
+            <option value="SUSPENDED">Suspended</option>
+            <option value="RESIGNED">Resigned</option>
+            <option value="TERMINATED">Terminated</option>
+            <option value="RETIRED">Retired</option>
             </select>
         </div>
 
         <div className="flex items-end">
             <div className="text-sm text-gray-600">
-            {filteredAndSortedEmployees.length} employé(s) trouvé(s)
+            {filteredAndSortedEmployees.length} employee(s) found
             </div>
         </div>
         </div>
     </div>
 
-    {/* Liste des employés */}
+    {/* Employee List */}
     {filteredAndSortedEmployees.length === 0 ? (
         <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
             <div className="text-center py-12">
             <span className="text-6xl">👥</span>
             <h3 className="mt-4 text-lg font-medium text-gray-900">
-                {searchTerm || statusFilter !== 'ALL' ? 'Aucun employé trouvé' : 'Aucun employé'}
+                {searchTerm || statusFilter !== 'ALL' ? 'No employees found' : 'No employees'}
             </h3>
             <p className="mt-2 text-sm text-gray-500">
-                {searchTerm || statusFilter !== 'ALL' 
-                ? 'Essayez de modifier vos critères de recherche'
-                : 'Commencez par ajouter votre premier employé'
-                }
+                {searchTerm || statusFilter !== 'ALL'
+                ? 'Try adjusting your search criteria'
+                : 'Start by adding your first employee'}
             </p>
             </div>
         </div>
         </div>
     ) : (
         <div className="bg-white shadow rounded-lg overflow-hidden">
-        {/* Version desktop - tableau */}
+        {/* Desktop Version - Table */}
         <div className="hidden lg:block">
             <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
                 <tr>
-                <th 
+                <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('nom')}
+                    onClick={() => handleSort('name')}
                 >
-                    Employé {getSortIcon('nom')}
+                    Employee {getSortIcon('name')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fonction
+                    Position
                 </th>
-                <th 
+                <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('dateEmbauche')}
+                    onClick={() => handleSort('hireDate')}
                 >
-                    Date d'embauche {getSortIcon('dateEmbauche')}
+                    Hire Date {getSortIcon('hireDate')}
                 </th>
-                <th 
+                <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('salaireBase')}
+                    onClick={() => handleSort('baseSalary')}
                 >
-                    Salaire net {getSortIcon('salaireBase')}
+                    Net Salary {getSortIcon('baseSalary')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Statut
+                    Status
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -298,25 +321,25 @@ return (
                         <div className="flex-shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                             <span className="text-sm font-medium text-blue-600">
-                            {employee.prenom.charAt(0)}{employee.nom.charAt(0)}
+                            {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                             </span>
                         </div>
                         </div>
                         <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                            {employee.prenom} {employee.nom}
+                            {employee.firstName} {employee.lastName}
                         </div>
                         <div className="text-sm text-gray-500">
-                            {employee.matricule}
+                            {employee.employeeId}
                         </div>
                         </div>
                     </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {employee.fonction}
+                    {employee.position}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatDate(employee.dateEmbauche)}
+                    {formatDate(employee.hireDate)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatCurrency(calculateNetSalary(employee))}
@@ -329,21 +352,21 @@ return (
                         <button
                         onClick={() => onView(employee)}
                         className="text-blue-600 hover:text-blue-900"
-                        title="Voir les détails"
+                        title="View Details"
                         >
                         👁️
                         </button>
                         <button
                         onClick={() => onEdit(employee)}
                         className="text-indigo-600 hover:text-indigo-900"
-                        title="Modifier"
+                        title="Edit"
                         >
                         ✏️
                         </button>
                         <button
                         onClick={() => onDelete(employee.id)}
                         className="text-red-600 hover:text-red-900"
-                        title="Supprimer"
+                        title="Delete"
                         >
                         🗑️
                         </button>
@@ -355,7 +378,7 @@ return (
             </table>
         </div>
 
-        {/* Version mobile - cartes */}
+        {/* Mobile Version - Cards */}
         <div className="lg:hidden">
             <div className="divide-y divide-gray-200">
             {filteredAndSortedEmployees.map((employee) => (
@@ -365,16 +388,16 @@ return (
                     <div className="flex-shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                         <span className="text-sm font-medium text-blue-600">
-                            {employee.prenom.charAt(0)}{employee.nom.charAt(0)}
+                            {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                         </span>
                         </div>
                     </div>
                     <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                        {employee.prenom} {employee.nom}
+                        {employee.firstName} {employee.lastName}
                         </div>
                         <div className="text-sm text-gray-500">
-                        {employee.matricule} • {employee.fonction}
+                        {employee.employeeId} • {employee.position}
                         </div>
                     </div>
                     </div>
@@ -401,11 +424,11 @@ return (
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
                     <div>
-                    <span className="text-gray-500">Embauché le:</span>
-                    <div className="font-medium">{formatDate(employee.dateEmbauche)}</div>
+                    <span className="text-gray-500">Hired On:</span>
+                    <div className="font-medium">{formatDate(employee.hireDate)}</div>
                     </div>
                     <div>
-                    <span className="text-gray-500">Salaire net:</span>
+                    <span className="text-gray-500">Net Salary:</span>
                     <div className="font-medium">{formatCurrency(calculateNetSalary(employee))}</div>
                     </div>
                 </div>
@@ -419,5 +442,5 @@ return (
         </div>
     )}
     </div>
-)
+);
 }

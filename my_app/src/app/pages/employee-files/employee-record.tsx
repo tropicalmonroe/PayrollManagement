@@ -16,7 +16,7 @@ const EmployeeRecordPage = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Charger les employés
+  // Load employees
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -29,7 +29,7 @@ const EmployeeRecordPage = () => {
         setEmployees(data);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des employés:', error);
+      console.error('Error loading employees:', error);
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ const EmployeeRecordPage = () => {
   };
 
   const handleDelete = async (employeeId: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet employé ?')) {
+    if (confirm('Are you sure you want to delete this employee?')) {
       try {
         const response = await fetch(`/api/employees/${employeeId}`, {
           method: 'DELETE',
@@ -56,11 +56,11 @@ const EmployeeRecordPage = () => {
         if (response.ok) {
           setEmployees(employees.filter(emp => emp.id !== employeeId));
         } else {
-          alert('Erreur lors de la suppression');
+          alert('Error during deletion');
         }
       } catch (error) {
-        console.error('Erreur lors de la suppression:', error);
-        alert('Erreur lors de la suppression');
+        console.error('Error during deletion:', error);
+        alert('Error during deletion');
       }
     }
   };
@@ -93,11 +93,11 @@ const EmployeeRecordPage = () => {
         setSelectedEmployee(null);
         setIsEditing(false);
       } else {
-        alert('Erreur lors de la sauvegarde');
+        alert('Error during save');
       }
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
-      alert('Erreur lors de la sauvegarde');
+      console.error('Error during save:', error);
+      alert('Error during save');
     }
   };
 
@@ -123,7 +123,7 @@ const EmployeeRecordPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Chargement...</div>
+            <div className="text-lg text-gray-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -139,29 +139,29 @@ const EmployeeRecordPage = () => {
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Retour</span>
+            <span>Back</span>
           </button>
           
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <Users className="w-8 h-8 text-blue-600" />
-              <h1 className="text-3xl font-bold text-gray-900">Fiche salarié</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Employee Record</h1>
             </div>
             <button
               onClick={handleAddNew}
               className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus className="w-4 h-4" />
-              <span>Nouvel employé</span>
+              <span>New Employee</span>
             </button>
           </div>
           
           <p className="text-gray-600 text-lg">
-            Création ou modification du dossier salarié : données personnelles, contrat, salaire, primes, indemnités, échéancier crédit logement.
+            Create or modify employee file: personal data, contract, salary, bonuses, allowances, housing loan schedule.
           </p>
         </div>
 
-        {/* Liste des employés */}
+        {/* Employee list */}
         <EmployeeList
           employees={employees}
           onEdit={handleEdit}
@@ -169,13 +169,13 @@ const EmployeeRecordPage = () => {
           onView={handleView}
         />
 
-        {/* Modal pour le formulaire d'employé */}
+        {/* Modal for employee form */}
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold">
-                  {isEditing ? 'Modifier l\'employé' : 'Nouvel employé'}
+                  {isEditing ? 'Edit Employee' : 'New Employee'}
                 </h2>
                 <button
                   onClick={handleCloseForm}
@@ -194,12 +194,12 @@ const EmployeeRecordPage = () => {
           </div>
         )}
 
-        {/* Modal pour les détails de l'employé */}
+        {/* Modal for employee details */}
         {showDetails && selectedEmployee && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">Détails de l'employé</h2>
+                <h2 className="text-xl font-bold">Employee Details</h2>
                 <button
                   onClick={handleCloseDetails}
                   className="text-gray-500 hover:text-gray-700"

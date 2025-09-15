@@ -465,5 +465,5 @@ export const formatDate = (date: Date | string): string => {
 };
 
 export const formatNumber = (num: number): string => {
-  return new Intl.NumberFormat('fr-FR').format(num);
+  return new Intl.NumberFormat('en-KE').format(num);
 };

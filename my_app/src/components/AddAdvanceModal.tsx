@@ -3,25 +3,25 @@ import { X, Calendar, DollarSign, User, FileText, Clock } from 'lucide-react';
 
 interface Employee {
 id: string;
-matricule: string;
-nom: string;
-prenom: string;
-fonction: string;
+employeeId: string;
+lastName: string;
+firstName: string;
+position: string;
 }
 
 interface Advance {
 id: string;
 employee: Employee;
-montant: number;
-dateAvance: Date;
-motif: string;
-nombreMensualites: number;
-montantMensualite: number;
-soldeRestant: number;
-statut: 'EN_COURS' | 'REMBOURSE' | 'ANNULE';
-dateCreation: Date;
+amount: number;
+advanceDate: Date;
+reason: string;
+numberOfInstallments: number;
+installmentAmount: number;
+remainingBalance: number;
+status: 'IN_PROGRESS' | 'REPAID' | 'CANCELLED';
+creationDate: Date;
 createdBy: string;
-dateRemboursementComplete?: Date;
+fullRepaymentDate?: Date;
 notes?: string;
 createdAt: Date;
 }
@@ -43,10 +43,10 @@ editAdvance = null
 }) => {
 const [formData, setFormData] = useState({
     employeeId: '',
-    montant: '',
-    dateAvance: '',
-    motif: '',
-    nombreMensualites: '',
+    amount: '',
+    advanceDate: '',
+    reason: '',
+    numberOfInstallments: '',
     notes: ''
 });
 const [loading, setLoading] = useState(false);
@@ -57,20 +57,20 @@ useEffect(() => {
     if (editAdvance) {
     setFormData({
         employeeId: editAdvance.employee.id,
-        montant: editAdvance.montant.toString(),
-        dateAvance: new Date(editAdvance.dateAvance).toISOString().split('T')[0],
-        motif: editAdvance.motif,
-        nombreMensualites: editAdvance.nombreMensualites.toString(),
+        amount: editAdvance.amount.toString(),
+        advanceDate: new Date(editAdvance.advanceDate).toISOString().split('T')[0],
+        reason: editAdvance.reason,
+        numberOfInstallments: editAdvance.numberOfInstallments.toString(),
         notes: editAdvance.notes || ''
     });
     } else {
     // Reset form for new advance
     setFormData({
         employeeId: '',
-        montant: '',
-        dateAvance: new Date().toISOString().split('T')[0],
-        motif: '',
-        nombreMensualites: '',
+        amount: '',
+        advanceDate: new Date().toISOString().split('T')[0],
+        reason: '',
+        numberOfInstallments: '',
         notes: ''
     });
     }
@@ -97,23 +97,23 @@ const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.employeeId) {
-    newErrors.employeeId = 'Veuillez sélectionner un employé';
+    newErrors.employeeId = 'Please select an employee';
     }
 
-    if (!formData.montant || parseFloat(formData.montant) <= 0) {
-    newErrors.montant = 'Veuillez entrer un montant valide';
+    if (!formData.amount || parseFloat(formData.amount) <= 0) {
+    newErrors.amount = 'Please enter a valid amount';
     }
 
-    if (!formData.dateAvance) {
-    newErrors.dateAvance = 'Veuillez sélectionner une date';
+    if (!formData.advanceDate) {
+    newErrors.advanceDate = 'Please select a date';
     }
 
-    if (!formData.motif.trim()) {
-    newErrors.motif = 'Veuillez entrer un motif';
+    if (!formData.reason.trim()) {
+    newErrors.reason = 'Please enter a reason';
     }
 
-    if (!formData.nombreMensualites || parseInt(formData.nombreMensualites) <= 0) {
-    newErrors.nombreMensualites = 'Veuillez entrer un nombre de mensualités valide';
+    if (!formData.numberOfInstallments || parseInt(formData.numberOfInstallments) <= 0) {
+    newErrors.numberOfInstallments = 'Please enter a valid number of installments';
     }
 
     setErrors(newErrors);
@@ -130,18 +130,18 @@ const handleSubmit = async (e: React.FormEvent) => {
     setLoading(true);
     
     try {
-    const montant = parseFloat(formData.montant);
-    const nombreMensualites = parseInt(formData.nombreMensualites);
-    const montantMensualite = montant / nombreMensualites;
+    const amount = parseFloat(formData.amount);
+    const numberOfInstallments = parseInt(formData.numberOfInstallments);
+    const installmentAmount = amount / numberOfInstallments;
 
     const advanceData = {
         employeeId: formData.employeeId,
-        montant: montant,
-        dateAvance: new Date(formData.dateAvance),
-        motif: formData.motif.trim(),
-        nombreMensualites: nombreMensualites,
-        montantMensualite: montantMensualite,
-        soldeRestant: montant, // Initially, the full amount is remaining
+        amount: amount,
+        advanceDate: new Date(formData.advanceDate),
+        reason: formData.reason.trim(),
+        numberOfInstallments: numberOfInstallments,
+        installmentAmount: installmentAmount,
+        remainingBalance: amount, // Initially, the full amount is remaining
         notes: formData.notes.trim() || undefined
     };
 
@@ -158,7 +158,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Erreur lors de la sauvegarde');
+        throw new Error(errorData.error || 'Error saving advance');
     }
 
     onSuccess();
@@ -171,22 +171,22 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
 };
 
-const calculateMensualite = () => {
-    const montant = parseFloat(formData.montant);
-    const nombreMensualites = parseInt(formData.nombreMensualites);
+const calculateInstallment = () => {
+    const amount = parseFloat(formData.amount);
+    const numberOfInstallments = parseInt(formData.numberOfInstallments);
     
-    if (montant > 0 && nombreMensualites > 0) {
-    return (montant / nombreMensualites).toFixed(2);
+    if (amount > 0 && numberOfInstallments > 0) {
+    return (amount / numberOfInstallments).toFixed(2);
     }
     return '0.00';
 };
 
 const formatCurrency = (amount: string) => {
     const num = parseFloat(amount);
-    if (isNaN(num)) return '0,00 MAD';
-    return new Intl.NumberFormat('fr-MA', {
+    if (isNaN(num)) return 'KSh 0.00';
+    return new Intl.NumberFormat('en-KE', {
     style: 'currency',
-    currency: 'MAD'
+    currency: 'KES'
     }).format(num);
 };
 
@@ -200,7 +200,7 @@ return (
         <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-medium text-gray-900 flex items-center">
             <DollarSign className="w-5 h-5 mr-2 text-[#0063b4]" />
-            {editAdvance ? 'Modifier l\'avance' : 'Nouvelle avance sur salaire'}
+            {editAdvance ? 'Edit Salary Advance' : 'New Salary Advance'}
             </h3>
             <button
             onClick={onClose}
@@ -216,7 +216,7 @@ return (
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
                 <User className="w-4 h-4 inline mr-1" />
-                Employé *
+                Employee *
             </label>
             <select
                 name="employeeId"
@@ -227,10 +227,10 @@ return (
                 }`}
                 disabled={!!editAdvance} // Disable when editing
             >
-                <option value="">Sélectionner un employé</option>
+                <option value="">Select an employee</option>
                 {employees.map((employee) => (
                 <option key={employee.id} value={employee.id}>
-                    {employee.prenom} {employee.nom} - {employee.matricule} ({employee.fonction})
+                    {employee.firstName} {employee.lastName} - {employee.employeeId} ({employee.position})
                 </option>
                 ))}
             </select>
@@ -244,63 +244,63 @@ return (
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                 <DollarSign className="w-4 h-4 inline mr-1" />
-                Montant de l'avance (MAD) *
+                Advance Amount (KES) *
                 </label>
                 <input
                 type="number"
-                name="montant"
-                value={formData.montant}
+                name="amount"
+                value={formData.amount}
                 onChange={handleInputChange}
                 step="0.01"
                 min="0"
                 className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
-                    errors.montant ? 'border-red-300' : 'border-gray-300'
+                    errors.amount ? 'border-red-300' : 'border-gray-300'
                 }`}
                 placeholder="0.00"
                 />
-                {errors.montant && (
-                <p className="mt-1 text-sm text-red-600">{errors.montant}</p>
+                {errors.amount && (
+                <p className="mt-1 text-sm text-red-600">{errors.amount}</p>
                 )}
             </div>
 
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Calendar className="w-4 h-4 inline mr-1" />
-                Date de l'avance *
+                Advance Date *
                 </label>
                 <input
                 type="date"
-                name="dateAvance"
-                value={formData.dateAvance}
+                name="advanceDate"
+                value={formData.advanceDate}
                 onChange={handleInputChange}
                 className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
-                    errors.dateAvance ? 'border-red-300' : 'border-gray-300'
+                    errors.advanceDate ? 'border-red-300' : 'border-gray-300'
                 }`}
                 />
-                {errors.dateAvance && (
-                <p className="mt-1 text-sm text-red-600">{errors.dateAvance}</p>
+                {errors.advanceDate && (
+                <p className="mt-1 text-sm text-red-600">{errors.advanceDate}</p>
                 )}
             </div>
             </div>
 
-            {/* Motif */}
+            {/* Reason */}
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
                 <FileText className="w-4 h-4 inline mr-1" />
-                Motif de l'avance *
+                Advance Reason *
             </label>
             <input
                 type="text"
-                name="motif"
-                value={formData.motif}
+                name="reason"
+                value={formData.reason}
                 onChange={handleInputChange}
                 className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
-                errors.motif ? 'border-red-300' : 'border-gray-300'
+                errors.reason ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder="Ex: Urgence familiale, frais médicaux, etc."
+                placeholder="Ex: Family emergency, medical expenses, etc."
             />
-            {errors.motif && (
-                <p className="mt-1 text-sm text-red-600">{errors.motif}</p>
+            {errors.reason && (
+                <p className="mt-1 text-sm text-red-600">{errors.reason}</p>
             )}
             </div>
 
@@ -308,30 +308,30 @@ return (
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Clock className="w-4 h-4 inline mr-1" />
-                Nombre de mensualités *
+                Number of Installments *
             </label>
             <input
                 type="number"
-                name="nombreMensualites"
-                value={formData.nombreMensualites}
+                name="numberOfInstallments"
+                value={formData.numberOfInstallments}
                 onChange={handleInputChange}
                 min="1"
                 max="24"
                 className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
-                errors.nombreMensualites ? 'border-red-300' : 'border-gray-300'
+                errors.numberOfInstallments ? 'border-red-300' : 'border-gray-300'
                 }`}
                 placeholder="Ex: 6"
             />
-            {errors.nombreMensualites && (
-                <p className="mt-1 text-sm text-red-600">{errors.nombreMensualites}</p>
+            {errors.numberOfInstallments && (
+                <p className="mt-1 text-sm text-red-600">{errors.numberOfInstallments}</p>
             )}
             <p className="mt-1 text-xs text-gray-500">
-                Maximum 24 mensualités
+                Maximum 24 installments
             </p>
             </div>
 
             {/* Calculated Monthly Payment */}
-            {formData.montant && formData.nombreMensualites && (
+            {formData.amount && formData.numberOfInstallments && (
             <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
                 <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -339,14 +339,14 @@ return (
                 </div>
                 <div className="ml-3">
                     <h3 className="text-sm font-medium text-blue-800">
-                    Mensualité calculée
+                    Calculated Installment
                     </h3>
                     <div className="mt-1 text-sm text-blue-700">
                     <span className="font-semibold text-lg">
-                        {formatCurrency(calculateMensualite())}
+                        {formatCurrency(calculateInstallment())}
                     </span>
                     <span className="ml-2 text-xs">
-                        sur {formData.nombreMensualites} mois
+                        over {formData.numberOfInstallments} months
                     </span>
                     </div>
                 </div>
@@ -357,7 +357,7 @@ return (
             {/* Notes */}
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-                Notes (optionnel)
+                Notes (optional)
             </label>
             <textarea
                 name="notes"
@@ -365,7 +365,7 @@ return (
                 onChange={handleInputChange}
                 rows={3}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
-                placeholder="Informations complémentaires..."
+                placeholder="Additional information..."
             />
             </div>
 
@@ -390,7 +390,7 @@ return (
                 onClick={onClose}
                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0063b4]"
             >
-                Annuler
+                Cancel
             </button>
             <button
                 type="submit"
@@ -400,10 +400,10 @@ return (
                 {loading ? (
                 <div className="flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Sauvegarde...
+                    Saving...
                 </div>
                 ) : (
-                editAdvance ? 'Modifier l\'avance' : 'Créer l\'avance'
+                editAdvance ? 'Edit Advance' : 'Create Advance'
                 )}
             </button>
             </div>
