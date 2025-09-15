@@ -9,6 +9,7 @@ import { calculatePayroll, type EmployeePayrollData } from '../../../lib/payroll
 interface EmployeeWithRelations extends Employee {
   variableElements: PrismaVariableElement[];
   advances: Advance[];
+  otherDeductions?: number;
 }
 
 const PayslipPage = () => {
@@ -125,6 +126,7 @@ const PayslipPage = () => {
         salaryAdvance,
         bankAccount: employee.bankAccount || '',
         bankBranch: employee.bankBranch || '',
+        otherDeductions: employee.otherDeductions || 0,
       };
 
       // Calculate payroll
