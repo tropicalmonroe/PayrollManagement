@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 
@@ -13,6 +14,7 @@ const toggleSidebar = () => {
 };
 
 return (
+    
     <div className="min-h-screen bg-gray-50">
     <Sidebar collapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
     

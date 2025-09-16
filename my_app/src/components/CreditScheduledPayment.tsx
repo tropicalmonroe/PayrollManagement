@@ -69,7 +69,7 @@ useEffect(() => {
 const fetchSchedule = async () => {
     try {
     setLoading(true);
-    const response = await fetch(`/api/loans/${loanId}/schedule`);
+    const response = await fetch(`/api/credits/${loanId}/echeancier`);
     if (response.ok) {
         const data = await response.json();
         setSchedule(data.schedule);

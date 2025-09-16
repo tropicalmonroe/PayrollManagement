@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout } from '../../../components/Layout';
+import { Layout } from '../../Layout';
 import { FileText, ArrowLeft, FileCheck, Award, Calculator } from 'lucide-react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';

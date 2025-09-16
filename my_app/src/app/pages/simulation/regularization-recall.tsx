@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { Layout } from '../../../components/Layout';
+import { Layout } from '../../Layout';
 import { TrendingUp, ArrowLeft, Download, RefreshCw, Info, Calendar, AlertCircle } from 'lucide-react';
 
 //This is when an employer takes back (recalls) money already paid to an employee because of an overpayment or error in payroll.

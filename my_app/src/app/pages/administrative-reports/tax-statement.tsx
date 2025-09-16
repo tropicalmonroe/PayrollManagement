@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '../../../components/Layout';
+import { Layout } from '../../Layout';
 import { Receipt, ArrowLeft, Download, Calendar, Users, FileSpreadsheet, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Employee } from '@prisma/client';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '../../../components/Layout';
+import { Layout } from '../../Layout';
 import { Users, ArrowLeft, Plus, Edit, Eye, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/router';
 import EmployeeList from '../../../components/EmployeeList';
