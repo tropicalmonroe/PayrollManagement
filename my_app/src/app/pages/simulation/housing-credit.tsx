@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { Layout } from '../../Layout';
+import { Layout } from '../../layout';
 import { Home, ArrowLeft, Download, RefreshCw, Info, Calculator, TrendingUp } from 'lucide-react';
 
 export default function HousingCredit() {

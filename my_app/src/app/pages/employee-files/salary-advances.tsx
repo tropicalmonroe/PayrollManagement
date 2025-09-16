@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '../../Layout';
+import { Layout } from '../../layout';
 import { TrendingUp, ArrowLeft, Plus } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Advance, Employee } from '@prisma/client';

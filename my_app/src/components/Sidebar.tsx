@@ -130,7 +130,7 @@ isOpen: boolean;
 };
 
 const SidebarSubmenu: React.FC<SidebarSubmenuProps> = ({ items, isOpen }) => {
-const pathname = usePathname(); // Use usePathname instead of useRouter
+const pathname = usePathname();
 
 return (
     <div
@@ -178,12 +178,12 @@ toggleSidebar: () => void;
 
 export function Sidebar({ collapsed, toggleSidebar }: SidebarProps) {
 const router = useRouter();
-const pathname = usePathname(); // Add usePathname hook
+const pathname = usePathname();
 const [user, setUser] = useState<User | null>({
     id: '1',
-    email: 'admin@AD Capital.com',
-    name: 'Administrateur AD Capital',
-    role: 'Administrateur',
+    email: 'admin@ADCapital.com',
+    name: 'AD Capital Admin',
+    role: 'Administrator',
 });
 
 const getFirstName = (fullName: string) => {
@@ -206,7 +206,6 @@ const getInitialOpenMenus = () => {
     'application-settings': false,
     };
 
-    // Use pathname instead of router.pathname
     if (pathname.startsWith('/employee-files')) {
     initialState['employee-files'] = true;
     } else if (pathname.startsWith('/payroll-calculation')) {
@@ -230,7 +229,7 @@ const [openMenus, setOpenMenus] = useState<Record<string, boolean>>(getInitialOp
 
 useEffect(() => {
     setOpenMenus(getInitialOpenMenus());
-}, [pathname]); // Update dependency to pathname
+}, [pathname]);
 
 const mainShortcuts = {
     dashboard: { key: 'd', menu: null },
@@ -282,7 +281,7 @@ useEffect(() => {
 }, [router, openMenus, toggleMenu]);
 
 const isActive = (path: string) => {
-    return pathname.startsWith(path); // Use pathname instead of router.pathname
+    return pathname.startsWith(path);
 };
 
 return (
@@ -316,8 +315,8 @@ return (
         <SidebarItem
             href="/dashboard"
             icon={<Home />}
-            title="Tableau de bord"
-            isActive={pathname === '/dashboard'} // Use pathname
+            title="Dashboard"
+            isActive={pathname === '/dashboard'}
             shortcut={collapsed ? '' : '⌘D'}
             collapsed={collapsed}
             toggleSidebar={toggleSidebar}
@@ -328,7 +327,7 @@ return (
         <SidebarItem
             href="/employee-files"
             icon={<Users />}
-            title="Dossier salarié"
+            title="Employee Records"
             isActive={isActive('/employee-files')}
             hasChildren={true}
             isOpen={openMenus['employee-files']}
@@ -339,16 +338,16 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/employee-files/employee-record', title: 'Fiche salarié' },
-            { href: '/employee-files/salary-advances', title: 'Avances sur salaire' },
-            { href: '/employee-files/consultation', title: 'Consultation fiche salarié' },
+            { href: '/employee-files/employee-record', title: 'Employee Profile' },
+            { href: '/employee-files/salary-advances', title: 'Salary Advances' },
+            { href: '/employee-files/consultation', title: 'Employee Profile View' },
             ]}
             isOpen={openMenus['employee-files']}
         />
         <SidebarItem
             href="/payroll-calculation"
             icon={<Calculator />}
-            title="Calcul de la paie"
+            title="Payroll Processing"
             isActive={isActive('/payroll-calculation')}
             hasChildren={true}
             isOpen={openMenus['payroll-calculation']}
@@ -359,15 +358,15 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/payroll-calculation/monthly-variables', title: 'Éléments variables mensuels' },
-            { href: '/payroll-calculation/monthly-calculation', title: 'Calcul mensuel' },
+            { href: '/payroll-calculation/monthly-variables', title: 'Monthly Variable Elements' },
+            { href: '/payroll-calculation/monthly-calculation', title: 'Monthly Payroll' },
             ]}
             isOpen={openMenus['payroll-calculation']}
         />
         <SidebarItem
             href="/employee-documents"
             icon={<FileText />}
-            title="Documents salariés"
+            title="Employee Documents"
             isActive={isActive('/employee-documents')}
             hasChildren={true}
             isOpen={openMenus['employee-documents']}
@@ -378,16 +377,16 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/employee-documents/payslip', title: 'Bulletin de paie' },
-            { href: '/employee-documents/salary-certificate', title: 'Attestation de salaire' },
-            { href: '/employee-documents/final-settlement', title: 'Solde de tout compte' },
+            { href: '/employee-documents/payslip', title: 'Payslip' },
+            { href: '/employee-documents/salary-certificate', title: 'Salary Certificate' },
+            { href: '/employee-documents/final-settlement', title: 'Final Settlement' },
             ]}
             isOpen={openMenus['employee-documents']}
         />
         <SidebarItem
             href="/administrative-reports"
             icon={<FileSpreadsheet />}
-            title="Éditions administratives"
+            title="Administrative Reports"
             isActive={isActive('/administrative-reports')}
             hasChildren={true}
             isOpen={openMenus['administrative-reports']}
@@ -398,17 +397,17 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/administrative-reports/payroll-journal', title: 'Journal de paie' },
-            { href: '/administrative-reports/bank-transfer', title: 'Virement de masse' },
-            { href: '/administrative-reports/cnss-declaration', title: 'Déclaration CNSS' },
-            { href: '/administrative-reports/igr-tax-statement', title: 'État fiscal IGR' },
+            { href: '/administrative-reports/payroll-journal', title: 'Payroll Journal' },
+            { href: '/administrative-reports/bank-transfer', title: 'Bulk Bank Transfer' },
+            { href: '/administrative-reports/nssf-declaration', title: 'NSSF Declaration' },
+            { href: '/administrative-reports/paye-tax-statement', title: 'PAYE Tax Statement' },
             ]}
             isOpen={openMenus['administrative-reports']}
         />
         <SidebarItem
             href="/archive"
             icon={<Award />}
-            title="Coffre"
+            title="Archive"
             isActive={isActive('/archive')}
             hasChildren={true}
             isOpen={openMenus['archive']}
@@ -419,12 +418,12 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/archive/payslips', title: 'Bulletins de paie' },
-            { href: '/archive/certificates', title: 'Attestations' },
-            { href: '/archive/cnss-declarations', title: 'Déclarations CNSS' },
-            { href: '/archive/igr-statements', title: 'États fiscaux IGR' },
-            { href: '/archive/payroll-journals', title: 'Journaux de paie' },
-            { href: '/archive/final-settlements', title: 'Soldes de tout compte' },
+            { href: '/archive/payslips', title: 'Payslips' },
+            { href: '/archive/certificates', title: 'Certificates' },
+            { href: '/archive/nssf-declarations', title: 'NSSF Declarations' },
+            { href: '/archive/paye-statements', title: 'PAYE Statements' },
+            { href: '/archive/payroll-journals', title: 'Payroll Journals' },
+            { href: '/archive/final-settlements', title: 'Final Settlements' },
             ]}
             isOpen={openMenus['archive']}
         />
@@ -442,10 +441,10 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/simulation/salary-simulation', title: 'Simulation salaire' },
-            { href: '/simulation/family-tax-impact', title: 'Impact familial/fiscal' },
-            { href: '/simulation/regularization-recall', title: 'Régularisation / rappel' },
-            { href: '/simulation/housing-credit', title: 'Crédit logement' },
+            { href: '/simulation/salary-simulation', title: 'Salary Simulation' },
+            { href: '/simulation/family-tax-impact', title: 'Family/Tax Impact' },
+            { href: '/simulation/regularization-recall', title: 'Regularization/Recall' },
+            { href: '/simulation/housing-loan', title: 'Housing Loan' },
             ]}
             isOpen={openMenus['simulation']}
         />
@@ -455,7 +454,7 @@ return (
         <SidebarItem
             href="/application-settings"
             icon={<Settings />}
-            title="Paramètres applicatifs"
+            title="Application Settings"
             isActive={isActive('/application-settings')}
             hasChildren={true}
             isOpen={openMenus['application-settings']}
@@ -466,9 +465,9 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/application-settings/social-tax-scales', title: 'Barèmes sociaux et fiscaux' },
-            { href: '/application-settings/thresholds-reductions', title: 'Plafonds, réductions, frais professionnels' },
-            { href: '/application-settings/housing-credit', title: 'Crédit logement' },
+            { href: '/application-settings/social-tax-scales', title: 'NHIF, NSSF, and PAYE Scales' },
+            { href: '/application-settings/thresholds-reductions', title: 'Thresholds, Reductions, Professional Expenses' },
+            { href: '/application-settings/housing-loan', title: 'Housing Loan' },
             ]}
             isOpen={openMenus['application-settings']}
         />
@@ -488,7 +487,7 @@ return (
                 <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{user ? user.name : 'AD Capital Admin'}</p>
                     <p className="text-xs text-gray-500 truncate">
-                    {user ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase() : 'Administrateur'}
+                    {user ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase() : 'Administrator'}
                     </p>
                 </div>
                 <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" />
@@ -497,11 +496,11 @@ return (
             </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider">Mon compte</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider">My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="cursor-pointer text-sm" onClick={() => router.push('/profile')}>
             <User className="mr-3 h-4 w-4" />
-            <span>Paramètres du profil</span>
+            <span>Profile Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -511,7 +510,7 @@ return (
             }}
             >
             <LogOut className="mr-3 h-4 w-4" />
-            <span>Déconnexion</span>
+            <span>Log Out</span>
             </DropdownMenuItem>
         </DropdownMenuContent>
         </DropdownMenu>

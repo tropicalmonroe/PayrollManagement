@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { Layout } from '../../Layout';
+import { Layout } from '../../layout';
 import { Calculator, ArrowLeft, Download, Save, RefreshCw, Info } from 'lucide-react';
 
 export default function SalarySimulation() {

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { Layout } from '../../Layout';
+import { Layout } from '../../layout';
 import { Calculator, Users, TrendingUp, Home, Play, FileText, DollarSign } from 'lucide-react';
 
 export default function SimulationIndex() {

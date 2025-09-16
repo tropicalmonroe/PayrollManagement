@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { Layout } from '../../Layout';
+import { Layout } from '../../layout';
 import { Calculator, Edit, Play } from 'lucide-react';
 
 const PayrollCalculationPage = () => {
