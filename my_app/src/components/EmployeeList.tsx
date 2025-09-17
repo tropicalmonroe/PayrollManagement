@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import { Employee, EmployeeStatus, MaritalStatus, Advance } from '@prisma/client';
 import { calculatePayroll, type EmployeePayrollData, type PayrollResult } from '../lib/payrollCalculations';

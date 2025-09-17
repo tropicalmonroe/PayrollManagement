@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Head from 'next/head'
+import { Layout } from '@/components/Layout'
 
 export default function Home() {
 const [activeTab, setActiveTab] = useState('dashboard')
@@ -15,6 +16,7 @@ return (
         <link rel="icon" href="/favicon.ico" />
     </Head>
 
+    <Layout>
     <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <header className="bg-white shadow-sm border-b">
@@ -77,6 +79,7 @@ return (
         </div>
         </main>
     </div>
+    </Layout>
     </>
 )
 }

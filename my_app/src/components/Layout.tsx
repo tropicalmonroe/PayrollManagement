@@ -1,6 +1,8 @@
 "use client";
+
 import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
+// import Navbar from './Navbar';
 
 interface LayoutProps {
 children: React.ReactNode;
@@ -17,6 +19,7 @@ return (
     
     <div className="min-h-screen bg-gray-50">
     <Sidebar collapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+    {/* <Navbar /> */}
     
     {/* Main content area */}
     <div 
