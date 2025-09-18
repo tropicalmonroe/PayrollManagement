@@ -14,18 +14,17 @@ const { signOut } = useAuth(); // Allow manual sign-out if needed
 const router = useRouter();
 const [errorMessage, setErrorMessage] = useState("");
 
-useEffect(() => {
-    if (!isLoaded) return; // Wait for user data to load
+    useEffect(() => {
+        if (!isLoaded) return;
 
-    const role = user?.publicMetadata.role;
+        const role = user?.publicMetadata.role;
 
-    if (role === "admin") {
-    router.push("/Dashboard");
-    } else if (role) {
-    setErrorMessage("You are not authorized to access this page.");
-    signOut(); // Ensure user is logged out to see login form again
-    }
-}, [user, isLoaded, router, signOut]);
+        // Only handle unauthorized users here, let middleware handle routing
+        if (role && role !== "admin") {
+        setErrorMessage("You are not authorized to access this application.");
+        signOut();
+        }
+    }, [user, isLoaded, router, signOut]);
 
 return (
     <div className=" w-screen h-screen bg-[#e6f0f8] overflow-hidden">

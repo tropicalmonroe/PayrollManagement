@@ -4,7 +4,6 @@
     import { useState, useEffect } from 'react';
     import Head from 'next/head';
     import { Advance, Employee } from '@prisma/client';
-    import { Layout } from '../../../../components/Layout';
     import EmployeeForm from '../../../../components/EmployeeForm';
     import EmployeeList from '../../../../components/EmployeeList';
     import EmployeeDetails from '../../../../components/EmployeeDetails';
