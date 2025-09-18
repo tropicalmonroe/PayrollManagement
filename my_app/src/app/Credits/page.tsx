@@ -150,7 +150,7 @@ const CreditManagement: React.FC = () => {
   const getStatusBadge = (status: LoanStatus) => {
     const badges = {
       ACTIVE: { color: 'bg-green-100 text-green-800', icon: CheckCircle, text: 'Active' },
-      PAID_OFF: { color: 'bg-gray-100 text-gray-800', icon: CheckCircle, text: 'Paid Off' },
+      PAID_OFF: { color: 'bg-zinc-100 text-zinc-800', icon: CheckCircle, text: 'Paid Off' },
       SUSPENDED: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, text: 'Suspended' }
     };
     
@@ -254,8 +254,8 @@ const CreditManagement: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Loan Management</h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-zinc-900">Loan Management</h1>
+            <p className="mt-1 text-sm text-zinc-500">
               Manage employee housing and consumer loans
             </p>
           </div>
@@ -276,14 +276,14 @@ const CreditManagement: React.FC = () => {
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <CreditCard className="h-6 w-6 text-gray-400" />
+                  <CreditCard className="h-6 w-6 text-zinc-400" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-zinc-500 truncate">
                       Total Loans
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-zinc-900">
                       {loans.length}
                     </dd>
                   </dl>
@@ -300,10 +300,10 @@ const CreditManagement: React.FC = () => {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-zinc-500 truncate">
                       Active Loans
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-zinc-900">
                       {loans.filter(c => c.status === 'ACTIVE').length}
                     </dd>
                   </dl>
@@ -320,10 +320,10 @@ const CreditManagement: React.FC = () => {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-zinc-500 truncate">
                       Total Amount
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-zinc-900">
                       {formatCurrency(loans.reduce((sum, c) => sum + c.loanAmount, 0))}
                     </dd>
                   </dl>
@@ -340,10 +340,10 @@ const CreditManagement: React.FC = () => {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-zinc-500 truncate">
                       Remaining Balance
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-zinc-900">
                       {formatCurrency(loans.reduce((sum, c) => sum + c.remainingBalance, 0))}
                     </dd>
                   </dl>
@@ -355,16 +355,16 @@ const CreditManagement: React.FC = () => {
 
         {/* Filters */}
         <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-6 py-4 border-b border-zinc-200">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
               <div className="flex-1 max-w-lg">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400" />
+                    <Search className="h-5 w-5 text-zinc-400" />
                   </div>
                   <input
                     type="text"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+                    className="block w-full pl-10 pr-3 py-2 border border-zinc-300 rounded-md leading-5 bg-white placeholder-zinc-500 focus:outline-none focus:placeholder-zinc-400 focus:ring-1 focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
                     placeholder="Search by name, employee ID or bank..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -376,7 +376,7 @@ const CreditManagement: React.FC = () => {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value as LoanStatus | 'ALL')}
-                  className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm rounded-md"
+                  className="block w-full pl-3 pr-10 py-2 text-base border border-zinc-300 focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm rounded-md"
                 >
                   <option value="ALL">All Statuses</option>
                   <option value="ACTIVE">Active</option>
@@ -387,7 +387,7 @@ const CreditManagement: React.FC = () => {
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value as LoanType | 'ALL')}
-                  className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm rounded-md"
+                  className="block w-full pl-3 pr-10 py-2 text-base border border-zinc-300 focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm rounded-md"
                 >
                   <option value="ALL">All Types</option>
                   <option value="HOUSING">Housing</option>
@@ -399,45 +399,45 @@ const CreditManagement: React.FC = () => {
 
           {/* Loans Table */}
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-zinc-200">
+              <thead className="bg-zinc-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Employee
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Type
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Amount
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Monthly Payment
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Progress
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Bank
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-zinc-200">
                 {filteredLoans.map((loan) => (
-                  <tr key={loan.id} className="hover:bg-gray-50">
+                  <tr key={loan.id} className="hover:bg-zinc-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-zinc-900">
                             {loan.employee.firstName} {loan.employee.lastName}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-zinc-500">
                             {loan.employee.employeeId} • {loan.employee.position}
                           </div>
                         </div>
@@ -447,14 +447,14 @@ const CreditManagement: React.FC = () => {
                       {getTypeBadge(loan.type)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
+                      <div className="text-sm text-zinc-900">
                         {formatCurrency(loan.loanAmount)}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-zinc-500">
                         Remaining: {formatCurrency(loan.remainingBalance)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                       {formatCurrency(loan.monthlyPayment)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -462,14 +462,14 @@ const CreditManagement: React.FC = () => {
                         const progressInfo = getProgressInfo(loan);
                         return (
                           <div className="flex items-center">
-                            <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                            <div className="w-16 bg-zinc-200 rounded-full h-2 mr-2">
                               <div 
                                 className={`h-2 rounded-full ${progressInfo.isLate ? 'bg-red-500' : 'bg-[#0063b4]'}`}
                                 style={{ width: `${Math.min(progressInfo.percentage, 100)}%` }}
                               ></div>
                             </div>
                             <div className="flex flex-col">
-                              <span className={`text-sm ${progressInfo.isLate ? 'text-red-600' : 'text-gray-600'}`}>
+                              <span className={`text-sm ${progressInfo.isLate ? 'text-red-600' : 'text-zinc-600'}`}>
                                 {Math.round(progressInfo.percentage)}%
                               </span>
                               {progressInfo.isLate && progressInfo.monthsLate > 0 && (
@@ -485,7 +485,7 @@ const CreditManagement: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getStatusBadge(loan.status)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                       {loan.bank}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -519,7 +519,7 @@ const CreditManagement: React.FC = () => {
                             setShowDetailsModal(false); // Close details modal if open
                             setShowEditModal(true);
                           }}
-                          className="text-gray-600 hover:text-gray-900 p-1 rounded"
+                          className="text-zinc-600 hover:text-zinc-900 p-1 rounded"
                           title="Edit"
                         >
                           <Edit className="w-4 h-4" />
@@ -542,9 +542,9 @@ const CreditManagement: React.FC = () => {
 
           {filteredLoans.length === 0 && (
             <div className="text-center py-12">
-              <CreditCard className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No loans found</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <CreditCard className="mx-auto h-12 w-12 text-zinc-400" />
+              <h3 className="mt-2 text-sm font-medium text-zinc-900">No loans found</h3>
+              <p className="mt-1 text-sm text-zinc-500">
                 {searchTerm || filterStatus !== 'ALL' || filterType !== 'ALL'
                   ? 'No loans match the search criteria.'
                   : 'Start by adding a new loan.'}
@@ -568,16 +568,16 @@ const CreditManagement: React.FC = () => {
 
       {/* Loan Details Modal */}
       {showDetailsModal && selectedLoan && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div className="fixed inset-0 bg-zinc-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-lg font-medium text-zinc-900">
                   Loan Details
                 </h3>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-zinc-400 hover:text-zinc-600"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -588,110 +588,110 @@ const CreditManagement: React.FC = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Employee</label>
-                    <p className="mt-1 text-sm text-gray-900">
+                    <label className="block text-sm font-medium text-zinc-700">Employee</label>
+                    <p className="mt-1 text-sm text-zinc-900">
                       {selectedLoan.employee.firstName} {selectedLoan.employee.lastName}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-zinc-500">
                       {selectedLoan.employee.employeeId} • {selectedLoan.employee.position}
                     </p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Loan Type</label>
+                    <label className="block text-sm font-medium text-zinc-700">Loan Type</label>
                     <div className="mt-1">
                       {getTypeBadge(selectedLoan.type)}
                     </div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Loan Amount</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedLoan.loanAmount)}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Loan Amount</label>
+                    <p className="mt-1 text-sm text-zinc-900">{formatCurrency(selectedLoan.loanAmount)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Interest Rate</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedLoan.interestRate}%</p>
+                    <label className="block text-sm font-medium text-zinc-700">Interest Rate</label>
+                    <p className="mt-1 text-sm text-zinc-900">{selectedLoan.interestRate}%</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Duration</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedLoan.durationYears} years</p>
+                    <label className="block text-sm font-medium text-zinc-700">Duration</label>
+                    <p className="mt-1 text-sm text-zinc-900">{selectedLoan.durationYears} years</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Monthly Payment</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedLoan.monthlyPayment)}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Monthly Payment</label>
+                    <p className="mt-1 text-sm text-zinc-900">{formatCurrency(selectedLoan.monthlyPayment)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedLoan.startDate)}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Start Date</label>
+                    <p className="mt-1 text-sm text-zinc-900">{formatDate(selectedLoan.startDate)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">End Date</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedLoan.endDate)}</p>
+                    <label className="block text-sm font-medium text-zinc-700">End Date</label>
+                    <p className="mt-1 text-sm text-zinc-900">{formatDate(selectedLoan.endDate)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Amount Repaid</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedLoan.amountRepaid)}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Amount Repaid</label>
+                    <p className="mt-1 text-sm text-zinc-900">{formatCurrency(selectedLoan.amountRepaid)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Remaining Balance</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedLoan.remainingBalance)}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Remaining Balance</label>
+                    <p className="mt-1 text-sm text-zinc-900">{formatCurrency(selectedLoan.remainingBalance)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Status</label>
+                    <label className="block text-sm font-medium text-zinc-700">Status</label>
                     <div className="mt-1">
                       {getStatusBadge(selectedLoan.status)}
                     </div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Bank</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedLoan.bank}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Bank</label>
+                    <p className="mt-1 text-sm text-zinc-900">{selectedLoan.bank}</p>
                   </div>
                 </div>
                 
                 {selectedLoan.accountNumber && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Account Number</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedLoan.accountNumber}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Account Number</label>
+                    <p className="mt-1 text-sm text-zinc-900">{selectedLoan.accountNumber}</p>
                   </div>
                 )}
                 
                 {selectedLoan.notes && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Notes</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedLoan.notes}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Notes</label>
+                    <p className="mt-1 text-sm text-zinc-900">{selectedLoan.notes}</p>
                   </div>
                 )}
                 
                 <div className="mt-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Repayment Progress</label>
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">Repayment Progress</label>
                   <div className="flex items-center">
-                    <div className="w-full bg-gray-200 rounded-full h-3 mr-3">
+                    <div className="w-full bg-zinc-200 rounded-full h-3 mr-3">
                       <div 
                         className="bg-[#0063b4] h-3 rounded-full" 
                         style={{ width: `${Math.min(getProgressPercentage(selectedLoan), 100)}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm text-gray-600 min-w-[3rem]">
+                    <span className="text-sm text-zinc-600 min-w-[3rem]">
                       {Math.round(getProgressPercentage(selectedLoan))}%
                     </span>
                   </div>
                 </div>
 
                 {/* Repayment amount update section */}
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">Update Repayment Amount</h4>
+                <div className="mt-6 p-4 bg-zinc-50 rounded-lg">
+                  <h4 className="text-sm font-medium text-zinc-900 mb-3">Update Repayment Amount</h4>
                   <div className="flex items-end space-x-3">
                     <div className="flex-1">
-                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                      <label className="block text-xs font-medium text-zinc-700 mb-1">
                         New amount repaid (KES)
                       </label>
                       <input
@@ -702,7 +702,7 @@ const CreditManagement: React.FC = () => {
                         value={newAmountRepaid}
                         onChange={(e) => setNewAmountRepaid(e.target.value)}
                         placeholder={selectedLoan.amountRepaid.toString()}
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4]"
+                        className="block w-full px-3 py-2 border border-zinc-300 rounded-md text-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4]"
                       />
                     </div>
                     <button
@@ -747,7 +747,7 @@ const CreditManagement: React.FC = () => {
                       {updateLoading ? 'Updating...' : 'Update'}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-zinc-500 mt-2">
                     Current amount: {formatCurrency(selectedLoan.amountRepaid)} / {formatCurrency(selectedLoan.loanAmount)}
                   </p>
                 </div>
@@ -756,7 +756,7 @@ const CreditManagement: React.FC = () => {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="px-4 py-2 bg-zinc-300 text-zinc-700 rounded-md hover:bg-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500"
                 >
                   Close
                 </button>

@@ -285,7 +285,7 @@ const NSSFDeclarationPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Loading...</div>
+            <div className="text-lg text-zinc-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -298,7 +298,7 @@ const NSSFDeclarationPage = () => {
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
@@ -306,10 +306,10 @@ const NSSFDeclarationPage = () => {
           
           <div className="flex items-center space-x-3 mb-4">
             <Building className="w-8 h-8 text-orange-600" />
-            <h1 className="text-3xl font-bold text-gray-900">NSSF Declaration</h1>
+            <h1 className="text-3xl font-bold text-zinc-900">NSSF Declaration</h1>
           </div>
           
-          <p className="text-gray-600 text-lg">
+          <p className="text-zinc-600 text-lg">
             Production of the monthly file or form to be submitted to NSSF for contributions due.
           </p>
         </div>
@@ -318,11 +318,11 @@ const NSSFDeclarationPage = () => {
           <>
             {/* Configuration */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Declaration Configuration</h3>
+              <h3 className="text-lg font-medium text-zinc-900 mb-4">Declaration Configuration</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     <Calendar className="w-4 h-4 inline mr-1" />
                     Declaration Period
                   </label>
@@ -332,20 +332,20 @@ const NSSFDeclarationPage = () => {
                     onChange={(e) => setSelectedMonth(e.target.value)}
                     className="payroll-input"
                   />
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-zinc-500 mt-1">
                     Declaration for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     <Users className="w-4 h-4 inline mr-1" />
                     Employees Included
                   </label>
-                  <div className="text-lg font-medium text-gray-900">
+                  <div className="text-lg font-medium text-zinc-900">
                     {employees.length} active employee(s)
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-zinc-500 mt-1">
                     All active employees will be included in the declaration
                   </p>
                 </div>
@@ -354,11 +354,11 @@ const NSSFDeclarationPage = () => {
 
             {/* Company Information */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Company Information</h3>
+              <h3 className="text-lg font-medium text-zinc-900 mb-4">Company Information</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     Company Name
                   </label>
                   <input
@@ -370,7 +370,7 @@ const NSSFDeclarationPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     NSSF Registration Number
                   </label>
                   <input
@@ -383,7 +383,7 @@ const NSSFDeclarationPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     Address
                   </label>
                   <input
@@ -395,7 +395,7 @@ const NSSFDeclarationPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     City
                   </label>
                   <input
@@ -410,24 +410,24 @@ const NSSFDeclarationPage = () => {
 
             {/* NSSF Rates */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Current NSSF Rates</h3>
+              <h3 className="text-lg font-medium text-zinc-900 mb-4">Current NSSF Rates</h3>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
                   <div className="text-lg font-bold text-blue-600">{formatCurrency(NSSF_RATES.ceiling)}</div>
-                  <div className="text-sm text-gray-600">Monthly ceiling</div>
+                  <div className="text-sm text-zinc-600">Monthly ceiling</div>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">
                   <div className="text-lg font-bold text-green-600">{(NSSF_RATES.employeeContribution * 100).toFixed(1)}%</div>
-                  <div className="text-sm text-gray-600">Employee contribution</div>
+                  <div className="text-sm text-zinc-600">Employee contribution</div>
                 </div>
                 <div className="text-center p-4 bg-orange-50 rounded-lg">
                   <div className="text-lg font-bold text-orange-600">{(NSSF_RATES.employerContribution * 100).toFixed(1)}%</div>
-                  <div className="text-sm text-gray-600">Employer contribution</div>
+                  <div className="text-sm text-zinc-600">Employer contribution</div>
                 </div>
                 <div className="text-center p-4 bg-purple-50 rounded-lg">
                   <div className="text-lg font-bold text-purple-600">{(NSSF_RATES.housingLevy * 100).toFixed(1)}%</div>
-                  <div className="text-sm text-gray-600">Housing levy</div>
+                  <div className="text-sm text-zinc-600">Housing levy</div>
                 </div>
               </div>
               
@@ -443,15 +443,15 @@ const NSSFDeclarationPage = () => {
 
             {/* Employees Preview */}
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">
+              <div className="px-6 py-4 border-b border-zinc-200">
+                <h3 className="text-lg font-medium text-zinc-900">
                   Employees to Declare
                 </h3>
               </div>
               
               <div className="max-h-64 overflow-y-auto">
                 {employees.map((employee) => (
-                  <div key={employee.id} className="px-6 py-3 border-b border-gray-100 last:border-b-0">
+                  <div key={employee.id} className="px-6 py-3 border-b border-zinc-100 last:border-b-0">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-8 w-8">
@@ -462,19 +462,19 @@ const NSSFDeclarationPage = () => {
                           </div>
                         </div>
                         <div className="ml-3">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-zinc-900">
                             {employee.firstName} {employee.lastName}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-zinc-500">
                             {employee.employeeId} • {employee.position}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-zinc-900">
                           {formatCurrency(employee.baseSalary)}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-zinc-500">
                           {employee.nssfNumber ? (
                             <span className="text-green-600">NSSF: {employee.nssfNumber}</span>
                           ) : (
@@ -492,8 +492,8 @@ const NSSFDeclarationPage = () => {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">Generate NSSF Declaration</h3>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h3 className="text-lg font-medium text-zinc-900">Generate NSSF Declaration</h3>
+                  <p className="text-sm text-zinc-500 mt-1">
                     Calculate contributions and generate declaration for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
@@ -513,11 +513,11 @@ const NSSFDeclarationPage = () => {
             {/* Results */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">NSSF Declaration - {getMonthLabel(selectedMonth)}</h3>
+                <h3 className="text-lg font-medium text-zinc-900">NSSF Declaration - {getMonthLabel(selectedMonth)}</h3>
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowResults(false)}
-                    className="text-sm text-gray-600 hover:text-gray-900"
+                    className="text-sm text-zinc-600 hover:text-zinc-900"
                   >
                     New Declaration
                   </button>
@@ -542,42 +542,42 @@ const NSSFDeclarationPage = () => {
             {/* Summary */}
             {summary && (
               <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Declaration Summary</h4>
+                <h4 className="text-lg font-medium text-zinc-900 mb-4">Declaration Summary</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">{summary.totalEmployees}</div>
-                    <div className="text-sm text-gray-600">Employees declared</div>
+                    <div className="text-sm text-zinc-600">Employees declared</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-green-600">{formatCurrency(summary.totalGrossSalary)}</div>
-                    <div className="text-sm text-gray-600">Total gross salaries</div>
+                    <div className="text-sm text-zinc-600">Total gross salaries</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-orange-600">{formatCurrency(summary.totalNSSFBase)}</div>
-                    <div className="text-sm text-gray-600">Total NSSF base</div>
+                    <div className="text-sm text-zinc-600">Total NSSF base</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-purple-600">{formatCurrency(summary.totalContributions)}</div>
-                    <div className="text-sm text-gray-600">Total contributions</div>
+                    <div className="text-sm text-zinc-600">Total contributions</div>
                   </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
+                <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-zinc-200">
                   <div className="text-center">
                     <div className="text-lg font-bold text-red-600">{formatCurrency(summary.totalEmployeeContributions)}</div>
-                    <div className="text-sm text-gray-600">Employee contributions</div>
+                    <div className="text-sm text-zinc-600">Employee contributions</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-blue-600">{formatCurrency(summary.totalEmployerContributions)}</div>
-                    <div className="text-sm text-gray-600">Employer contributions</div>
+                    <div className="text-sm text-zinc-600">Employer contributions</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-green-600">{formatCurrency(summary.totalHousingLevy)}</div>
-                    <div className="text-sm text-gray-600">Housing levy</div>
+                    <div className="text-sm text-zinc-600">Housing levy</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-yellow-600">{formatCurrency(summary.totalTrainingLevy)}</div>
-                    <div className="text-sm text-gray-600">Training levy</div>
+                    <div className="text-sm text-zinc-600">Training levy</div>
                   </div>
                 </div>
               </div>
@@ -585,22 +585,22 @@ const NSSFDeclarationPage = () => {
 
             {/* Declaration Information */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Declaration Information</h4>
+              <h4 className="text-lg font-medium text-zinc-900 mb-4">Declaration Information</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-600">Company :</span>
+                  <span className="text-zinc-600">Company :</span>
                   <div className="font-medium">{companyInfo.name}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">NSSF Number :</span>
+                  <span className="text-zinc-600">NSSF Number :</span>
                   <div className="font-medium">{companyInfo.nssfNumber}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Period :</span>
+                  <span className="text-zinc-600">Period :</span>
                   <div className="font-medium">{getMonthLabel(selectedMonth)}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Generation date :</span>
+                  <span className="text-zinc-600">Generation date :</span>
                   <div className="font-medium">{new Date().toLocaleDateString('en-US')}</div>
                 </div>
               </div>
@@ -609,32 +609,32 @@ const NSSFDeclarationPage = () => {
             {/* Detailed Table */}
             <div className="bg-white shadow rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-zinc-200">
+                  <thead className="bg-zinc-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Employee
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Gross salary
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         NSSF base
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Employee contributions
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Employer contributions
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Total contributions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-zinc-200">
                     {declarationData.map((entry) => (
-                      <tr key={entry.employee.id} className="hover:bg-gray-50">
+                      <tr key={entry.employee.id} className="hover:bg-zinc-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-8 w-8">
@@ -645,10 +645,10 @@ const NSSFDeclarationPage = () => {
                               </div>
                             </div>
                             <div className="ml-3">
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-zinc-900">
                                 {entry.employee.firstName} {entry.employee.lastName}
                               </div>
-                              <div className="text-sm text-gray-500">
+                              <div className="text-sm text-zinc-500">
                                 {entry.employee.employeeId} • {entry.employee.nssfNumber || 'NSSF missing'}
                               </div>
                             </div>
@@ -672,9 +672,9 @@ const NSSFDeclarationPage = () => {
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot className="bg-gray-50">
+                  <tfoot className="bg-zinc-50">
                     <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-zinc-900">
                         TOTALS ({summary?.totalEmployees || 0} employees)
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">

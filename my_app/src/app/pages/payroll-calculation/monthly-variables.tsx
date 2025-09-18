@@ -149,7 +149,7 @@ const MonthlyVariablesPage = () => {
       case 'ADVANCE':
         return 'bg-purple-100 text-purple-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-zinc-100 text-zinc-800';
     }
   };
 
@@ -171,7 +171,7 @@ const MonthlyVariablesPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Loading...</div>
+            <div className="text-lg text-zinc-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -184,7 +184,7 @@ const MonthlyVariablesPage = () => {
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span> 
@@ -193,7 +193,7 @@ const MonthlyVariablesPage = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <Edit className="w-8 h-8 text-orange-600" />
-              <h1 className="text-3xl font-bold text-gray-900">Monthly Variable Elements</h1> 
+              <h1 className="text-3xl font-bold text-zinc-900">Monthly Variable Elements</h1> 
             </div>
             <button
               onClick={() => setShowAddModal(true)}
@@ -204,7 +204,7 @@ const MonthlyVariablesPage = () => {
             </button>
           </div>
           
-          <p className="text-gray-600 text-lg">
+          <p className="text-zinc-600 text-lg">
             Monthly entry of variable elements: overtime, absences, bonuses, leaves, lates, advances.
           </p>
         </div>
@@ -213,7 +213,7 @@ const MonthlyVariablesPage = () => {
         <div className="bg-white p-4 rounded-lg shadow-sm border mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-zinc-700 mb-1">
                 <Calendar className="w-4 h-4 inline mr-1" />
                 Month 
               </label>
@@ -226,7 +226,7 @@ const MonthlyVariablesPage = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-zinc-700 mb-1">
                 <User className="w-4 h-4 inline mr-1" />
                 Employee {/* Translated Employé */}
               </label>
@@ -245,7 +245,7 @@ const MonthlyVariablesPage = () => {
             </div>
 
             <div className="flex items-end">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-zinc-600">
                 {filteredVariables.length} element(s) for {getMonthLabel(selectedMonth)} 
               </div>
             </div>
@@ -257,11 +257,11 @@ const MonthlyVariablesPage = () => {
           <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="text-center py-12">
-                <Edit className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-4 text-lg font-medium text-gray-900">
+                <Edit className="mx-auto h-12 w-12 text-zinc-400" />
+                <h3 className="mt-4 text-lg font-medium text-zinc-900">
                   No variable elements for {getMonthLabel(selectedMonth)} 
                 </h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-zinc-500">
                   Start by adding the month’s variable elements (overtime, absences, bonuses, etc.) 
                 </p>
                 <div className="mt-6">
@@ -280,35 +280,35 @@ const MonthlyVariablesPage = () => {
           <div className="bg-white shadow rounded-lg overflow-hidden">
             {/* Desktop version - table */}
             <div className="hidden lg:block">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-zinc-200">
+                <thead className="bg-zinc-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Employee
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Type
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Description
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Quantity/Hours
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Amount
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Actions 
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-zinc-200">
                   {filteredVariables.map((variable) => (
-                    <tr key={variable.id} className="hover:bg-gray-50">
+                    <tr key={variable.id} className="hover:bg-zinc-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
@@ -319,10 +319,10 @@ const MonthlyVariablesPage = () => {
                             </div>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-zinc-900">
                               {variable.employee.firstName} {variable.employee.lastName}
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-zinc-500">
                               {variable.employee.employeeId}
                             </div>
                           </div>
@@ -333,16 +333,16 @@ const MonthlyVariablesPage = () => {
                           {getTypeLabel(variable.type)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                      <td className="px-6 py-4 text-sm text-zinc-900 max-w-xs">
                         {variable.description}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {variable.hours || '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {variable.amount ? formatCurrency(variable.amount) : '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {formatDate(variable.date)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -362,7 +362,7 @@ const MonthlyVariablesPage = () => {
 
             {/* Mobile version - cards */}
             <div className="lg:hidden">
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-zinc-200">
                 {filteredVariables.map((variable) => (
                   <div key={variable.id} className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -375,10 +375,10 @@ const MonthlyVariablesPage = () => {
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-zinc-900">
                             {variable.employee.firstName} {variable.employee.lastName}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-zinc-500">
                             {variable.employee.employeeId}
                           </div>
                         </div>
@@ -398,22 +398,22 @@ const MonthlyVariablesPage = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-500">Description:</span> 
+                        <span className="text-zinc-500">Description:</span> 
                         <div className="font-medium">{variable.description}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Date:</span> 
+                        <span className="text-zinc-500">Date:</span> 
                         <div className="font-medium">{formatDate(variable.date)}</div>
                       </div>
                       {variable.hours && (
                         <div>
-                          <span className="text-gray-500">Hours:</span> 
+                          <span className="text-zinc-500">Hours:</span> 
                           <div className="font-medium">{variable.hours}</div>
                         </div>
                       )}
                       {variable.amount && (
                         <div>
-                          <span className="text-gray-500">Amount:</span> 
+                          <span className="text-zinc-500">Amount:</span> 
                           <div className="font-medium">{formatCurrency(variable.amount)}</div>
                         </div>
                       )}
@@ -428,7 +428,7 @@ const MonthlyVariablesPage = () => {
         {/* Summary by Employee */}
         {filteredVariables.length > 0 && selectedEmployee === 'ALL' && (
           <div className="mt-8 bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
+            <h3 className="text-lg font-medium text-zinc-900 mb-4">
               Summary by Employee for {getMonthLabel(selectedMonth)} 
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -439,7 +439,7 @@ const MonthlyVariablesPage = () => {
                   const totalAmount = employeeVariables.reduce((sum, v) => sum + (v.amount || 0), 0);
                   
                   return (
-                    <div key={employee.id} className="bg-gray-50 p-4 rounded-lg">
+                    <div key={employee.id} className="bg-zinc-50 p-4 rounded-lg">
                       <div className="flex items-center mb-2">
                         <div className="flex-shrink-0 h-8 w-8">
                           <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
@@ -449,21 +449,21 @@ const MonthlyVariablesPage = () => {
                           </div>
                         </div>
                         <div className="ml-3">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-zinc-900">
                             {employee.firstName} {employee.lastName}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-zinc-500">
                             {employee.employeeId}
                           </div>
                         </div>
                       </div>
                       <div className="text-sm">
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Elements:</span>
+                          <span className="text-zinc-600">Elements:</span>
                           <span className="font-medium">{employeeVariables.length}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Total Amount:</span> 
+                          <span className="text-zinc-600">Total Amount:</span> 
                           <span className="font-medium">{formatCurrency(totalAmount)}</span>
                         </div>
                       </div>

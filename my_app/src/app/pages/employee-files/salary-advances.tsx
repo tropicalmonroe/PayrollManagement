@@ -104,7 +104,7 @@ const SalaryAdvancesPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Loading...</div>
+            <div className="text-lg text-zinc-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -117,7 +117,7 @@ const SalaryAdvancesPage = () => {
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
@@ -126,7 +126,7 @@ const SalaryAdvancesPage = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <TrendingUp className="w-8 h-8 text-green-600" />
-              <h1 className="text-3xl font-bold text-gray-900">Salary Advances</h1>
+              <h1 className="text-3xl font-bold text-zinc-900">Salary Advances</h1>
             </div>
             <button
               onClick={() => setShowAddModal(true)}
@@ -137,7 +137,7 @@ const SalaryAdvancesPage = () => {
             </button>
           </div>
           
-          <p className="text-gray-600 text-lg">
+          <p className="text-zinc-600 text-lg">
             Recording of granted advances, tracking, and automatic integration into monthly payroll.
           </p>
         </div>
@@ -147,11 +147,11 @@ const SalaryAdvancesPage = () => {
           <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="text-center py-12">
-                <TrendingUp className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-4 text-lg font-medium text-gray-900">
+                <TrendingUp className="mx-auto h-12 w-12 text-zinc-400" />
+                <h3 className="mt-4 text-lg font-medium text-zinc-900">
                   No advances recorded
                 </h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-zinc-500">
                   Start by recording the first salary advance
                 </p>
                 <div className="mt-6">
@@ -170,35 +170,35 @@ const SalaryAdvancesPage = () => {
           <div className="bg-white shadow rounded-lg overflow-hidden">
             {/* Desktop version - table */}
             <div className="hidden lg:block">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-zinc-200">
+                <thead className="bg-zinc-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Employee
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Amount
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Advance Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Installment
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Remaining Balance
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Reason
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-zinc-200">
                   {advances.map((advance) => (
-                    <tr key={advance.id} className="hover:bg-gray-50">
+                    <tr key={advance.id} className="hover:bg-zinc-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
@@ -209,34 +209,34 @@ const SalaryAdvancesPage = () => {
                             </div>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-zinc-900">
                               {advance.employee.firstName} {advance.employee.lastName}
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-zinc-500">
                               {advance.employee.employeeId}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {formatCurrency(advance.amount)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {formatDate(advance.advanceDate)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {formatCurrency(advance.installmentAmount)}
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-zinc-500">
                           {advance.numberOfInstallments} installments
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {formatCurrency(advance.remainingBalance)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(advance.status)}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                      <td className="px-6 py-4 text-sm text-zinc-900 max-w-xs truncate">
                         {advance.reason}
                       </td>
                     </tr>
@@ -247,7 +247,7 @@ const SalaryAdvancesPage = () => {
 
             {/* Mobile version - cards */}
             <div className="lg:hidden">
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-zinc-200">
                 {advances.map((advance) => (
                   <div key={advance.id} className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -260,10 +260,10 @@ const SalaryAdvancesPage = () => {
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-zinc-900">
                             {advance.employee.firstName} {advance.employee.lastName}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-zinc-500">
                             {advance.employee.employeeId}
                           </div>
                         </div>
@@ -272,24 +272,24 @@ const SalaryAdvancesPage = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-500">Amount:</span>
+                        <span className="text-zinc-500">Amount:</span>
                         <div className="font-medium">{formatCurrency(advance.amount)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Remaining Balance:</span>
+                        <span className="text-zinc-500">Remaining Balance:</span>
                         <div className="font-medium">{formatCurrency(advance.remainingBalance)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Installment:</span>
+                        <span className="text-zinc-500">Installment:</span>
                         <div className="font-medium">{formatCurrency(advance.installmentAmount)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Date:</span>
+                        <span className="text-zinc-500">Date:</span>
                         <div className="font-medium">{formatDate(advance.advanceDate)}</div>
                       </div>
                     </div>
                     <div className="mt-2">
-                      <span className="text-gray-500 text-sm">Reason:</span>
+                      <span className="text-zinc-500 text-sm">Reason:</span>
                       <div className="text-sm">{advance.reason}</div>
                     </div>
                   </div>

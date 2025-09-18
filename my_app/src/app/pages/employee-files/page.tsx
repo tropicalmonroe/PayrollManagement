@@ -36,9 +36,9 @@ const EmployeeFilesPage = () => {
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">
             <Users className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Employee Profile</h1>
+            <h1 className="text-3xl font-bold text-zinc-900">Employee Profile</h1>
           </div>
-          <p className="text-gray-600 text-lg">
+          <p className="text-zinc-600 text-lg">
             Comprehensive management of employee profiles: creation, modification, review, and salary advance management. 
           </p>
         </div>
@@ -48,7 +48,7 @@ const EmployeeFilesPage = () => {
             <div
               key={index}
               onClick={() => router.push(section.href)}
-              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-200 overflow-hidden"
+              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-zinc-200 overflow-hidden"
             >
               <div className={`${section.color} p-4`}>
                 <div className="text-white">
@@ -56,10 +56,10 @@ const EmployeeFilesPage = () => {
                 </div>
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                <h3 className="text-xl font-semibold text-zinc-900 mb-3">
                   {section.title}
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-zinc-600 text-sm leading-relaxed">
                   {section.description}
                 </p>
               </div>

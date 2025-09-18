@@ -128,22 +128,22 @@ export default function PayrollPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-zinc-900">
                   {selectedEmployee.firstName} {selectedEmployee.lastName}
                 </h2>
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="mt-1 text-sm text-zinc-600">
                   {months.find((m) => m.value === selectedMonth)?.label} {selectedYear}
                 </p>
               </div>
               <button
                 onClick={handleClosePayroll}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+                className="bg-zinc-600 hover:bg-zinc-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
               >
                 Back
               </button>
             </div>
 
-            <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
+            <div className="bg-white rounded-lg shadow border border-zinc-200 p-4">
               <DetailedPayrollView
                 employee={selectedEmployee}
                 month={selectedMonth}
@@ -168,18 +168,18 @@ export default function PayrollPage() {
       <Layout>
         <div className="space-y-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Payroll Calculation</h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <h2 className="text-2xl font-bold text-zinc-900">Payroll Calculation</h2>
+            <p className="mt-1 text-sm text-zinc-600">
               Generate payslips for your employees
             </p>
           </div>
 
           {/* Pay Period Selection */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Pay Period</h3>
+          <div className="bg-white rounded-lg shadow-sm border border-zinc-200 p-6">
+            <h3 className="text-lg font-medium text-zinc-900 mb-4">Pay Period</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="month" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="month" className="block text-sm font-medium text-zinc-700 mb-2">
                   Month
                 </label>
                 <select
@@ -196,7 +196,7 @@ export default function PayrollPage() {
                 </select>
               </div>
               <div>
-                <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="year" className="block text-sm font-medium text-zinc-700 mb-2">
                   Year
                 </label>
                 <select
@@ -216,9 +216,9 @@ export default function PayrollPage() {
           </div>
 
           {/* Employee List */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">
+          <div className="bg-white rounded-lg shadow-sm border border-zinc-200">
+            <div className="px-6 py-4 border-b border-zinc-200">
+              <h3 className="text-lg font-medium text-zinc-900">
                 Active Employees ({employees.length})
               </h3>
             </div>
@@ -226,7 +226,7 @@ export default function PayrollPage() {
             {loading ? (
               <div className="p-8 text-center">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="mt-2 text-sm text-gray-500">Loading employees...</p>
+                <p className="mt-2 text-sm text-zinc-500">Loading employees...</p>
               </div>
             ) : error ? (
               <div className="p-8 text-center">
@@ -241,15 +241,15 @@ export default function PayrollPage() {
             ) : employees.length === 0 ? (
               <div className="p-8 text-center">
                 <span className="text-6xl">👥</span>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">No Active Employees</h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <h3 className="mt-4 text-lg font-medium text-zinc-900">No Active Employees</h3>
+                <p className="mt-2 text-sm text-zinc-500">
                   Add employees to start calculating payroll
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-zinc-200">
                 {employees.map((employee) => (
-                  <div key={employee.id} className="p-6 hover:bg-gray-50">
+                  <div key={employee.id} className="p-6 hover:bg-zinc-50">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -261,14 +261,14 @@ export default function PayrollPage() {
                         </div>
                         <div className="ml-4">
                           <div className="flex items-center">
-                            <h4 className="text-sm font-medium text-gray-900">
+                            <h4 className="text-sm font-medium text-zinc-900">
                               {employee.firstName} {employee.lastName}
                             </h4>
                             <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                               {employee.status}
                             </span>
                           </div>
-                          <div className="mt-1 flex items-center text-sm text-gray-500">
+                          <div className="mt-1 flex items-center text-sm text-zinc-500">
                             <span>{employee.employeeId}</span>
                             <span className="mx-2">•</span>
                             <span>{employee.position}</span>
@@ -284,13 +284,13 @@ export default function PayrollPage() {
                       </div>
                       <div className="flex items-center space-x-3">
                         <div className="text-right text-sm">
-                          <div className="text-gray-900 font-medium">
+                          <div className="text-zinc-900 font-medium">
                             {new Intl.NumberFormat('en-KE', {
                               style: 'currency',
                               currency: 'KES',
                             }).format(employee.grossSalary || employee.baseSalary)}
                           </div>
-                          <div className="text-gray-500">Gross Salary</div>
+                          <div className="text-zinc-500">Gross Salary</div>
                         </div>
                         <button
                           onClick={() => handleGeneratePayroll(employee)}
@@ -308,8 +308,8 @@ export default function PayrollPage() {
 
           {/* Batch Actions */}
           {employees.length > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Batch Actions</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-zinc-200 p-6">
+              <h3 className="text-lg font-medium text-zinc-900 mb-4">Batch Actions</h3>
               <div className="flex space-x-4">
                 <button
                   onClick={() => {

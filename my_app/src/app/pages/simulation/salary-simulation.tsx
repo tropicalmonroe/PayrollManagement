@@ -107,14 +107,14 @@ function SalarySimulationContent() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Link href="/simulation">
-            <button className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            <button className="inline-flex items-center px-3 py-2 border border-zinc-300 shadow-sm text-sm leading-4 font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </button>
           </Link>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Salary Simulation</h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <h2 className="text-2xl font-bold text-zinc-900">Salary Simulation</h2>
+            <p className="mt-1 text-sm text-zinc-600">
               Calculate net salary from gross salary with contributions and PAYE
             </p>
           </div>
@@ -122,7 +122,7 @@ function SalarySimulationContent() {
         <div className="flex space-x-3">
           <button
             onClick={resetForm}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center px-4 py-2 border border-zinc-300 shadow-sm text-sm font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Reset
@@ -139,13 +139,13 @@ function SalarySimulationContent() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Simulation Parameters */}
         <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Simulation Parameters</h3>
+          <div className="px-6 py-4 border-b border-zinc-200">
+            <h3 className="text-lg font-medium text-zinc-900">Simulation Parameters</h3>
           </div>
           <div className="p-6 space-y-6">
             {/* Gross Salary */}
             <div>
-              <label htmlFor="grossSalary" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="grossSalary" className="block text-sm font-medium text-zinc-700 mb-2">
                 Monthly Gross Salary (KES)
               </label>
               <input
@@ -153,7 +153,7 @@ function SalarySimulationContent() {
                 id="grossSalary"
                 value={grossSalary}
                 onChange={(e) => setGrossSalary(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 step="100"
               />
@@ -161,14 +161,14 @@ function SalarySimulationContent() {
 
             {/* Family Status */}
             <div>
-              <label htmlFor="familyStatus" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="familyStatus" className="block text-sm font-medium text-zinc-700 mb-2">
                 Family Status
               </label>
               <select
                 id="familyStatus"
                 value={familyStatus}
                 onChange={(e) => setFamilyStatus(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="single">Single</option>
                 <option value="married">Married</option>
@@ -179,7 +179,7 @@ function SalarySimulationContent() {
 
             {/* Number of Dependants */}
             <div>
-              <label htmlFor="numberOfDependants" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="numberOfDependants" className="block text-sm font-medium text-zinc-700 mb-2">
                 Number of Dependants
               </label>
               <input
@@ -187,7 +187,7 @@ function SalarySimulationContent() {
                 id="numberOfDependants"
                 value={numberOfDependants}
                 onChange={(e) => setNumberOfDependants(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 max="10"
               />
@@ -195,7 +195,7 @@ function SalarySimulationContent() {
 
             {/* Professional Expenses */}
             <div>
-              <label htmlFor="professionalExpenses" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="professionalExpenses" className="block text-sm font-medium text-zinc-700 mb-2">
                 Professional Expenses (KES)
               </label>
               <input
@@ -203,18 +203,18 @@ function SalarySimulationContent() {
                 id="professionalExpenses"
                 value={professionalExpenses}
                 onChange={(e) => setProfessionalExpenses(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 step="50"
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-zinc-500">
                 Maximum 20% of gross salary or 15,000 KES
               </p>
             </div>
 
             {/* Other Deductions */}
             <div>
-              <label htmlFor="otherDeductions" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="otherDeductions" className="block text-sm font-medium text-zinc-700 mb-2">
                 Other Deductions (KES)
               </label>
               <input
@@ -222,11 +222,11 @@ function SalarySimulationContent() {
                 id="otherDeductions"
                 value={otherDeductions}
                 onChange={(e) => setOtherDeductions(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 min="0"
                 step="50"
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-zinc-500">
                 Housing credit, pension contributions, etc.
               </p>
             </div>
@@ -235,56 +235,56 @@ function SalarySimulationContent() {
 
         {/* Simulation Results */}
         <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Simulation Results</h3>
+          <div className="px-6 py-4 border-b border-zinc-200">
+            <h3 className="text-lg font-medium text-zinc-900">Simulation Results</h3>
           </div>
           <div className="p-6">
             {loading ? (
               <div className="text-center py-8">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="mt-2 text-sm text-gray-500">Calculating...</p>
+                <p className="mt-2 text-sm text-zinc-500">Calculating...</p>
               </div>
             ) : results ? (
               <div className="space-y-4">
                 {/* Gross Salary */}
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="text-sm font-medium text-gray-700">Gross Salary</span>
-                  <span className="text-sm font-semibold text-gray-900">{formatCurrency(results.grossSalary)}</span>
+                <div className="flex justify-between items-center py-2 border-b border-zinc-100">
+                  <span className="text-sm font-medium text-zinc-700">Gross Salary</span>
+                  <span className="text-sm font-semibold text-zinc-900">{formatCurrency(results.grossSalary)}</span>
                 </div>
 
                 {/* Contributions */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center py-1">
-                    <span className="text-sm text-gray-600 ml-4">- NSSF (6%)</span>
+                    <span className="text-sm text-zinc-600 ml-4">- NSSF (6%)</span>
                     <span className="text-sm text-red-600">-{formatCurrency(results.nssfContribution)}</span>
                   </div>
                   <div className="flex justify-between items-center py-1">
-                    <span className="text-sm text-gray-600 ml-4">- NHIF</span>
+                    <span className="text-sm text-zinc-600 ml-4">- NHIF</span>
                     <span className="text-sm text-red-600">-{formatCurrency(results.nhifContribution)}</span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-sm font-medium text-gray-700">Total Contributions</span>
+                  <div className="flex justify-between items-center py-2 border-b border-zinc-100">
+                    <span className="text-sm font-medium text-zinc-700">Total Contributions</span>
                     <span className="text-sm font-semibold text-red-600">-{formatCurrency(results.totalContributions)}</span>
                   </div>
                 </div>
 
                 {/* Taxable Salary */}
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="text-sm font-medium text-gray-700">Taxable Salary</span>
-                  <span className="text-sm font-semibold text-gray-900">{formatCurrency(results.taxableSalary)}</span>
+                <div className="flex justify-between items-center py-2 border-b border-zinc-100">
+                  <span className="text-sm font-medium text-zinc-700">Taxable Salary</span>
+                  <span className="text-sm font-semibold text-zinc-900">{formatCurrency(results.taxableSalary)}</span>
                 </div>
 
                 {/* Tax Deductions */}
                 {results.taxSavings > 0 && (
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-sm text-gray-600">- Tax Deductions</span>
+                  <div className="flex justify-between items-center py-2 border-b border-zinc-100">
+                    <span className="text-sm text-zinc-600">- Tax Deductions</span>
                     <span className="text-sm text-green-600">-{formatCurrency(results.taxSavings)}</span>
                   </div>
                 )}
 
                 {/* PAYE */}
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="text-sm font-medium text-gray-700">
+                <div className="flex justify-between items-center py-2 border-b border-zinc-100">
+                  <span className="text-sm font-medium text-zinc-700">
                     PAYE ({results.taxRate.toFixed(1)}%)
                   </span>
                   <span className="text-sm font-semibold text-red-600">-{formatCurrency(results.paye)}</span>
@@ -314,8 +314,8 @@ function SalarySimulationContent() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <Calculator className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-sm text-gray-500">
+                <Calculator className="h-12 w-12 text-zinc-400 mx-auto mb-4" />
+                <p className="text-sm text-zinc-500">
                   Adjust the parameters to view results
                 </p>
               </div>
@@ -327,32 +327,32 @@ function SalarySimulationContent() {
       {/* Comparison with Other Salaries */}
       {results && (
         <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Comparison with Other Salaries</h3>
+          <div className="px-6 py-4 border-b border-zinc-200">
+            <h3 className="text-lg font-medium text-zinc-900">Comparison with Other Salaries</h3>
           </div>
           <div className="p-6">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-zinc-200">
+                <thead className="bg-zinc-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Gross Salary
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Contributions
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       PAYE
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Net Salary
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Net Rate
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-zinc-200">
                   {[0.8, 0.9, 1.0, 1.1, 1.2].map((multiplier, index) => {
                     const testSalary = Math.round(grossSalary * multiplier);
                     const testProfessionalExpenses = Math.min(professionalExpenses, testSalary * 0.2, 15000);
@@ -377,19 +377,19 @@ function SalarySimulationContent() {
                     
                     return (
                       <tr key={index} className={multiplier === 1.0 ? 'bg-blue-50' : ''}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900">
                           {formatCurrency(testSalary)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                           {formatCurrency(testNssf + testNhif)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                           {formatCurrency(testMonthlyPaye)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900">
                           {formatCurrency(testNet)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                           {netRate.toFixed(1)}%
                         </td>
                       </tr>

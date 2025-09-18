@@ -285,7 +285,7 @@ const BankTransferPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Loading...</div>
+            <div className="text-lg text-zinc-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -298,7 +298,7 @@ const BankTransferPage = () => {
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
@@ -306,10 +306,10 @@ const BankTransferPage = () => {
           
           <div className="flex items-center space-x-3 mb-4">
             <CreditCard className="w-8 h-8 text-green-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Bulk Bank Transfer</h1>
+            <h1 className="text-3xl font-bold text-zinc-900">Bulk Bank Transfer</h1>
           </div>
           
-          <p className="text-gray-600 text-lg">
+          <p className="text-zinc-600 text-lg">
             Generate bank or Excel file for executing bulk salary transfers.
           </p>
         </div>
@@ -318,11 +318,11 @@ const BankTransferPage = () => {
           <>
             {/* Configuration */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Transfer Configuration</h3>
+              <h3 className="text-lg font-medium text-zinc-900 mb-4">Transfer Configuration</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     <Calendar className="w-4 h-4 inline mr-1" />
                     Payroll Period
                   </label>
@@ -332,20 +332,20 @@ const BankTransferPage = () => {
                     onChange={(e) => setSelectedMonth(e.target.value)}
                     className="payroll-input"
                   />
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-zinc-500 mt-1">
                     Transfer for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     <Users className="w-4 h-4 inline mr-1" />
                     Employees Included
                   </label>
-                  <div className="text-lg font-medium text-gray-900">
+                  <div className="text-lg font-medium text-zinc-900">
                     {employees.length} active employee(s)
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-zinc-500 mt-1">
                     Only employees with valid bank data will be included
                   </p>
                 </div>
@@ -354,11 +354,11 @@ const BankTransferPage = () => {
 
             {/* Company Information */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Company Information</h3>
+              <h3 className="text-lg font-medium text-zinc-900 mb-4">Company Information</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     Company Name
                   </label>
                   <input
@@ -370,7 +370,7 @@ const BankTransferPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     Debit Account
                   </label>
                   <input
@@ -383,7 +383,7 @@ const BankTransferPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     Bank
                   </label>
                   <input
@@ -398,15 +398,15 @@ const BankTransferPage = () => {
 
             {/* Employees Preview */}
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">
+              <div className="px-6 py-4 border-b border-zinc-200">
+                <h3 className="text-lg font-medium text-zinc-900">
                   Employees Preview
                 </h3>
               </div>
               
               <div className="max-h-64 overflow-y-auto">
                 {employees.map((employee) => (
-                  <div key={employee.id} className="px-6 py-3 border-b border-gray-100 last:border-b-0">
+                  <div key={employee.id} className="px-6 py-3 border-b border-zinc-100 last:border-b-0">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-8 w-8">
@@ -417,19 +417,19 @@ const BankTransferPage = () => {
                           </div>
                         </div>
                         <div className="ml-3">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-zinc-900">
                             {employee.firstName} {employee.lastName}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-zinc-500">
                             {employee.employeeId} • {employee.position}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-zinc-900">
                           {formatCurrency(employee.baseSalary)}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-zinc-500">
                           {employee.bankAccount ? (
                             <span className="text-green-600">✓ Bank details available</span>
                           ) : (
@@ -447,8 +447,8 @@ const BankTransferPage = () => {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">Generate Transfer File</h3>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h3 className="text-lg font-medium text-zinc-900">Generate Transfer File</h3>
+                  <p className="text-sm text-zinc-500 mt-1">
                     Calculate net salaries and generate bank file for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
@@ -468,11 +468,11 @@ const BankTransferPage = () => {
             {/* Results */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Bulk Transfer - {getMonthLabel(selectedMonth)}</h3>
+                <h3 className="text-lg font-medium text-zinc-900">Bulk Transfer - {getMonthLabel(selectedMonth)}</h3>
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowResults(false)}
-                    className="text-sm text-gray-600 hover:text-gray-900"
+                    className="text-sm text-zinc-600 hover:text-zinc-900"
                   >
                     New Generation
                   </button>
@@ -498,23 +498,23 @@ const BankTransferPage = () => {
             {/* Summary */}
             {summary && (
               <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Transfer Summary</h4>
+                <h4 className="text-lg font-medium text-zinc-900 mb-4">Transfer Summary</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">{summary.totalEmployees}</div>
-                    <div className="text-sm text-gray-600">Total Employees</div>
+                    <div className="text-sm text-zinc-600">Total Employees</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">{summary.validTransfers}</div>
-                    <div className="text-sm text-gray-600">Valid Transfers</div>
+                    <div className="text-sm text-zinc-600">Valid Transfers</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-red-600">{summary.invalidTransfers}</div>
-                    <div className="text-sm text-gray-600">Invalid Transfers</div>
+                    <div className="text-sm text-zinc-600">Invalid Transfers</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-purple-600">{formatCurrency(summary.totalAmount)}</div>
-                    <div className="text-sm text-gray-600">Total Amount</div>
+                    <div className="text-sm text-zinc-600">Total Amount</div>
                   </div>
                 </div>
 
@@ -533,22 +533,22 @@ const BankTransferPage = () => {
 
             {/* Transfer Information */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Transfer Information</h4>
+              <h4 className="text-lg font-medium text-zinc-900 mb-4">Transfer Information</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-600">Reference :</span>
+                  <span className="text-zinc-600">Reference :</span>
                   <div className="font-medium">{companyInfo.reference}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Company :</span>
+                  <span className="text-zinc-600">Company :</span>
                   <div className="font-medium">{companyInfo.name}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Debit Account :</span>
+                  <span className="text-zinc-600">Debit Account :</span>
                   <div className="font-medium">{formatBankAccount(companyInfo.account)}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Bank :</span>
+                  <span className="text-zinc-600">Bank :</span>
                   <div className="font-medium">{companyInfo.bank}</div>
                 </div>
               </div>
@@ -557,26 +557,26 @@ const BankTransferPage = () => {
             {/* Detailed Table */}
             <div className="bg-white shadow rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-zinc-200">
+                  <thead className="bg-zinc-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Employee
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Bank Details
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Net Payable
                       </th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Status
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-zinc-200">
                     {transferData.map((entry) => (
-                      <tr key={entry.employee.id} className={`hover:bg-gray-50 ${!entry.isValid ? 'bg-red-50' : ''}`}>
+                      <tr key={entry.employee.id} className={`hover:bg-zinc-50 ${!entry.isValid ? 'bg-red-50' : ''}`}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-8 w-8">
@@ -587,20 +587,20 @@ const BankTransferPage = () => {
                               </div>
                             </div>
                             <div className="ml-3">
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-zinc-900">
                                 {entry.employee.firstName} {entry.employee.lastName}
                               </div>
-                              <div className="text-sm text-gray-500">
+                              <div className="text-sm text-zinc-500">
                                 {entry.employee.employeeId} • {entry.employee.position}
                               </div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
+                          <div className="text-sm text-zinc-900">
                             {entry.bankAccount ? formatBankAccount(entry.bankAccount) : 'Not provided'}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-zinc-500">
                             {entry.bankBranch || 'Branch not provided'}
                           </div>
                           {entry.errors.length > 0 && (
@@ -610,7 +610,7 @@ const BankTransferPage = () => {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <span className={entry.isValid ? 'text-green-600' : 'text-gray-400'}>
+                          <span className={entry.isValid ? 'text-green-600' : 'text-zinc-400'}>
                             {formatCurrency(entry.netPayable)}
                           </span>
                         </td>
@@ -628,9 +628,9 @@ const BankTransferPage = () => {
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot className="bg-gray-50">
+                  <tfoot className="bg-zinc-50">
                     <tr>
-                      <td colSpan={2} className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                      <td colSpan={2} className="px-6 py-4 whitespace-nowrap text-sm font-bold text-zinc-900">
                         TOTAL TO TRANSFER ({summary?.validTransfers || 0} transfers)
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">

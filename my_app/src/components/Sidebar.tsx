@@ -36,6 +36,7 @@ DropdownMenuLabel,
 DropdownMenuSeparator,
 DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
+// import SidebarFooter from './SidebarFooter';
 
 type SidebarItemProps = {
 href: string;
@@ -79,13 +80,13 @@ const handleClick = (e: React.MouseEvent) => {
 const content = (
     <div
     className={`group relative flex items-center ${collapsed ? 'px-3' : 'px-6'} py-3 cursor-pointer transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-        isActive ? 'bg-[#0063b4]/8 text-gray-900 border-r-3 border-[#0063b4]' : 'hover:bg-gray-50 text-gray-700'
+        isActive ? 'bg-[#0063b4]/8 text-zinc-900 border-r-3 border-[#0063b4]' : 'hover:bg-zinc-50 text-zinc-700'
     }`}
     onClick={handleClick}
     >
     <div
         className={`${collapsed ? 'mx-auto' : 'mr-4'} transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-        isActive ? 'text-[#0063b4]' : 'text-gray-500 group-hover:text-[#0063b4]'
+        isActive ? 'text-[#0063b4]' : 'text-zinc-100 group-hover:text-[#0063b4]'
         }`}
     >
         {React.cloneElement(icon as React.ReactElement<LucideProps>, {
@@ -95,18 +96,18 @@ const content = (
     </div>
     {!collapsed && (
         <span
-        className={`flex-1 font-normal text-sm tracking-normal leading-tight ${
-            isActive ? 'text-gray-900 font-medium' : 'text-gray-700 group-hover:text-gray-900'
+        className={`flex-1 font-normal text-sm leading-tight ${
+            isActive ? 'text-zinc-900 tracking-tight font-medium' : 'text-zinc-100 tracking-tight group-hover:text-zinc-900'
         }`}
         >
         {title}
         </span>
     )}
     {shortcut && !collapsed && (
-        <div className="mr-2 px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-500 font-medium">{shortcut}</div>
+        <div className="mr-2 px-1.5 py-0.5 rounded text-xs scale-90 bg-zinc-100 text-zinc-500 font-medium">{shortcut}</div>
     )}
     {hasChildren && !collapsed && (
-        <div className={`ml-2 transition-all duration-200 ${isActive ? 'text-[#0063b4]' : 'text-gray-400 group-hover:text-gray-600'}`}>
+        <div className={`ml-2 transition-all duration-200 ${isActive ? 'text-[#0063b4]' : 'text-zinc-100 group-hover:text-zinc-600'}`}>
         <ChevronRight size={14} strokeWidth={2} className={`transition-transform duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isOpen ? 'rotate-90' : 'rotate-0'}`} />
         </div>
     )}
@@ -136,24 +137,24 @@ return (
     <div
     className={`overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
     >
-    <div className="bg-gray-50/50 border-l-2 border-gray-100 ml-6">
+    <div className="bg-[#142b3d] border-l-1 border-slate-100 ml-6">
         {items.map((item) => (
         <Link key={item.href} href={item.href}>
             <div
             className={`group flex items-center px-6 py-2.5 cursor-pointer transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-                pathname === item.href ? 'bg-[#0063b4]/8 text-gray-900 border-r-2 border-[#0063b4]' : 'text-gray-600 hover:bg-white hover:text-gray-900'
+                pathname === item.href ? 'bg-[#0063b4]/8 text-zinc-900 border-r-2 border-[#0063b4]' : 'text-zinc-50 hover:bg-white hover:text-zinc-900'
             }`}
             >
             <div
                 className={`w-1.5 h-1.5 rounded-full mr-4 transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-                pathname === item.href ? 'bg-[#0063b4]' : 'bg-gray-300 group-hover:bg-[#0063b4]'
+                pathname === item.href ? 'bg-[#0063b4]' : 'bg-zinc-300 group-hover:bg-[#0063b4]'
                 }`}
             />
             <span className={`flex-1 text-sm font-normal tracking-normal ${pathname === item.href ? 'font-medium' : ''}`}>
                 {item.title}
             </span>
             {item.shortcut && (
-                <div className="px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-500 font-medium">{item.shortcut}</div>
+                <div className="px-1.5 py-0.5 rounded text-xs bg-zinc-100 text-zinc-500 font-medium">{item.shortcut}</div>
             )}
             </div>
         </Link>
@@ -286,43 +287,46 @@ const isActive = (path: string) => {
 
 return (
     <div
-    className={`fixed top-0 left-0 ${collapsed ? 'w-20' : 'w-72'} h-screen bg-white border-r border-gray-200 flex flex-col z-50 transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]`}
+    className={`fixed top-0 left-0 ${collapsed ? 'w-20' : 'w-72'} h-screen bg-white border-r border-zinc-200 flex flex-col z-50 transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]`}
     >
-    <div className="px-6 py-6 border-b border-gray-100 bg-white relative">
+    <div className="px-6 py-6 border-b border-zinc-100 bg-white relative">
         <div className="flex items-center justify-center">
         <div className="p-1">
             {collapsed ? (
             <div className="flex justify-center">
-                <img src="/payroll black.png" alt="Payroll Logo" className="w-6 h-6 object-contain" />
+                <img src="/logosch.png" alt="PayrollLogo" className="w-6 h-6 object-contain" />
             </div>
             ) : (
+            <div className="flex flex-col items-center">
             <div className="text-center">
-                <img src="/payroll black.png" alt="Payroll Logo" className="w-20 h-auto object-contain" />
+                <img src="/logosch.png" alt="PayrollLogo" className="w-20 h-auto object-contain" />
+            </div>
+            <p className='text-xs text-slate-600 font-semibold'>NewLight Academy Payroll</p>
             </div>
             )}
         </div>
         </div>
         <button
         onClick={toggleSidebar}
-        className="absolute right-0 top-1/2 -translate-y-1/2 -mr-3 bg-white border border-gray-200 rounded-full p-1.5 shadow-md hover:shadow-lg transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-50"
+        className="absolute right-0 top-1/2 -translate-y-1/2 -mr-3 bg-white border border-zinc-200 rounded-full p-1.5 shadow-md hover:shadow-lg transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-50"
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-        {collapsed ? <ChevronRight size={18} className="text-gray-600" /> : <ChevronLeft size={18} className="text-gray-600" />}
+        {collapsed ? <ChevronRight size={18} className="text-zinc-600" /> : <ChevronLeft size={18} className="text-zinc-600" />}
         </button>
     </div>
-    <div className="flex-1 overflow-y-auto bg-white overflow-x-hidden">
+    <div className="flex-1 overflow-y-auto bg-[#2772a0] overflow-x-hidden">
         <div className="pt-4">
         <SidebarItem
             href="/dashboard"
             icon={<Home />}
             title="Dashboard"
             isActive={pathname === '/dashboard'}
-            shortcut={collapsed ? '' : '⌘D'}
+            shortcut={collapsed ? '' : 'Ctrl + D'}
             collapsed={collapsed}
             toggleSidebar={toggleSidebar}
         />
         </div>
-        <div className="mx-6 my-4 h-px bg-gray-200" />
+        <div className="mx-6 my-4 h-px bg-zinc-200" />
         <div className="space-y-1">
         <SidebarItem
             href="/employee-files"
@@ -332,7 +336,7 @@ return (
             hasChildren={true}
             isOpen={openMenus['employee-files']}
             onClick={() => toggleMenu('employee-files')}
-            shortcut={collapsed ? '' : '⌘1'}
+            shortcut={collapsed ? '' : 'Ctrl + 1'}
             collapsed={collapsed}
             toggleSidebar={toggleSidebar}
         />
@@ -352,7 +356,7 @@ return (
             hasChildren={true}
             isOpen={openMenus['payroll-calculation']}
             onClick={() => toggleMenu('payroll-calculation')}
-            shortcut={collapsed ? '' : '⌘2'}
+            shortcut={collapsed ? '' : 'Ctrl + 2'}
             collapsed={collapsed}
             toggleSidebar={toggleSidebar}
         />
@@ -371,7 +375,7 @@ return (
             hasChildren={true}
             isOpen={openMenus['employee-documents']}
             onClick={() => toggleMenu('employee-documents')}
-            shortcut={collapsed ? '' : '⌘3'}
+            shortcut={collapsed ? '' : 'Ctrl + 3'}
             collapsed={collapsed}
             toggleSidebar={toggleSidebar}
         />
@@ -391,7 +395,7 @@ return (
             hasChildren={true}
             isOpen={openMenus['administrative-reports']}
             onClick={() => toggleMenu('administrative-reports')}
-            shortcut={collapsed ? '' : '⌘4'}
+            shortcut={collapsed ? '' : 'Ctrl + 4'}
             collapsed={collapsed}
             toggleSidebar={toggleSidebar}
         />
@@ -412,7 +416,7 @@ return (
             hasChildren={true}
             isOpen={openMenus['archive']}
             onClick={() => toggleMenu('archive')}
-            shortcut={collapsed ? '' : '⌘5'}
+            shortcut={collapsed ? '' : 'Ctrl + 5'}
             collapsed={collapsed}
             toggleSidebar={toggleSidebar}
         />
@@ -435,7 +439,7 @@ return (
             hasChildren={true}
             isOpen={openMenus['simulation']}
             onClick={() => toggleMenu('simulation')}
-            shortcut={collapsed ? '' : '⌘6'}
+            shortcut={collapsed ? '' : 'Ctrl + 6'}
             collapsed={collapsed}
             toggleSidebar={toggleSidebar}
         />
@@ -449,7 +453,7 @@ return (
             isOpen={openMenus['simulation']}
         />
         </div>
-        <div className="mx-6 my-4 h-px bg-gray-200" />
+        <div className="mx-6 my-4 h-px bg-zinc-200" />
         <div className="space-y-1 pb-6">
         <SidebarItem
             href="/application-settings"
@@ -459,7 +463,7 @@ return (
             hasChildren={true}
             isOpen={openMenus['application-settings']}
             onClick={() => toggleMenu('application-settings')}
-            shortcut={collapsed ? '' : '⌘7'}
+            shortcut={collapsed ? '' : 'Ctrl + 7'}
             collapsed={collapsed}
             toggleSidebar={toggleSidebar}
         />
@@ -473,52 +477,11 @@ return (
         />
         </div>
     </div>
-    <div className="px-4 py-4 border-t border-gray-100 bg-white">
-        <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-            <div className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-3'} cursor-pointer p-2 rounded-md hover:bg-gray-50 transition-colors duration-150`}>
-            <Avatar className="h-12 w-12 border border-gray-200 overflow-hidden">
-                <AvatarFallback className="bg-[#0063b4] text-white text-sm font-medium">
-                {user ? `${getFirstName(user.name).charAt(0)}${getLastName(user.name).charAt(0)}` : 'TA'}
-                </AvatarFallback>
-            </Avatar>
-            {!collapsed && (
-                <>
-                <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{user ? user.name : 'AD Capital Admin'}</p>
-                    <p className="text-xs text-gray-500 truncate">
-                    {user ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase() : 'Administrator'}
-                    </p>
-                </div>
-                <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                </>
-            )}
-            </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider">My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer text-sm" onClick={() => router.push('/profile')}>
-            <User className="mr-3 h-4 w-4" />
-            <span>Profile Settings</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-            className="cursor-pointer text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
-            onClick={() => {
-                router.push('/');
-            }}
-            >
-            <LogOut className="mr-3 h-4 w-4" />
-            <span>Log Out</span>
-            </DropdownMenuItem>
-        </DropdownMenuContent>
-        </DropdownMenu>
-        <div className="flex items-center justify-center mt-3 pt-3 border-t border-gray-100">
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-2'}`}>
-            <Circle className="w-2 h-2 text-green-500 fill-current" />
-            {!collapsed && <p className="text-xs text-gray-500 font-medium">© 2025 AD Capital</p>}
-        </div>
+    {/* <SidebarFooter/> */}
+        <div className="flex items-center justify-center my-1 py-2">{/* border-t border-zinc-100 */}
+        <div className={`flex items-center ${collapsed ? "justify-center" : "space-x-2"}`}>
+        <Circle className="w-2 h-2 text-green-500 fill-current" />
+        {!collapsed && <p className="text-xs text-zinc-500 font-medium">© 2025 NewLight Academy</p>}
         </div>
     </div>
     </div>

@@ -193,18 +193,18 @@ const formatCurrency = (amount: string) => {
 if (!isOpen) return null;
 
 return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div className="fixed inset-0 bg-zinc-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
         <div className="mt-3">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-medium text-gray-900 flex items-center">
+            <h3 className="text-lg font-medium text-zinc-900 flex items-center">
             <DollarSign className="w-5 h-5 mr-2 text-[#0063b4]" />
             {editAdvance ? 'Edit Salary Advance' : 'New Salary Advance'}
             </h3>
             <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-zinc-400 hover:text-zinc-600 transition-colors"
             >
             <X className="w-6 h-6" />
             </button>
@@ -214,7 +214,7 @@ return (
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Employee Selection */}
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
                 <User className="w-4 h-4 inline mr-1" />
                 Employee *
             </label>
@@ -223,7 +223,7 @@ return (
                 value={formData.employeeId}
                 onChange={handleInputChange}
                 className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
-                errors.employeeId ? 'border-red-300' : 'border-gray-300'
+                errors.employeeId ? 'border-red-300' : 'border-zinc-300'
                 }`}
                 disabled={!!editAdvance} // Disable when editing
             >
@@ -242,7 +242,7 @@ return (
             {/* Amount and Date */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 mb-2">
                 <DollarSign className="w-4 h-4 inline mr-1" />
                 Advance Amount (KES) *
                 </label>
@@ -254,7 +254,7 @@ return (
                 step="0.01"
                 min="0"
                 className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
-                    errors.amount ? 'border-red-300' : 'border-gray-300'
+                    errors.amount ? 'border-red-300' : 'border-zinc-300'
                 }`}
                 placeholder="0.00"
                 />
@@ -264,7 +264,7 @@ return (
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 mb-2">
                 <Calendar className="w-4 h-4 inline mr-1" />
                 Advance Date *
                 </label>
@@ -274,7 +274,7 @@ return (
                 value={formData.advanceDate}
                 onChange={handleInputChange}
                 className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
-                    errors.advanceDate ? 'border-red-300' : 'border-gray-300'
+                    errors.advanceDate ? 'border-red-300' : 'border-zinc-300'
                 }`}
                 />
                 {errors.advanceDate && (
@@ -285,7 +285,7 @@ return (
 
             {/* Reason */}
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
                 <FileText className="w-4 h-4 inline mr-1" />
                 Advance Reason *
             </label>
@@ -295,7 +295,7 @@ return (
                 value={formData.reason}
                 onChange={handleInputChange}
                 className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
-                errors.reason ? 'border-red-300' : 'border-gray-300'
+                errors.reason ? 'border-red-300' : 'border-zinc-300'
                 }`}
                 placeholder="Ex: Family emergency, medical expenses, etc."
             />
@@ -306,7 +306,7 @@ return (
 
             {/* Repayment Terms */}
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
                 <Clock className="w-4 h-4 inline mr-1" />
                 Number of Installments *
             </label>
@@ -318,14 +318,14 @@ return (
                 min="1"
                 max="24"
                 className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
-                errors.numberOfInstallments ? 'border-red-300' : 'border-gray-300'
+                errors.numberOfInstallments ? 'border-red-300' : 'border-zinc-300'
                 }`}
                 placeholder="Ex: 6"
             />
             {errors.numberOfInstallments && (
                 <p className="mt-1 text-sm text-red-600">{errors.numberOfInstallments}</p>
             )}
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-zinc-500">
                 Maximum 24 installments
             </p>
             </div>
@@ -356,7 +356,7 @@ return (
 
             {/* Notes */}
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Notes (optional)
             </label>
             <textarea
@@ -364,7 +364,7 @@ return (
                 value={formData.notes}
                 onChange={handleInputChange}
                 rows={3}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
                 placeholder="Additional information..."
             />
             </div>
@@ -384,11 +384,11 @@ return (
             )}
 
             {/* Action Buttons */}
-            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <div className="flex justify-end space-x-3 pt-6 border-t border-zinc-200">
             <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0063b4]"
+                className="px-4 py-2 border border-zinc-300 rounded-md shadow-sm text-sm font-medium text-zinc-700 bg-white hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0063b4]"
             >
                 Cancel
             </button>

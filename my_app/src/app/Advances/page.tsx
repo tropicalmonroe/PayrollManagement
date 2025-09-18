@@ -208,8 +208,8 @@ const AdvanceManagement: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Salary Advance Management</h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-zinc-900">Salary Advance Management</h1>
+            <p className="mt-1 text-sm text-zinc-500">
               Manage employee salary advances
             </p>
           </div>
@@ -230,14 +230,14 @@ const AdvanceManagement: React.FC = () => {
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <TrendingUp className="h-6 w-6 text-gray-400" />
+                  <TrendingUp className="h-6 w-6 text-zinc-400" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-zinc-500 truncate">
                       Total Advances
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-zinc-900">
                       {advances.length}
                     </dd>
                   </dl>
@@ -254,10 +254,10 @@ const AdvanceManagement: React.FC = () => {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-zinc-500 truncate">
                       In Progress
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-zinc-900">
                       {advances.filter(a => a.status === 'IN_PROGRESS').length}
                     </dd>
                   </dl>
@@ -274,10 +274,10 @@ const AdvanceManagement: React.FC = () => {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-zinc-500 truncate">
                       Total Amount
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-zinc-900">
                       {formatCurrency(advances.reduce((sum, a) => sum + a.amount, 0))}
                     </dd>
                   </dl>
@@ -294,10 +294,10 @@ const AdvanceManagement: React.FC = () => {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-zinc-500 truncate">
                       Remaining Balance
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-zinc-900">
                       {formatCurrency(advances.reduce((sum, a) => sum + a.remainingBalance, 0))}
                     </dd>
                   </dl>
@@ -309,16 +309,16 @@ const AdvanceManagement: React.FC = () => {
 
         {/* Filters */}
         <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-6 py-4 border-b border-zinc-200">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
               <div className="flex-1 max-w-lg">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400" />
+                    <Search className="h-5 w-5 text-zinc-400" />
                   </div>
                   <input
                     type="text"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+                    className="block w-full pl-10 pr-3 py-2 border border-zinc-300 rounded-md leading-5 bg-white placeholder-zinc-500 focus:outline-none focus:placeholder-zinc-400 focus:ring-1 focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
                     placeholder="Search by name, employee ID, or reason..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -330,7 +330,7 @@ const AdvanceManagement: React.FC = () => {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value as AdvanceStatus | 'ALL')}
-                  className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm rounded-md"
+                  className="block w-full pl-3 pr-10 py-2 text-base border border-zinc-300 focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm rounded-md"
                 >
                   <option value="ALL">All Statuses</option>
                   <option value="IN_PROGRESS">In Progress</option>
@@ -343,59 +343,59 @@ const AdvanceManagement: React.FC = () => {
 
           {/* Advances Table */}
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-zinc-200">
+              <thead className="bg-zinc-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Employee
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Amount
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Installment
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Progress
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Reason
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-zinc-200">
                 {filteredAdvances.map((advance) => (
-                  <tr key={advance.id} className="hover:bg-gray-50">
+                  <tr key={advance.id} className="hover:bg-zinc-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-zinc-900">
                             {advance.employee.firstName} {advance.employee.lastName}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-zinc-500">
                             {advance.employee.employeeId} • {advance.employee.position}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
+                      <div className="text-sm text-zinc-900">
                         {formatCurrency(advance.amount)}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-zinc-500">
                         Remaining: {formatCurrency(advance.remainingBalance)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                       {formatCurrency(advance.installmentAmount)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -403,14 +403,14 @@ const AdvanceManagement: React.FC = () => {
                         const progressInfo = getProgressInfo(advance);
                         return (
                           <div className="flex items-center">
-                            <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                            <div className="w-16 bg-zinc-200 rounded-full h-2 mr-2">
                               <div 
                                 className={`h-2 rounded-full ${progressInfo.isLate ? 'bg-red-500' : 'bg-[#0063b4]'}`}
                                 style={{ width: `${Math.min(progressInfo.percentage, 100)}%` }}
                               ></div>
                             </div>
                             <div className="flex flex-col">
-                              <span className={`text-sm ${progressInfo.isLate ? 'text-red-600' : 'text-gray-600'}`}>
+                              <span className={`text-sm ${progressInfo.isLate ? 'text-red-600' : 'text-zinc-600'}`}>
                                 {Math.round(progressInfo.percentage)}%
                               </span>
                               {progressInfo.isLate && (
@@ -426,10 +426,10 @@ const AdvanceManagement: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getStatusBadge(advance.status)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                       {formatDate(advance.advanceDate)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                       <div className="max-w-32 truncate" title={advance.reason}>
                         {advance.reason}
                       </div>
@@ -455,7 +455,7 @@ const AdvanceManagement: React.FC = () => {
                             setShowDetailsModal(false);
                             setShowEditModal(true);
                           }}
-                          className="text-gray-600 hover:text-gray-900 p-1 rounded"
+                          className="text-zinc-600 hover:text-zinc-900 p-1 rounded"
                           title="Edit"
                         >
                           <Edit className="w-4 h-4" />
@@ -478,9 +478,9 @@ const AdvanceManagement: React.FC = () => {
 
           {filteredAdvances.length === 0 && (
             <div className="text-center py-12">
-              <TrendingUp className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No advances found</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <TrendingUp className="mx-auto h-12 w-12 text-zinc-400" />
+              <h3 className="mt-2 text-sm font-medium text-zinc-900">No advances found</h3>
+              <p className="mt-1 text-sm text-zinc-500">
                 {searchTerm || filterStatus !== 'ALL'
                   ? 'No advances match the search criteria.'
                   : 'Start by adding a new advance.'}
@@ -503,16 +503,16 @@ const AdvanceManagement: React.FC = () => {
 
       {/* Advance Details Modal */}
       {showDetailsModal && selectedAdvance && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div className="fixed inset-0 bg-zinc-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-lg font-medium text-zinc-900">
                   Advance Details
                 </h3>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-zinc-400 hover:text-zinc-600"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -523,81 +523,81 @@ const AdvanceManagement: React.FC = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Employee</label>
-                    <p className="mt-1 text-sm text-gray-900">
+                    <label className="block text-sm font-medium text-zinc-700">Employee</label>
+                    <p className="mt-1 text-sm text-zinc-900">
                       {selectedAdvance.employee.firstName} {selectedAdvance.employee.lastName}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-zinc-500">
                       {selectedAdvance.employee.employeeId} • {selectedAdvance.employee.position}
                     </p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Advance Amount</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedAdvance.amount)}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Advance Amount</label>
+                    <p className="mt-1 text-sm text-zinc-900">{formatCurrency(selectedAdvance.amount)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Advance Date</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedAdvance.advanceDate)}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Advance Date</label>
+                    <p className="mt-1 text-sm text-zinc-900">{formatDate(selectedAdvance.advanceDate)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Number of Installments</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedAdvance.numberOfInstallments} months</p>
+                    <label className="block text-sm font-medium text-zinc-700">Number of Installments</label>
+                    <p className="mt-1 text-sm text-zinc-900">{selectedAdvance.numberOfInstallments} months</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Installment Amount</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedAdvance.installmentAmount)}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Installment Amount</label>
+                    <p className="mt-1 text-sm text-zinc-900">{formatCurrency(selectedAdvance.installmentAmount)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Remaining Balance</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatCurrency(selectedAdvance.remainingBalance)}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Remaining Balance</label>
+                    <p className="mt-1 text-sm text-zinc-900">{formatCurrency(selectedAdvance.remainingBalance)}</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Status</label>
+                    <label className="block text-sm font-medium text-zinc-700">Status</label>
                     <div className="mt-1">
                       {getStatusBadge(selectedAdvance.status)}
                     </div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Reason</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedAdvance.reason}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Reason</label>
+                    <p className="mt-1 text-sm text-zinc-900">{selectedAdvance.reason}</p>
                   </div>
                 </div>
                 
                 {selectedAdvance.notes && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Notes</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedAdvance.notes}</p>
+                    <label className="block text-sm font-medium text-zinc-700">Notes</label>
+                    <p className="mt-1 text-sm text-zinc-900">{selectedAdvance.notes}</p>
                   </div>
                 )}
                 
                 <div className="mt-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Repayment Progress</label>
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">Repayment Progress</label>
                   <div className="flex items-center">
-                    <div className="w-full bg-gray-200 rounded-full h-3 mr-3">
+                    <div className="w-full bg-zinc-200 rounded-full h-3 mr-3">
                       <div 
                         className="bg-[#0063b4] h-3 rounded-full" 
                         style={{ width: `${Math.min(getProgressPercentage(selectedAdvance), 100)}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm text-gray-600 min-w-[3rem]">
+                    <span className="text-sm text-zinc-600 min-w-[3rem]">
                       {Math.round(getProgressPercentage(selectedAdvance))}%
                     </span>
                   </div>
                 </div>
 
                 {/* Update Remaining Balance Section */}
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">Update Remaining Balance</h4>
+                <div className="mt-6 p-4 bg-zinc-50 rounded-lg">
+                  <h4 className="text-sm font-medium text-zinc-900 mb-3">Update Remaining Balance</h4>
                   <div className="flex items-end space-x-3">
                     <div className="flex-1">
-                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                      <label className="block text-xs font-medium text-zinc-700 mb-1">
                         New Remaining Balance (KES)
                       </label>
                       <input
@@ -608,7 +608,7 @@ const AdvanceManagement: React.FC = () => {
                         value={newRemainingBalance}
                         onChange={(e) => setNewRemainingBalance(e.target.value)}
                         placeholder={selectedAdvance.remainingBalance.toString()}
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4]"
+                        className="block w-full px-3 py-2 border border-zinc-300 rounded-md text-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4]"
                       />
                     </div>
                     <button
@@ -653,7 +653,7 @@ const AdvanceManagement: React.FC = () => {
                       {updateLoading ? 'Updating...' : 'Update'}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-zinc-500 mt-2">
                     Current balance: {formatCurrency(selectedAdvance.remainingBalance)} / {formatCurrency(selectedAdvance.amount)}
                   </p>
                 </div>
@@ -662,7 +662,7 @@ const AdvanceManagement: React.FC = () => {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="px-4 py-2 bg-zinc-300 text-zinc-700 rounded-md hover:bg-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500"
                 >
                   Close
                 </button>

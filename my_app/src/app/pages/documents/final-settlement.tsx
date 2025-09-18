@@ -171,7 +171,7 @@ export default function FinalSettlementPage() {
     const statusConfig = {
       GENERATED: { color: 'bg-blue-100 text-blue-800', text: 'Generated' },
       SENT: { color: 'bg-green-100 text-green-800', text: 'Sent' },
-      ARCHIVED: { color: 'bg-gray-100 text-gray-800', text: 'Archived' }
+      ARCHIVED: { color: 'bg-zinc-100 text-zinc-800', text: 'Archived' }
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.GENERATED;
@@ -189,14 +189,14 @@ export default function FinalSettlementPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Final Settlement</h1>
-            <p className="text-gray-600">Entry of termination elements and generation of official document</p>
+            <h1 className="text-2xl font-bold text-zinc-900">Final Settlement</h1>
+            <p className="text-zinc-600">Entry of termination elements and generation of official document</p>
           </div>
         </div>
 
         {/* Settlement generation */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <h2 className="text-lg font-semibold text-zinc-900 mb-4">
             <Plus className="inline-block w-5 h-5 mr-2" />
             Generate New Final Settlement
           </h2>
@@ -210,13 +210,13 @@ export default function FinalSettlementPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Employee *
               </label>
               <select
                 value={selectedEmployee}
                 onChange={(e) => setSelectedEmployee(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select an employee</option>
                 {employees.map((employee) => (
@@ -228,25 +228,25 @@ export default function FinalSettlementPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Contract End Date *
               </label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Departure Reason *
               </label>
               <select
                 value={departureReason}
                 onChange={(e) => setDepartureReason(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select a reason</option>
                 {departureReasons.map((reason) => (
@@ -260,14 +260,14 @@ export default function FinalSettlementPage() {
 
           {/* Financial elements */}
           <div className="border-t pt-6">
-            <h3 className="text-md font-semibold text-gray-900 mb-4 flex items-center">
+            <h3 className="text-md font-semibold text-zinc-900 mb-4 flex items-center">
               <DollarSign className="w-5 h-5 mr-2" />
               Financial Elements
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 mb-2">
                   Unused Leave Days (KES)
                 </label>
                 <input
@@ -276,12 +276,12 @@ export default function FinalSettlementPage() {
                   value={unusedLeave}
                   onChange={(e) => setUnusedLeave(e.target.value)}
                   placeholder="0.00"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 mb-2">
                   Severance Pay (KES)
                 </label>
                 <input
@@ -290,12 +290,12 @@ export default function FinalSettlementPage() {
                   value={severancePay}
                   onChange={(e) => setSeverancePay(e.target.value)}
                   placeholder="0.00"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 mb-2">
                   Other Allowances (KES)
                 </label>
                 <input
@@ -304,12 +304,12 @@ export default function FinalSettlementPage() {
                   value={otherAllowances}
                   onChange={(e) => setOtherAllowances(e.target.value)}
                   placeholder="0.00"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 mb-2">
                   Various Deductions (KES)
                 </label>
                 <input
@@ -318,7 +318,7 @@ export default function FinalSettlementPage() {
                   value={deductions}
                   onChange={(e) => setDeductions(e.target.value)}
                   placeholder="0.00"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -345,19 +345,19 @@ export default function FinalSettlementPage() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Search by name, first name or employee ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
             <button
               onClick={fetchDocuments}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 flex items-center"
+              className="px-4 py-2 bg-zinc-100 text-zinc-700 rounded-md hover:bg-zinc-200 flex items-center"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
@@ -367,50 +367,50 @@ export default function FinalSettlementPage() {
 
         {/* Settlements list */}
         <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="px-6 py-4 border-b border-zinc-200">
+            <h2 className="text-lg font-semibold text-zinc-900">
               Generated Settlements ({filteredDocuments.length})
             </h2>
           </div>
 
           {loading ? (
             <div className="p-6 text-center">
-              <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-gray-400" />
-              <p className="text-gray-500">Loading...</p>
+              <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-zinc-400" />
+              <p className="text-zinc-500">Loading...</p>
             </div>
           ) : filteredDocuments.length === 0 ? (
             <div className="p-6 text-center">
-              <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-500">No final settlements found</p>
+              <Receipt className="w-12 h-12 mx-auto mb-4 text-zinc-400" />
+              <p className="text-zinc-500">No final settlements found</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-zinc-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Employee
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Departure Reason
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Net Balance
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Generation Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-zinc-200">
                   {filteredDocuments.map((document) => (
-                    <tr key={document.id} className="hover:bg-gray-50">
+                    <tr key={document.id} className="hover:bg-zinc-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
@@ -419,23 +419,23 @@ export default function FinalSettlementPage() {
                             </div>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-zinc-900">
                               {document.employee.firstName} {document.employee.lastName}
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-zinc-500">
                               {document.employee.employeeId} • {document.employee.position}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {document.metadata?.departureReason ? 
                           departureReasons.find(m => m.value === document.metadata.departureReason)?.label || 
                           document.metadata.departureReason : 
                           'N/A'
                         }
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {document.metadata?.netBalance ? 
                           `${document.metadata.netBalance.toLocaleString()} KES` : 
                           'N/A'
@@ -444,7 +444,7 @@ export default function FinalSettlementPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(document.status)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                         {new Date(document.generationDate).toLocaleDateString('en-US')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -455,7 +455,7 @@ export default function FinalSettlementPage() {
                           <button className="text-green-600 hover:text-green-900">
                             <Download className="w-4 h-4" />
                           </button>
-                          <button className="text-gray-600 hover:text-gray-900">
+                          <button className="text-zinc-600 hover:text-zinc-900">
                             <Printer className="w-4 h-4" />
                           </button>
                           <button className="text-purple-600 hover:text-purple-900">

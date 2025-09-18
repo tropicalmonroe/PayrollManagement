@@ -287,7 +287,7 @@ const PayrollJournalPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Loading...</div>
+            <div className="text-lg text-zinc-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -300,7 +300,7 @@ const PayrollJournalPage = () => {
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
@@ -308,10 +308,10 @@ const PayrollJournalPage = () => {
           
           <div className="flex items-center space-x-3 mb-4">
             <BookOpen className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Payroll Journal</h1>
+            <h1 className="text-3xl font-bold text-zinc-900">Payroll Journal</h1>
           </div>
           
-          <p className="text-gray-600 text-lg">
+          <p className="text-zinc-600 text-lg">
             Consolidation of all payroll entries for the month by employee for accounting and HR purposes.
           </p>
         </div>
@@ -320,11 +320,11 @@ const PayrollJournalPage = () => {
           <>
             {/* Configuration */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Journal Configuration</h3>
+              <h3 className="text-lg font-medium text-zinc-900 mb-4">Journal Configuration</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     <Calendar className="w-4 h-4 inline mr-1" />
                     Period
                   </label>
@@ -334,13 +334,13 @@ const PayrollJournalPage = () => {
                     onChange={(e) => setSelectedMonth(e.target.value)}
                     className="payroll-input"
                   />
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-zinc-500 mt-1">
                     Journal for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     <Filter className="w-4 h-4 inline mr-1" />
                     Filter by position
                   </label>
@@ -357,11 +357,11 @@ const PayrollJournalPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     <Users className="w-4 h-4 inline mr-1" />
                     Employees included
                   </label>
-                  <div className="text-lg font-medium text-gray-900">
+                  <div className="text-lg font-medium text-zinc-900">
                     {filterDepartment 
                       ? employees.filter(emp => emp.position.toLowerCase().includes(filterDepartment.toLowerCase())).length
                       : employees.length
@@ -373,8 +373,8 @@ const PayrollJournalPage = () => {
 
             {/* Employees Preview */}
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">
+              <div className="px-6 py-4 border-b border-zinc-200">
+                <h3 className="text-lg font-medium text-zinc-900">
                   Employees included in the journal
                 </h3>
               </div>
@@ -384,7 +384,7 @@ const PayrollJournalPage = () => {
                   ? employees.filter(emp => emp.position.toLowerCase().includes(filterDepartment.toLowerCase()))
                   : employees
                 ).map((employee) => (
-                  <div key={employee.id} className="px-6 py-3 border-b border-gray-100 last:border-b-0">
+                  <div key={employee.id} className="px-6 py-3 border-b border-zinc-100 last:border-b-0">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-8 w-8">
@@ -395,15 +395,15 @@ const PayrollJournalPage = () => {
                           </div>
                         </div>
                         <div className="ml-3">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-zinc-900">
                             {employee.firstName} {employee.lastName}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-zinc-500">
                             {employee.employeeId} • {employee.position}
                           </div>
                         </div>
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-zinc-500">
                         {formatCurrency(employee.baseSalary)}
                       </div>
                     </div>
@@ -416,8 +416,8 @@ const PayrollJournalPage = () => {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">Generate Payroll Journal</h3>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h3 className="text-lg font-medium text-zinc-900">Generate Payroll Journal</h3>
+                  <p className="text-sm text-zinc-500 mt-1">
                     Calculation and consolidation of payroll data for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
@@ -437,11 +437,11 @@ const PayrollJournalPage = () => {
             {/* Results */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Payroll Journal - {getMonthLabel(selectedMonth)}</h3>
+                <h3 className="text-lg font-medium text-zinc-900">Payroll Journal - {getMonthLabel(selectedMonth)}</h3>
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowResults(false)}
-                    className="text-sm text-gray-600 hover:text-gray-900"
+                    className="text-sm text-zinc-600 hover:text-zinc-900"
                   >
                     New Generation
                   </button>
@@ -459,27 +459,27 @@ const PayrollJournalPage = () => {
             {/* Summary */}
             {summary && (
               <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Journal Summary</h4>
+                <h4 className="text-lg font-medium text-zinc-900 mb-4">Journal Summary</h4>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">{summary.totalEmployees}</div>
-                    <div className="text-sm text-gray-600">Employees</div>
+                    <div className="text-sm text-zinc-600">Employees</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-green-600">{formatCurrency(summary.totalEarnings)}</div>
-                    <div className="text-sm text-gray-600">Total Earnings</div>
+                    <div className="text-sm text-zinc-600">Total Earnings</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-red-600">{formatCurrency(summary.totalDeductions)}</div>
-                    <div className="text-sm text-gray-600">Total Deductions</div>
+                    <div className="text-sm text-zinc-600">Total Deductions</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-orange-600">{formatCurrency(summary.totalEmployerContributions)}</div>
-                    <div className="text-sm text-gray-600">Employer Contributions</div>
+                    <div className="text-sm text-zinc-600">Employer Contributions</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-purple-600">{formatCurrency(summary.totalEmployerCost)}</div>
-                    <div className="text-sm text-gray-600">Total Cost</div>
+                    <div className="text-sm text-zinc-600">Total Cost</div>
                   </div>
                 </div>
               </div>
@@ -488,32 +488,32 @@ const PayrollJournalPage = () => {
             {/* Detailed Table */}
             <div className="bg-white shadow rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-zinc-200">
+                  <thead className="bg-zinc-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Employee
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Earnings
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Deductions
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Net Payable
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Employer Contributions
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Total Cost
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-zinc-200">
                     {journalData.map((entry) => (
-                      <tr key={entry.employee.id} className="hover:bg-gray-50">
+                      <tr key={entry.employee.id} className="hover:bg-zinc-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-8 w-8">
@@ -524,10 +524,10 @@ const PayrollJournalPage = () => {
                               </div>
                             </div>
                             <div className="ml-3">
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-zinc-900">
                                 {entry.employee.firstName} {entry.employee.lastName}
                               </div>
-                              <div className="text-sm text-gray-500">
+                              <div className="text-sm text-zinc-500">
                                 {entry.employee.employeeId} • {entry.employee.position}
                               </div>
                             </div>
@@ -551,9 +551,9 @@ const PayrollJournalPage = () => {
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot className="bg-gray-50">
+                  <tfoot className="bg-zinc-50">
                     <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-zinc-900">
                         TOTALS
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">

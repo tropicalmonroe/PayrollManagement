@@ -115,7 +115,7 @@ const getStatusBadge = (status: string, dueDate: Date) => {
     icon = Clock;
     text = 'Pending';
     } else if (status === 'CANCELLED') {
-    color = 'bg-gray-100 text-gray-800';
+    color = 'bg-zinc-100 text-zinc-800';
     icon = Clock;
     text = 'Cancelled';
     }
@@ -165,16 +165,16 @@ return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
     <div className="bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-zinc-200">
         <div className="flex items-center">
             <Calendar className="w-6 h-6 text-[#0063b4] mr-3" />
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-zinc-900">
             Loan Repayment Schedule
             </h2>
         </div>
         <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-zinc-400 hover:text-zinc-600 transition-colors"
         >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -190,7 +190,7 @@ return (
         <div className="flex flex-col h-full">
             {/* Stats Cards */}
             {stats && (
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-6 border-b border-zinc-200">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-blue-50 p-4 rounded-lg">
                     <div className="flex items-center">
@@ -240,49 +240,49 @@ return (
             {/* Repayment Schedule Table */}
             <div className="flex-1 overflow-auto p-6">
             <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50 sticky top-0">
+                <table className="min-w-full divide-y divide-zinc-200">
+                <thead className="bg-zinc-50 sticky top-0">
                     <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         No.
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Due Date
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Monthly Payment
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Principal
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Remaining Balance
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Status
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Actions
                     </th>
                     </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-zinc-200">
                     {schedule.map((installment) => (
                         
-                    <tr key={installment.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                    <tr key={installment.id} className="hover:bg-zinc-50">
+                        <td className="px-4 py-3 text-sm font-medium text-zinc-900">
                         {installment.installmentNumber}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-900">
+                        <td className="px-4 py-3 text-sm text-zinc-900">
                         {formatDate(installment.dueDate)}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                        <td className="px-4 py-3 text-sm text-zinc-900 text-right">
                         {formatCurrency(installment.totalMonthlyPayment)}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                        <td className="px-4 py-3 text-sm text-zinc-900 text-right">
                         {formatCurrency(installment.principal)}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                        <td className="px-4 py-3 text-sm text-zinc-900 text-right">
                         {formatCurrency(installment.remainingBalance)}
                         </td>
                         <td className="px-4 py-3 text-center">
@@ -332,13 +332,13 @@ return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
             <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
             <div className="p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                <h3 className="text-lg font-medium text-zinc-900 mb-4">
                 Record Payment - Installment #{selectedInstallment.installmentNumber}
                 </h3>
                 
                 <div className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-zinc-700 mb-1">
                     Amount Paid (KES)
                     </label>
                     <input
@@ -346,31 +346,31 @@ return (
                     step="0.01"
                     value={paymentData.amountPaid}
                     onChange={(e) => setPaymentData((prev) => ({ ...prev, amountPaid: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
                     />
                 </div>
                 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-zinc-700 mb-1">
                     Payment Date
                     </label>
                     <input
                     type="date"
                     value={paymentData.paymentDate}
                     onChange={(e) => setPaymentData((prev) => ({ ...prev, paymentDate: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
                     />
                 </div>
                 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-zinc-700 mb-1">
                     Notes (optional)
                     </label>
                     <textarea
                     value={paymentData.notes}
                     onChange={(e) => setPaymentData((prev) => ({ ...prev, notes: e.target.value }))}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
                     placeholder="Notes about the payment..."
                     />
                 </div>
@@ -382,7 +382,7 @@ return (
                     setShowPaymentModal(false);
                     setSelectedInstallment(null);
                     }}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-300 rounded-md hover:bg-zinc-50"
                 >
                     Cancel
                 </button>

@@ -188,15 +188,15 @@ const getCorrectSeniorityRate = () => {
 const totalEmployerCost = payrollResult.grossSalary + payrollResult.employerContributions.totalEmployerContributions;
 
 return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-zinc-50 min-h-screen">
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Personal Information */}
-        <div className="bg-white rounded-lg shadow border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
+        <div className="bg-white rounded-lg shadow border border-zinc-200">
+        <div className="p-4 border-b border-zinc-200">
+            <h2 className="text-lg font-semibold text-zinc-900">
             {employee.firstName} {employee.lastName}
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-zinc-600">
             {employee.position} - {getMonthName(month)} {year}
             </p>
         </div>
@@ -204,19 +204,19 @@ return (
         <div className="p-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
-                <p className="text-gray-500">Employee ID</p>
+                <p className="text-zinc-500">Employee ID</p>
                 <p className="font-medium">{employee.employeeId}</p>
             </div>
             <div>
-                <p className="text-gray-500">NSSF Number</p>
+                <p className="text-zinc-500">NSSF Number</p>
                 <p className="font-medium">{employee.nssfNumber || 'N/A'}</p>
             </div>
             <div>
-                <p className="text-gray-500">Hire Date</p>
+                <p className="text-zinc-500">Hire Date</p>
                 <p className="font-medium">{formatDate(employee.hireDate)}</p>
             </div>
             <div>
-                <p className="text-gray-500">Seniority</p>
+                <p className="text-zinc-500">Seniority</p>
                 <p className="font-medium">{calculateSeniority()}</p>
             </div>
             </div>
@@ -224,9 +224,9 @@ return (
         </div>
 
         {/* Earnings */}
-        <div className="bg-white rounded-lg shadow border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-            <h3 className="text-base font-semibold text-gray-900">Earnings</h3>
+        <div className="bg-white rounded-lg shadow border border-zinc-200">
+        <div className="p-4 border-b border-zinc-200">
+            <h3 className="text-base font-semibold text-zinc-900">Earnings</h3>
         </div>
 
         <div className="p-4">
@@ -259,7 +259,7 @@ return (
             {variableGains.length > 0 && (
                 <>
                 <div className="border-t pt-2 mt-2">
-                    <p className="text-xs text-gray-500 mb-2">Variable Elements</p>
+                    <p className="text-xs text-zinc-500 mb-2">Variable Elements</p>
                     {variableGains.map((element) => (
                     <div key={element.id} className="flex justify-between">
                         <span>{element.description}</span>
@@ -280,21 +280,21 @@ return (
 
         {/* Gross Salaries */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Gross Salary</h3>
-            <p className="text-xl font-bold text-gray-900">{formatCurrency(payrollResult.grossSalary)} KES</p>
+        <div className="bg-white rounded-lg shadow border border-zinc-200 p-4">
+            <h3 className="text-sm font-semibold text-zinc-900 mb-2">Gross Salary</h3>
+            <p className="text-xl font-bold text-zinc-900">{formatCurrency(payrollResult.grossSalary)} KES</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Taxable Gross Salary</h3>
-            <p className="text-xl font-bold text-gray-900">{formatCurrency(payrollResult.taxCalculation.taxableNet)} KES</p>
+        <div className="bg-white rounded-lg shadow border border-zinc-200 p-4">
+            <h3 className="text-sm font-semibold text-zinc-900 mb-2">Taxable Gross Salary</h3>
+            <p className="text-xl font-bold text-zinc-900">{formatCurrency(payrollResult.taxCalculation.taxableNet)} KES</p>
         </div>
         </div>
 
         {/* Employee Contributions */}
-        <div className="bg-white rounded-lg shadow border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-            <h3 className="text-base font-semibold text-gray-900">Employee Contributions</h3>
+        <div className="bg-white rounded-lg shadow border border-zinc-200">
+        <div className="p-4 border-b border-zinc-200">
+            <h3 className="text-base font-semibold text-zinc-900">Employee Contributions</h3>
         </div>
 
         <div className="p-4">
@@ -325,9 +325,9 @@ return (
         </div>
 
         {/* Employer Contributions */}
-        <div className="bg-white rounded-lg shadow border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-            <h3 className="text-base font-semibold text-gray-900">Employer Contributions</h3>
+        <div className="bg-white rounded-lg shadow border border-zinc-200">
+        <div className="p-4 border-b border-zinc-200">
+            <h3 className="text-base font-semibold text-zinc-900">Employer Contributions</h3>
         </div>
 
         <div className="p-4">
@@ -350,9 +350,9 @@ return (
         </div>
 
         {/* PAYE Calculation */}
-        <div className="bg-white rounded-lg shadow border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-            <h3 className="text-base font-semibold text-gray-900">Pay As You Earn (PAYE) Calculation</h3>
+        <div className="bg-white rounded-lg shadow border border-zinc-200">
+        <div className="p-4 border-b border-zinc-200">
+            <h3 className="text-base font-semibold text-zinc-900">Pay As You Earn (PAYE) Calculation</h3>
         </div>
 
         <div className="p-4">
@@ -383,9 +383,9 @@ return (
         </div>
 
         {/* Other Deductions */}
-        <div className="bg-white rounded-lg shadow border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-            <h3 className="text-base font-semibold text-gray-900">Other Deductions</h3>
+        <div className="bg-white rounded-lg shadow border border-zinc-200">
+        <div className="p-4 border-b border-zinc-200">
+            <h3 className="text-base font-semibold text-zinc-900">Other Deductions</h3>
         </div>
 
         <div className="p-4">
@@ -393,7 +393,7 @@ return (
             {/* Credits */}
             {activeCredits.length > 0 && (
                 <>
-                <p className="text-xs text-gray-500 mb-2">Loan Repayments</p>
+                <p className="text-xs text-zinc-500 mb-2">Loan Repayments</p>
                 {activeCredits.map((credit) => (
                     <div key={credit.id} className="flex justify-between">
                     <span>Loan ({credit.type === 'HOUSING' ? 'Housing' : 'Consumer'})</span>
@@ -406,7 +406,7 @@ return (
             {/* Advances */}
             {activeAdvances.length > 0 && (
                 <>
-                <p className="text-xs text-gray-500 mb-2">Advance Repayments</p>
+                <p className="text-xs text-zinc-500 mb-2">Advance Repayments</p>
                 {activeAdvances.map((advance) => (
                     <div key={advance.id} className="flex justify-between">
                     <span>Advance Repayment</span>
@@ -419,7 +419,7 @@ return (
             {/* Variable Deductions */}
             {variableDeductions.length > 0 && (
                 <>
-                <p className="text-xs text-gray-500 mb-2">Other Variable Deductions</p>
+                <p className="text-xs text-zinc-500 mb-2">Other Variable Deductions</p>
                 {variableDeductions.map((element) => (
                     <div key={element.id} className="flex justify-between">
                     <span>{element.description}</span>
@@ -444,9 +444,9 @@ return (
         </div>
 
         {/* Final Result */}
-        <div className="bg-white rounded-lg shadow border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-            <h3 className="text-base font-semibold text-gray-900">Final Result</h3>
+        <div className="bg-white rounded-lg shadow border border-zinc-200">
+        <div className="p-4 border-b border-zinc-200">
+            <h3 className="text-base font-semibold text-zinc-900">Final Result</h3>
         </div>
 
         <div className="p-4">

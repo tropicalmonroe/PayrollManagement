@@ -215,7 +215,7 @@ return (
     {/* Payslip Table */}
     <div className="border-2 border-black text-xs">
         {/* Table Header */}
-        <div className="grid grid-cols-6 border-b-2 border-black bg-gray-100 font-bold">
+        <div className="grid grid-cols-6 border-b-2 border-black bg-zinc-100 font-bold">
         <div className="border-r border-black p-1 text-center">Item</div>
         <div className="border-r border-black p-1 text-center">Days</div>
         <div className="border-r border-black p-1 text-center">Base</div>

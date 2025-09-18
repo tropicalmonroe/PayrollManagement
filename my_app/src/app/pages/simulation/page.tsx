@@ -98,8 +98,8 @@ function SimulationContent() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Simulation</h2>
-        <p className="mt-1 text-sm text-gray-600">
+        <h2 className="text-2xl font-bold text-zinc-900">Simulation</h2>
+        <p className="mt-1 text-sm text-zinc-600">
           Simulation tools to analyze different payroll and tax impact scenarios
         </p>
       </div>
@@ -114,10 +114,10 @@ function SimulationContent() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-medium text-zinc-500 truncate">
                     Simulations this month
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">
+                  <dd className="text-lg font-medium text-zinc-900">
                     24
                   </dd>
                 </dl>
@@ -134,10 +134,10 @@ function SimulationContent() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-medium text-zinc-500 truncate">
                     Identified savings
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">
+                  <dd className="text-lg font-medium text-zinc-900">
                     12,450 KES
                   </dd>
                 </dl>
@@ -154,10 +154,10 @@ function SimulationContent() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-medium text-zinc-500 truncate">
                     Employees analyzed
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">
+                  <dd className="text-lg font-medium text-zinc-900">
                     18
                   </dd>
                 </dl>
@@ -174,10 +174,10 @@ function SimulationContent() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-medium text-zinc-500 truncate">
                     Reports generated
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">
+                  <dd className="text-lg font-medium text-zinc-900">
                     7
                   </dd>
                 </dl>
@@ -207,7 +207,7 @@ function SimulationContent() {
                     <h3 className={`text-lg font-semibold ${colorClasses.title}`}>
                       {module.title}
                     </h3>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <p className="mt-1 text-sm text-zinc-600">
                       {module.description}
                     </p>
                   </div>
@@ -215,10 +215,10 @@ function SimulationContent() {
               </div>
 
               <div className="mt-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Features:</h4>
+                <h4 className="text-sm font-medium text-zinc-700 mb-2">Features:</h4>
                 <ul className="space-y-1">
                   {module.features.map((feature, index) => (
-                    <li key={index} className="flex items-center text-sm text-gray-600">
+                    <li key={index} className="flex items-center text-sm text-zinc-600">
                       <div className={`w-1.5 h-1.5 rounded-full ${colorClasses.icon.replace('text-', 'bg-')} mr-2`} />
                       {feature}
                     </li>
@@ -233,7 +233,7 @@ function SimulationContent() {
                     Start simulation
                   </button>
                 </Link>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-zinc-500">
                   Last used: 2 days ago
                 </span>
               </div>
@@ -244,10 +244,10 @@ function SimulationContent() {
 
       {/* Recent Simulations */}
       <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Recent Simulations</h3>
+        <div className="px-6 py-4 border-b border-zinc-200">
+          <h3 className="text-lg font-medium text-zinc-900">Recent Simulations</h3>
         </div>
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-zinc-200">
           {[
             {
               type: 'Salary Simulation',
@@ -271,7 +271,7 @@ function SimulationContent() {
               status: 'In Progress'
             }
           ].map((simulation, index) => (
-            <div key={index} className="px-6 py-4 hover:bg-gray-50">
+            <div key={index} className="px-6 py-4 hover:bg-zinc-50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -281,7 +281,7 @@ function SimulationContent() {
                   </div>
                   <div className="ml-4">
                     <div className="flex items-center">
-                      <h4 className="text-sm font-medium text-gray-900">
+                      <h4 className="text-sm font-medium text-zinc-900">
                         {simulation.type}
                       </h4>
                       <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -292,7 +292,7 @@ function SimulationContent() {
                         {simulation.status}
                       </span>
                     </div>
-                    <div className="mt-1 flex items-center text-sm text-gray-500">
+                    <div className="mt-1 flex items-center text-sm text-zinc-500">
                       <span>{simulation.employee}</span>
                       <span className="mx-2">•</span>
                       <span className="font-medium">{simulation.amount}</span>
@@ -300,7 +300,7 @@ function SimulationContent() {
                   </div>
                 </div>
                 <div className="text-right text-sm">
-                  <div className="text-gray-900">
+                  <div className="text-zinc-900">
                     {new Date(simulation.date).toLocaleDateString('en-KE')}
                   </div>
                   <button className="text-blue-600 hover:text-blue-800 font-medium">
@@ -311,7 +311,7 @@ function SimulationContent() {
             </div>
           ))}
         </div>
-        <div className="px-6 py-3 bg-gray-50 text-center">
+        <div className="px-6 py-3 bg-zinc-50 text-center">
           <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
             View all simulations
           </button>

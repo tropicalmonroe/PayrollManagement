@@ -1,36 +1,19 @@
-"use client";
-
-import React, { useState } from 'react';
-import { Sidebar } from './Sidebar';
+// src/components/Layout.tsx
 // import Navbar from './Navbar';
+import { SidebarWrapper } from './Sidebarwrapper';
 
 interface LayoutProps {
 children: React.ReactNode;
 }
 
-export function Layout({ children }: LayoutProps) {
-const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-};
-
+export default async function Layout({ children }: LayoutProps) {
 return (
-    
-    <div className="min-h-screen bg-gray-50">
-    <Sidebar collapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+    <div className="min-h-screen bg-zinc-900">
+    <SidebarWrapper />
     {/* <Navbar /> */}
-    
-    {/* Main content area */}
-    <div 
-        className={`transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-        sidebarCollapsed ? 'ml-20' : 'ml-72'
-        }`}
-    >
-        <main className="p-6">
-        {children}
-        </main>
+    <div className="ml-72 transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+        <main className="p-4">{children}</main>
     </div>
     </div>
-  );
+);
 }

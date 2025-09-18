@@ -184,14 +184,14 @@ function HousingCreditContent() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Link href="/simulation">
-            <button className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            <button className="inline-flex items-center px-3 py-2 border border-zinc-300 shadow-sm text-sm leading-4 font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </button>
           </Link>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Housing Loan Simulation</h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <h2 className="text-2xl font-bold text-zinc-900">Housing Loan Simulation</h2>
+            <p className="mt-1 text-sm text-zinc-600">
               Calculate the tax impact and savings from a housing loan
             </p>
           </div>
@@ -199,7 +199,7 @@ function HousingCreditContent() {
         <div className="flex space-x-3">
           <button
             onClick={resetForm}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center px-4 py-2 border border-zinc-300 shadow-sm text-sm font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Reset
@@ -216,12 +216,12 @@ function HousingCreditContent() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Employee Information */}
         <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Employee Information</h3>
+          <div className="px-6 py-4 border-b border-zinc-200">
+            <h3 className="text-lg font-medium text-zinc-900">Employee Information</h3>
           </div>
           <div className="p-6 space-y-6">
             <div>
-              <label htmlFor="grossSalary" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="grossSalary" className="block text-sm font-medium text-zinc-700 mb-2">
                 Monthly Gross Salary (KES)
               </label>
               <input
@@ -229,7 +229,7 @@ function HousingCreditContent() {
                 id="grossSalary"
                 value={grossSalary}
                 onChange={(e) => setGrossSalary(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                 min="0"
                 step="100"
               />
@@ -237,14 +237,14 @@ function HousingCreditContent() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="familyStatus" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="familyStatus" className="block text-sm font-medium text-zinc-700 mb-2">
                   Family Status
                 </label>
                 <select
                   id="familyStatus"
                   value={familyStatus}
                   onChange={(e) => setFamilyStatus(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                 >
                   <option value="single">Single</option>
                   <option value="married">Married</option>
@@ -253,7 +253,7 @@ function HousingCreditContent() {
                 </select>
               </div>
               <div>
-                <label htmlFor="numberOfDependants" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="numberOfDependants" className="block text-sm font-medium text-zinc-700 mb-2">
                   Number of Dependants
                 </label>
                 <input
@@ -261,7 +261,7 @@ function HousingCreditContent() {
                   id="numberOfDependants"
                   value={numberOfDependants}
                   onChange={(e) => setNumberOfDependants(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="0"
                   max="10"
                 />
@@ -270,7 +270,7 @@ function HousingCreditContent() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="professionalExpenses" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="professionalExpenses" className="block text-sm font-medium text-zinc-700 mb-2">
                   Professional Expenses (KES)
                 </label>
                 <input
@@ -278,13 +278,13 @@ function HousingCreditContent() {
                   id="professionalExpenses"
                   value={professionalExpenses}
                   onChange={(e) => setProfessionalExpenses(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="0"
                   step="50"
                 />
               </div>
               <div>
-                <label htmlFor="otherDeductions" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="otherDeductions" className="block text-sm font-medium text-zinc-700 mb-2">
                   Other Deductions (KES)
                 </label>
                 <input
@@ -292,7 +292,7 @@ function HousingCreditContent() {
                   id="otherDeductions"
                   value={otherDeductions}
                   onChange={(e) => setOtherDeductions(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="0"
                   step="50"
                 />
@@ -303,19 +303,19 @@ function HousingCreditContent() {
 
         {/* Loan Parameters */}
         <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Loan Parameters</h3>
+          <div className="px-6 py-4 border-b border-zinc-200">
+            <h3 className="text-lg font-medium text-zinc-900">Loan Parameters</h3>
           </div>
           <div className="p-6 space-y-6">
             <div>
-              <label htmlFor="housingType" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="housingType" className="block text-sm font-medium text-zinc-700 mb-2">
                 Housing Type
               </label>
               <select
                 id="housingType"
                 value={housingType}
                 onChange={(e) => setHousingType(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
               >
                 <option value="primary">Primary Residence</option>
                 <option value="affordable">Affordable Housing</option>
@@ -324,7 +324,7 @@ function HousingCreditContent() {
             </div>
 
             <div>
-              <label htmlFor="loanAmount" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="loanAmount" className="block text-sm font-medium text-zinc-700 mb-2">
                 Loan Amount (KES)
               </label>
               <input
@@ -332,7 +332,7 @@ function HousingCreditContent() {
                 id="loanAmount"
                 value={loanAmount}
                 onChange={(e) => setLoanAmount(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                 min="0"
                 step="10000"
               />
@@ -340,7 +340,7 @@ function HousingCreditContent() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="loanTerm" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="loanTerm" className="block text-sm font-medium text-zinc-700 mb-2">
                   Loan Term (Years)
                 </label>
                 <input
@@ -348,13 +348,13 @@ function HousingCreditContent() {
                   id="loanTerm"
                   value={loanTerm}
                   onChange={(e) => setLoanTerm(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="1"
                   max="30"
                 />
               </div>
               <div>
-                <label htmlFor="interestRate" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="interestRate" className="block text-sm font-medium text-zinc-700 mb-2">
                   Interest Rate (%)
                 </label>
                 <input
@@ -362,7 +362,7 @@ function HousingCreditContent() {
                   id="interestRate"
                   value={interestRate}
                   onChange={(e) => setInterestRate(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="0"
                   max="15"
                   step="0.1"
@@ -372,7 +372,7 @@ function HousingCreditContent() {
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label htmlFor="monthlyRepayment" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="monthlyRepayment" className="block text-sm font-medium text-zinc-700">
                   Monthly Repayment (KES)
                 </label>
                 <button
@@ -387,7 +387,7 @@ function HousingCreditContent() {
                 id="monthlyRepayment"
                 value={monthlyRepayment}
                 onChange={(e) => setMonthlyRepayment(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                 min="0"
                 step="10"
               />
@@ -401,15 +401,15 @@ function HousingCreditContent() {
         <div className="bg-white shadow rounded-lg p-8">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
-            <p className="mt-2 text-sm text-gray-500">Calculating impact...</p>
+            <p className="mt-2 text-sm text-zinc-500">Calculating impact...</p>
           </div>
         </div>
       ) : results ? (
         <div className="space-y-6">
           {/* Housing Loan Impact */}
           <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Housing Loan Impact</h3>
+            <div className="px-6 py-4 border-b border-zinc-200">
+              <h3 className="text-lg font-medium text-zinc-900">Housing Loan Impact</h3>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -417,40 +417,40 @@ function HousingCreditContent() {
                   <div className="flex items-center justify-center mb-2">
                     <TrendingUp className="h-8 w-8 text-green-600" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-2xl font-bold text-zinc-900">
                     {formatCurrency(results.savings.monthlyPaye)}
                   </div>
-                  <div className="text-sm text-gray-600">Monthly PAYE Savings</div>
+                  <div className="text-sm text-zinc-600">Monthly PAYE Savings</div>
                 </div>
 
                 <div className="text-center p-6 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-center justify-center mb-2">
                     <Calculator className="h-8 w-8 text-blue-600" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-2xl font-bold text-zinc-900">
                     {formatCurrency(results.savings.annualPaye)}
                   </div>
-                  <div className="text-sm text-gray-600">Annual PAYE Savings</div>
+                  <div className="text-sm text-zinc-600">Annual PAYE Savings</div>
                 </div>
 
                 <div className="text-center p-6 bg-orange-50 rounded-lg border border-orange-200">
                   <div className="flex items-center justify-center mb-2">
                     <Home className="h-8 w-8 text-orange-600" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-2xl font-bold text-zinc-900">
                     {formatPercentage(results.effectiveRate)}
                   </div>
-                  <div className="text-sm text-gray-600">Effective Rate</div>
+                  <div className="text-sm text-zinc-600">Effective Rate</div>
                 </div>
 
                 <div className="text-center p-6 bg-purple-50 rounded-lg border border-purple-200">
                   <div className="flex items-center justify-center mb-2">
                     <TrendingUp className="h-8 w-8 text-purple-600" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-2xl font-bold text-zinc-900">
                     {formatCurrency(results.disposableIncome)}
                   </div>
-                  <div className="text-sm text-gray-600">Disposable Income</div>
+                  <div className="text-sm text-zinc-600">Disposable Income</div>
                 </div>
               </div>
             </div>
@@ -458,48 +458,48 @@ function HousingCreditContent() {
 
           {/* Comparison With/Without Loan */}
           <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Comparison With/Without Loan</h3>
+            <div className="px-6 py-4 border-b border-zinc-200">
+              <h3 className="text-lg font-medium text-zinc-900">Comparison With/Without Loan</h3>
             </div>
             <div className="p-6">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-zinc-200">
+                  <thead className="bg-zinc-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Item
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Without Loan
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         With Loan
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         Difference
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-zinc-200">
                     <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900">
                         Gross Salary
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                         {formatCurrency(results.withoutLoan.grossSalary)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                         {formatCurrency(results.withLoan.grossSalary)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                         -
                       </td>
                     </tr>
                     <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900">
                         Mortgage Interest Relief
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                         {formatCurrency(0)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600">
@@ -510,27 +510,27 @@ function HousingCreditContent() {
                       </td>
                     </tr>
                     <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900">
                         Monthly PAYE
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                         {formatCurrency(results.withoutLoan.paye)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                         {formatCurrency(results.withLoan.paye)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
                         -{formatCurrency(results.savings.monthlyPaye)}
                       </td>
                     </tr>
-                    <tr className="bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                    <tr className="bg-zinc-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-zinc-900">
                         Net Salary
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900">
                         {formatCurrency(results.withoutLoan.netSalary)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900">
                         {formatCurrency(results.withLoan.netSalary)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
@@ -545,46 +545,46 @@ function HousingCreditContent() {
 
           {/* Loan Financial Analysis */}
           <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Loan Financial Analysis</h3>
+            <div className="px-6 py-4 border-b border-zinc-200">
+              <h3 className="text-lg font-medium text-zinc-900">Loan Financial Analysis</h3>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h4 className="text-sm font-medium text-gray-700">Loan Costs</h4>
+                  <h4 className="text-sm font-medium text-zinc-700">Loan Costs</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Loan Amount</span>
+                      <span className="text-sm text-zinc-600">Loan Amount</span>
                       <span className="text-sm font-medium">{formatCurrency(loanAmount)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Total Loan Cost</span>
+                      <span className="text-sm text-zinc-600">Total Loan Cost</span>
                       <span className="text-sm font-medium">{formatCurrency(results.totalLoanCost)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Total Interest</span>
+                      <span className="text-sm text-zinc-600">Total Interest</span>
                       <span className="text-sm text-red-600">{formatCurrency(results.totalInterest)}</span>
                     </div>
                     <div className="flex justify-between border-t pt-2">
-                      <span className="text-sm font-medium text-gray-700">Actual Cost (After PAYE Savings)</span>
-                      <span className="text-sm font-bold text-gray-900">{formatCurrency(results.actualCost)}</span>
+                      <span className="text-sm font-medium text-zinc-700">Actual Cost (After PAYE Savings)</span>
+                      <span className="text-sm font-bold text-zinc-900">{formatCurrency(results.actualCost)}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-sm font-medium text-gray-700">Tax Savings</h4>
+                  <h4 className="text-sm font-medium text-zinc-700">Tax Savings</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Annual PAYE Savings</span>
+                      <span className="text-sm text-zinc-600">Annual PAYE Savings</span>
                       <span className="text-sm font-medium text-green-600">{formatCurrency(results.savings.annualPaye)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Total PAYE Savings</span>
+                      <span className="text-sm text-zinc-600">Total PAYE Savings</span>
                       <span className="text-sm font-medium text-green-600">{formatCurrency(results.totalPayeSavings)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Repayment Capacity</span>
+                      <span className="text-sm text-zinc-600">Repayment Capacity</span>
                       <span className="text-sm font-medium">{formatPercentage(results.repaymentCapacity)}</span>
                     </div>
                   </div>
@@ -595,8 +595,8 @@ function HousingCreditContent() {
 
           {/* Recommendations */}
           <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Recommendations</h3>
+            <div className="px-6 py-4 border-b border-zinc-200">
+              <h3 className="text-lg font-medium text-zinc-900">Recommendations</h3>
             </div>
             <div className="p-6">
               <div className="space-y-4">

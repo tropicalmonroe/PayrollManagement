@@ -143,7 +143,7 @@ const EmployeeConsultationPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Loading...</div>
+            <div className="text-lg text-zinc-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -156,7 +156,7 @@ const EmployeeConsultationPage = () => {
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span> {/* Translated Retour */}
@@ -164,10 +164,10 @@ const EmployeeConsultationPage = () => {
           
           <div className="flex items-center space-x-3 mb-4">
             <Eye className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Employee Profile Review</h1>
+            <h1 className="text-3xl font-bold text-zinc-900">Employee Profile Review</h1>
           </div>
           
-          <p className="text-gray-600 text-lg">
+          <p className="text-zinc-600 text-lg">
             Read-only view of the employee’s complete profile (no modifications). 
           </p>
         </div>
@@ -176,7 +176,7 @@ const EmployeeConsultationPage = () => {
         <div className="bg-white p-4 rounded-lg shadow-sm border mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-zinc-700 mb-1">
                 <Search className="w-4 h-4 inline mr-1" />
                 Search 
               </label>
@@ -190,7 +190,7 @@ const EmployeeConsultationPage = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-zinc-700 mb-1">
                 <Filter className="w-4 h-4 inline mr-1" />
                 Status {/* Translated Statut */}
               </label>
@@ -209,7 +209,7 @@ const EmployeeConsultationPage = () => {
             </div>
 
             <div className="flex items-end">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-zinc-600">
                 {filteredEmployees.length} employee(s) found 
               </div>
             </div>
@@ -221,11 +221,11 @@ const EmployeeConsultationPage = () => {
           <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="text-center py-12">
-                <Eye className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-4 text-lg font-medium text-gray-900">
+                <Eye className="mx-auto h-12 w-12 text-zinc-400" />
+                <h3 className="mt-4 text-lg font-medium text-zinc-900">
                   {searchTerm || statusFilter !== 'ALL' ? 'No employees found' : 'No employees'}
                 </h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-zinc-500">
                   {searchTerm || statusFilter !== 'ALL' 
                     ? 'Try adjusting your search criteria' 
                     : 'No employees available for review'}
@@ -237,44 +237,44 @@ const EmployeeConsultationPage = () => {
           <div className="bg-white shadow rounded-lg overflow-hidden">
             {/* Desktop version - table */}
             <div className="hidden lg:block">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-zinc-200">
+                <thead className="bg-zinc-50">
                   <tr>
                     <th 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                      className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider cursor-pointer hover:bg-zinc-100"
                       onClick={() => handleSort('name')}
                     >
                       Employee {getSortIcon('name')}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Position 
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Marital Status 
                     </th>
                     <th 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                      className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider cursor-pointer hover:bg-zinc-100"
                       onClick={() => handleSort('hireDate')}
                     >
                       Hire Date {getSortIcon('hireDate')} 
                     </th>
                     <th 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                      className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider cursor-pointer hover:bg-zinc-100"
                       onClick={() => handleSort('baseSalary')}
                     >
                       Base Salary {getSortIcon('baseSalary')} 
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Status {/* Translated Statut */}
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Action {/* Translated Action */}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-zinc-200">
                   {filteredEmployees.map((employee) => (
-                    <tr key={employee.id} className="hover:bg-gray-50">
+                    <tr key={employee.id} className="hover:bg-zinc-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
@@ -285,30 +285,30 @@ const EmployeeConsultationPage = () => {
                             </div>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-zinc-900">
                               {employee.firstName} {employee.lastName}
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-zinc-500">
                               {employee.employeeId}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {employee.position}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {employee.maritalStatus}
                         {employee.numberOfDeductions > 0 && (
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-zinc-500">
                             {employee.numberOfDeductions} dependent(s) 
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {formatDate(employee.hireDate)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {formatCurrency(employee.baseSalary)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -332,7 +332,7 @@ const EmployeeConsultationPage = () => {
 
             {/* Mobile version - cards */}
             <div className="lg:hidden">
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-zinc-200">
                 {filteredEmployees.map((employee) => (
                   <div key={employee.id} className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -345,10 +345,10 @@ const EmployeeConsultationPage = () => {
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-zinc-900">
                             {employee.firstName} {employee.lastName}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-zinc-500">
                             {employee.employeeId} • {employee.position}
                           </div>
                         </div>
@@ -363,19 +363,19 @@ const EmployeeConsultationPage = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-500">Hired on:</span> 
+                        <span className="text-zinc-500">Hired on:</span> 
                         <div className="font-medium">{formatDate(employee.hireDate)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Base Salary:</span> 
+                        <span className="text-zinc-500">Base Salary:</span> 
                         <div className="font-medium">{formatCurrency(employee.baseSalary)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Marital Status:</span> 
+                        <span className="text-zinc-500">Marital Status:</span> 
                         <div className="font-medium">{employee.maritalStatus}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Status:</span> 
+                        <span className="text-zinc-500">Status:</span> 
                         <div>{getStatusBadge(employee.status)}</div>
                       </div>
                     </div>
@@ -394,7 +394,7 @@ const EmployeeConsultationPage = () => {
                 <h2 className="text-xl font-bold">Employee Profile Review</h2> {/* Translated Consultation de la fiche salarié */}
                 <button
                   onClick={handleCloseDetails}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-zinc-500 hover:text-zinc-700"
                 >
                   ✕
                 </button>

@@ -79,7 +79,7 @@ export default function SalaryCertificateViewPage() {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-            <p className="text-gray-600">Loading certificate...</p> {/* Translated Chargement de l'attestation... */}
+            <p className="text-zinc-600">Loading certificate...</p> {/* Translated Chargement de l'attestation... */}
           </div>
         </div>
       </Layout>
@@ -114,7 +114,7 @@ export default function SalaryCertificateViewPage() {
         <div className="print:hidden">
           <button
             onClick={handleBack}
-            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 flex items-center gap-2"
+            className="bg-zinc-600 text-white px-4 py-2 rounded-md hover:bg-zinc-700 flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to list {/* Translated Retour à la liste */}

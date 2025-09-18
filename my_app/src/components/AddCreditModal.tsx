@@ -261,16 +261,16 @@ return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
     <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-zinc-200">
         <div className="flex items-center">
             <CreditCard className="w-6 h-6 text-[#0063b4] mr-3" />
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-zinc-900">
             {editLoan ? 'Edit Loan' : 'New Simple Loan'}
             </h2>
         </div>
         <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-zinc-400 hover:text-zinc-600 transition-colors"
         >
             <X className="w-6 h-6" />
         </button>
@@ -280,7 +280,7 @@ return (
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
         {/* Employee Selection */}
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
             Employee *
             </label>
             <select
@@ -288,7 +288,7 @@ return (
             value={formData.employeeId}
             onChange={handleInputChange}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
-                errors.employeeId ? 'border-red-500' : 'border-gray-300'
+                errors.employeeId ? 'border-red-500' : 'border-zinc-300'
             }`}
             >
             <option value="">Select an employee</option>
@@ -303,14 +303,14 @@ return (
 
         {/* Loan Type */}
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
             Loan type *
             </label>
             <select
             name="type"
             value={formData.type}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
+            className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
             >
             <option value="HOUSING">Housing Loan</option>
             <option value="CONSUMER">Consumer Loan</option>
@@ -319,11 +319,11 @@ return (
 
         {/* Monthly amount */}
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
             Monthly deduction amount (KES) *
             </label>
             <div className="relative">
-            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
             <input
                 type="number"
                 name="monthlyAmount"
@@ -332,31 +332,31 @@ return (
                 step="0.01"
                 min="0"
                 className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
-                errors.monthlyAmount ? 'border-red-500' : 'border-gray-300'
+                errors.monthlyAmount ? 'border-red-500' : 'border-zinc-300'
                 }`}
                 placeholder="Ex: 5000.00"
             />
             </div>
             {errors.monthlyAmount && <p className="mt-1 text-sm text-red-600">{errors.monthlyAmount}</p>}
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-zinc-500">
             Amount that will be deducted each month from salary
             </p>
         </div>
 
         {/* Start date */}
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
             Start date *
             </label>
             <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
             <input
                 type="date"
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleInputChange}
                 className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
-                errors.startDate ? 'border-red-500' : 'border-gray-300'
+                errors.startDate ? 'border-red-500' : 'border-zinc-300'
                 }`}
             />
             </div>
@@ -365,18 +365,18 @@ return (
 
         {/* Bank */}
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
             Bank *
             </label>
             <div className="relative">
-            <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
             <input
                 type="text"
                 name="bank"
                 value={formData.bank}
                 onChange={handleInputChange}
                 className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
-                errors.bank ? 'border-red-500' : 'border-gray-300'
+                errors.bank ? 'border-red-500' : 'border-zinc-300'
                 }`}
                 placeholder="Ex: Equity Bank"
             />
@@ -386,7 +386,7 @@ return (
 
         {/* Notes */}
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
             Notes (optional)
             </label>
             <textarea
@@ -394,7 +394,7 @@ return (
             value={formData.notes}
             onChange={handleInputChange}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
+            className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
             placeholder="Additional information about the loan..."
             />
         </div>
@@ -411,7 +411,7 @@ return (
             <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-300 rounded-md hover:bg-zinc-50"
             >
             Cancel
             </button>

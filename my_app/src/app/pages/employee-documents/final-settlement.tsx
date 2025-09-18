@@ -219,7 +219,7 @@ const FinalSettlementPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Loading...</div>
+            <div className="text-lg text-zinc-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -232,7 +232,7 @@ const FinalSettlementPage = () => {
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
@@ -240,10 +240,10 @@ const FinalSettlementPage = () => {
           
           <div className="flex items-center space-x-3 mb-4">
             <Calculator className="w-8 h-8 text-orange-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Final Settlement</h1>
+            <h1 className="text-3xl font-bold text-zinc-900">Final Settlement</h1>
           </div>
           
-          <p className="text-gray-600 text-lg">
+          <p className="text-zinc-600 text-lg">
             Entry of termination elements (unused leave, allowances...) and generation of official settlement document.
           </p>
         </div>
@@ -252,10 +252,10 @@ const FinalSettlementPage = () => {
           <>
             {/* Employee selection */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Employee Selection</h3>
+              <h3 className="text-lg font-medium text-zinc-900 mb-4">Employee Selection</h3>
               
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 mb-2">
                   <Search className="w-4 h-4 inline mr-1" />
                   Search employee
                 </label>
@@ -270,12 +270,12 @@ const FinalSettlementPage = () => {
 
               <div className="max-h-48 overflow-y-auto border rounded-lg">
                 {filteredEmployees.length === 0 ? (
-                  <div className="p-6 text-center text-gray-500">
+                  <div className="p-6 text-center text-zinc-500">
                     No employees found
                   </div>
                 ) : (
                   filteredEmployees.map((employee) => (
-                    <div key={employee.id} className="px-4 py-3 border-b border-gray-100 last:border-b-0">
+                    <div key={employee.id} className="px-4 py-3 border-b border-zinc-100 last:border-b-0">
                       <div className="flex items-center">
                         <input
                           type="radio"
@@ -284,19 +284,19 @@ const FinalSettlementPage = () => {
                           value={employee.id}
                           checked={selectedEmployee === employee.id}
                           onChange={(e) => setSelectedEmployee(e.target.value)}
-                          className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300"
+                          className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-zinc-300"
                         />
                         <label htmlFor={`employee-${employee.id}`} className="ml-3 flex-1 cursor-pointer">
                           <div className="flex items-center justify-between">
                             <div>
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-zinc-900">
                                 {employee.firstName} {employee.lastName}
                               </div>
-                              <div className="text-sm text-gray-500">
+                              <div className="text-sm text-zinc-500">
                                 {employee.employeeId} • {employee.position} • {employee.status}
                               </div>
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-zinc-500">
                               {formatCurrency(employee.baseSalary)}
                             </div>
                           </div>
@@ -312,11 +312,11 @@ const FinalSettlementPage = () => {
             {selectedEmployee && (
               <>
                 <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Departure Information</h3>
+                  <h3 className="text-lg font-medium text-zinc-900 mb-4">Departure Information</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-zinc-700 mb-2">
                         <Calendar className="w-4 h-4 inline mr-1" />
                         Departure Date
                       </label>
@@ -329,7 +329,7 @@ const FinalSettlementPage = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-zinc-700 mb-2">
                         Departure Reason
                       </label>
                       <select
@@ -349,15 +349,15 @@ const FinalSettlementPage = () => {
                   </div>
 
                   {selectedEmployeeData && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-medium text-gray-900 mb-2">Employee Information</h4>
+                    <div className="mt-4 p-4 bg-zinc-50 rounded-lg">
+                      <h4 className="font-medium text-zinc-900 mb-2">Employee Information</h4>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <span className="text-gray-600">Hire Date:</span>
+                          <span className="text-zinc-600">Hire Date:</span>
                           <span className="ml-2 font-medium">{formatDate(selectedEmployeeData.hireDate)}</span>
                         </div>
                         <div>
-                          <span className="text-gray-600">Seniority:</span>
+                          <span className="text-zinc-600">Seniority:</span>
                           <span className="ml-2 font-medium">{calculateSeniority(selectedEmployeeData.hireDate, departureDate)}</span>
                         </div>
                       </div>
@@ -367,11 +367,11 @@ const FinalSettlementPage = () => {
 
                 {/* Calculation elements */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Calculation Elements</h3>
+                  <h3 className="text-lg font-medium text-zinc-900 mb-4">Calculation Elements</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-zinc-700 mb-2">
                         Unused Vacation (days)
                       </label>
                       <input
@@ -382,14 +382,14 @@ const FinalSettlementPage = () => {
                         className="payroll-input"
                       />
                       {selectedEmployeeData && (
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-zinc-500 mt-1">
                           Value: {formatCurrency(calculateVacationPay(selectedEmployeeData))}
                         </p>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-zinc-700 mb-2">
                         Notice Period (days)
                       </label>
                       <input
@@ -400,14 +400,14 @@ const FinalSettlementPage = () => {
                         className="payroll-input"
                       />
                       {selectedEmployeeData && (
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-zinc-500 mt-1">
                           Value: {formatCurrency(calculateNoticePay(selectedEmployeeData))}
                         </p>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-zinc-700 mb-2">
                         Severance Pay
                       </label>
                       <input
@@ -425,7 +425,7 @@ const FinalSettlementPage = () => {
                 {/* Custom elements */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-medium text-gray-900">Custom Elements</h3>
+                    <h3 className="text-lg font-medium text-zinc-900">Custom Elements</h3>
                     <button
                       onClick={addCustomElement}
                       className="flex items-center space-x-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
@@ -436,7 +436,7 @@ const FinalSettlementPage = () => {
                   </div>
 
                   {customElements.length === 0 ? (
-                    <p className="text-gray-500 text-center py-4">
+                    <p className="text-zinc-500 text-center py-4">
                       No custom elements added
                     </p>
                   ) : (
@@ -485,8 +485,8 @@ const FinalSettlementPage = () => {
                 <div className="bg-white p-6 rounded-lg shadow-sm border">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900">Generate Final Settlement</h3>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <h3 className="text-lg font-medium text-zinc-900">Generate Final Settlement</h3>
+                      <p className="text-sm text-zinc-500 mt-1">
                         Official end-of-contract document for {selectedEmployeeData?.firstName} {selectedEmployeeData?.lastName}
                       </p>
                     </div>
@@ -508,11 +508,11 @@ const FinalSettlementPage = () => {
             {/* Settlement preview */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Final Settlement Preview</h3>
+                <h3 className="text-lg font-medium text-zinc-900">Final Settlement Preview</h3>
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowPreview(false)}
-                    className="text-sm text-gray-600 hover:text-gray-900"
+                    className="text-sm text-zinc-600 hover:text-zinc-900"
                   >
                     Back to entry
                   </button>
@@ -531,9 +531,9 @@ const FinalSettlementPage = () => {
             <div className="bg-white shadow-lg rounded-lg overflow-hidden">
               <div className="p-8">
                 {/* Header */}
-                <div className="text-center border-b-2 border-gray-200 pb-6 mb-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">FINAL SETTLEMENT</h2>
-                  <p className="text-gray-600">
+                <div className="text-center border-b-2 border-zinc-200 pb-6 mb-8">
+                  <h2 className="text-2xl font-bold text-zinc-900 mb-2">FINAL SETTLEMENT</h2>
+                  <p className="text-zinc-600">
                     Prepared on {formatDate(settlementData.generatedDate)}
                   </p>
                 </div>
@@ -541,40 +541,40 @@ const FinalSettlementPage = () => {
                 {/* Employee and departure information */}
                 <div className="grid grid-cols-2 gap-8 mb-8">
                   <div>
-                    <h3 className="font-medium text-gray-900 mb-3">Employee Information</h3>
+                    <h3 className="font-medium text-zinc-900 mb-3">Employee Information</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Full Name:</span>
+                        <span className="text-zinc-600">Full Name:</span>
                         <span className="font-medium">{settlementData.employee.firstName} {settlementData.employee.lastName}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Employee ID:</span>
+                        <span className="text-zinc-600">Employee ID:</span>
                         <span className="font-medium">{settlementData.employee.employeeId}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Position:</span>
+                        <span className="text-zinc-600">Position:</span>
                         <span className="font-medium">{settlementData.employee.position}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Hire Date:</span>
+                        <span className="text-zinc-600">Hire Date:</span>
                         <span className="font-medium">{formatDate(settlementData.employee.hireDate)}</span>
                       </div>
                     </div>
                   </div>
                   
                   <div>
-                    <h3 className="font-medium text-gray-900 mb-3">Departure Information</h3>
+                    <h3 className="font-medium text-zinc-900 mb-3">Departure Information</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Departure Date:</span>
+                        <span className="text-zinc-600">Departure Date:</span>
                         <span className="font-medium">{formatDate(settlementData.departureDate)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Reason:</span>
+                        <span className="text-zinc-600">Reason:</span>
                         <span className="font-medium">{settlementData.departureReason}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Seniority:</span>
+                        <span className="text-zinc-600">Seniority:</span>
                         <span className="font-medium">{calculateSeniority(settlementData.employee.hireDate, settlementData.departureDate)}</span>
                       </div>
                     </div>
@@ -583,7 +583,7 @@ const FinalSettlementPage = () => {
 
                 {/* Gains detail */}
                 <div className="mb-8">
-                  <h3 className="font-medium text-gray-900 mb-4 bg-green-50 p-3 rounded">GAINS</h3>
+                  <h3 className="font-medium text-zinc-900 mb-4 bg-green-50 p-3 rounded">GAINS</h3>
                   <div className="space-y-2 text-sm">
                     {settlementData.vacationPay > 0 && (
                       <div className="flex justify-between">
@@ -609,7 +609,7 @@ const FinalSettlementPage = () => {
                         <span className="font-medium">{formatCurrency(element.amount)}</span>
                       </div>
                     ))}
-                    <div className="border-t border-gray-200 pt-2 flex justify-between font-medium text-lg">
+                    <div className="border-t border-zinc-200 pt-2 flex justify-between font-medium text-lg">
                       <span>TOTAL GAINS</span>
                       <span className="text-green-600">{formatCurrency(settlementData.totalGains)}</span>
                     </div>
@@ -619,7 +619,7 @@ const FinalSettlementPage = () => {
                 {/* Deductions detail */}
                 {settlementData.totalDeductions > 0 && (
                   <div className="mb-8">
-                    <h3 className="font-medium text-gray-900 mb-4 bg-red-50 p-3 rounded">DEDUCTIONS</h3>
+                    <h3 className="font-medium text-zinc-900 mb-4 bg-red-50 p-3 rounded">DEDUCTIONS</h3>
                     <div className="space-y-2 text-sm">
                       {settlementData.customElements.filter((e: SettlementElement) => e.type === 'DEDUCTION').map((element: SettlementElement) => (
                         <div key={element.id} className="flex justify-between">
@@ -627,7 +627,7 @@ const FinalSettlementPage = () => {
                           <span className="font-medium">{formatCurrency(element.amount)}</span>
                         </div>
                       ))}
-                      <div className="border-t border-gray-200 pt-2 flex justify-between font-medium text-lg">
+                      <div className="border-t border-zinc-200 pt-2 flex justify-between font-medium text-lg">
                         <span>TOTAL DEDUCTIONS</span>
                         <span className="text-red-600">{formatCurrency(settlementData.totalDeductions)}</span>
                       </div>
@@ -636,9 +636,9 @@ const FinalSettlementPage = () => {
                 )}
 
                 {/* Net amount payable */}
-                <div className="bg-gray-50 p-6 rounded-lg mb-8">
+                <div className="bg-zinc-50 p-6 rounded-lg mb-8">
                   <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-gray-900">NET AMOUNT PAYABLE</span>
+                    <span className="text-xl font-bold text-zinc-900">NET AMOUNT PAYABLE</span>
                     <span className="text-2xl font-bold text-green-600">
                       {formatCurrency(settlementData.netToPay)}
                     </span>
@@ -648,16 +648,16 @@ const FinalSettlementPage = () => {
                 {/* Signatures */}
                 <div className="grid grid-cols-2 gap-8">
                   <div className="text-center">
-                    <div className="border-t border-gray-300 pt-4 mt-8">
-                      <div className="text-sm font-medium text-gray-900">Employer Signature</div>
-                      <div className="text-xs text-gray-600 mt-1">Company Stamp</div>
+                    <div className="border-t border-zinc-300 pt-4 mt-8">
+                      <div className="text-sm font-medium text-zinc-900">Employer Signature</div>
+                      <div className="text-xs text-zinc-600 mt-1">Company Stamp</div>
                     </div>
                   </div>
                   
                   <div className="text-center">
-                    <div className="border-t border-gray-300 pt-4 mt-8">
-                      <div className="text-sm font-medium text-gray-900">Employee Signature</div>
-                      <div className="text-xs text-gray-600 mt-1">For acceptance and receipt</div>
+                    <div className="border-t border-zinc-300 pt-4 mt-8">
+                      <div className="text-sm font-medium text-zinc-900">Employee Signature</div>
+                      <div className="text-xs text-zinc-600 mt-1">For acceptance and receipt</div>
                     </div>
                   </div>
                 </div>

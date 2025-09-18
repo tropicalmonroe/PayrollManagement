@@ -77,7 +77,7 @@ const AdministrativeReportsPage = () => {
       case 'purple':
         return 'text-purple-600';
       default:
-        return 'text-gray-600';
+        return 'text-zinc-600';
     }
   };
 
@@ -92,7 +92,7 @@ const AdministrativeReportsPage = () => {
       case 'purple':
         return 'bg-purple-50 hover:bg-purple-100';
       default:
-        return 'bg-gray-50 hover:bg-gray-100';
+        return 'bg-zinc-50 hover:bg-zinc-100';
     }
   };
 
@@ -107,7 +107,7 @@ const AdministrativeReportsPage = () => {
       case 'purple':
         return 'border-purple-200 hover:border-purple-300';
       default:
-        return 'border-gray-200 hover:border-gray-300';
+        return 'border-zinc-200 hover:border-zinc-300';
     }
   };
 
@@ -117,7 +117,7 @@ const AdministrativeReportsPage = () => {
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
@@ -125,10 +125,10 @@ const AdministrativeReportsPage = () => {
           
           <div className="flex items-center space-x-3 mb-4">
             <FileSpreadsheet className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Administrative Reports</h1>
+            <h1 className="text-3xl font-bold text-zinc-900">Administrative Reports</h1>
           </div>
           
-          <p className="text-gray-600 text-lg max-w-3xl">
+          <p className="text-zinc-600 text-lg max-w-3xl">
             Generation of administrative and accounting documents: payroll journals, bank transfers, 
             NSSF declarations and income tax statements for official organizations.
           </p>
@@ -143,26 +143,26 @@ const AdministrativeReportsPage = () => {
                 <div className={`${getBgColor(section.color)} ${getBorderColor(section.color)} border-2 rounded-lg p-6 transition-all duration-200 cursor-pointer h-full`}>
                   <div className="flex items-center mb-4">
                     <IconComponent className={`w-8 h-8 ${getIconColor(section.color)} mr-3`} />
-                    <h3 className="text-xl font-semibold text-gray-900">{section.title}</h3>
+                    <h3 className="text-xl font-semibold text-zinc-900">{section.title}</h3>
                   </div>
                   
-                  <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                  <p className="text-zinc-600 mb-4 text-sm leading-relaxed">
                     {section.description}
                   </p>
                   
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-900">Features:</h4>
-                    <ul className="text-xs text-gray-600 space-y-1">
+                    <h4 className="text-sm font-medium text-zinc-900">Features:</h4>
+                    <ul className="text-xs text-zinc-600 space-y-1">
                       {section.features.map((feature, index) => (
                         <li key={index} className="flex items-center">
-                          <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
+                          <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full mr-2"></span>
                           {feature}
                         </li>
                       ))}
                     </ul>
                   </div>
                   
-                  <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="mt-4 pt-4 border-t border-zinc-200">
                     <span className={`text-sm font-medium ${getIconColor(section.color)}`}>
                       Access →
                     </span>
@@ -175,14 +175,14 @@ const AdministrativeReportsPage = () => {
 
         {/* Additional information */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
+          <h3 className="text-lg font-medium text-zinc-900 mb-4">
             Information about Administrative Reports
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">📊 Generation Process</h4>
-              <ul className="text-sm text-gray-600 space-y-1">
+              <h4 className="font-medium text-zinc-900 mb-2">📊 Generation Process</h4>
+              <ul className="text-sm text-zinc-600 space-y-1">
                 <li>• Selection of period and criteria</li>
                 <li>• Automatic data calculation</li>
                 <li>• Validation and consistency control</li>
@@ -191,8 +191,8 @@ const AdministrativeReportsPage = () => {
             </div>
             
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">🏛️ Regulatory Compliance</h4>
-              <ul className="text-sm text-gray-600 space-y-1">
+              <h4 className="font-medium text-zinc-900 mb-2">🏛️ Regulatory Compliance</h4>
+              <ul className="text-sm text-zinc-600 space-y-1">
                 <li>• Official NSSF and tax administration formats</li>
                 <li>• Updated regulatory rates and thresholds</li>
                 <li>• Automatic consistency checks</li>
@@ -203,8 +203,8 @@ const AdministrativeReportsPage = () => {
           
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">💼 Accounting Usage</h4>
-              <ul className="text-sm text-gray-600 space-y-1">
+              <h4 className="font-medium text-zinc-900 mb-2">💼 Accounting Usage</h4>
+              <ul className="text-sm text-zinc-600 space-y-1">
                 <li>• Detailed journals for accounting</li>
                 <li>• Summaries of social contributions</li>
                 <li>• Breakdown by cost center</li>
@@ -213,8 +213,8 @@ const AdministrativeReportsPage = () => {
             </div>
             
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">🏦 Banking Management</h4>
-              <ul className="text-sm text-gray-600 space-y-1">
+              <h4 className="font-medium text-zinc-900 mb-2">🏦 Banking Management</h4>
+              <ul className="text-sm text-zinc-600 space-y-1">
                 <li>• Bank transfer files</li>
                 <li>• Account number validation</li>
                 <li>• Control summaries</li>

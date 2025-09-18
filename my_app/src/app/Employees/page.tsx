@@ -193,8 +193,8 @@ export default function EmployeesPage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
-                <p className="mt-1 text-sm text-gray-600">
+                <h2 className="text-2xl font-bold text-zinc-900">Employee Management</h2>
+                <p className="mt-1 text-sm text-zinc-600">
                   Manage employee information
                 </p>
               </div>
@@ -203,7 +203,7 @@ export default function EmployeesPage() {
               <div className="px-4 py-5 sm:p-6">
                 <div className="text-center py-12">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <p className="mt-2 text-sm text-gray-500">Loading employees...</p>
+                  <p className="mt-2 text-sm text-zinc-500">Loading employees...</p>
                 </div>
               </div>
             </div>
@@ -226,8 +226,8 @@ export default function EmployeesPage() {
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
-              <p className="mt-1 text-sm text-gray-600">
+              <h2 className="text-2xl font-bold text-zinc-900">Employee Management</h2>
+              <p className="mt-1 text-sm text-zinc-600">
                 Manage employee information ({employees.length} employee{employees.length > 1 ? 's' : ''})
               </p>
             </div>

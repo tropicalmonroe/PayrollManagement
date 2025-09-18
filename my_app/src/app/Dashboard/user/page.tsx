@@ -14,8 +14,8 @@ if (role !== 'USER') {
 return (
     <Layout>
     <div>
-        <h2 className="text-2xl font-bold text-gray-900">User Dashboard</h2>
-        <p className="mt-1 text-sm text-gray-600">Welcome, {role}</p>
+        <h2 className="text-2xl font-bold text-zinc-900">User Dashboard</h2>
+        <p className="mt-1 text-sm text-zinc-600">Welcome, {role}</p>
     </div>
     </Layout>
 );

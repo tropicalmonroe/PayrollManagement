@@ -61,7 +61,7 @@ const EmployeeDocumentsPage = () => {
       case 'orange':
         return 'text-orange-600';
       default:
-        return 'text-gray-600';
+        return 'text-zinc-600';
     }
   };
 
@@ -74,7 +74,7 @@ const EmployeeDocumentsPage = () => {
       case 'orange':
         return 'bg-orange-50 hover:bg-orange-100';
       default:
-        return 'bg-gray-50 hover:bg-gray-100';
+        return 'bg-zinc-50 hover:bg-zinc-100';
     }
   };
 
@@ -87,7 +87,7 @@ const EmployeeDocumentsPage = () => {
       case 'orange':
         return 'border-orange-200 hover:border-orange-300';
       default:
-        return 'border-gray-200 hover:border-gray-300';
+        return 'border-zinc-200 hover:border-zinc-300';
     }
   };
 
@@ -97,7 +97,7 @@ const EmployeeDocumentsPage = () => {
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
@@ -105,10 +105,10 @@ const EmployeeDocumentsPage = () => {
           
           <div className="flex items-center space-x-3 mb-4">
             <FileCheck className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Employee Documents</h1>
+            <h1 className="text-3xl font-bold text-zinc-900">Employee Documents</h1>
           </div>
           
-          <p className="text-gray-600 text-lg max-w-3xl">
+          <p className="text-zinc-600 text-lg max-w-3xl">
             Generation and management of all official documents for employees: payslips, certificates, and final settlements.
           </p>
         </div>
@@ -122,26 +122,26 @@ const EmployeeDocumentsPage = () => {
                 <div className={`${getBgColor(section.color)} ${getBorderColor(section.color)} border-2 rounded-lg p-6 transition-all duration-200 cursor-pointer h-full`}>
                   <div className="flex items-center mb-4">
                     <IconComponent className={`w-8 h-8 ${getIconColor(section.color)} mr-3`} />
-                    <h3 className="text-xl font-semibold text-gray-900">{section.title}</h3>
+                    <h3 className="text-xl font-semibold text-zinc-900">{section.title}</h3>
                   </div>
                   
-                  <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                  <p className="text-zinc-600 mb-4 text-sm leading-relaxed">
                     {section.description}
                   </p>
                   
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-900">Features:</h4> 
-                    <ul className="text-xs text-gray-600 space-y-1">
+                    <h4 className="text-sm font-medium text-zinc-900">Features:</h4> 
+                    <ul className="text-xs text-zinc-600 space-y-1">
                       {section.features.map((feature, index) => (
                         <li key={index} className="flex items-center">
-                          <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
+                          <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full mr-2"></span>
                           {feature}
                         </li>
                       ))}
                     </ul>
                   </div>
                   
-                  <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="mt-4 pt-4 border-t border-zinc-200">
                     <span className={`text-sm font-medium ${getIconColor(section.color)}`}>
                       Access → 
                     </span>
@@ -154,14 +154,14 @@ const EmployeeDocumentsPage = () => {
 
         {/* Additional information */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
+          <h3 className="text-lg font-medium text-zinc-900 mb-4">
             Information on Employee Documents 
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">📋 Generation Process</h4> 
-              <ul className="text-sm text-gray-600 space-y-1">
+              <h4 className="font-medium text-zinc-900 mb-2">📋 Generation Process</h4> 
+              <ul className="text-sm text-zinc-600 space-y-1">
                 <li>• Selection of employee and period</li> 
                 <li>• Automatic calculation of amounts</li>
                 <li>• PDF document generation</li>
@@ -170,8 +170,8 @@ const EmployeeDocumentsPage = () => {
             </div>
             
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">🔒 Security and Compliance</h4> 
-              <ul className="text-sm text-gray-600 space-y-1">
+              <h4 className="font-medium text-zinc-900 mb-2">🔒 Security and Compliance</h4> 
+              <ul className="text-sm text-zinc-600 space-y-1">
                 <li>• Documents compliant with Kenyan regulations</li>
                 <li>• Secure and timestamped archiving</li>
                 <li>• Complete traceability of generations</li>

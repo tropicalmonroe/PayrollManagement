@@ -119,7 +119,7 @@ export default function IncomeTaxStatement() {
       <div className="p-6 space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Income Tax Statement</h1>
-          <p className="text-gray-600">
+          <p className="text-zinc-600">
             Generate income tax statements for employees
           </p>
         </div>
@@ -132,14 +132,14 @@ export default function IncomeTaxStatement() {
                 <Calendar className="h-5 w-5" />
                 Period Configuration
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-zinc-600">
                 Select the period for the income tax statement
               </p>
             </div>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="month" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="month" className="block text-sm font-medium text-zinc-700">
                     Month
                   </label>
                   <select
@@ -157,7 +157,7 @@ export default function IncomeTaxStatement() {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="year" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="year" className="block text-sm font-medium text-zinc-700">
                     Year
                   </label>
                   <input
@@ -181,13 +181,13 @@ export default function IncomeTaxStatement() {
                 <FileText className="h-5 w-5" />
                 Document Generation
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-zinc-600">
                 Generate income tax statement for selected employees
               </p>
             </div>
             <div className="space-y-4">
               <div className="flex flex-col gap-2">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-zinc-600">
                   {selectedEmployees.length} employee(s) selected
                 </p>
                 <div className="flex gap-2">
@@ -233,7 +233,7 @@ export default function IncomeTaxStatement() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="mb-4">
             <h3 className="text-lg font-medium">Employee Selection</h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-zinc-600">
               Select employees to include in the income tax statement
             </p>
           </div>
@@ -251,7 +251,7 @@ export default function IncomeTaxStatement() {
                     className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                       selectedEmployees.includes(employee.id)
                         ? 'bg-blue-50 border-blue-300'
-                        : 'hover:bg-gray-50'
+                        : 'hover:bg-zinc-50'
                     }`}
                     onClick={() => toggleEmployeeSelection(employee.id)}
                   >
@@ -267,7 +267,7 @@ export default function IncomeTaxStatement() {
                           <p className="font-medium">
                             {employee.firstName} {employee.lastName}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-zinc-600">
                             {employee.employeeId} • {employee.position}
                           </p>
                         </div>
@@ -275,7 +275,7 @@ export default function IncomeTaxStatement() {
                           <p className="font-medium">
                             {formatCurrency(employee.baseSalary)}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-zinc-600">
                             ID: {employee.idNumber || 'Not provided'}
                           </p>
                         </div>

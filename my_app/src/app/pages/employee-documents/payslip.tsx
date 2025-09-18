@@ -220,7 +220,7 @@ const PayslipPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Loading...</div>
+            <div className="text-lg text-zinc-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -233,7 +233,7 @@ const PayslipPage = () => {
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span> {/* Translated Retour */}
@@ -241,10 +241,10 @@ const PayslipPage = () => {
           
           <div className="flex items-center space-x-3 mb-4">
             <FileText className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Payslip</h1>
+            <h1 className="text-3xl font-bold text-zinc-900">Payslip</h1>
           </div>
           
-          <p className="text-gray-600 text-lg">
+          <p className="text-zinc-600 text-lg">
             Generation of individual payslip in PDF, intended for delivery to the employee.
           </p>
         </div>
@@ -253,11 +253,11 @@ const PayslipPage = () => {
           <>
             {/* Payslip configuration */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Payslip Configuration</h3>
+              <h3 className="text-lg font-medium text-zinc-900 mb-4">Payslip Configuration</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     <Calendar className="w-4 h-4 inline mr-1" />
                     Period
                   </label>
@@ -267,13 +267,13 @@ const PayslipPage = () => {
                     onChange={(e) => setSelectedMonth(e.target.value)}
                     className="payroll-input"
                   />
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-zinc-500 mt-1">
                     Payslip for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     <Search className="w-4 h-4 inline mr-1" />
                     Search Employee {/* Translated Rechercher un employé */}
                   </label>
@@ -290,20 +290,20 @@ const PayslipPage = () => {
 
             {/* Employee selection */}
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">
+              <div className="px-6 py-4 border-b border-zinc-200">
+                <h3 className="text-lg font-medium text-zinc-900">
                   Select Employee ({filteredEmployees.length} employee(s))
                 </h3>
               </div>
               
               <div className="max-h-96 overflow-y-auto">
                 {filteredEmployees.length === 0 ? (
-                  <div className="p-6 text-center text-gray-500">
+                  <div className="p-6 text-center text-zinc-500">
                     No employees found
                   </div>
                 ) : (
                   filteredEmployees.map((employee) => (
-                    <div key={employee.id} className="px-6 py-4 border-b border-gray-100 last:border-b-0">
+                    <div key={employee.id} className="px-6 py-4 border-b border-zinc-100 last:border-b-0">
                       <div className="flex items-center">
                         <input
                           type="radio"
@@ -312,7 +312,7 @@ const PayslipPage = () => {
                           value={employee.id}
                           checked={selectedEmployee === employee.id}
                           onChange={(e) => setSelectedEmployee(e.target.value)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-zinc-300"
                         />
                         <label htmlFor={`employee-${employee.id}`} className="ml-3 flex-1 cursor-pointer">
                           <div className="flex items-center justify-between">
@@ -325,15 +325,15 @@ const PayslipPage = () => {
                                 </div>
                               </div>
                               <div className="ml-4">
-                                <div className="text-sm font-medium text-gray-900">
+                                <div className="text-sm font-medium text-zinc-900">
                                   {employee.firstName} {employee.lastName}
                                 </div>
-                                <div className="text-sm text-gray-500">
+                                <div className="text-sm text-zinc-500">
                                   {employee.employeeId} • {employee.position}
                                 </div>
                               </div>
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-zinc-500">
                               {formatCurrency(employee.baseSalary)}
                             </div>
                           </div>
@@ -349,8 +349,8 @@ const PayslipPage = () => {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">Generate Payslip</h3> 
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h3 className="text-lg font-medium text-zinc-900">Generate Payslip</h3> 
+                  <p className="text-sm text-zinc-500 mt-1">
                     {selectedEmployee ? 
                       `Payslip for ${getMonthLabel(selectedMonth)}` :
                       'Select an employee to continue'}
@@ -372,11 +372,11 @@ const PayslipPage = () => {
             {/* Payslip preview */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Payslip Preview</h3>
+                <h3 className="text-lg font-medium text-zinc-900">Payslip Preview</h3>
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowPreview(false)}
-                    className="text-sm text-gray-600 hover:text-gray-900"
+                    className="text-sm text-zinc-600 hover:text-zinc-900"
                   >
                     Back to Selection
                   </button>
@@ -395,14 +395,14 @@ const PayslipPage = () => {
             <div className="bg-white shadow-lg rounded-lg overflow-hidden">
               <div className="p-8">
                 {/* Header */}
-                <div className="border-b-2 border-gray-200 pb-6 mb-6">
+                <div className="border-b-2 border-zinc-200 pb-6 mb-6">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h2 className="text-2xl font-bold text-gray-900">PAYSLIP</h2> 
-                      <p className="text-gray-600 mt-1">Period: {getMonthLabel(payrollData.period)}</p>
+                      <h2 className="text-2xl font-bold text-zinc-900">PAYSLIP</h2> 
+                      <p className="text-zinc-600 mt-1">Period: {getMonthLabel(payrollData.period)}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm text-gray-600">Employee ID</div> 
+                      <div className="text-sm text-zinc-600">Employee ID</div> 
                       <div className="font-medium">{payrollData.employee.employeeId}</div>
                     </div>
                   </div>
@@ -411,40 +411,40 @@ const PayslipPage = () => {
                 {/* Employee information */}
                 <div className="grid grid-cols-2 gap-8 mb-8">
                   <div>
-                    <h3 className="font-medium text-gray-900 mb-3">Employee Information</h3>
+                    <h3 className="font-medium text-zinc-900 mb-3">Employee Information</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Full Name:</span> 
+                        <span className="text-zinc-600">Full Name:</span> 
                         <span className="font-medium">{payrollData.employee.firstName} {payrollData.employee.lastName}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Position:</span>
+                        <span className="text-zinc-600">Position:</span>
                         <span className="font-medium">{payrollData.employee.position}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">NSSF Number:</span> 
+                        <span className="text-zinc-600">NSSF Number:</span> 
                         <span className="font-medium">{payrollData.employee.nssfNumber || 'N/A'}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Hire Date:</span>
+                        <span className="text-zinc-600">Hire Date:</span>
                         <span className="font-medium">{formatDate(payrollData.employee.hireDate)}</span>
                       </div>
                     </div>
                   </div>
                   
                   <div>
-                    <h3 className="font-medium text-gray-900 mb-3">Work Period</h3>
+                    <h3 className="font-medium text-zinc-900 mb-3">Work Period</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Days Worked:</span>
+                        <span className="text-zinc-600">Days Worked:</span>
                         <span className="font-medium">{payrollData.employee.numberOfDaysPerMonth} days</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Marital Status:</span> 
+                        <span className="text-zinc-600">Marital Status:</span> 
                         <span className="font-medium">{payrollData.employee.maritalStatus}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Number of Dependents:</span>
+                        <span className="text-zinc-600">Number of Dependents:</span>
                         <span className="font-medium">{payrollData.employee.numberOfDeductions}</span>
                       </div>
                     </div>
@@ -453,7 +453,7 @@ const PayslipPage = () => {
 
                 {/* Earnings details */}
                 <div className="mb-8">
-                  <h3 className="font-medium text-gray-900 mb-4 bg-green-50 p-3 rounded">EARNINGS</h3> 
+                  <h3 className="font-medium text-zinc-900 mb-4 bg-green-50 p-3 rounded">EARNINGS</h3> 
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Base Salary</span> 
@@ -491,7 +491,7 @@ const PayslipPage = () => {
                         <span className="font-medium">{formatCurrency(payrollData.payroll.earnings.overtimePay)}</span>
                       </div>
                     )}
-                    <div className="border-t border-gray-200 pt-2 flex justify-between font-medium text-lg">
+                    <div className="border-t border-zinc-200 pt-2 flex justify-between font-medium text-lg">
                       <span>TOTAL EARNINGS</span> 
                       <span className="text-green-600">{formatCurrency(payrollData.payroll.grossSalary)}</span>
                     </div>
@@ -500,9 +500,9 @@ const PayslipPage = () => {
 
                 {/* Deductions details */}
                 <div className="mb-8">
-                  <h3 className="font-medium text-gray-900 mb-4 bg-red-50 p-3 rounded">DEDUCTIONS</h3>
+                  <h3 className="font-medium text-zinc-900 mb-4 bg-red-50 p-3 rounded">DEDUCTIONS</h3>
                   <div className="space-y-2 text-sm">
-                    <div className="font-medium text-gray-800 mb-2">Employee Contributions:</div>
+                    <div className="font-medium text-zinc-800 mb-2">Employee Contributions:</div>
                     <div className="ml-4 space-y-1">
                       <div className="flex justify-between">
                         <span>NSSF Contribution</span> 
@@ -533,7 +533,7 @@ const PayslipPage = () => {
                     
                     {payrollData.payroll.otherDeductions.totalOtherDeductions > 0 && (
                       <>
-                        <div className="font-medium text-gray-800 mb-2 mt-3">Other Deductions:</div>
+                        <div className="font-medium text-zinc-800 mb-2 mt-3">Other Deductions:</div>
                         <div className="ml-4 space-y-1">
                           {payrollData.payroll.otherDeductions.mortgageCredit > 0 && (
                             <div className="flex justify-between">
@@ -557,7 +557,7 @@ const PayslipPage = () => {
                       </>
                     )}
                     
-                    <div className="border-t border-gray-200 pt-2 flex justify-between font-medium text-lg">
+                    <div className="border-t border-zinc-200 pt-2 flex justify-between font-medium text-lg">
                       <span>TOTAL DEDUCTIONS</span> 
                       <span className="text-red-600">{formatCurrency(payrollData.payroll.totalDeductions)}</span>
                     </div>
@@ -565,9 +565,9 @@ const PayslipPage = () => {
                 </div>
 
                 {/* Net payable */}
-                <div className="bg-gray-50 p-6 rounded-lg">
+                <div className="bg-zinc-50 p-6 rounded-lg">
                   <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-gray-900">NET PAYABLE</span> 
+                    <span className="text-xl font-bold text-zinc-900">NET PAYABLE</span> 
                     <span className="text-2xl font-bold text-green-600">
                       {formatCurrency(payrollData.payroll.netSalaryPayable)}
                     </span>
@@ -576,9 +576,9 @@ const PayslipPage = () => {
 
                 {/* Bank information */}
                 {payrollData.employee.bankAccount && (
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <h3 className="font-medium text-gray-900 mb-2">Bank Information</h3> 
-                    <div className="text-sm text-gray-600">
+                  <div className="mt-6 pt-6 border-t border-zinc-200">
+                    <h3 className="font-medium text-zinc-900 mb-2">Bank Information</h3> 
+                    <div className="text-sm text-zinc-600">
                       <div>Account: {payrollData.employee.bankAccount}</div>
                       {payrollData.employee.bankBranch && <div>Branch: {payrollData.employee.bankBranch}</div>} 
                     </div>

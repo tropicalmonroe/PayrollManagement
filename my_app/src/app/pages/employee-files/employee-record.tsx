@@ -139,7 +139,7 @@ const EmployeeRecordPage = () => {
       <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Loading...</div>
+            <div className="text-lg text-zinc-600">Loading...</div>
           </div>
         </div>
       </Layout>
@@ -152,7 +152,7 @@ const EmployeeRecordPage = () => {
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
@@ -161,7 +161,7 @@ const EmployeeRecordPage = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <Users className="w-8 h-8 text-blue-600" />
-              <h1 className="text-3xl font-bold text-gray-900">Employee Record</h1>
+              <h1 className="text-3xl font-bold text-zinc-900">Employee Record</h1>
             </div>
             <button
               onClick={handleAddNew}
@@ -172,7 +172,7 @@ const EmployeeRecordPage = () => {
             </button>
           </div>
           
-          <p className="text-gray-600 text-lg">
+          <p className="text-zinc-600 text-lg">
             Create or modify employee file: personal data, contract, salary, bonuses, allowances, housing loan schedule.
           </p>
         </div>
@@ -196,7 +196,7 @@ const EmployeeRecordPage = () => {
                 </h2>
                 <button
                   onClick={handleCloseForm}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-zinc-500 hover:text-zinc-700"
                 >
                   ✕
                 </button>
@@ -219,7 +219,7 @@ const EmployeeRecordPage = () => {
                 <h2 className="text-xl font-bold">Employee Details</h2>
                 <button
                   onClick={handleCloseDetails}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-zinc-500 hover:text-zinc-700"
                 >
                   ✕
                 </button>

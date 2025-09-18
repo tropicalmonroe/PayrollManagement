@@ -182,7 +182,7 @@ export default function SalaryCertificatePage() {
     const statusConfig = {
       GENERATED: { color: 'bg-blue-100 text-blue-800', text: 'Generated' },
       SENT: { color: 'bg-green-100 text-green-800', text: 'Sent' },
-      ARCHIVED: { color: 'bg-gray-100 text-gray-800', text: 'Archived' }
+      ARCHIVED: { color: 'bg-zinc-100 text-zinc-800', text: 'Archived' }
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.GENERATED;
@@ -200,14 +200,14 @@ export default function SalaryCertificatePage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Salary Certificates</h1>
-            <p className="text-gray-600">Generate income or presence certificates</p>
+            <h1 className="text-2xl font-bold text-zinc-900">Salary Certificates</h1>
+            <p className="text-zinc-600">Generate income or presence certificates</p>
           </div>
         </div>
 
         {/* Certificate generation */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <h2 className="text-lg font-semibold text-zinc-900 mb-4">
             <Plus className="inline-block w-5 h-5 mr-2" />
             Generate New Certificate
           </h2>
@@ -221,13 +221,13 @@ export default function SalaryCertificatePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Employee *
               </label>
               <select
                 value={selectedEmployee}
                 onChange={(e) => setSelectedEmployee(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select an employee</option>
                 {employees.map((employee) => (
@@ -239,13 +239,13 @@ export default function SalaryCertificatePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Certificate Type *
               </label>
               <select
                 value={certificateType}
                 onChange={(e) => setCertificateType(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select a type</option>
                 {certificateTypes.map((type) => (
@@ -257,31 +257,31 @@ export default function SalaryCertificatePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Start Date *
               </label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 mb-2">
                 End Date *
               </label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Reason (optional)
               </label>
               <textarea
@@ -289,7 +289,7 @@ export default function SalaryCertificatePage() {
                 onChange={(e) => setReason(e.target.value)}
                 rows={3}
                 placeholder="Specify the reason for the certificate request..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -315,13 +315,13 @@ export default function SalaryCertificatePage() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Search by name, first name or employee ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -330,50 +330,50 @@ export default function SalaryCertificatePage() {
 
         {/* Certificate list */}
         <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="px-6 py-4 border-b border-zinc-200">
+            <h2 className="text-lg font-semibold text-zinc-900">
               Generated Certificates ({filteredDocuments.length})
             </h2>
           </div>
 
           {loading ? (
             <div className="p-6 text-center">
-              <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-gray-400" />
-              <p className="text-gray-500">Loading...</p>
+              <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-zinc-400" />
+              <p className="text-zinc-500">Loading...</p>
             </div>
           ) : filteredDocuments.length === 0 ? (
             <div className="p-6 text-center">
-              <Award className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-500">No certificates found</p>
+              <Award className="w-12 h-12 mx-auto mb-4 text-zinc-400" />
+              <p className="text-zinc-500">No certificates found</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-zinc-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Employee
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Type
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Period
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Generation Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-zinc-200">
                   {filteredDocuments.map((document) => (
-                    <tr key={document.id} className="hover:bg-gray-50">
+                    <tr key={document.id} className="hover:bg-zinc-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
@@ -382,29 +382,29 @@ export default function SalaryCertificatePage() {
                             </div>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-zinc-900">
                               {document.employee.firstName} {document.employee.lastName}
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-zinc-500">
                               {document.employee.employeeId} • {document.employee.position}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {document.metadata?.certificateType ? 
                           certificateTypes.find(t => t.value === document.metadata.certificateType)?.label || 
                           document.metadata.certificateType : 
                           'N/A'
                         }
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                         {document.period}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(document.status)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                         {new Date(document.generationDate).toLocaleDateString('en-US')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -425,7 +425,7 @@ export default function SalaryCertificatePage() {
                           </button>
                           <button
                             onClick={() => window.print()}
-                            className="text-gray-600 hover:text-gray-800"
+                            className="text-zinc-600 hover:text-zinc-800"
                             title="Print"
                           >
                             <Printer className="w-4 h-4" />

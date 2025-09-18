@@ -1,13 +1,20 @@
     // app/dashboard/admin/_components/dashboardComponent.tsx
     "use client";
 
-    import { useState, useEffect } from 'react';
-    import Head from 'next/head';
-    import { Advance, Employee } from '@prisma/client';
-    import EmployeeForm from '../../../../components/EmployeeForm';
-    import EmployeeList from '../../../../components/EmployeeList';
-    import EmployeeDetails from '../../../../components/EmployeeDetails';
-    import PayrollSlip from '../../../../components/PayrollSlip';
+import { useState, useEffect } from 'react';
+import { Advance, Employee } from '@prisma/client';
+import EmployeeForm from '../../../../components/EmployeeForm';
+import EmployeeList from '../../../../components/EmployeeList';
+import EmployeeDetails from '../../../../components/EmployeeDetails';
+import PayrollSlip from '../../../../components/PayrollSlip';
+import { MdOutlinePeopleAlt } from "react-icons/md";
+import { FaPiggyBank, FaCalculator } from "react-icons/fa6";
+import { IoDocumentText, IoWarning } from "react-icons/io5";
+import { HiBanknotes } from "react-icons/hi2";
+import { IoMdAdd } from "react-icons/io";
+import { TbReportAnalytics } from "react-icons/tb";
+
+import { Card } from '@/components/ui/card';
 
     export default function DashboardComponent() {
     const [view, setView] = useState("dashboard");
@@ -32,12 +39,12 @@
     };
 
     return (
-        <div className="p-6">
+        <div className="py-6">
         {/* Navigation */}
         <nav className="flex gap-2 mb-6 flex-wrap">
             <button
             onClick={() => setView("dashboard")}
-            className={`payroll-button-secondary ${
+            className={`payroll-button-secondary cursor-pointer ${
                 view === "dashboard" ? "bg-blue-600 text-white" : ""
             }`}
             >
@@ -45,7 +52,7 @@
             </button>
             <button
             onClick={() => setView("employees")}
-            className={`payroll-button-secondary ${
+            className={`payroll-button-secondary cursor-pointer ${
                 view === "employees" ? "bg-blue-600 text-white" : ""
             }`}
             >
@@ -53,7 +60,7 @@
             </button>
             <button
             onClick={() => setView("payroll")}
-            className={`payroll-button-secondary ${
+            className={`payroll-button-secondary cursor-pointer ${
                 view === "payroll" ? "bg-blue-600 text-white" : ""
             }`}
             >
@@ -61,7 +68,7 @@
             </button>
             <button
             onClick={() => setView("documents")}
-            className={`payroll-button-secondary ${
+            className={`payroll-button-secondary cursor-pointer ${
                 view === "documents" ? "bg-blue-600 text-white" : ""
             }`}
             >
@@ -69,7 +76,7 @@
             </button>
             <button
             onClick={() => setView("reports")}
-            className={`payroll-button-secondary ${
+            className={`payroll-button-secondary cursor-pointer ${
                 view === "reports" ? "bg-blue-600 text-white" : ""
             }`}
             >
@@ -77,7 +84,7 @@
             </button>
             <button
             onClick={() => setView("settings")}
-            className={`payroll-button-secondary ${
+            className={`payroll-button-secondary cursor-pointer ${
                 view === "settings" ? "bg-blue-600 text-white" : ""
             }`}
             >
@@ -86,9 +93,9 @@
         </nav>
 
         {/* Selected Content */}
-        <div className="p-4 border rounded-lg bg-white shadow">
+        <Card className="p-4 rounded-lg bg-[#f3f8fc] border-0 shadow-md">
             {renderContent()}
-        </div>
+        </Card>
         </div>
     );
     }
@@ -130,8 +137,8 @@
         return (
         <div className="space-y-6">
             <div>
-            <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <h2 className="text-2xl font-bold tracking-tighter text-zinc-900">Dashboard</h2>
+            <p className="mt-1 text-sm text-zinc-600">
                 Overview of payroll management
             </p>
             </div>
@@ -141,11 +148,11 @@
                 <div className="p-5">
                     <div className="flex items-center">
                     <div className="flex-shrink-0">
-                        <div className="w-8 h-8 bg-gray-200 rounded"></div>
+                        <div className="w-8 h-8 bg-zinc-200 rounded"></div>
                     </div>
                     <div className="ml-5 w-0 flex-1">
-                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                        <div className="h-6 bg-gray-200 rounded"></div>
+                        <div className="h-4 bg-zinc-200 rounded mb-2"></div>
+                        <div className="h-6 bg-zinc-200 rounded"></div>
                     </div>
                     </div>
                 </div>
@@ -160,23 +167,25 @@
         return (
         <div className="space-y-6">
             <div>
-            <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <h2 className="text-2xl font-bold text-zinc-900">Dashboard</h2>
+            <p className="mt-1 text-sm text-zinc-600">
                 Overview of payroll management
             </p>
             </div>
-            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="bg-rose-50 border border-rose-200 rounded-md p-4">
             <div className="flex">
                 <div className="flex-shrink-0">
-                <span className="text-red-400">⚠️</span>
+                <span className="text-rose-400">
+                    <IoWarning/>
+                </span>
                 </div>
                 <div className="ml-3">
-                <p className="text-sm text-red-800">{error}</p>
+                <p className="text-sm text-rose-500">{error}</p>
                 </div>
                 <div className="ml-auto pl-3">
                 <button
                     onClick={fetchDashboardStats}
-                    className="text-red-400 hover:text-red-600"
+                    className="text-rose-400 hover:text-rose-600"
                 >
                     Retry
                 </button>
@@ -191,19 +200,19 @@
         { 
         title: 'Active Employees', 
         value: stats?.totalEmployees?.toString() || '0', 
-        icon: '👥', 
+        icon: <MdOutlinePeopleAlt />, 
         color: 'blue' 
         },
         { 
         title: 'Current Month Payrolls', 
         value: stats?.currentMonthPayrolls?.toString() || '0', 
-        icon: '💰', 
+        icon: <FaPiggyBank/>, 
         color: 'green' 
         },
         { 
         title: 'Documents Generated', 
         value: stats?.documentsThisMonth?.toString() || '0', 
-        icon: '📄', 
+        icon: <IoDocumentText />, 
         color: 'purple' 
         },
         { 
@@ -212,7 +221,7 @@
             style: 'currency',
             currency: 'KES',
         }).format(stats?.totalPayrollAmount || 0), 
-        icon: '💵', 
+        icon: <HiBanknotes />, 
         color: 'yellow' 
         },
     ];
@@ -220,27 +229,27 @@
     return (
         <div className="space-y-6">
         <div>
-            <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-            <p className="mt-1 text-sm text-gray-600">
-            Overview of payroll management - {stats?.currentPeriod}
+            <h2 className="text-2xl font-bold tracking-tighter text-zinc-900">Dashboard</h2>
+            <p className="mt-0 text-sm tracking-tighter text-zinc-800 capitalize">
+            Overview of payroll management&nbsp;-&nbsp;<span className='tracking-normal font-semibold'>{stats?.currentPeriod}</span>
             </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-[7vh]">
             {statsCards.map((stat, index) => (
-            <div key={index} className="bg-white overflow-hidden shadow rounded-lg">
+            <div key={index} className="odd:bg-[#1a2837] even:bg-[#2f5675] overflow-hidden shadow rounded-md h-[15vh]">
                 <div className="p-5">
                 <div className="flex items-center">
                     <div className="flex-shrink-0">
-                    <span className="text-2xl">{stat.icon}</span>
+                    <span className="text-3xl text-[#ccddea]">{stat.icon}</span>
                     </div>
                     <div className="ml-5 w-0 flex-1">
                     <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">
+                        <dt className="text-sm font-medium text-blue-100 truncate tracking-tighter">
                         {stat.title}
                         </dt>
-                        <dd className="text-lg font-medium text-gray-900">
+                        <dd className="text-2xl font-medium text-white mt-1">
                         {stat.value}
                         </dd>
                     </dl>
@@ -255,12 +264,12 @@
         {stats?.recentEmployees && stats.recentEmployees.length > 0 && (
             <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                <h3 className="text-lg leading-6 font-medium text-zinc-900 mb-4">
                 Recently Added Employees
                 </h3>
                 <div className="space-y-3">
                 {stats.recentEmployees.map((employee: Employee) => (
-                    <div key={employee.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                    <div key={employee.id} className="flex items-center justify-between py-2 border-b border-zinc-100 last:border-b-0">
                     <div className="flex items-center">
                         <div className="flex-shrink-0 h-8 w-8">
                         <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
@@ -270,13 +279,13 @@
                         </div>
                         </div>
                         <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-zinc-900">
                             {employee.firstName} {employee.lastName}
                         </p>
-                        <p className="text-xs text-gray-500">{employee.position}</p>
+                        <p className="text-xs text-zinc-500">{employee.position}</p>
                         </div>
                     </div>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-zinc-400">
                         {new Date(employee.createdAt).toLocaleDateString('en-KE')}
                     </div>
                     </div>
@@ -287,9 +296,9 @@
         )}
 
         {/* Quick Actions */}
-        <div className="bg-white shadow rounded-lg">
+        <div className="bg-white shadow-md rounded-md">
             <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
+            <h3 className="text-lg leading-6 tracking-tighter font-medium text-zinc-900">
                 Quick Actions
             </h3>
             <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -297,36 +306,38 @@
                 { 
                     title: 'Add Employee', 
                     description: 'Create a new employee record', 
-                    icon: '➕',
+                    icon: <IoMdAdd />,
                     href: '/employees',
                 },
                 { 
                     title: 'Calculate Payroll', 
                     description: 'Run monthly payroll calculation', 
-                    icon: '🧮',
+                    icon: <FaCalculator/>,
                     href: '/payroll',
                 },
                 { 
                     title: 'View Reports', 
                     description: 'Access payroll reports', 
-                    icon: '📋',
+                    icon: <TbReportAnalytics />,
                     href: '/reports',
                 },
                 ].map((action, index) => (
-                <div key={index} className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300">
+                <div key={index} className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset 
+                focus-within:ring-blue-500 rounded-lg border border-zinc-200 hover:border-transparent hover:bg-[#e6f0f8] 
+                transition ease-in-out duration-300 hover:scale-105">
                     <div>
                     <span className="rounded-lg inline-flex p-3 bg-blue-50 text-blue-600 ring-4 ring-white">
                         <span className="text-xl">{action.icon}</span>
                     </span>
                     </div>
                     <div className="mt-4">
-                    <h3 className="text-lg font-medium">
+                    <h3 className="text-lg font-medium tracking-tight">
                         <a href={action.href} className="focus:outline-none">
                         <span className="absolute inset-0" aria-hidden="true" />
                         {action.title}
                         </a>
                     </h3>
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-[14px] text-zinc-400 tracking-tighter font-light">
                         {action.description}
                     </p>
                     </div>
@@ -517,8 +528,8 @@
         <div className="space-y-6">
             <div className="flex justify-between items-center">
             <div>
-                <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
-                <p className="mt-1 text-sm text-gray-600">
+                <h2 className="text-2xl font-bold text-zinc-900">Employee Management</h2>
+                <p className="mt-1 text-sm text-zinc-600">
                 Manage employee information
                 </p>
             </div>
@@ -527,7 +538,7 @@
             <div className="px-4 py-5 sm:p-6">
                 <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="text-sm text-gray-500">Loading employees...</p>
+                <p className="text-sm text-zinc-500">Loading employees...</p>
                 </div>
             </div>
             </div>
@@ -539,8 +550,8 @@
         <div className="space-y-6">
         <div className="flex justify-between items-center">
             <div>
-            <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <h2 className="text-2xl font-bold text-zinc-900">Employee Management</h2>
+            <p className="mt-1 text-sm text-zinc-600">
                 Manage employee information ({employees.length} employee{employees.length > 1 ? 's' : ''})
             </p>
             </div>
@@ -671,10 +682,10 @@
         <div className="space-y-6">
             <div className="flex items-center justify-between">
             <div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold text-zinc-900">
                 Payslip - {selectedEmployee.firstName} {selectedEmployee.lastName}
                 </h2>
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="mt-1 text-sm text-zinc-600">
                 {months.find((m) => m.value === selectedMonth)?.label} {selectedYear}
                 </p>
             </div>
@@ -686,7 +697,7 @@
             </button>
             </div>
             
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-zinc-200 p-6">
             <PayrollSlip 
                 employee={selectedEmployee} 
                 month={selectedMonth} 
@@ -700,18 +711,18 @@
     return (
         <div className="space-y-6">
         <div>
-            <h2 className="text-2xl font-bold text-gray-900">Payroll Calculation</h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <h2 className="text-2xl font-bold text-zinc-900">Payroll Calculation</h2>
+            <p className="mt-1 text-sm text-zinc-600">
             Generate payslips for your employees
             </p>
         </div>
 
         {/* Period Selection */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Payroll Period</h3>
+        <div className="bg-white rounded-lg shadow-sm border border-zinc-200 p-6">
+            <h3 className="text-lg font-medium text-zinc-900 mb-4">Payroll Period</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label htmlFor="month" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="month" className="block text-sm font-medium text-zinc-700 mb-2">
                 Month
                 </label>
                 <select
@@ -728,7 +739,7 @@
                 </select>
             </div>
             <div>
-                <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="year" className="block text-sm font-medium text-zinc-700 mb-2">
                 Year
                 </label>
                 <select
@@ -748,9 +759,9 @@
         </div>
 
         {/* Employee List */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">
+        <div className="bg-white rounded-lg shadow-sm border border-zinc-200">
+            <div className="px-6 py-4 border-b border-zinc-200">
+            <h3 className="text-lg font-medium text-zinc-900">
                 Active Employees ({employees.length})
             </h3>
             </div>
@@ -758,7 +769,7 @@
             {loading ? (
             <div className="p-8 text-center">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="mt-2 text-sm text-gray-500">Loading employees...</p>
+                <p className="mt-2 text-sm text-zinc-500">Loading employees...</p>
             </div>
             ) : error ? (
             <div className="p-8 text-center">
@@ -773,15 +784,15 @@
             ) : employees.length === 0 ? (
             <div className="p-8 text-center">
                 <span className="text-6xl">👥</span>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">No Active Employees</h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <h3 className="mt-4 text-lg font-medium text-zinc-900">No Active Employees</h3>
+                <p className="mt-2 text-sm text-zinc-500">
                 Add employees to start calculating payroll
                 </p>
             </div>
             ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-zinc-200">
                 {employees.map((employee) => (
-                <div key={employee.id} className="p-6 hover:bg-gray-50">
+                <div key={employee.id} className="p-6 hover:bg-zinc-50">
                     <div className="flex items-center justify-between">
                     <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -793,14 +804,14 @@
                         </div>
                         <div className="ml-4">
                         <div className="flex items-center">
-                            <h4 className="text-sm font-medium text-gray-900">
+                            <h4 className="text-sm font-medium text-zinc-900">
                             {employee.firstName} {employee.lastName}
                             </h4>
                             <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             {employee.status}
                             </span>
                         </div>
-                        <div className="mt-1 flex items-center text-sm text-gray-500">
+                        <div className="mt-1 flex items-center text-sm text-zinc-500">
                             <span>{employee.employeeId}</span>
                             <span className="mx-2">•</span>
                             <span>{employee.position}</span>
@@ -816,13 +827,13 @@
                     </div>
                     <div className="flex items-center space-x-3">
                         <div className="text-right text-sm">
-                        <div className="text-gray-900 font-medium">
+                        <div className="text-zinc-900 font-medium">
                             {new Intl.NumberFormat('en-KE', {
                             style: 'currency',
                             currency: 'KES',
                             }).format(employee.grossSalary)}
                         </div>
-                        <div className="text-gray-500">Gross Salary</div>
+                        <div className="text-zinc-500">Gross Salary</div>
                         </div>
                         <button
                         onClick={() => handleGeneratePayroll(employee)}
@@ -845,8 +856,8 @@
     return (
         <div className="space-y-6">
         <div>
-            <h2 className="text-2xl font-bold text-gray-900">Documents</h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <h2 className="text-2xl font-bold text-zinc-900">Documents</h2>
+            <p className="mt-1 text-sm text-zinc-600">
             Manage payroll documents
             </p>
         </div>
@@ -855,8 +866,8 @@
             <div className="px-4 py-5 sm:p-6">
             <div className="text-center py-12">
                 <span className="text-6xl">📄</span>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">No Documents</h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <h3 className="mt-4 text-lg font-medium text-zinc-900">No Documents</h3>
+                <p className="mt-2 text-sm text-zinc-500">
                 Generated documents will appear here
                 </p>
             </div>
@@ -870,8 +881,8 @@
     return (
         <div className="space-y-6">
         <div>
-            <h2 className="text-2xl font-bold text-gray-900">Reports</h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <h2 className="text-2xl font-bold text-zinc-900">Reports</h2>
+            <p className="mt-1 text-sm text-zinc-600">
             View payroll reports
             </p>
         </div>
@@ -880,8 +891,8 @@
             <div className="px-4 py-5 sm:p-6">
             <div className="text-center py-12">
                 <span className="text-6xl">📈</span>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">No Reports</h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <h3 className="mt-4 text-lg font-medium text-zinc-900">No Reports</h3>
+                <p className="mt-2 text-sm text-zinc-500">
                 Reports will be available after payroll calculations
                 </p>
             </div>
@@ -895,8 +906,8 @@
     return (
         <div className="space-y-6">
         <div>
-            <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <h2 className="text-2xl font-bold text-zinc-900">Settings</h2>
+            <p className="mt-1 text-sm text-zinc-600">
             Configure application settings
             </p>
         </div>
@@ -905,12 +916,12 @@
             {/* Company Settings */}
             <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                <h3 className="text-lg leading-6 font-medium text-zinc-900">
                 Company Information
                 </h3>
                 <div className="mt-5 space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-zinc-700">
                     Company Name
                     </label>
                     <input
@@ -920,7 +931,7 @@
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-zinc-700">
                     Address
                     </label>
                     <textarea
@@ -939,12 +950,12 @@
             {/* Payroll Settings */}
             <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                <h3 className="text-lg leading-6 font-medium text-zinc-900">
                 Payroll Settings
                 </h3>
                 <div className="mt-5 space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-zinc-700">
                     NSSF Rate (%)
                     </label>
                     <input
@@ -955,7 +966,7 @@
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-zinc-700">
                     NSSF Max Contribution (KES)
                     </label>
                     <input
@@ -965,7 +976,7 @@
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-zinc-700">
                     SHIF Rate (%)
                     </label>
                     <input
@@ -976,7 +987,7 @@
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-zinc-700">
                     Housing Levy Rate (%)
                     </label>
                     <input

@@ -171,14 +171,14 @@ function RegularizationRecallContent() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Link href="/simulation">
-            <button className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            <button className="inline-flex items-center px-3 py-2 border border-zinc-300 shadow-sm text-sm leading-4 font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </button>
           </Link>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Regularization / Recall</h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <h2 className="text-2xl font-bold text-zinc-900">Regularization / Recall</h2>
+            <p className="mt-1 text-sm text-zinc-600">
               Calculate salary recalls and tax regularizations
             </p>
           </div>
@@ -186,7 +186,7 @@ function RegularizationRecallContent() {
         <div className="flex space-x-3">
           <button
             onClick={resetForm}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center px-4 py-2 border border-zinc-300 shadow-sm text-sm font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Reset
@@ -203,20 +203,20 @@ function RegularizationRecallContent() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Operation Parameters */}
         <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Operation Parameters</h3>
+          <div className="px-6 py-4 border-b border-zinc-200">
+            <h3 className="text-lg font-medium text-zinc-900">Operation Parameters</h3>
           </div>
           <div className="p-6 space-y-6">
             {/* Operation Type */}
             <div>
-              <label htmlFor="operationType" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="operationType" className="block text-sm font-medium text-zinc-700 mb-2">
                 Operation Type
               </label>
               <select
                 id="operationType"
                 value={operationType}
                 onChange={(e) => setOperationType(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
               >
                 <option value="recall">Salary Recall</option>
                 <option value="regularization">Tax Regularization</option>
@@ -227,7 +227,7 @@ function RegularizationRecallContent() {
             {/* Period */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="startDate" className="block text-sm font-medium text-zinc-700 mb-2">
                   Start Date
                 </label>
                 <input
@@ -235,11 +235,11 @@ function RegularizationRecallContent() {
                   id="startDate"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
                 />
               </div>
               <div>
-                <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="endDate" className="block text-sm font-medium text-zinc-700 mb-2">
                   End Date
                 </label>
                 <input
@@ -247,7 +247,7 @@ function RegularizationRecallContent() {
                   id="endDate"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
                 />
               </div>
             </div>
@@ -255,7 +255,7 @@ function RegularizationRecallContent() {
             {/* Salaries */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="currentGrossSalary" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="currentGrossSalary" className="block text-sm font-medium text-zinc-700 mb-2">
                   Current Gross Salary (KES)
                 </label>
                 <input
@@ -263,13 +263,13 @@ function RegularizationRecallContent() {
                   id="currentGrossSalary"
                   value={currentGrossSalary}
                   onChange={(e) => setCurrentGrossSalary(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
                   min="0"
                   step="100"
                 />
               </div>
               <div>
-                <label htmlFor="newGrossSalary" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="newGrossSalary" className="block text-sm font-medium text-zinc-700 mb-2">
                   New Gross Salary (KES)
                 </label>
                 <input
@@ -277,7 +277,7 @@ function RegularizationRecallContent() {
                   id="newGrossSalary"
                   value={newGrossSalary}
                   onChange={(e) => setNewGrossSalary(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
                   min="0"
                   step="100"
                 />
@@ -287,14 +287,14 @@ function RegularizationRecallContent() {
             {/* Family Status */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="familyStatus" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="familyStatus" className="block text-sm font-medium text-zinc-700 mb-2">
                   Family Status
                 </label>
                 <select
                   id="familyStatus"
                   value={familyStatus}
                   onChange={(e) => setFamilyStatus(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
                 >
                   <option value="single">Single</option>
                   <option value="married">Married</option>
@@ -303,7 +303,7 @@ function RegularizationRecallContent() {
                 </select>
               </div>
               <div>
-                <label htmlFor="numberOfDependants" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="numberOfDependants" className="block text-sm font-medium text-zinc-700 mb-2">
                   Number of Dependants
                 </label>
                 <input
@@ -311,7 +311,7 @@ function RegularizationRecallContent() {
                   id="numberOfDependants"
                   value={numberOfDependants}
                   onChange={(e) => setNumberOfDependants(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
                   min="0"
                   max="10"
                 />
@@ -321,7 +321,7 @@ function RegularizationRecallContent() {
             {/* Deductions */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="professionalExpenses" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="professionalExpenses" className="block text-sm font-medium text-zinc-700 mb-2">
                   Professional Expenses (KES)
                 </label>
                 <input
@@ -329,13 +329,13 @@ function RegularizationRecallContent() {
                   id="professionalExpenses"
                   value={professionalExpenses}
                   onChange={(e) => setProfessionalExpenses(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
                   min="0"
                   step="50"
                 />
               </div>
               <div>
-                <label htmlFor="otherDeductions" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="otherDeductions" className="block text-sm font-medium text-zinc-700 mb-2">
                   Other Deductions (KES)
                 </label>
                 <input
@@ -343,7 +343,7 @@ function RegularizationRecallContent() {
                   id="otherDeductions"
                   value={otherDeductions}
                   onChange={(e) => setOtherDeductions(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
                   min="0"
                   step="50"
                 />
@@ -354,14 +354,14 @@ function RegularizationRecallContent() {
 
         {/* Calculation Results */}
         <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Calculation Results</h3>
+          <div className="px-6 py-4 border-b border-zinc-200">
+            <h3 className="text-lg font-medium text-zinc-900">Calculation Results</h3>
           </div>
           <div className="p-6">
             {loading ? (
               <div className="text-center py-8">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                <p className="mt-2 text-sm text-gray-500">Calculating...</p>
+                <p className="mt-2 text-sm text-zinc-500">Calculating...</p>
               </div>
             ) : results ? (
               <div className="space-y-6">
@@ -379,28 +379,28 @@ function RegularizationRecallContent() {
 
                 {/* Monthly Difference */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Monthly Difference</h4>
+                  <h4 className="text-sm font-medium text-zinc-700 mb-3">Monthly Difference</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between items-center py-1">
-                      <span className="text-sm text-gray-600">Gross Salary</span>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm text-zinc-600">Gross Salary</span>
+                      <span className="text-sm font-medium text-zinc-900">
                         {formatDifference(results.monthlyDifference.grossSalary)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-1">
-                      <span className="text-sm text-gray-600">Contributions</span>
+                      <span className="text-sm text-zinc-600">Contributions</span>
                       <span className="text-sm text-red-600">
                         {formatDifference(results.monthlyDifference.contributions)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-1">
-                      <span className="text-sm text-gray-600">PAYE</span>
+                      <span className="text-sm text-zinc-600">PAYE</span>
                       <span className="text-sm text-red-600">
                         {formatDifference(results.monthlyDifference.paye)}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-t border-gray-200">
-                      <span className="text-sm font-medium text-gray-700">Monthly Net</span>
+                    <div className="flex justify-between items-center py-2 border-t border-zinc-200">
+                      <span className="text-sm font-medium text-zinc-700">Monthly Net</span>
                       <span className="text-sm font-semibold text-green-600">
                         {formatDifference(results.monthlyDifference.netSalary)}
                       </span>
@@ -410,22 +410,22 @@ function RegularizationRecallContent() {
 
                 {/* Total Recall */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Total Recall for the Period</h4>
+                  <h4 className="text-sm font-medium text-zinc-700 mb-3">Total Recall for the Period</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between items-center py-1">
-                      <span className="text-sm text-gray-600">Gross Recall</span>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm text-zinc-600">Gross Recall</span>
+                      <span className="text-sm font-medium text-zinc-900">
                         {formatCurrency(results.totalRecall.grossSalary)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-1">
-                      <span className="text-sm text-gray-600">NSSF Adjustment</span>
+                      <span className="text-sm text-zinc-600">NSSF Adjustment</span>
                       <span className="text-sm text-red-600">
                         -{formatCurrency(results.nssfAdjustment)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-1">
-                      <span className="text-sm text-gray-600">PAYE Adjustment</span>
+                      <span className="text-sm text-zinc-600">PAYE Adjustment</span>
                       <span className="text-sm text-red-600">
                         -{formatCurrency(results.payeAdjustment)}
                       </span>
@@ -456,8 +456,8 @@ function RegularizationRecallContent() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-sm text-gray-500">
+                <TrendingUp className="h-12 w-12 text-zinc-400 mx-auto mb-4" />
+                <p className="text-sm text-zinc-500">
                   Configure the parameters to view results
                 </p>
               </div>
@@ -469,40 +469,40 @@ function RegularizationRecallContent() {
       {/* Calculation Details */}
       {results && (
         <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Calculation Details</h3>
+          <div className="px-6 py-4 border-b border-zinc-200">
+            <h3 className="text-lg font-medium text-zinc-900">Calculation Details</h3>
           </div>
           <div className="p-6">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-zinc-200">
+                <thead className="bg-zinc-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Item
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Current Calculation
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       New Calculation
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Monthly Difference
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                       Total Recall
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-zinc-200">
                   <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900">
                       Gross Salary
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                       {formatCurrency(results.currentCalculation.grossSalary)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                       {formatCurrency(results.newCalculation.grossSalary)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
@@ -513,13 +513,13 @@ function RegularizationRecallContent() {
                     </td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900">
                       Social Contributions
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                       {formatCurrency(results.currentCalculation.totalContributions)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                       {formatCurrency(results.newCalculation.totalContributions)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">
@@ -530,13 +530,13 @@ function RegularizationRecallContent() {
                     </td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900">
                       PAYE
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                       {formatCurrency(results.currentCalculation.paye)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                       {formatCurrency(results.newCalculation.paye)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">
@@ -546,14 +546,14 @@ function RegularizationRecallContent() {
                       {formatCurrency(results.totalRecall.paye)}
                     </td>
                   </tr>
-                  <tr className="bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                  <tr className="bg-zinc-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-zinc-900">
                       Net Salary
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900">
                       {formatCurrency(results.currentCalculation.netSalary)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900">
                       {formatCurrency(results.newCalculation.netSalary)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
@@ -573,8 +573,8 @@ function RegularizationRecallContent() {
       {/* Important Information */}
       {results && (
         <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Important Information</h3>
+          <div className="px-6 py-4 border-b border-zinc-200">
+            <h3 className="text-lg font-medium text-zinc-900">Important Information</h3>
           </div>
           <div className="p-6">
             <div className="space-y-4">

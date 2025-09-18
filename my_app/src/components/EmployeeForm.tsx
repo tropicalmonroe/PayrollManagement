@@ -142,8 +142,8 @@ const handleSubmit = async (e: React.FormEvent) => {
 return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
     <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <div className="px-6 py-4 border-b border-zinc-200">
+        <h2 className="text-xl font-semibold text-zinc-900">
             {isEditing ? 'Edit Employee' : 'Add New Employee'}
         </h2>
         </div>
@@ -152,11 +152,11 @@ return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Personal Information */}
             <div className="lg:col-span-3">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
+            <h3 className="text-lg font-medium text-zinc-900 mb-4">Personal Information</h3>
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Employee ID <span className="text-red-500">*</span>
             </label>
             <input
@@ -171,7 +171,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Last Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -186,7 +186,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 First Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -201,7 +201,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 ID Number
             </label>
             <input
@@ -216,7 +216,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 NSSF Number
             </label>
             <input
@@ -230,7 +230,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Marital Status
             </label>
             <select
@@ -247,7 +247,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Date of Birth
             </label>
             <input
@@ -261,7 +261,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Phone Number
             </label>
             <input
@@ -276,7 +276,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Email
             </label>
             <input
@@ -291,7 +291,7 @@ return (
             </div>
 
             <div className="lg:col-span-3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Address
             </label>
             <textarea
@@ -306,11 +306,11 @@ return (
 
             {/* Professional Information */}
             <div className="lg:col-span-3 mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Professional Information</h3>
+            <h3 className="text-lg font-medium text-zinc-900 mb-4">Professional Information</h3>
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Position <span className="text-red-500">*</span>
             </label>
             <input
@@ -325,7 +325,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Hire Date <span className="text-red-500">*</span>
             </label>
             <input
@@ -339,7 +339,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Status
             </label>
             <select
@@ -357,7 +357,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Number of Deductions
             </label>
             <input
@@ -371,7 +371,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Working Days per Month
             </label>
             <input
@@ -387,11 +387,11 @@ return (
 
             {/* Salary Information */}
             <div className="lg:col-span-3 mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Salary Information</h3>
+            <h3 className="text-lg font-medium text-zinc-900 mb-4">Salary Information</h3>
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Base Salary (KES) <span className="text-red-500">*</span>
             </label>
             <input
@@ -408,7 +408,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Housing Allowance (KES)
             </label>
             <input
@@ -424,7 +424,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Meal Allowance (KES)
             </label>
             <input
@@ -440,7 +440,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Transport Allowance (KES)
             </label>
             <input
@@ -456,7 +456,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Representation Allowance (KES)
             </label>
             <input
@@ -473,59 +473,59 @@ return (
 
             {/* Kenyan Contributions (optional) */}
             <div className="lg:col-span-3 mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Kenyan Contributions (optional)</h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <h3 className="text-lg font-medium text-zinc-900 mb-4">Kenyan Contributions (optional)</h3>
+            <p className="text-sm text-zinc-600 mb-4">
                 Check the contributions to apply with standard rates. If unchecked, automatic calculations based on salary will be used.
             </p>
             </div>
 
             <div className="lg:col-span-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+                <div className="flex items-center space-x-3 p-3 border border-zinc-200 rounded-lg">
                 <input
                     type="checkbox"
                     name="useNssfEmployee"
                     checked={formData.useNssfEmployee}
                     onChange={(e) => setFormData((prev) => ({ ...prev, useNssfEmployee: e.target.checked }))}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-zinc-300 rounded"
                 />
                 <div className="flex-1">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-zinc-700">
                     NSSF Contribution
                     </label>
-                    <p className="text-xs text-gray-500">6% of pensionable salary (capped)</p>
+                    <p className="text-xs text-zinc-500">6% of pensionable salary (capped)</p>
                 </div>
                 </div>
 
-                <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+                <div className="flex items-center space-x-3 p-3 border border-zinc-200 rounded-lg">
                 <input
                     type="checkbox"
                     name="useShifEmployee"
                     checked={formData.useShifEmployee}
                     onChange={(e) => setFormData((prev) => ({ ...prev, useShifEmployee: e.target.checked }))}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-zinc-300 rounded"
                 />
                 <div className="flex-1">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-zinc-700">
                     SHIF Contribution
                     </label>
-                    <p className="text-xs text-gray-500">2.75% of gross salary</p>
+                    <p className="text-xs text-zinc-500">2.75% of gross salary</p>
                 </div>
                 </div>
 
-                <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+                <div className="flex items-center space-x-3 p-3 border border-zinc-200 rounded-lg">
                 <input
                     type="checkbox"
                     name="useHousingLevy"
                     checked={formData.useHousingLevy}
                     onChange={(e) => setFormData((prev) => ({ ...prev, useHousingLevy: e.target.checked }))}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-zinc-300 rounded"
                 />
                 <div className="flex-1">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-zinc-700">
                     Housing Levy
                     </label>
-                    <p className="text-xs text-gray-500">1.5% of gross salary</p>
+                    <p className="text-xs text-zinc-500">1.5% of gross salary</p>
                 </div>
                 </div>
             </div>
@@ -533,11 +533,11 @@ return (
 
             {/* Banking Information */}
             <div className="lg:col-span-3 mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Banking Information</h3>
+            <h3 className="text-lg font-medium text-zinc-900 mb-4">Banking Information</h3>
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Bank Account
             </label>
             <input
@@ -551,7 +551,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Bank Branch
             </label>
             <input
@@ -590,7 +590,7 @@ return (
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
+        <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-zinc-200">
             <button
             type="button"
             onClick={onCancel}

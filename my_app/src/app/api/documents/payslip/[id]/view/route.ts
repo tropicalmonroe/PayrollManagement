@@ -123,7 +123,7 @@ return `
         .border-b { border-bottom-width: 1px; }
         .border-r { border-right-width: 1px; }
         .border-black { border-color: black; }
-        .bg-gray-100 { background-color: #f3f4f6; }
+        .bg-zinc-100 { background-color: #f3f4f6; }
         .p-1 { padding: 4px; }
         .p-2 { padding: 8px; }
         .w-32 { width: 128px; }
@@ -220,7 +220,7 @@ return `
         <!-- Payroll table -->
         <div class="border-2 border-black text-xs">
             <!-- Table header -->
-            <div class="grid grid-cols-6 border-b-2 border-black bg-gray-100 font-bold">
+            <div class="grid grid-cols-6 border-b-2 border-black bg-zinc-100 font-bold">
                 <div class="border-r border-black p-1 text-center">Item</div>
                 <div class="border-r border-black p-1 text-center">Days</div>
                 <div class="border-r border-black p-1 text-center">Base</div>

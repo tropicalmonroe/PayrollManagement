@@ -85,7 +85,7 @@ return (
     )}
 
     {/* Salary certificate document */}
-    <div className="certificate-container bg-white p-8 max-w-4xl mx-auto border border-gray-300 print:border-0 print:p-6 print:max-w-none print:mx-0">
+    <div className="certificate-container bg-white p-8 max-w-4xl mx-auto border border-zinc-300 print:border-0 print:p-6 print:max-w-none print:mx-0">
         {/* Header */}
         <div className="header flex justify-between items-start mb-6 print:mb-4">
         <div className="logo">
@@ -221,7 +221,7 @@ return (
 
         {/* Footer */}
         <div className="footer text-center mt-8 print:mt-4 pt-4 print:pt-2 border-t border-black">
-        <p className="text-xs print:text-[10px] text-gray-600">
+        <p className="text-xs print:text-[10px] text-zinc-600">
             ADACPITAL - Management Company | Casablanca, Morocco {/* Translated ADACPITAL - Société de Gestion | Casablanca, Maroc */}
         </p>
         </div>

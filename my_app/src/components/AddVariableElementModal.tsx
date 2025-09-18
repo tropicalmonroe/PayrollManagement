@@ -192,15 +192,15 @@ const years = Array.from({ length: 10 }, (_, i) => {
 if (!isOpen) return null;
 
 return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div className="fixed inset-0 bg-zinc-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
         <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-gray-900">
+        <h3 className="text-lg font-medium text-zinc-900">
             {editElement ? 'Edit Variable Element' : 'Add Variable Element'} {/* Translated Ajouter/Modifier l'élément variable */}
         </h3>
         <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-zinc-400 hover:text-zinc-600"
         >
             <X className="w-6 h-6" />
         </button>
@@ -215,7 +215,7 @@ return (
         <form onSubmit={handleSubmit} className="space-y-4">
         {/* Employee */}
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
             Employee * {/* Translated Employé * */}
             </label>
             <select
@@ -223,7 +223,7 @@ return (
             value={formData.employeeId}
             onChange={handleInputChange}
             required
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+            className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
             >
             <option value="">Select an employee</option> {/* Translated Sélectionner un employé */}
             {employees.map((employee) => (
@@ -236,7 +236,7 @@ return (
 
         {/* Element Type */}
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
             Element Type * {/* Translated Type d'élément * */}
             </label>
             <select
@@ -244,7 +244,7 @@ return (
             value={formData.type}
             onChange={handleInputChange}
             required
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+            className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
             >
             <option value="">Select a type</option> {/* Translated Sélectionner un type */}
             {elementTypes.map((type) => (
@@ -257,7 +257,7 @@ return (
 
         {/* Description */}
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
             Description * {/* Translated Description * */}
             </label>
             <textarea
@@ -266,7 +266,7 @@ return (
             onChange={handleInputChange}
             required
             rows={3}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+            className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
             placeholder="Detailed description of the variable element" 
             />
         </div>
@@ -274,7 +274,7 @@ return (
         {/* Period */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Month * {/* Translated Mois * */}
             </label>
             <select
@@ -282,7 +282,7 @@ return (
                 value={formData.month}
                 onChange={handleInputChange}
                 required
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
             >
                 {months.map((month) => (
                 <option key={month.value} value={month.value}>
@@ -293,7 +293,7 @@ return (
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Year * {/* Translated Année * */}
             </label>
             <select
@@ -301,7 +301,7 @@ return (
                 value={formData.year}
                 onChange={handleInputChange}
                 required
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
             >
                 {years.map((year) => (
                 <option key={year} value={year}>
@@ -314,7 +314,7 @@ return (
 
         {/* Date */}
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
             Date * {/* Translated Date * */}
             </label>
             <input
@@ -323,7 +323,7 @@ return (
             value={formData.date}
             onChange={handleInputChange}
             required
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+            className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
             />
         </div>
 
@@ -331,7 +331,7 @@ return (
         {formData.type === 'OVERTIME' ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Number of Hours * {/* Translated Nombre d'heures * */}
                 </label>
                 <input
@@ -342,13 +342,13 @@ return (
                 step="0.5"
                 min="0"
                 required
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
                 placeholder="Ex: 8"
                 />
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Hourly Rate (KES) * {/* Translated Taux horaire (MAD) * */}
                 </label>
                 <input
@@ -359,13 +359,13 @@ return (
                 step="0.01"
                 min="0"
                 required
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
                 placeholder="Ex: 50.00"
                 />
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Total Amount (KES) {/* Translated Montant total (MAD) */}
                 </label>
                 <input
@@ -373,7 +373,7 @@ return (
                 name="amount"
                 value={formData.amount}
                 readOnly
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 sm:text-sm"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm bg-zinc-50 sm:text-sm"
                 placeholder="Calculated automatically"
                 />
             </div>
@@ -381,7 +381,7 @@ return (
         ) : (
             /* Amount for other types */
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Amount (KES) * {/* Translated Montant (MAD) * */}
             </label>
             <input
@@ -392,7 +392,7 @@ return (
                 step="0.01"
                 min="0"
                 required
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
                 placeholder="Ex: 1000.00"
             />
             </div>
@@ -403,7 +403,7 @@ return (
             <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0063b4]"
+            className="px-4 py-2 border border-zinc-300 rounded-md shadow-sm text-sm font-medium text-zinc-700 bg-white hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0063b4]"
             >
             Cancel {/* Translated Annuler */}
             </button>
