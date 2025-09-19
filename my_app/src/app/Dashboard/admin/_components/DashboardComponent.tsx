@@ -12,7 +12,8 @@ import { FaPiggyBank, FaCalculator } from "react-icons/fa6";
 import { IoCloseCircleSharp, IoDocumentText, IoPersonAddSharp, IoWarning } from "react-icons/io5";
 import { HiBanknotes } from "react-icons/hi2";
 import { IoIosWarning, IoMdAdd } from "react-icons/io";
-import { TbReportAnalytics } from "react-icons/tb";
+import { TbReportAnalytics, TbTrendingUp } from "react-icons/tb";
+
 
 import { Card } from '@/components/ui/card';
 
@@ -887,8 +888,8 @@ import { Card } from '@/components/ui/card';
     return (
         <div className="space-y-6">
         <div>
-            <h2 className="text-2xl font-bold text-zinc-900">Documents</h2>
-            <p className="mt-1 text-sm text-zinc-600">
+            <h2 className="text-2xl font-bold tracking-tighter text-zinc-900">Documents</h2>
+            <p className="mt-1 text-sm tracking-tighter capitalize text-zinc-700">
             Manage payroll documents
             </p>
         </div>
@@ -896,9 +897,13 @@ import { Card } from '@/components/ui/card';
         <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
             <div className="text-center py-12">
-                <span className="text-6xl">📄</span>
+                <div className='flex items-center justify-center'>
+                <span className="text-6xl text-rose-400 text-center">
+                    <IoDocumentText/>
+                </span>
+                </div>
                 <h3 className="mt-4 text-lg font-medium text-zinc-900">No Documents</h3>
-                <p className="mt-2 text-sm text-zinc-500">
+                <p className="mt-2 text-sm text-zinc-400 tracking-tight">
                 Generated documents will appear here
                 </p>
             </div>
@@ -911,25 +916,31 @@ import { Card } from '@/components/ui/card';
     function ReportsContent() {
     return (
         <div className="space-y-6">
-        <div>
-            <h2 className="text-2xl font-bold text-zinc-900">Reports</h2>
-            <p className="mt-1 text-sm text-zinc-600">
-            View payroll reports
-            </p>
-        </div>
-
-        <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-            <div className="text-center py-12">
-                <span className="text-6xl">📈</span>
-                <h3 className="mt-4 text-lg font-medium text-zinc-900">No Reports</h3>
-                <p className="mt-2 text-sm text-zinc-500">
-                Reports will be available after payroll calculations
+            <div className=''>
+                <h2 className="text-2xl font-bold text-zinc-50 tracking-tighter">Reports and Documents</h2>
+                <p className="mt-1 text-sm text-[#e6f0f8]">
+                View payroll reports and manage documents
                 </p>
             </div>
+
+            <div className="bg-white shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-6 flex flex-col justify-center items-center">
+                <div className="text-center py-12">
+                    <div className='flex justify-center items-center'>
+                    <div className='flex justify-center items-center w-20 h-20 bg-[#c7e0f0] rounded-2xl'>
+                    <span className="text-6xl text-[#1f4f6d] text-center">
+                        <TbTrendingUp />
+                        </span>
+                    </div>
+                    </div>
+                    <h3 className="mt-4 text-lg font-medium text-zinc-900 tracking-tight">No reports available</h3>
+                    <p className="mt-2 text-sm text-zinc-500 tracking-tight capitalize">
+                    Reports will be available after payroll calculations
+                    </p>
+                </div>
+                </div>
             </div>
-        </div>
-        </div>
+            </div>
     );
     }
 
@@ -966,7 +977,7 @@ import { Card } from '@/components/ui/card';
                     Address
                     </label>
                     <textarea
-                    className="payroll-input mt-1"
+                    className="payroll-input mt-1 resize-none"
                     rows={3}
                     placeholder="Company address"
                     />

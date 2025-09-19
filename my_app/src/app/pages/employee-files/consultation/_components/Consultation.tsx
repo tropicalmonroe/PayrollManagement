@@ -1,9 +1,9 @@
+"use client";
 import React, { useState, useEffect } from 'react';
-import Layout from '../../layout';
 import { Eye, ArrowLeft, Search, Filter } from 'lucide-react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { Employee, EmployeeStatus, MaritalStatus } from '@prisma/client';
-import EmployeeDetails from '../../../components/EmployeeDetails';
+import EmployeeDetails from '../../../../../components/EmployeeDetails';
 
 const EmployeeConsultationPage = () => {
   const router = useRouter();
@@ -140,60 +140,64 @@ const EmployeeConsultationPage = () => {
 
   if (loading) {
     return (
-      <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
             <div className="text-lg text-zinc-600">Loading...</div>
           </div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="p-6">
+      <div className="p-6 bg-white mt-[2vh] rounded-md">
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
+            className="flex items-center justify-center space-x-1 scale-95 hover:bg-[#3890bf] transition-colors duration-300 
+            mb-4 bg-rose-400 px-4 py-1 rounded-md"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back</span> {/* Translated Retour */}
-          </button>
+            <ArrowLeft className="w-5 h-5 text-white" />
+            <span className='tracking-tighter text-white'>Back</span>
+        </button>
           
-          <div className="flex items-center space-x-3 mb-4">
-            <Eye className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-zinc-900">Employee Profile Review</h1>
+          <div className="flex items-center space-x-3 my-4">
+            <div className="flex items-center justify-center w-10 h-10 bg-zinc-700 rounded-xl p-1">
+            <Eye className="w-6 h-6 text-blue-50" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tighter text-zinc-800">Employee Profile Review</h1>
           </div>
           
-          <p className="text-zinc-600 text-lg">
+          <p className="text-zinc-400 text-sm w-[17vw]">
             Read-only view of the employee’s complete profile (no modifications). 
           </p>
         </div>
 
         {/* Filters and search */}
-        <div className="bg-white p-4 rounded-lg shadow-sm border mb-6">
+        <div className="bg-[#1f435b] p-4 rounded-lg shadow-sm border">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-zinc-700 mb-1">
-                <Search className="w-4 h-4 inline mr-1" />
-                Search 
+              <div className='flex items-center justify-start'>
+              <label className="block text-sm font-medium text-zinc-50 mb-1">
+                <Search className="w-4 h-4 inline text-zinc-50 mr-2" />
+                Search
               </label>
+                </div> 
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Name, surname, employee ID, position..."
-                className="payroll-input"
+                className="payroll-input placeholder:text-zinc-700 placeholder:text-sm placeholder:font-medium placeholder:tracking-tight"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">
-                <Filter className="w-4 h-4 inline mr-1" />
+              <div className='flex items-center justify-start'>
+              <label className="block text-sm font-medium text-zinc-50 mb-1">
+                <Filter className="w-4 h-4 inline text-zinc-50 mr-2" />
                 Status {/* Translated Statut */}
               </label>
+              </div>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as EmployeeStatus | 'ALL')}
@@ -208,11 +212,11 @@ const EmployeeConsultationPage = () => {
               </select>
             </div>
 
-            <div className="flex items-end">
-              <div className="text-sm text-zinc-600">
-                {filteredEmployees.length} employee(s) found 
-              </div>
+            <div className="flex items-center">
+            <div className="text-sm text-zinc-50 mt-6 tracking-tight">
+            <span className='tracking-normal font-semibold'>{filteredEmployees.length}</span> employee(s) found
             </div>
+        </div>
           </div>
         </div>
 
@@ -221,7 +225,7 @@ const EmployeeConsultationPage = () => {
           <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="text-center py-12">
-                <Eye className="mx-auto h-12 w-12 text-zinc-400" />
+                <Eye className="mx-auto h-12 w-12 text-rose-400" />
                 <h3 className="mt-4 text-lg font-medium text-zinc-900">
                   {searchTerm || statusFilter !== 'ALL' ? 'No employees found' : 'No employees'}
                 </h3>
@@ -320,7 +324,7 @@ const EmployeeConsultationPage = () => {
                           className="text-blue-600 hover:text-blue-900 flex items-center space-x-1"
                           title="View full profile"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-4 h-4 " />
                           <span>View</span>
                         </button>
                       </td>
@@ -411,7 +415,6 @@ const EmployeeConsultationPage = () => {
           </div>
         )}
       </div>
-    </Layout>
   );
 };
 

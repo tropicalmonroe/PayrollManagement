@@ -1,9 +1,9 @@
+"use client";
 import React, { useState, useEffect } from 'react';
-import Layout from '../../layout';
 import { TrendingUp, ArrowLeft, Plus } from 'lucide-react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { Advance, Employee } from '@prisma/client';
-import AddAdvanceModal from '../../../components/AddAdvanceModal';
+import AddAdvanceModal from '../../../../../components/AddAdvanceModal';
 
 type AdvanceWithEmployee = Advance & {
   employee: Employee;
@@ -101,43 +101,44 @@ const SalaryAdvancesPage = () => {
 
   if (loading) {
     return (
-      <Layout>
         <div className="p-6">
           <div className="flex justify-center items-center h-64">
             <div className="text-lg text-zinc-600">Loading...</div>
           </div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="p-6">
+      <div className="p-6 bg-white mt-[2vh] rounded-md">
         <div className="mb-6">
           <button
-            onClick={() => router.back()}
-            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back</span>
-          </button>
+          onClick={() => router.back()}
+          className="flex items-center justify-center space-x-1 scale-95 hover:bg-[#3890bf] transition-colors duration-300 
+          mb-4 bg-rose-400 px-4 py-1 rounded-md"
+        >
+          <ArrowLeft className="w-5 h-5 text-white" />
+          <span className='tracking-tighter text-white'>Back</span>
+      </button>
           
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <TrendingUp className="w-8 h-8 text-green-600" />
-              <h1 className="text-3xl font-bold text-zinc-900">Salary Advances</h1>
+              <div className="flex items-center justify-center w-10 h-10 bg-zinc-700 rounded-xl p-1">
+              <TrendingUp className="w-6 h-6 text-blue-50" />
+              </div>
+              <h1 className="text-2xl font-bold tracking-tighter text-zinc-800">Salary Advances</h1>
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              className="flex items-center space-x-2 text-sm cursor-pointer bg-emerald-600 text-white px-4 
+              py-2 rounded-lg hover:bg-emerald-700 transition-colors"
             >
               <Plus className="w-4 h-4" />
               <span>New Advance</span>
             </button>
           </div>
           
-          <p className="text-zinc-600 text-lg">
+          <p className="text-zinc-400 text-sm w-[20vw]">
             Recording of granted advances, tracking, and automatic integration into monthly payroll.
           </p>
         </div>
@@ -147,17 +148,17 @@ const SalaryAdvancesPage = () => {
           <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="text-center py-12">
-                <TrendingUp className="mx-auto h-12 w-12 text-zinc-400" />
-                <h3 className="mt-4 text-lg font-medium text-zinc-900">
+                <TrendingUp className="mx-auto h-12 w-12 text-rose-400" />
+                <h3 className="mt-4 text-lg font-medium tracking-tight capitalize text-zinc-900">
                   No advances recorded
                 </h3>
-                <p className="mt-2 text-sm text-zinc-500">
+                <p className="mt-2 text-sm text-zinc-400 font-light">
                   Start by recording the first salary advance
                 </p>
                 <div className="mt-6">
                   <button
                     onClick={() => setShowAddModal(true)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     New Advance
@@ -312,7 +313,6 @@ const SalaryAdvancesPage = () => {
           />
         )}
       </div>
-    </Layout>
   );
 };
 

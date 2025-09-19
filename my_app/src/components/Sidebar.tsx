@@ -342,9 +342,9 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/employee-files/employee-record', title: 'Employee Profile' },
-            { href: '/employee-files/salary-advances', title: 'Salary Advances' },
-            { href: '/employee-files/consultation', title: 'Employee Profile View' },
+            { href: '/pages/employee-files/employee-record', title: 'Employee Profile' },
+            { href: '/pages/employee-files/salary-advances', title: 'Salary Advances' },
+            { href: '/pages/employee-files/consultation', title: 'Employee Profile View' },
             ]}
             isOpen={openMenus['employee-files']}
         />
