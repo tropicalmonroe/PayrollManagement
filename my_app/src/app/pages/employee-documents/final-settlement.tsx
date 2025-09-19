@@ -471,7 +471,7 @@ const FinalSettlementPage = () => {
                           
                           <button
                             onClick={() => removeCustomElement(element.id)}
-                            className="text-red-600 hover:text-red-800"
+                            className="text-rose-600 hover:text-rose-800"
                           >
                             <Minus className="w-4 h-4" />
                           </button>
@@ -619,7 +619,7 @@ const FinalSettlementPage = () => {
                 {/* Deductions detail */}
                 {settlementData.totalDeductions > 0 && (
                   <div className="mb-8">
-                    <h3 className="font-medium text-zinc-900 mb-4 bg-red-50 p-3 rounded">DEDUCTIONS</h3>
+                    <h3 className="font-medium text-zinc-900 mb-4 bg-rose-50 p-3 rounded">DEDUCTIONS</h3>
                     <div className="space-y-2 text-sm">
                       {settlementData.customElements.filter((e: SettlementElement) => e.type === 'DEDUCTION').map((element: SettlementElement) => (
                         <div key={element.id} className="flex justify-between">
@@ -629,7 +629,7 @@ const FinalSettlementPage = () => {
                       ))}
                       <div className="border-t border-zinc-200 pt-2 flex justify-between font-medium text-lg">
                         <span>TOTAL DEDUCTIONS</span>
-                        <span className="text-red-600">{formatCurrency(settlementData.totalDeductions)}</span>
+                        <span className="text-rose-600">{formatCurrency(settlementData.totalDeductions)}</span>
                       </div>
                     </div>
                   </div>

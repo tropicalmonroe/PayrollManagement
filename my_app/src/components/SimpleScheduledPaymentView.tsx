@@ -173,7 +173,7 @@ const getStatusBadge = (status: string, dueDate: Date) => {
     icon = CheckCircle;
     text = 'Paid';
     } else if (status === 'PENDING' && dueDateObj < now) {
-    color = 'bg-red-100 text-red-800';
+    color = 'bg-rose-100 text-rose-800';
     icon = AlertTriangle;
     text = 'Overdue';
     } else if (status === 'PENDING') {
@@ -298,12 +298,12 @@ return (
                     </div>
                 </div>
 
-                <div className="bg-red-50 p-4 rounded-lg">
+                <div className="bg-rose-50 p-4 rounded-lg">
                     <div className="flex items-center">
-                    <AlertTriangle className="w-5 h-5 text-red-600 mr-2" />
+                    <AlertTriangle className="w-5 h-5 text-rose-600 mr-2" />
                     <div>
-                        <p className="text-sm text-red-600 font-medium">Overdue</p>
-                        <p className="text-lg font-bold text-red-800">{stats.overdueInstallments}</p>
+                        <p className="text-sm text-rose-600 font-medium">Overdue</p>
+                        <p className="text-lg font-bold text-rose-800">{stats.overdueInstallments}</p>
                     </div>
                     </div>
                 </div>

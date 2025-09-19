@@ -464,16 +464,16 @@ const CreditManagement: React.FC = () => {
                           <div className="flex items-center">
                             <div className="w-16 bg-zinc-200 rounded-full h-2 mr-2">
                               <div 
-                                className={`h-2 rounded-full ${progressInfo.isLate ? 'bg-red-500' : 'bg-[#0063b4]'}`}
+                                className={`h-2 rounded-full ${progressInfo.isLate ? 'bg-rose-500' : 'bg-[#0063b4]'}`}
                                 style={{ width: `${Math.min(progressInfo.percentage, 100)}%` }}
                               ></div>
                             </div>
                             <div className="flex flex-col">
-                              <span className={`text-sm ${progressInfo.isLate ? 'text-red-600' : 'text-zinc-600'}`}>
+                              <span className={`text-sm ${progressInfo.isLate ? 'text-rose-600' : 'text-zinc-600'}`}>
                                 {Math.round(progressInfo.percentage)}%
                               </span>
                               {progressInfo.isLate && progressInfo.monthsLate > 0 && (
-                                <span className="text-xs text-red-500">
+                                <span className="text-xs text-rose-500">
                                   {progressInfo.monthsLate} months late
                                 </span>
                               )}
@@ -527,7 +527,7 @@ const CreditManagement: React.FC = () => {
                         <button
                           onClick={() => handleDeleteLoan(loan.id)}
                           disabled={deleteLoading}
-                          className="text-red-600 hover:text-red-900 p-1 rounded disabled:opacity-50"
+                          className="text-rose-600 hover:text-rose-900 p-1 rounded disabled:opacity-50"
                           title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />

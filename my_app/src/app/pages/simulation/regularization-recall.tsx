@@ -389,13 +389,13 @@ function RegularizationRecallContent() {
                     </div>
                     <div className="flex justify-between items-center py-1">
                       <span className="text-sm text-zinc-600">Contributions</span>
-                      <span className="text-sm text-red-600">
+                      <span className="text-sm text-rose-600">
                         {formatDifference(results.monthlyDifference.contributions)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-1">
                       <span className="text-sm text-zinc-600">PAYE</span>
-                      <span className="text-sm text-red-600">
+                      <span className="text-sm text-rose-600">
                         {formatDifference(results.monthlyDifference.paye)}
                       </span>
                     </div>
@@ -420,13 +420,13 @@ function RegularizationRecallContent() {
                     </div>
                     <div className="flex justify-between items-center py-1">
                       <span className="text-sm text-zinc-600">NSSF Adjustment</span>
-                      <span className="text-sm text-red-600">
+                      <span className="text-sm text-rose-600">
                         -{formatCurrency(results.nssfAdjustment)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-1">
                       <span className="text-sm text-zinc-600">PAYE Adjustment</span>
-                      <span className="text-sm text-red-600">
+                      <span className="text-sm text-rose-600">
                         -{formatCurrency(results.payeAdjustment)}
                       </span>
                     </div>
@@ -522,10 +522,10 @@ function RegularizationRecallContent() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                       {formatCurrency(results.newCalculation.totalContributions)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-rose-600">
                       {formatDifference(results.monthlyDifference.contributions)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-rose-600">
                       {formatCurrency(results.totalRecall.contributions)}
                     </td>
                   </tr>
@@ -539,10 +539,10 @@ function RegularizationRecallContent() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                       {formatCurrency(results.newCalculation.paye)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-rose-600">
                       {formatDifference(results.monthlyDifference.paye)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-rose-600">
                       {formatCurrency(results.totalRecall.paye)}
                     </td>
                   </tr>

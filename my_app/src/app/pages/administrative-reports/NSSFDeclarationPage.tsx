@@ -478,7 +478,7 @@ const NSSFDeclarationPage = () => {
                           {employee.nssfNumber ? (
                             <span className="text-green-600">NSSF: {employee.nssfNumber}</span>
                           ) : (
-                            <span className="text-red-600">NSSF missing</span>
+                            <span className="text-rose-600">NSSF missing</span>
                           )}
                         </div>
                       </div>
@@ -564,7 +564,7 @@ const NSSFDeclarationPage = () => {
 
                 <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-zinc-200">
                   <div className="text-center">
-                    <div className="text-lg font-bold text-red-600">{formatCurrency(summary.totalEmployeeContributions)}</div>
+                    <div className="text-lg font-bold text-rose-600">{formatCurrency(summary.totalEmployeeContributions)}</div>
                     <div className="text-sm text-zinc-600">Employee contributions</div>
                   </div>
                   <div className="text-center">
@@ -660,7 +660,7 @@ const NSSFDeclarationPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-blue-600">
                           {formatCurrency(entry.nssfBase)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-red-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-rose-600">
                           {formatCurrency(entry.employeeContribution)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-orange-600">
@@ -683,7 +683,7 @@ const NSSFDeclarationPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-blue-600">
                         {formatCurrency(summary?.totalNSSFBase || 0)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-red-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-rose-600">
                         {formatCurrency(summary?.totalEmployeeContributions || 0)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-orange-600">

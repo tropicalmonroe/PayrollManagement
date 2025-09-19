@@ -157,7 +157,7 @@ return (
 
             <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
-                Employee ID <span className="text-red-500">*</span>
+                Employee ID <span className="text-rose-500">*</span>
             </label>
             <input
                 type="text"
@@ -172,7 +172,7 @@ return (
 
             <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
-                Last Name <span className="text-red-500">*</span>
+                Last Name <span className="text-rose-500">*</span>
             </label>
             <input
                 type="text"
@@ -187,7 +187,7 @@ return (
 
             <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
-                First Name <span className="text-red-500">*</span>
+                First Name <span className="text-rose-500">*</span>
             </label>
             <input
                 type="text"
@@ -311,7 +311,7 @@ return (
 
             <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
-                Position <span className="text-red-500">*</span>
+                Position <span className="text-rose-500">*</span>
             </label>
             <input
                 type="text"
@@ -326,7 +326,7 @@ return (
 
             <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
-                Hire Date <span className="text-red-500">*</span>
+                Hire Date <span className="text-rose-500">*</span>
             </label>
             <input
                 type="date"
@@ -392,7 +392,7 @@ return (
 
             <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
-                Base Salary (KES) <span className="text-red-500">*</span>
+                Base Salary (KES) <span className="text-rose-500">*</span>
             </label>
             <input
                 type="number"

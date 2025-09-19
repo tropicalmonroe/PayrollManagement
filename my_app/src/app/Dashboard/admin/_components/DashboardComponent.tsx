@@ -9,9 +9,9 @@ import EmployeeDetails from '../../../../components/EmployeeDetails';
 import PayrollSlip from '../../../../components/PayrollSlip';
 import { MdOutlinePeopleAlt } from "react-icons/md";
 import { FaPiggyBank, FaCalculator } from "react-icons/fa6";
-import { IoDocumentText, IoWarning } from "react-icons/io5";
+import { IoCloseCircleSharp, IoDocumentText, IoPersonAddSharp, IoWarning } from "react-icons/io5";
 import { HiBanknotes } from "react-icons/hi2";
-import { IoMdAdd } from "react-icons/io";
+import { IoIosWarning, IoMdAdd } from "react-icons/io";
 import { TbReportAnalytics } from "react-icons/tb";
 
 import { Card } from '@/components/ui/card';
@@ -550,39 +550,41 @@ import { Card } from '@/components/ui/card';
         <div className="space-y-6">
         <div className="flex justify-between items-center">
             <div>
-            <h2 className="text-2xl font-bold text-zinc-900">Employee Management</h2>
-            <p className="mt-1 text-sm text-zinc-600">
-                Manage employee information ({employees.length} employee{employees.length > 1 ? 's' : ''})
-            </p>
+                <h2 className="text-2xl font-bold tracking-tighter text-zinc-900">Employee Management</h2>
+                <p className="mt-0 text-sm tracking-tighter text-zinc-700 capitalize">
+                Manage employee information&nbsp;-&nbsp;<span className='tracking-normal font-semibold'>({employees.length} employee{employees.length > 1 ? 's' : ''})</span>
+                </p>
             </div>
-            <button 
+            <button
             onClick={handleAddClick}
-            className="payroll-button"
+            className="payroll-button flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-[#142b3d]"
             >
-            Add Employee
+            <IoPersonAddSharp className='mr-2 w-[18px] h-[18px]'/>Add Employee
             </button>
         </div>
 
         {error && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-                <div className="flex-shrink-0">
-                <span className="text-red-400">⚠️</span>
+                <div className="bg-rose-50 border border-red-200 rounded-md p-4">
+                    <div className="flex items-center justify-center">
+                    <div className="flex-shrink-0">
+                        <span className="text-rose-400">
+                            <IoIosWarning className="w-7 h-7" />
+                        </span>
+                    </div>
+                    <div className="ml-3">
+                        <p className="text-sm text-rose-800">{error}</p>
+                    </div>
+                    <div className="ml-auto pl-3">
+                        <button
+                        onClick={() => setError(null)}
+                        className="text-rose-400 hover:text-rose-600"
+                        >
+                        <IoCloseCircleSharp className="w-7 h-7 mt-2" />
+                        </button>
+                    </div>
+                    </div>
                 </div>
-                <div className="ml-3">
-                <p className="text-sm text-red-800">{error}</p>
-                </div>
-                <div className="ml-auto pl-3">
-                <button
-                    onClick={() => setError(null)}
-                    className="text-red-400 hover:text-red-600"
-                >
-                    ✕
-                </button>
-                </div>
-            </div>
-            </div>
-        )}
+                )}
 
         <EmployeeList
             employees={employees}
@@ -711,144 +713,173 @@ import { Card } from '@/components/ui/card';
     return (
         <div className="space-y-6">
         <div>
-            <h2 className="text-2xl font-bold text-zinc-900">Payroll Calculation</h2>
-            <p className="mt-1 text-sm text-zinc-600">
+        <h2 className="text-2xl font-bold tracking-tighter text-zinc-900">Payroll Calculation</h2>
+        <p className="mt-0 text-sm tracking-tighter text-zinc-700 capitalize">
             Generate payslips for your employees
-            </p>
+        </p>
         </div>
 
-        {/* Period Selection */}
-        <div className="bg-white rounded-lg shadow-sm border border-zinc-200 p-6">
-            <h3 className="text-lg font-medium text-zinc-900 mb-4">Payroll Period</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Pay Period Selection */}
+        <div className="bg-[#142b3d] rounded-lg shadow-sm border border-zinc-200 p-6">
+        <h3 className="text-lg font-medium text-zinc-50 mb-4 tracking-tight">Payroll Period</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label htmlFor="month" className="block text-sm font-medium text-zinc-700 mb-2">
+            <label htmlFor="month" className="block text-sm font-medium text-white mb-2">
                 Month
-                </label>
-                <select
+            </label>
+            <select
                 id="month"
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="payroll-input"
-                >
+                className="payroll-input w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
                 {months.map((month) => (
-                    <option key={month.value} value={month.value}>
+                <option key={month.value} value={month.value}>
                     {month.label}
-                    </option>
+                </option>
                 ))}
-                </select>
+            </select>
             </div>
             <div>
-                <label htmlFor="year" className="block text-sm font-medium text-zinc-700 mb-2">
+            <label htmlFor="year" className="block text-sm font-medium text-white mb-2">
                 Year
-                </label>
-                <select
+            </label>
+            <select
                 id="year"
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="payroll-input"
-                >
+                className="payroll-input w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
                 {years.map((year) => (
-                    <option key={year} value={year}>
+                <option key={year} value={year}>
                     {year}
-                    </option>
+                </option>
                 ))}
-                </select>
+            </select>
             </div>
-            </div>
+        </div>
         </div>
 
         {/* Employee List */}
         <div className="bg-white rounded-lg shadow-sm border border-zinc-200">
-            <div className="px-6 py-4 border-b border-zinc-200">
+        <div className="px-6 py-4 border-b border-zinc-200">
             <h3 className="text-lg font-medium text-zinc-900">
-                Active Employees ({employees.length})
+            Active Employees&nbsp;-&nbsp;<span className='tracking-normal font-semibold'>({employees.length})</span>
             </h3>
-            </div>
+        </div>
 
-            {loading ? (
+        {loading ? (
             <div className="p-8 text-center">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="mt-2 text-sm text-zinc-500">Loading employees...</p>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-sm text-zinc-500">Loading employees...</p>
             </div>
-            ) : error ? (
+        ) : error ? (
             <div className="p-8 text-center">
-                <p className="text-red-600">{error}</p>
-                <button
+            <p className="text-rose-400">{error}</p>
+            <button
                 onClick={fetchEmployees}
-                className="mt-4 payroll-button-secondary"
-                >
+                className="payroll-button-secondary mt-4 rounded-md bg-zinc-600 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+            >
                 Retry
-                </button>
+            </button>
             </div>
-            ) : employees.length === 0 ? (
+        ) : employees.length === 0 ? (
             <div className="p-8 text-center">
-                <span className="text-6xl">👥</span>
-                <h3 className="mt-4 text-lg font-medium text-zinc-900">No Active Employees</h3>
-                <p className="mt-2 text-sm text-zinc-500">
-                Add employees to start calculating payroll
-                </p>
+            <div className='flex items-center justify-center'>
+            <span className="text-6xl text-rose-400 text-cente">
+            <MdOutlinePeopleAlt/>
+            </span>
             </div>
-            ) : (
+            <h3 className="mt-4 text-lg font-medium tracking-tight capitalize text-zinc-900">No Active Employees</h3>
+            <p className="mt-2 text-sm text-zinc-400 font-light">
+                Add employees to start calculating payroll
+            </p>
+            </div>
+        ) : (
             <div className="divide-y divide-zinc-200">
-                {employees.map((employee) => (
+            {employees.map((employee) => (
                 <div key={employee.id} className="p-6 hover:bg-zinc-50">
-                    <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
+                    <div className="flex-shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <span className="text-sm font-medium text-blue-600">
+                        <span className="text-sm font-medium text-blue-600">
                             {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
-                            </span>
-                        </div>
-                        </div>
-                        <div className="ml-4">
-                        <div className="flex items-center">
-                            <h4 className="text-sm font-medium text-zinc-900">
-                            {employee.firstName} {employee.lastName}
-                            </h4>
-                            <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {employee.status}
-                            </span>
-                        </div>
-                        <div className="mt-1 flex items-center text-sm text-zinc-500">
-                            <span>{employee.employeeId}</span>
-                            <span className="mx-2">•</span>
-                            <span>{employee.position}</span>
-                            <span className="mx-2">•</span>
-                            <span className="font-medium">
-                            {new Intl.NumberFormat('en-KE', {
-                                style: 'currency',
-                                currency: 'KES',
-                            }).format(employee.baseSalary)} / month
-                            </span>
-                        </div>
+                        </span>
                         </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                        <div className="text-right text-sm">
-                        <div className="text-zinc-900 font-medium">
+                    <div className="ml-4">
+                        <div className="flex items-center">
+                        <h4 className="text-sm font-medium text-zinc-900">
+                            {employee.firstName} {employee.lastName}
+                        </h4>
+                        <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            {employee.status}
+                        </span>
+                        </div>
+                        <div className="mt-1 flex items-center text-sm text-zinc-500">
+                        <span>{employee.employeeId}</span>
+                        <span className="mx-2">•</span>
+                        <span>{employee.position}</span>
+                        <span className="mx-2">•</span>
+                        <span className="font-medium">
                             {new Intl.NumberFormat('en-KE', {
                             style: 'currency',
                             currency: 'KES',
-                            }).format(employee.grossSalary)}
+                            }).format(employee.baseSalary)} / month
+                        </span>
+                        </div>
+                    </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                    <div className="text-right text-sm">
+                        <div className="text-zinc-900 font-medium">
+                        {new Intl.NumberFormat('en-KE', {
+                            style: 'currency',
+                            currency: 'KES',
+                        }).format(employee.grossSalary || employee.baseSalary)}
                         </div>
                         <div className="text-zinc-500">Gross Salary</div>
-                        </div>
-                        <button
-                        onClick={() => handleGeneratePayroll(employee)}
-                        className="payroll-button"
-                        >
-                        Generate Payslip
-                        </button>
                     </div>
+                    <button
+                        onClick={() => handleGeneratePayroll(employee)}
+                        className="payroll-button rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                    >
+                        Generate Payslip
+                    </button>
                     </div>
                 </div>
-                ))}
+                </div>
+            ))}
             </div>
-            )}
+        )}
         </div>
+
+        {/* Batch Actions */}
+        {employees.length > 0 && (
+        <div className="bg-white rounded-lg shadow-sm border border-zinc-200 p-6">
+            <h3 className="text-lg font-medium text-zinc-900 mb-4">Batch Actions</h3>
+            <div className="flex space-x-4">
+            <button
+                onClick={() => {
+                alert('Feature coming soon: Generate all payslips in PDF');
+                }}
+                className="payroll-button rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+                Generate All Payslips (PDF)
+            </button>
+            <button
+                onClick={() => {
+                alert('Feature coming soon: Export payroll ledger in Excel');
+                }}
+                className="payroll-button-secondary rounded-md bg-zinc-600 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+            >
+                Export Payroll Ledger (Excel)
+            </button>
+            </div>
         </div>
+        )}
+    </div>
     );
     }
 

@@ -235,7 +235,7 @@ return (
                 ))}
             </select>
             {errors.employeeId && (
-                <p className="mt-1 text-sm text-red-600">{errors.employeeId}</p>
+                <p className="mt-1 text-sm text-rose-600">{errors.employeeId}</p>
             )}
             </div>
 
@@ -259,7 +259,7 @@ return (
                 placeholder="0.00"
                 />
                 {errors.amount && (
-                <p className="mt-1 text-sm text-red-600">{errors.amount}</p>
+                <p className="mt-1 text-sm text-rose-600">{errors.amount}</p>
                 )}
             </div>
 
@@ -278,7 +278,7 @@ return (
                 }`}
                 />
                 {errors.advanceDate && (
-                <p className="mt-1 text-sm text-red-600">{errors.advanceDate}</p>
+                <p className="mt-1 text-sm text-rose-600">{errors.advanceDate}</p>
                 )}
             </div>
             </div>
@@ -300,7 +300,7 @@ return (
                 placeholder="Ex: Family emergency, medical expenses, etc."
             />
             {errors.reason && (
-                <p className="mt-1 text-sm text-red-600">{errors.reason}</p>
+                <p className="mt-1 text-sm text-rose-600">{errors.reason}</p>
             )}
             </div>
 
@@ -323,7 +323,7 @@ return (
                 placeholder="Ex: 6"
             />
             {errors.numberOfInstallments && (
-                <p className="mt-1 text-sm text-red-600">{errors.numberOfInstallments}</p>
+                <p className="mt-1 text-sm text-rose-600">{errors.numberOfInstallments}</p>
             )}
             <p className="mt-1 text-xs text-zinc-500">
                 Maximum 24 installments
@@ -371,13 +371,13 @@ return (
 
             {/* Submit Error */}
             {errors.submit && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="bg-rose-50 border border-red-200 rounded-md p-4">
                 <div className="flex">
                 <div className="flex-shrink-0">
-                    <X className="h-5 w-5 text-red-400" />
+                    <X className="h-5 w-5 text-rose-400" />
                 </div>
                 <div className="ml-3">
-                    <p className="text-sm text-red-800">{errors.submit}</p>
+                    <p className="text-sm text-rose-800">{errors.submit}</p>
                 </div>
                 </div>
             </div>

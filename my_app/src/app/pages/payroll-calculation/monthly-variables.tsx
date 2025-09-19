@@ -139,7 +139,7 @@ const MonthlyVariablesPage = () => {
       case 'OVERTIME':
         return 'bg-blue-100 text-blue-800';
       case 'ABSENCE':
-        return 'bg-red-100 text-red-800';
+        return 'bg-rose-100 text-rose-800';
       case 'BONUS':
         return 'bg-green-100 text-green-800';
       case 'LEAVE':
@@ -348,7 +348,7 @@ const MonthlyVariablesPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           onClick={() => handleDeleteVariable(variable.id)}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-rose-600 hover:text-rose-900"
                           title="Delete"
                         >
                           🗑️
@@ -385,7 +385,7 @@ const MonthlyVariablesPage = () => {
                       </div>
                       <button
                         onClick={() => handleDeleteVariable(variable.id)}
-                        className="text-red-600 hover:text-red-900"
+                        className="text-rose-600 hover:text-rose-900"
                         title="Delete"
                       >
                         🗑️

@@ -470,7 +470,7 @@ const PayrollJournalPage = () => {
                     <div className="text-sm text-zinc-600">Total Earnings</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-red-600">{formatCurrency(summary.totalDeductions)}</div>
+                    <div className="text-lg font-bold text-rose-600">{formatCurrency(summary.totalDeductions)}</div>
                     <div className="text-sm text-zinc-600">Total Deductions</div>
                   </div>
                   <div className="text-center">
@@ -536,7 +536,7 @@ const PayrollJournalPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-green-600">
                           {formatCurrency(entry.earnings.total)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-red-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-rose-600">
                           {formatCurrency(entry.deductions.total)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-blue-600">
@@ -559,7 +559,7 @@ const PayrollJournalPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">
                         {formatCurrency(summary?.totalEarnings || 0)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-red-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-rose-600">
                         {formatCurrency(summary?.totalDeductions || 0)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-blue-600">

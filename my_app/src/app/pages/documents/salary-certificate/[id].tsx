@@ -91,8 +91,8 @@ export default function SalaryCertificateViewPage() {
       <Layout>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="bg-red-50 border border-red-200 rounded-md p-6 max-w-md">
-              <p className="text-red-700 mb-4">{error || 'Document not found'}</p> {/* Translated Document non trouvé */}
+            <div className="bg-rose-50 border border-red-200 rounded-md p-6 max-w-md">
+              <p className="text-rose-700 mb-4">{error || 'Document not found'}</p> {/* Translated Document non trouvé */}
               <button
                 onClick={handleBack}
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2 mx-auto"

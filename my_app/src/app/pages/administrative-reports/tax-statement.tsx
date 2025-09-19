@@ -537,7 +537,7 @@ const TaxStatementPage = () => {
                           {employee.idNumber ? (
                             <span className="text-green-600">ID: {employee.idNumber}</span>
                           ) : (
-                            <span className="text-red-600">ID Number missing</span>
+                            <span className="text-rose-600">ID Number missing</span>
                           )}
                         </div>
                       </div>
@@ -629,7 +629,7 @@ const TaxStatementPage = () => {
                     <div className="text-sm text-zinc-600">Total Taxable Net</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-red-600">{formatCurrency(summary.totalTaxDeductions)}</div>
+                    <div className="text-lg font-bold text-rose-600">{formatCurrency(summary.totalTaxDeductions)}</div>
                     <div className="text-sm text-zinc-600">Total Deductions</div>
                   </div>
                   <div className="text-center">

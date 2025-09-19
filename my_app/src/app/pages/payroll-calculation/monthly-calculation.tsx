@@ -400,10 +400,10 @@ const MonthlyCalculationPage = () => {
 
                 <div className="bg-white p-4 rounded-lg shadow-sm border">
                   <div className="flex items-center">
-                    <AlertCircle className="w-8 h-8 text-red-600" />
+                    <AlertCircle className="w-8 h-8 text-rose-600" />
                     <div className="ml-3">
                       <div className="text-sm font-medium text-zinc-500">Errors</div> 
-                      <div className="text-2xl font-bold text-red-600">{failedCalculations.length}</div>
+                      <div className="text-2xl font-bold text-rose-600">{failedCalculations.length}</div>
                     </div>
                   </div>
                 </div>
@@ -455,7 +455,7 @@ const MonthlyCalculationPage = () => {
                       {result.success ? (
                         <CheckCircle className="w-6 h-6 text-green-600" />
                       ) : (
-                        <AlertCircle className="w-6 h-6 text-red-600" />
+                        <AlertCircle className="w-6 h-6 text-rose-600" />
                       )}
                     </div>
                   </div>
@@ -480,7 +480,7 @@ const MonthlyCalculationPage = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="text-red-600 text-sm">
+                    <div className="text-rose-600 text-sm">
                       <strong>Error:</strong> {result.error} {/* Translated Erreur: */}
                     </div>
                   )}
@@ -506,7 +506,7 @@ const MonthlyCalculationPage = () => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-zinc-600">Errors:</span>
-                        <span className="font-medium text-red-600">{failedCalculations.length}</span>
+                        <span className="font-medium text-rose-600">{failedCalculations.length}</span>
                       </div>
                     </div>
                   </div>

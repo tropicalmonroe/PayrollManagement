@@ -298,7 +298,7 @@ return (
                 </option>
             ))}
             </select>
-            {errors.employeeId && <p className="mt-1 text-sm text-red-600">{errors.employeeId}</p>}
+            {errors.employeeId && <p className="mt-1 text-sm text-rose-600">{errors.employeeId}</p>}
         </div>
 
         {/* Loan Type */}
@@ -337,7 +337,7 @@ return (
                 placeholder="Ex: 5000.00"
             />
             </div>
-            {errors.monthlyAmount && <p className="mt-1 text-sm text-red-600">{errors.monthlyAmount}</p>}
+            {errors.monthlyAmount && <p className="mt-1 text-sm text-rose-600">{errors.monthlyAmount}</p>}
             <p className="mt-1 text-xs text-zinc-500">
             Amount that will be deducted each month from salary
             </p>
@@ -360,7 +360,7 @@ return (
                 }`}
             />
             </div>
-            {errors.startDate && <p className="mt-1 text-sm text-red-600">{errors.startDate}</p>}
+            {errors.startDate && <p className="mt-1 text-sm text-rose-600">{errors.startDate}</p>}
         </div>
 
         {/* Bank */}
@@ -381,7 +381,7 @@ return (
                 placeholder="Ex: Equity Bank"
             />
             </div>
-            {errors.bank && <p className="mt-1 text-sm text-red-600">{errors.bank}</p>}
+            {errors.bank && <p className="mt-1 text-sm text-rose-600">{errors.bank}</p>}
         </div>
 
         {/* Notes */}
@@ -401,8 +401,8 @@ return (
 
         {/* Error Message */}
         {errors.submit && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-            <p className="text-sm text-red-600">{errors.submit}</p>
+            <div className="bg-rose-50 border border-red-200 rounded-lg p-3">
+            <p className="text-sm text-rose-600">{errors.submit}</p>
             </div>
         )}
 

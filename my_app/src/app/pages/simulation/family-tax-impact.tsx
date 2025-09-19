@@ -228,8 +228,8 @@ function FamilyTaxImpactContent() {
 
         {/* Current Status */}
         <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-zinc-200 bg-red-50">
-            <h3 className="text-lg font-medium text-red-900">Current Status</h3>
+          <div className="px-6 py-4 border-b border-zinc-200 bg-rose-50">
+            <h3 className="text-lg font-medium text-rose-900">Current Status</h3>
           </div>
           <div className="p-6 space-y-6">
             <div>
@@ -265,9 +265,9 @@ function FamilyTaxImpactContent() {
             </div>
 
             {comparison && (
-              <div className="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
-                <h4 className="text-sm font-medium text-red-800 mb-2">Current Summary</h4>
-                <div className="space-y-1 text-xs text-red-700">
+              <div className="mt-4 p-4 bg-rose-50 rounded-lg border border-red-200">
+                <h4 className="text-sm font-medium text-rose-800 mb-2">Current Summary</h4>
+                <div className="space-y-1 text-xs text-rose-700">
                   <div className="flex justify-between">
                     <span>Monthly PAYE:</span>
                     <span className="font-medium">{formatCurrency(comparison.current.paye)}</span>
@@ -361,7 +361,7 @@ function FamilyTaxImpactContent() {
                     {comparison.difference.paye < 0 ? (
                       <TrendingDown className="h-8 w-8 text-green-600" />
                     ) : (
-                      <TrendingUp className="h-8 w-8 text-red-600" />
+                      <TrendingUp className="h-8 w-8 text-rose-600" />
                     )}
                   </div>
                   <div className="text-2xl font-bold text-zinc-900">
@@ -375,7 +375,7 @@ function FamilyTaxImpactContent() {
                     {comparison.difference.netSalary > 0 ? (
                       <TrendingUp className="h-8 w-8 text-green-600" />
                     ) : (
-                      <TrendingDown className="h-8 w-8 text-red-600" />
+                      <TrendingDown className="h-8 w-8 text-rose-600" />
                     )}
                   </div>
                   <div className="text-2xl font-bold text-zinc-900">
@@ -389,7 +389,7 @@ function FamilyTaxImpactContent() {
                     {comparison.difference.annualSavings > 0 ? (
                       <TrendingUp className="h-8 w-8 text-green-600" />
                     ) : (
-                      <TrendingDown className="h-8 w-8 text-red-600" />
+                      <TrendingDown className="h-8 w-8 text-rose-600" />
                     )}
                   </div>
                   <div className="text-2xl font-bold text-zinc-900">
@@ -469,7 +469,7 @@ function FamilyTaxImpactContent() {
                         {formatCurrency(comparison.new.totalDeductions - comparison.new.personalRelief)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <span className={(comparison.new.totalDeductions - comparison.new.personalRelief) > (comparison.current.totalDeductions - comparison.current.personalRelief) ? 'text-green-600' : 'text-red-600'}>
+                        <span className={(comparison.new.totalDeductions - comparison.new.personalRelief) > (comparison.current.totalDeductions - comparison.current.personalRelief) ? 'text-green-600' : 'text-rose-600'}>
                           {formatDifference((comparison.new.totalDeductions - comparison.new.personalRelief) - (comparison.current.totalDeductions - comparison.current.personalRelief))}
                         </span>
                       </td>
@@ -485,7 +485,7 @@ function FamilyTaxImpactContent() {
                         {formatCurrency(comparison.new.totalDeductions)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
-                        <span className={comparison.new.totalDeductions > comparison.current.totalDeductions ? 'text-green-600' : 'text-red-600'}>
+                        <span className={comparison.new.totalDeductions > comparison.current.totalDeductions ? 'text-green-600' : 'text-rose-600'}>
                           {formatDifference(comparison.new.totalDeductions - comparison.current.totalDeductions)}
                         </span>
                       </td>

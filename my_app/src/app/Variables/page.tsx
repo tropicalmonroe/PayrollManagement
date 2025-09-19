@@ -171,7 +171,7 @@ export default function VariablesPage() {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'OVERTIME': return <Clock className="w-4 h-4 text-green-600" />;
-      case 'ABSENCE': return <AlertCircle className="w-4 h-4 text-red-600" />;
+      case 'ABSENCE': return <AlertCircle className="w-4 h-4 text-rose-600" />;
       case 'BONUS': return <DollarSign className="w-4 h-4 text-blue-600" />;
       case 'LEAVE': return <Calendar className="w-4 h-4 text-purple-600" />;
       case 'LATENESS': return <Clock className="w-4 h-4 text-orange-600" />;
@@ -363,7 +363,7 @@ export default function VariablesPage() {
               </div>
             ) : error ? (
               <div className="p-8 text-center">
-                <p className="text-red-600">{error}</p>
+                <p className="text-rose-600">{error}</p>
                 <button
                   onClick={fetchVariableElements}
                   className="mt-4 inline-flex items-center px-4 py-2 border border-zinc-300 rounded-md shadow-sm text-sm font-medium text-zinc-700 bg-white hover:bg-zinc-50"
@@ -476,7 +476,7 @@ export default function VariablesPage() {
                             </button>
                             <button
                               onClick={() => handleDeleteElement(element.id)}
-                              className="text-red-600 hover:text-red-900"
+                              className="text-rose-600 hover:text-rose-900"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>

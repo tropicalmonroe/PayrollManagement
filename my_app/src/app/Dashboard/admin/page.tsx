@@ -20,7 +20,7 @@ export default async function DashboardPage() {
 
   return (
     <Layout>
-      <Suspense fallback={<div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-zinc-800/50">Loading dashboard...</div>}>
+      <Suspense fallback={<div className="flex items-center justify-center h-screen bg-white animate-pulse">Loading dashboard...</div>}>
       <Navbar />
         <DashboardComponent/>
       </Suspense>

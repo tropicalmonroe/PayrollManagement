@@ -500,7 +500,7 @@ const PayslipPage = () => {
 
                 {/* Deductions details */}
                 <div className="mb-8">
-                  <h3 className="font-medium text-zinc-900 mb-4 bg-red-50 p-3 rounded">DEDUCTIONS</h3>
+                  <h3 className="font-medium text-zinc-900 mb-4 bg-rose-50 p-3 rounded">DEDUCTIONS</h3>
                   <div className="space-y-2 text-sm">
                     <div className="font-medium text-zinc-800 mb-2">Employee Contributions:</div>
                     <div className="ml-4 space-y-1">
@@ -559,7 +559,7 @@ const PayslipPage = () => {
                     
                     <div className="border-t border-zinc-200 pt-2 flex justify-between font-medium text-lg">
                       <span>TOTAL DEDUCTIONS</span> 
-                      <span className="text-red-600">{formatCurrency(payrollData.payroll.totalDeductions)}</span>
+                      <span className="text-rose-600">{formatCurrency(payrollData.payroll.totalDeductions)}</span>
                     </div>
                   </div>
                 </div>

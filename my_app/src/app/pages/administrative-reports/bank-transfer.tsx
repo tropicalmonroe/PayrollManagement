@@ -433,7 +433,7 @@ const BankTransferPage = () => {
                           {employee.bankAccount ? (
                             <span className="text-green-600">✓ Bank details available</span>
                           ) : (
-                            <span className="text-red-600">✗ Bank details missing</span>
+                            <span className="text-rose-600">✗ Bank details missing</span>
                           )}
                         </div>
                       </div>
@@ -509,7 +509,7 @@ const BankTransferPage = () => {
                     <div className="text-sm text-zinc-600">Valid Transfers</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-red-600">{summary.invalidTransfers}</div>
+                    <div className="text-2xl font-bold text-rose-600">{summary.invalidTransfers}</div>
                     <div className="text-sm text-zinc-600">Invalid Transfers</div>
                   </div>
                   <div className="text-center">
@@ -576,12 +576,12 @@ const BankTransferPage = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-zinc-200">
                     {transferData.map((entry) => (
-                      <tr key={entry.employee.id} className={`hover:bg-zinc-50 ${!entry.isValid ? 'bg-red-50' : ''}`}>
+                      <tr key={entry.employee.id} className={`hover:bg-zinc-50 ${!entry.isValid ? 'bg-rose-50' : ''}`}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-8 w-8">
-                              <div className={`h-8 w-8 rounded-full ${entry.isValid ? 'bg-green-100' : 'bg-red-100'} flex items-center justify-center`}>
-                                <span className={`text-xs font-medium ${entry.isValid ? 'text-green-600' : 'text-red-600'}`}>
+                              <div className={`h-8 w-8 rounded-full ${entry.isValid ? 'bg-green-100' : 'bg-rose-100'} flex items-center justify-center`}>
+                                <span className={`text-xs font-medium ${entry.isValid ? 'text-green-600' : 'text-rose-600'}`}>
                                   {entry.employee.firstName.charAt(0)}{entry.employee.lastName.charAt(0)}
                                 </span>
                               </div>
@@ -604,7 +604,7 @@ const BankTransferPage = () => {
                             {entry.bankBranch || 'Branch not provided'}
                           </div>
                           {entry.errors.length > 0 && (
-                            <div className="text-xs text-red-600 mt-1">
+                            <div className="text-xs text-rose-600 mt-1">
                               {entry.errors.join(', ')}
                             </div>
                           )}
@@ -620,7 +620,7 @@ const BankTransferPage = () => {
                               Valid
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
                               Invalid
                             </span>
                           )}

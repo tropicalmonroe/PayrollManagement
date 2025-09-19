@@ -1,38 +1,33 @@
-import Head from 'next/head'
-import { Layout } from '../../components/Layout';
+// app/dashboard/admin/page.tsx
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import Layout from "../../components/Layout";
+import { Suspense } from "react";
+import Navbar from "@/components/Navbar";
+import ReportsPage from "./_components/ReportsPage";
 
-export default function ReportsPage() {
+export const metadata = {
+  title: "Reports - NewLight Aademy Payroll Management",
+  description: "Reports page for the payroll management application",
+};
+
+export default async function OurReportsPage() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
   return (
-    <>
-      <Head>
-        <title>Reports and Documents - AD Capital</title>
-        <meta name="description" content="View payroll reports and documents" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <Layout>
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold text-zinc-900">Reports and Documents</h2>
-            <p className="mt-1 text-sm text-zinc-600">
-              View payroll reports and manage documents
-            </p>
-          </div>
-
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <div className="text-center py-12">
-                <span className="text-6xl">📈</span>
-                <h3 className="mt-4 text-lg font-medium text-zinc-900">No reports available</h3>
-                <p className="mt-2 text-sm text-zinc-500">
-                  Reports will be available after payroll calculations
-                </p>
-              </div>
-            </div>
-          </div>
+    <Layout>
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-screen bg-white">
+          Loading Reports...
         </div>
-      </Layout>
-    </>
-  )
+      }>
+      <Navbar />
+        <ReportsPage/>
+      </Suspense>
+    </Layout>
+  );
 }

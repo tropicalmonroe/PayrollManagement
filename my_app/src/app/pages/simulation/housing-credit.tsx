@@ -563,7 +563,7 @@ function HousingCreditContent() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-zinc-600">Total Interest</span>
-                      <span className="text-sm text-red-600">{formatCurrency(results.totalInterest)}</span>
+                      <span className="text-sm text-rose-600">{formatCurrency(results.totalInterest)}</span>
                     </div>
                     <div className="flex justify-between border-t pt-2">
                       <span className="text-sm font-medium text-zinc-700">Actual Cost (After PAYE Savings)</span>

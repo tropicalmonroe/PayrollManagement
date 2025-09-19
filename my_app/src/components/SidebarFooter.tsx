@@ -68,7 +68,7 @@
 //             <span>Profile Settings</span>
 //         </DropdownMenuItem>
 //         <DropdownMenuSeparator />
-//         <DropdownMenuItem className="cursor-pointer text-sm text-rose-400 hover:text-rose-700 hover:bg-red-50">
+//         <DropdownMenuItem className="cursor-pointer text-sm text-rose-400 hover:text-rose-700 hover:bg-rose-50">
 //             <SignOutButton>
 //             <div className="flex items-center">
 //                 <LogOut className="mr-3 h-4 w-4" />

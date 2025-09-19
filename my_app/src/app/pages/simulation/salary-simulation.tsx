@@ -256,15 +256,15 @@ function SalarySimulationContent() {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center py-1">
                     <span className="text-sm text-zinc-600 ml-4">- NSSF (6%)</span>
-                    <span className="text-sm text-red-600">-{formatCurrency(results.nssfContribution)}</span>
+                    <span className="text-sm text-rose-600">-{formatCurrency(results.nssfContribution)}</span>
                   </div>
                   <div className="flex justify-between items-center py-1">
                     <span className="text-sm text-zinc-600 ml-4">- NHIF</span>
-                    <span className="text-sm text-red-600">-{formatCurrency(results.nhifContribution)}</span>
+                    <span className="text-sm text-rose-600">-{formatCurrency(results.nhifContribution)}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-zinc-100">
                     <span className="text-sm font-medium text-zinc-700">Total Contributions</span>
-                    <span className="text-sm font-semibold text-red-600">-{formatCurrency(results.totalContributions)}</span>
+                    <span className="text-sm font-semibold text-rose-600">-{formatCurrency(results.totalContributions)}</span>
                   </div>
                 </div>
 
@@ -287,7 +287,7 @@ function SalarySimulationContent() {
                   <span className="text-sm font-medium text-zinc-700">
                     PAYE ({results.taxRate.toFixed(1)}%)
                   </span>
-                  <span className="text-sm font-semibold text-red-600">-{formatCurrency(results.paye)}</span>
+                  <span className="text-sm font-semibold text-rose-600">-{formatCurrency(results.paye)}</span>
                 </div>
 
                 {/* Net Salary */}

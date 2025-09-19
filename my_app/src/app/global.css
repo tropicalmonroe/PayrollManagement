@@ -153,10 +153,12 @@ body {
   border: 1px solid #cbd5e1;
   border-radius: 0.375rem;
   outline: none;
+  background: #c7e0f0;
+  height: 2.25rem;
 }
 
 .payroll-input:focus {
-  outline: 2px solid #3b82f6;
+  outline: 1px solid #f3f8fc;
   outline-offset: 2px;
 }
 
@@ -169,7 +171,8 @@ body {
 }
 
 .payroll-button:hover {
-  background: #1d4ed8;
+  background: #ccddea;
+  color: #2563eb;
 }
 
 .payroll-button:focus {

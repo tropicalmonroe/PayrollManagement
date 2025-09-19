@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Employee, EmployeeStatus, MaritalStatus, Advance } from '@prisma/client';
 import { calculatePayroll, type EmployeePayrollData, type PayrollResult } from '../lib/payrollCalculations';
+import { MdOutlinePeopleAlt } from 'react-icons/md';
 
 interface EmployeeListProps {
 employees: Employee[];
@@ -221,23 +222,23 @@ const getSortIcon = (field: 'name' | 'hireDate' | 'baseSalary') => {
 return (
     <div className="space-y-6">
     {/* Filters and Search */}
-    <div className="bg-white p-4 rounded-lg shadow-sm border">
+    <div className="bg-[#1f435b] p-4 rounded-lg shadow-sm border">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-50 mb-1">
             Search
             </label>
             <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Name, ID, position..."
-            className="payroll-input"
+            placeholder="Name, ID, Position..."
+            className="payroll-input placeholder:text-zinc-700 placeholder:text-sm placeholder:font-medium placeholder:tracking-tight"
             />
         </div>
 
         <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-1">
+            <label className="block text-sm font-medium text-zinc-50 mb-1">
             Status
             </label>
             <select
@@ -254,9 +255,9 @@ return (
             </select>
         </div>
 
-        <div className="flex items-end">
-            <div className="text-sm text-zinc-600">
-            {filteredAndSortedEmployees.length} employee(s) found
+        <div className="flex items-center">
+            <div className="text-sm text-zinc-50 mt-6 tracking-tight">
+            <span className='tracking-normal font-semibold'>{filteredAndSortedEmployees.length}</span> employee(s) found
             </div>
         </div>
         </div>
@@ -267,11 +268,15 @@ return (
         <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
             <div className="text-center py-12">
-            <span className="text-6xl">👥</span>
-            <h3 className="mt-4 text-lg font-medium text-zinc-900">
+            <div className='flex justify-center items-center'>
+                <span className="text-6xl text-rose-400 text-center">
+                    <MdOutlinePeopleAlt/>
+                </span>
+            </div>
+            <h3 className="mt-4 text-lg font-medium tracking-tight capitalize text-zinc-900">
                 {searchTerm || statusFilter !== 'ALL' ? 'No employees found' : 'No employees'}
             </h3>
-            <p className="mt-2 text-sm text-zinc-500">
+            <p className="mt-2 text-sm text-zinc-400 font-light">
                 {searchTerm || statusFilter !== 'ALL'
                 ? 'Try adjusting your search criteria'
                 : 'Start by adding your first employee'}
@@ -367,7 +372,7 @@ return (
                         </button>
                         <button
                         onClick={() => onDelete(employee.id)}
-                        className="text-red-600 hover:text-red-900"
+                        className="text-rose-600 hover:text-rose-900"
                         title="Delete"
                         >
                         🗑️
@@ -418,7 +423,7 @@ return (
                     </button>
                     <button
                         onClick={() => onDelete(employee.id)}
-                        className="text-red-600 hover:text-red-900"
+                        className="text-rose-600 hover:text-rose-900"
                     >
                         🗑️
                     </button>
