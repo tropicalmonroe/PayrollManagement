@@ -60,7 +60,7 @@ const reportSections = [
     description: 'Monthly and annual detail of income tax withheld, generated according to Kenyan tax rates.',
     icon: Receipt,
     color: 'purple',
-    href: '/pages/administrative-reports/tax-statement',
+    href: '/pages/administrative-reports/paye-tax-statement',
     features: [
         'Monthly and annual income tax statement',
         'Kenyan tax rates',

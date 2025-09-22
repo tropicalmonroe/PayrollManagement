@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Layout from "../../../../components/Layout";
 import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
-import IncometaxstatementPage from "./_components/Incometaxstatement";
+import IncometaxstatementPage from "./_components/IncomeTaxStatement";
 
 export const metadata = {
 title: "Income tax statement - NewLight Academy Payroll Management",
