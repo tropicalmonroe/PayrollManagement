@@ -1,9 +1,9 @@
+"use client";
 import React, { useState, useEffect } from 'react';
-import Layout from '../../layout';
 import { Edit, ArrowLeft, Plus, Save, Calendar, User } from 'lucide-react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { Employee, VariableElement } from '@prisma/client';
-import AddVariableElementModal from '../../../components/AddVariableElementModal';
+import AddVariableElementModal from '../../../../../components/AddVariableElementModal';
 
 type VariableElementWithEmployee = VariableElement & {
   employee: Employee;
@@ -166,54 +166,43 @@ const MonthlyVariablesPage = () => {
     }).format(date);
   };
 
-  if (loading) {
-    return (
-      <Layout>
-        <div className="p-6">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-zinc-600">Loading...</div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
-    <Layout>
-      <div className="p-6">
+      <div className="p-6 bg-white mt-[2vh] rounded-md">
         <div className="mb-6">
           <button
-            onClick={() => router.back()}
-            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back</span> 
-          </button>
-          
-          <div className="flex items-center justify-between mb-4">
+          onClick={() => router.back()}
+          className="flex items-center justify-center space-x-1 scale-95 hover:bg-[#3890bf] transition-colors duration-300 
+          mb-4 bg-rose-400 px-4 py-1 rounded-md"
+        >
+          <ArrowLeft className="w-5 h-5 text-white" />
+          <span className='tracking-tighter text-white'>Back</span>
+              </button>
+          <div className="flex items-center justify-between my-8">
             <div className="flex items-center space-x-3">
-              <Edit className="w-8 h-8 text-orange-600" />
-              <h1 className="text-3xl font-bold text-zinc-900">Monthly Variable Elements</h1> 
+              <div className="flex items-center justify-center w-10 h-10 bg-zinc-700 rounded-xl p-1">
+              <Edit className="w-6 h-6 text-blue-50" />
+              </div>
+              <h1 className="text-2xl font-bold tracking-tighter text-zinc-800">Monthly Variable Elements</h1> 
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center space-x-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+              className="flex items-center space-x-2 cursor-pointer bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-blue-400 transition-colors duration-300"
             >
               <Plus className="w-4 h-4" />
               <span>New Element</span> {/* Translated Nouvel élément */}
             </button>
           </div>
           
-          <p className="text-zinc-600 text-lg">
+          <p className="text-zinc-400 text-sm w-[20vw]">
             Monthly entry of variable elements: overtime, absences, bonuses, leaves, lates, advances.
           </p>
         </div>
 
         {/* Filters */}
-        <div className="bg-white p-4 rounded-lg shadow-sm border mb-6">
+        <div className="bg-[#1f435b] p-6 rounded-lg shadow-sm border mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">
+              <label className="text-sm font-medium text-white mb-1 flex items-center">
                 <Calendar className="w-4 h-4 inline mr-1" />
                 Month 
               </label>
@@ -226,7 +215,7 @@ const MonthlyVariablesPage = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">
+              <label className="text-sm font-medium text-white mb-1 flex items-center">
                 <User className="w-4 h-4 inline mr-1" />
                 Employee {/* Translated Employé */}
               </label>
@@ -244,8 +233,8 @@ const MonthlyVariablesPage = () => {
               </select>
             </div>
 
-            <div className="flex items-end">
-              <div className="text-sm text-zinc-600">
+            <div className="flex items-center mt-5">
+              <div className="text-sm text-white">
                 {filteredVariables.length} element(s) for {getMonthLabel(selectedMonth)} 
               </div>
             </div>
@@ -254,20 +243,20 @@ const MonthlyVariablesPage = () => {
 
         {/* Variable Elements List */}
         {filteredVariables.length === 0 ? (
-          <div className="bg-white shadow rounded-lg">
+          <div className="bg-white shadow rounded-lg mt-12">
             <div className="px-4 py-5 sm:p-6">
               <div className="text-center py-12">
                 <Edit className="mx-auto h-12 w-12 text-zinc-400" />
-                <h3 className="mt-4 text-lg font-medium text-zinc-900">
+                <h3 className="mt-4 text-lg font-medium text-zinc-800 tracking-tight">
                   No variable elements for {getMonthLabel(selectedMonth)} 
                 </h3>
-                <p className="mt-2 text-sm text-zinc-500">
+                <p className="mt-2 text-sm text-zinc-400 tracking-tight">
                   Start by adding the month’s variable elements (overtime, absences, bonuses, etc.) 
                 </p>
                 <div className="mt-6">
                   <button
                     onClick={() => setShowAddModal(true)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700"
+                    className="inline-flex items-center  space-x-2 cursor-pointer bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-blue-400 transition-colors duration-300"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     New Element
@@ -489,7 +478,6 @@ const MonthlyVariablesPage = () => {
           />
         )}
       </div>
-    </Layout>
   );
 };
 

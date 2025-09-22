@@ -142,7 +142,7 @@ return (
         <Link key={item.href} href={item.href}>
             <div
             className={`group flex items-center px-6 py-2.5 cursor-pointer transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-                pathname === item.href ? 'bg-[#0063b4]/8 text-zinc-900 border-r-2 border-[#0063b4]' : 'text-zinc-50 hover:bg-white hover:text-zinc-900'
+                pathname === item.href ? 'bg-blue-50 text-blue-400 border-r-2 border-[#0063b4]' : 'text-zinc-50 hover:bg-white hover:text-zinc-900'
             }`}
             >
             <div
@@ -342,7 +342,8 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/pages/employee-files/employee-record', title: 'Employee Profile' },
+            { href: '/pages/employee-files', title: 'Employee Profile' },
+            { href: '/pages/employee-files/employee-record', title: 'Employee Record' },
             { href: '/pages/employee-files/salary-advances', title: 'Salary Advances' },
             { href: '/pages/employee-files/consultation', title: 'Employee Profile View' },
             ]}
@@ -362,8 +363,9 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/payroll-calculation/monthly-variables', title: 'Monthly Variable Elements' },
-            { href: '/payroll-calculation/monthly-calculation', title: 'Monthly Payroll' },
+            { href: '/pages/payroll-calculation', title: 'Payroll Calculation' },
+            { href: '/pages/payroll-calculation/monthly-variables', title: 'Monthly Variable Elements' },
+            { href: '/pages/payroll-calculation/monthly-calculation', title: 'Monthly Payroll' },
             ]}
             isOpen={openMenus['payroll-calculation']}
         />
@@ -381,9 +383,10 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/employee-documents/payslip', title: 'Payslip' },
-            { href: '/employee-documents/salary-certificate', title: 'Salary Certificate' },
-            { href: '/employee-documents/final-settlement', title: 'Final Settlement' },
+            { href: '/pages/employee-documents', title: 'Employee Documents' },
+            { href: '/pages/employee-documents/payslip', title: 'Payslip' },
+            { href: '/pages/employee-documents/salary-certificate', title: 'Salary Certificate' },
+            { href: '/pages/employee-documents/final-settlement', title: 'Final Settlement' },
             ]}
             isOpen={openMenus['employee-documents']}
         />

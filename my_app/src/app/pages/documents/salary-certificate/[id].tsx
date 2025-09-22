@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import Layout from '../../../layout';
 import { SalaryCertificate } from '../../../../components/SalaryCertificate';
 import { ArrowLeft, RefreshCw } from 'lucide-react';

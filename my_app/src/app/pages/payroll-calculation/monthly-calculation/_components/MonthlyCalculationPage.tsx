@@ -1,9 +1,9 @@
+"use client";
 import React, { useState, useEffect } from 'react';
-import Layout from '../../layout';
 import { Play, ArrowLeft, Calculator, Users, CheckCircle, AlertCircle, Clock } from 'lucide-react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { Employee, VariableElement as PrismaVariableElement, Advance } from '@prisma/client';
-import { calculatePayroll, type EmployeePayrollData } from '../../../lib/payrollCalculations';
+import { calculatePayroll, type EmployeePayrollData } from '../../../../../lib/payrollCalculations';
 
 interface EmployeeWithRelations extends Employee {
   variableElements: PrismaVariableElement[];
@@ -218,36 +218,26 @@ const MonthlyCalculationPage = () => {
   const successfulCalculations = calculationResults.filter(r => r.success);
   const failedCalculations = calculationResults.filter(r => !r.success);
 
-  if (loading) {
-    return (
-      <Layout>
-        <div className="p-6">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-zinc-600">Loading...</div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
-    <Layout>
-      <div className="p-6">
+      <div className="p-6 bg-white mt-[2vh] rounded-md">
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
+            className="flex items-center justify-center space-x-1 scale-95 hover:bg-[#3890bf] transition-colors duration-300 
+            mb-4 bg-rose-400 px-4 py-1 rounded-md"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back</span> 
-          </button>
+            <ArrowLeft className="w-5 h-5 text-white" />
+            <span className='tracking-tighter text-white'>Back</span>
+                </button>
           
-          <div className="flex items-center space-x-3 mb-4">
-            <Play className="w-8 h-8 text-green-600" />
-            <h1 className="text-3xl font-bold text-zinc-900">Monthly Payroll Calculation</h1>
+          <div className="flex items-center space-x-3 my-8">
+          <div className="flex items-center justify-center w-10 h-10 bg-zinc-700 rounded-xl p-1">
+            <Play className="w-6 h-6 text-blue-50" />
+          </div>
+            <h1 className="text-2xl font-bold tracking-tighter text-zinc-800">Monthly Payroll Calculation</h1>
           </div>
           
-          <p className="text-zinc-600 text-lg">
+          <p className="text-zinc-400 text-sm w-[20vw] mb-8">
             Automatic payroll calculation with application of tax brackets, social security, and tax contributions based on each employee’s situation.
           </p>
         </div>
@@ -255,11 +245,11 @@ const MonthlyCalculationPage = () => {
         {!showResults ? (
           <>
             {/* Calculation configuration */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-zinc-900 mb-4">Calculation Configuration</h3>
+            <div className="bg-[#1f435b] p-4 rounded-lg shadow-sm border mb-6">
+              <h3 className="text-lg font-medium text-zinc-50 mb-4 tracking-tight">Calculation Configuration</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Calculation Period 
                   </label>
                   <input
@@ -268,21 +258,22 @@ const MonthlyCalculationPage = () => {
                     onChange={(e) => setSelectedMonth(e.target.value)}
                     className="payroll-input"
                   />
-                  <p className="text-sm text-zinc-500 mt-1">
+                  <p className="text-sm text-white mt-1">
                     Calculation for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Selected Employees
                   </label>
-                  <div className="text-lg font-medium text-zinc-900">
-                    {selectedEmployees.length} / {employees.length} employees 
+                  <div className="text-lg font-medium text-white">
+                    <span className='tracking-normal font-semibold'>{selectedEmployees.length} / {employees.length}</span>&nbsp;employees 
                   </div>
                   <button
                     onClick={handleSelectAll}
-                    className="text-sm text-blue-600 hover:text-blue-800 mt-1"
+                    className="flex items-center justify-center space-x-1 hover:bg-blue-400 transition-colors duration-300 
+                    my-4 bg-blue-200 px-4 py-1 rounded-md hover:cursor-pointer"
                   >
                     {selectedEmployees.length === employees.length ? 'Deselect All' : 'Select All'}
                   </button>
@@ -340,18 +331,18 @@ const MonthlyCalculationPage = () => {
             </div>
 
             {/* Start calculation button */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="bg-[#1f435b] p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-zinc-900">Start Calculation</h3>
-                  <p className="text-sm text-zinc-500 mt-1">
+                  <h3 className="text-lg font-medium text-zinc-50">Start Calculation</h3>
+                  <p className="text-sm text-white mt-1">
                     Calculation will be performed for {selectedEmployees.length} employee(s) for the period {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
                 <button
                   onClick={handleCalculatePayroll}
                   disabled={selectedEmployees.length === 0 || calculating}
-                  className="flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 bg-blue-200 text-white px-6 py-3 rounded-lg hover:bg-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Calculator className="w-5 h-5" />
                   <span>Calculate Payroll</span> 
@@ -548,7 +539,6 @@ const MonthlyCalculationPage = () => {
           </>
         )}
       </div>
-    </Layout>
   );
 };
 

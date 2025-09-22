@@ -225,7 +225,7 @@ return (
     <div className="bg-[#1f435b] p-4 rounded-lg shadow-sm border">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-            <label className="block text-sm font-medium text-zinc-50 mb-1">
+            <label className="block text-sm font-medium text-white mb-1">
             Search
             </label>
             <input
@@ -238,7 +238,7 @@ return (
         </div>
 
         <div>
-            <label className="block text-sm font-medium text-zinc-50 mb-1">
+            <label className="block text-sm font-medium text-white mb-1">
             Status
             </label>
             <select
@@ -256,7 +256,7 @@ return (
         </div>
 
         <div className="flex items-center">
-            <div className="text-sm text-zinc-50 mt-6 tracking-tight">
+            <div className="text-sm text-white mt-6 tracking-tight">
             <span className='tracking-normal font-semibold'>{filteredAndSortedEmployees.length}</span> employee(s) found
             </div>
         </div>

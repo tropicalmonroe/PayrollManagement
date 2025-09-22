@@ -1,16 +1,16 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import Layout from "../../../components/Layout";
+import Layout from "../../../../components/Layout";
 import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
-import PayrollCalculationPage from "./_components/PayrollcalculationPage";
+import MonthlyVariablesPage from "./_components/MonthlyVariablesPage";
 
 export const metadata = {
-title: "Payroll Calculations - NewLight Academy Payroll Management",
-description: "Payroll calculations page for the payroll management application",
+title: "Monthly Variables - NewLight Academy Payroll Management",
+description: "Monthly variables page for the payroll management application",
 };
 
-export default async function PayrollCalculationDashboardPage() {
+export default async function MonthlyVariablesDashboardPage() {
 const { userId } = await auth();
 
 if (!userId) {
@@ -22,12 +22,12 @@ return (
     <Suspense
         fallback={
         <div className="flex items-center justify-center h-screen bg-white">
-            Loading Payroll Calculations...
+            Loading Monthly Variables...
         </div>
         }
     >
         <Navbar />
-        <PayrollCalculationPage/>
+        <MonthlyVariablesPage/>
     </Suspense>
     </Layout>
 );

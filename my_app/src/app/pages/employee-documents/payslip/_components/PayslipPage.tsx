@@ -1,9 +1,9 @@
+"use client";
 import React, { useState, useEffect } from 'react';
-import Layout from '../../layout';
 import { FileText, ArrowLeft, Download, User, Calendar, Search, Filter } from 'lucide-react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { Employee, VariableElement as PrismaVariableElement, Advance } from '@prisma/client';
-import { calculatePayroll, type EmployeePayrollData } from '../../../lib/payrollCalculations';
+import { calculatePayroll, type EmployeePayrollData } from '../../../../../lib/payrollCalculations';
 
 // Extend Employee type to include relations
 interface EmployeeWithRelations extends Employee {
@@ -215,36 +215,26 @@ const PayslipPage = () => {
     employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) {
-    return (
-      <Layout>
-        <div className="p-6">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-zinc-600">Loading...</div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
-    <Layout>
-      <div className="p-6">
+      <div className="p-6 bg-white mt-[2vh] rounded-md">
         <div className="mb-6">
           <button
-            onClick={() => router.back()}
-            className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back</span> {/* Translated Retour */}
-          </button>
+          onClick={() => router.back()}
+          className="flex items-center justify-center space-x-1 scale-95 hover:bg-[#3890bf] transition-colors duration-300 
+          mb-4 bg-rose-400 px-4 py-1 rounded-md"
+        >
+          <ArrowLeft className="w-5 h-5 text-white" />
+          <span className='tracking-tighter text-white'>Back</span>
+      </button> 
           
-          <div className="flex items-center space-x-3 mb-4">
-            <FileText className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-zinc-900">Payslip</h1>
+          <div className="flex items-center space-x-3 my-8">
+            <div className="flex items-center justify-center w-10 h-10 bg-zinc-700 rounded-xl p-1">
+            <FileText className="w-6 h-6 text-blue-50" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tighter text-zinc-800">Payslip</h1>
           </div>
           
-          <p className="text-zinc-600 text-lg">
+          <p className="text-zinc-400 text-sm w-[20vw]">
             Generation of individual payslip in PDF, intended for delivery to the employee.
           </p>
         </div>
@@ -252,37 +242,41 @@ const PayslipPage = () => {
         {!showPreview ? (
           <>
             {/* Payslip configuration */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-zinc-900 mb-4">Payslip Configuration</h3>
+            <div className="bg-[#1f435b] p-6 rounded-lg shadow-sm border mb-6">
+              <h3 className="text-lg font-medium text-zinc-50 mb-4">Payslip Configuration</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
-                    <Calendar className="w-4 h-4 inline mr-1" />
+                  <div className="flex items-center mb-2">
+                  <Calendar className="w-4 h-4 inline mr-1 text-white" />
+                  <label className="block text-sm font-medium text-white">
                     Period
                   </label>
+                  </div>
                   <input
                     type="month"
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(e.target.value)}
                     className="payroll-input"
                   />
-                  <p className="text-sm text-zinc-500 mt-1">
+                  <p className="text-sm text-white mt-1">
                     Payslip for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
-                    <Search className="w-4 h-4 inline mr-1" />
-                    Search Employee {/* Translated Rechercher un employé */}
+                <div className="flex items-center mb-2">
+                  <Search className="w-4 h-4 inline mr-1 text-white" />
+                  <label className="block text-sm font-medium text-white">
+                    Search Employee
                   </label>
+                  </div>
                   <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Name, surname, employee ID..."
-                    className="payroll-input"
+                    className="payroll-input placeholder:text-zinc-700 placeholder:text-sm placeholder:font-medium placeholder:tracking-tight"
                   />
                 </div>
               </div>
@@ -291,14 +285,14 @@ const PayslipPage = () => {
             {/* Employee selection */}
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
               <div className="px-6 py-4 border-b border-zinc-200">
-                <h3 className="text-lg font-medium text-zinc-900">
-                  Select Employee ({filteredEmployees.length} employee(s))
+                <h3 className="text-lg tracking-tight text-zinc-800 font-medium capitalize">
+                  Select Employee &nbsp;<strong>({filteredEmployees.length} employee(s))</strong>
                 </h3>
               </div>
               
               <div className="max-h-96 overflow-y-auto">
                 {filteredEmployees.length === 0 ? (
-                  <div className="p-6 text-center text-zinc-500">
+                  <div className="p-6 text-center text-zinc-400 tracking-tight">
                     No employees found
                   </div>
                 ) : (
@@ -346,11 +340,11 @@ const PayslipPage = () => {
             </div>
 
             {/* Generate button */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="bg-[#1f435b] p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-zinc-900">Generate Payslip</h3> 
-                  <p className="text-sm text-zinc-500 mt-1">
+                  <h3 className="text-lg font-medium text-zinc-50">Generate Payslip</h3> 
+                  <p className="text-sm text-white mt-1">
                     {selectedEmployee ? 
                       `Payslip for ${getMonthLabel(selectedMonth)}` :
                       'Select an employee to continue'}
@@ -359,7 +353,7 @@ const PayslipPage = () => {
                 <button
                   onClick={handleGeneratePayslip}
                   disabled={!selectedEmployee || generating}
-                  className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 bg-blue-200 text-white px-6 py-3 rounded-lg hover:bg-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FileText className="w-5 h-5" />
                   <span>{generating ? 'Generating...' : 'Generate Payslip'}</span> 
@@ -589,7 +583,6 @@ const PayslipPage = () => {
           </>
         )}
       </div>
-    </Layout>
   );
 };
 
