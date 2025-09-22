@@ -1,9 +1,9 @@
+"use client";
 import React, { useState, useEffect } from 'react';
-import Layout  from '../../layout';
 import { CreditCard, ArrowLeft, Download, Calendar, Users, FileSpreadsheet, Building, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Employee } from '@prisma/client/';
-import { calculatePayroll, OptionalInsurances, type EmployeePayrollData } from '../../../lib/payrollCalculations';
+import { calculatePayroll, OptionalInsurances, type EmployeePayrollData } from '../../../../../lib/payrollCalculations';
 
 interface BankTransferEntry {
   employee: Employee;
@@ -280,21 +280,9 @@ const BankTransferPage = () => {
     return account.replace(/(\d{3})(\d{3})(\d{18})/, '$1 $2 $3');
   };
 
-  if (loading) {
-    return (
-      <Layout>
-        <div className="p-6">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-zinc-600">Loading...</div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
 
   return (
-    <Layout>
-      <div className="p-6">
+      <div className="p-6 bg-white mt-[2vh] rounded-md">
         <div className="mb-6">
           <button
                     onClick={() => router.back()}
@@ -320,35 +308,39 @@ const BankTransferPage = () => {
         {!showResults ? (
           <>
             {/* Configuration */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-zinc-900 mb-4">Transfer Configuration</h3>
+            <div className="bg-[#1f435b] p-6 rounded-lg shadow-sm border mb-6">
+              <h3 className="text-lg font-medium text-zinc-50 mb-4">Transfer Configuration</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
-                    <Calendar className="w-4 h-4 inline mr-1" />
-                    Payroll Period
+                  <div className="flex items-center mb-2">
+                  <Calendar className="w-4 h-4 inline mr-1 text-white" />
+                  <label className="block text-sm font-medium text-white">
+                    Period
                   </label>
+                  </div>
                   <input
                     type="month"
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(e.target.value)}
                     className="payroll-input"
                   />
-                  <p className="text-sm text-zinc-500 mt-1">
+                  <p className="text-sm text-white mt-1">
                     Transfer for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
-                    <Users className="w-4 h-4 inline mr-1" />
+                  <div className="flex items-center mb-2">
+                  <Users className="w-4 h-4 inline mr-1 text-white" />
+                  <label className="block text-sm font-medium text-white">
                     Employees Included
                   </label>
-                  <div className="text-lg font-medium text-zinc-900">
+                  </div>
+                  <div className="text-lg font-semibold text-white">
                     {employees.length} active employee(s)
                   </div>
-                  <p className="text-sm text-zinc-500 mt-1">
+                  <p className="text-sm text-white tracking-tight mt-1">
                     Only employees with valid bank data will be included
                   </p>
                 </div>
@@ -356,12 +348,12 @@ const BankTransferPage = () => {
             </div>
 
             {/* Company Information */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-zinc-900 mb-4">Company Information</h3>
+            <div className="bg-[#1f435b] p-6 rounded-lg shadow-sm border mb-6">
+              <h3 className="text-lg font-medium text-zinc-50 mb-4">Company Information</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Company Name
                   </label>
                   <input
@@ -373,7 +365,7 @@ const BankTransferPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Debit Account
                   </label>
                   <input
@@ -386,7 +378,7 @@ const BankTransferPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Bank
                   </label>
                   <input
@@ -402,7 +394,7 @@ const BankTransferPage = () => {
             {/* Employees Preview */}
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
               <div className="px-6 py-4 border-b border-zinc-200">
-                <h3 className="text-lg font-medium text-zinc-900">
+                <h3 className="text-lg font-medium text-zinc-800 tracking-tight capitalize">
                   Employees Preview
                 </h3>
               </div>
@@ -447,18 +439,18 @@ const BankTransferPage = () => {
             </div>
 
             {/* Generate Button */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="bg-[#1f435b] p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-zinc-900">Generate Transfer File</h3>
-                  <p className="text-sm text-zinc-500 mt-1">
+                  <h3 className="text-lg font-medium text-zinc-50">Generate Transfer File</h3>
+                  <p className="text-sm text-white mt-1">
                     Calculate net salaries and generate bank file for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
                 <button
                   onClick={handleGenerateTransfer}
                   disabled={generating}
-                  className="flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 bg-blue-200 text-white px-6 py-3 rounded-lg hover:bg-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <CreditCard className="w-5 h-5" />
                   <span>{generating ? 'Generating...' : 'Generate Transfer'}</span>
@@ -648,7 +640,6 @@ const BankTransferPage = () => {
           </>
         )}
       </div>
-    </Layout>
   );
 };
 

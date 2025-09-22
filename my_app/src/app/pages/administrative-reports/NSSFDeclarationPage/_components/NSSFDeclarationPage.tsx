@@ -1,22 +1,24 @@
+
+"use client";
 import React, { useState, useEffect } from 'react';
-import Layout from '../../layout';
-import { Receipt, ArrowLeft, Download, Calendar, Users, FileSpreadsheet, AlertCircle } from 'lucide-react';
+import { Building, ArrowLeft, Download, Calendar, Users, FileSpreadsheet, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Employee } from '@prisma/client';
-import { calculatePayroll, OptionalInsurances, type EmployeePayrollData } from '../../../lib/payrollCalculations';
+import { calculatePayroll, OptionalInsurances, type EmployeePayrollData } from '../../../../../lib/payrollCalculations';
 
-interface TaxStatementEntry {
+interface NSSFDeclarationEntry {
   employee: Employee;
   grossSalary: number;
-  taxableNet: number;
-  taxDeductions: number;
-  taxableBase: number;
-  payeCalculated: number;
-  payeWithheld: number;
-  averageRate: number;
+  nssfCeiling: number;
+  nssfBase: number;
+  employeeContribution: number;
+  employerContribution: number;
+  housingLevy: number;
+  trainingLevy: number;
+  totalContributions: number;
 }
 
-const TaxStatementPage = () => {
+const NSSFDeclarationPage = () => {
   const router = useRouter();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,17 +27,24 @@ const TaxStatementPage = () => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
-  const [selectedYear, setSelectedYear] = useState(() => new Date().getFullYear().toString());
-  const [statementData, setStatementData] = useState<TaxStatementEntry[]>([]);
+  const [declarationData, setDeclarationData] = useState<NSSFDeclarationEntry[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [summary, setSummary] = useState<any>(null);
-  const [reportType, setReportType] = useState<'monthly' | 'annual'>('monthly');
   const [companyInfo, setCompanyInfo] = useState({
     name: 'YOUR COMPANY',
-    taxNumber: 'P051123456A',
-    address: 'Company Address',
+    nssfNumber: '1234567',
+    address: 'Company address',
     city: 'Nairobi'
   });
+
+  // NSSF Rates 2024 (Kenya)
+  const NSSF_RATES = {
+    ceiling: 18000, // Monthly NSSF ceiling (Tier II)
+    employeeContribution: 0.06, // 6% (Tier II)
+    employerContribution: 0.06, // 6% (Tier II)
+    housingLevy: 0.015, // 1.5% (Employer only)
+    trainingLevy: 0.01 // 1.0% (Employer only)
+  };
 
   useEffect(() => {
     fetchEmployees();
@@ -69,18 +78,19 @@ const TaxStatementPage = () => {
     return totalMonths / 12;
   };
 
-  const handleGenerateStatement = async () => {
+  const handleGenerateDeclaration = async () => {
     setGenerating(true);
-    setStatementData([]);
+    setDeclarationData([]);
     setShowResults(true);
 
-    const statementEntries: TaxStatementEntry[] = [];
+    const declarationEntries: NSSFDeclarationEntry[] = [];
     let totalGrossSalary = 0;
-    let totalTaxableNet = 0;
-    let totalTaxDeductions = 0;
-    let totalTaxableBase = 0;
-    let totalPayeCalculated = 0;
-    let totalPayeWithheld = 0;
+    let totalNSSFBase = 0;
+    let totalEmployeeContributions = 0;
+    let totalEmployerContributions = 0;
+    let totalHousingLevy = 0;
+    let totalTrainingLevy = 0;
+    let totalContributions = 0;
 
     for (const employee of employees) {
       try {
@@ -95,7 +105,7 @@ const TaxStatementPage = () => {
           dateOfBirth: employee.dateOfBirth || new Date(),
           hireDate: employee.hireDate,
           seniority: getSeniorityInYears(employee.hireDate),
-          numberOfDeductions: 0, // Calculate based on dependents
+          numberOfDeductions: 0, // calculate based on dependents
           numberOfDaysPerMonth: employee.numberOfDaysPerMonth,
           
           // Salary & allowances
@@ -115,12 +125,12 @@ const TaxStatementPage = () => {
           // Additional payroll fields
           bonuses: 0,
           overtimePay: 0,
+          otherDeductions: 0,
           loanRepayment: employee.loanRepayment,
           helbLoan: employee.helbLoan,
           subjectToNssf: employee.subjectToNssf,
           subjectToShif: employee.subjectToShif,
           subjectToHousingLevy: employee.subjectToHousingLevy,
-          otherDeductions: 0,
           
           // Bank
           bankAccount: employee.bankAccount || '',
@@ -130,91 +140,91 @@ const TaxStatementPage = () => {
         // Calculate payroll
         const payrollResult = calculatePayroll(employeeData);
 
-        // PAYE-specific calculations
+        // NSSF specific calculations
         const grossSalary = payrollResult.grossSalary;
-        const taxableNet = payrollResult.taxCalculation.taxableNet;
-        const taxDeductions = payrollResult.taxCalculation.professionalExpenses;
-        const taxableBase = payrollResult.taxCalculation.netTaxable;
-        const payeCalculated = payrollResult.taxCalculation.incomeTax;
-        const payeWithheld = payrollResult.taxCalculation.incomeTax; // Same value for PAYE withheld
+        const nssfBase = Math.min(grossSalary, NSSF_RATES.ceiling);
         
-        const averageRate = taxableBase > 0 ? (payeCalculated / taxableBase) * 100 : 0;
+        const employeeContribution = nssfBase * NSSF_RATES.employeeContribution;
+        const employerContribution = nssfBase * NSSF_RATES.employerContribution;
+        const housingLevy = grossSalary * NSSF_RATES.housingLevy;
+        const trainingLevy = grossSalary * NSSF_RATES.trainingLevy;
+        
+        const totalContributionsEmployee = employeeContribution + employerContribution + housingLevy + trainingLevy;
 
-        const entry: TaxStatementEntry = {
+        const entry: NSSFDeclarationEntry = {
           employee,
           grossSalary,
-          taxableNet,
-          taxDeductions,
-          taxableBase,
-          payeCalculated,
-          payeWithheld,
-          averageRate
+          nssfCeiling: NSSF_RATES.ceiling,
+          nssfBase,
+          employeeContribution,
+          employerContribution,
+          housingLevy,
+          trainingLevy,
+          totalContributions: totalContributionsEmployee
         };
 
-        statementEntries.push(entry);
+        declarationEntries.push(entry);
 
         // Accumulate totals
         totalGrossSalary += grossSalary;
-        totalTaxableNet += taxableNet;
-        totalTaxDeductions += taxDeductions;
-        totalTaxableBase += taxableBase;
-        totalPayeCalculated += payeCalculated;
-        totalPayeWithheld += payeWithheld;
+        totalNSSFBase += nssfBase;
+        totalEmployeeContributions += employeeContribution;
+        totalEmployerContributions += employerContribution;
+        totalHousingLevy += housingLevy;
+        totalTrainingLevy += trainingLevy;
+        totalContributions += totalContributionsEmployee;
 
       } catch (error) {
         console.error(`Error calculating for ${employee.firstName} ${employee.lastName}:`, error);
       }
     }
 
-    setStatementData(statementEntries);
+    setDeclarationData(declarationEntries);
     setSummary({
-      totalEmployees: statementEntries.length,
+      totalEmployees: declarationEntries.length,
       totalGrossSalary,
-      totalTaxableNet,
-      totalTaxDeductions,
-      totalTaxableBase,
-      totalPayeCalculated,
-      totalPayeWithheld,
-      averageRateGlobal: totalTaxableBase > 0 ? (totalPayeCalculated / totalTaxableBase) * 100 : 0
+      totalNSSFBase,
+      totalEmployeeContributions,
+      totalEmployerContributions,
+      totalHousingLevy,
+      totalTrainingLevy,
+      totalContributions
     });
 
     setGenerating(false);
   };
 
-  const handleExportTaxFile = () => {
-    const period = reportType === 'monthly' ? getMonthLabel(selectedMonth) : `Year ${selectedYear}`;
-    
-    // Simplified tax file format for Kenya
-    const taxContent = [
-      '# PAYE TAX STATEMENT',
+  const handleExportNSSFFile = () => {
+    // Simplified NSSF file format
+    const nssfContent = [
+      '# NSSF DECLARATION',
       `# Company: ${companyInfo.name}`,
-      `# PIN: ${companyInfo.taxNumber}`,
-      `# Period: ${period}`,
-      `# Report Type: ${reportType === 'monthly' ? 'Monthly' : 'Annual'}`,
-      `# Generation Date: ${new Date().toLocaleDateString('en-KE')}`,
+      `# NSSF Number: ${companyInfo.nssfNumber}`,
+      `# Period: ${getMonthLabel(selectedMonth)}`,
+      `# Generation date: ${new Date().toLocaleDateString('en-US')}`,
       '',
-      '# TAX SUMMARY',
-      `# Number of Employees: ${summary?.totalEmployees || 0}`,
-      `# Total Gross Salaries: ${(summary?.totalGrossSalary || 0).toFixed(2)} KES`,
-      `# Total Taxable Net: ${(summary?.totalTaxableNet || 0).toFixed(2)} KES`,
-      `# Total Tax Deductions: ${(summary?.totalTaxDeductions || 0).toFixed(2)} KES`,
-      `# Total Taxable Base: ${(summary?.totalTaxableBase || 0).toFixed(2)} KES`,
-      `# Total PAYE Calculated: ${(summary?.totalPayeCalculated || 0).toFixed(2)} KES`,
-      `# Total PAYE Withheld: ${(summary?.totalPayeWithheld || 0).toFixed(2)} KES`,
-      `# Global Average Rate: ${(summary?.averageRateGlobal || 0).toFixed(2)}%`,
+      '# SUMMARY',
+      `# Number of employees: ${summary?.totalEmployees || 0}`,
+      `# Total gross salaries: ${(summary?.totalGrossSalary || 0).toFixed(2)} KES`,
+      `# Total NSSF base: ${(summary?.totalNSSFBase || 0).toFixed(2)} KES`,
+      `# Total employee contributions: ${(summary?.totalEmployeeContributions || 0).toFixed(2)} KES`,
+      `# Total employer contributions: ${(summary?.totalEmployerContributions || 0).toFixed(2)} KES`,
+      `# Total housing levy: ${(summary?.totalHousingLevy || 0).toFixed(2)} KES`,
+      `# Total training levy: ${(summary?.totalTrainingLevy || 0).toFixed(2)} KES`,
+      `# TOTAL TO PAY: ${(summary?.totalContributions || 0).toFixed(2)} KES`,
       '',
       '# EMPLOYEE DETAILS',
-      '# Format: ID_Number;Last_Name;First_Name;Gross_Salary;Taxable_Net;Tax_Deductions;Taxable_Base;PAYE_Calculated;PAYE_Withheld;Average_Rate',
-      ...statementData.map(entry => 
-        `${entry.employee.idNumber || 'N/A'};${entry.employee.lastName};${entry.employee.firstName};${entry.grossSalary.toFixed(2)};${entry.taxableNet.toFixed(2)};${entry.taxDeductions.toFixed(2)};${entry.taxableBase.toFixed(2)};${entry.payeCalculated.toFixed(2)};${entry.payeWithheld.toFixed(2)};${entry.averageRate.toFixed(2)}`
+      '# Format: NSSF_Number;Last_Name;First_Name;Gross_Salary;NSSF_Base;Employee_Contribution;Employer_Contribution;Housing_Levy;Training_Levy;Total',
+      ...declarationData.map(entry => 
+        `${entry.employee.nssfNumber || 'N/A'};${entry.employee.lastName};${entry.employee.firstName};${entry.grossSalary.toFixed(2)};${entry.nssfBase.toFixed(2)};${entry.employeeContribution.toFixed(2)};${entry.employerContribution.toFixed(2)};${entry.housingLevy.toFixed(2)};${entry.trainingLevy.toFixed(2)};${entry.totalContributions.toFixed(2)}`
       )
     ].join('\n');
 
-    const blob = new Blob([taxContent], { type: 'text/plain;charset=utf-8;' });
+    const blob = new Blob([nssfContent], { type: 'text/plain;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `paye_statement_${reportType === 'monthly' ? selectedMonth : selectedYear}.txt`);
+    link.setAttribute('download', `nssf_declaration_${selectedMonth}.txt`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -222,20 +232,20 @@ const TaxStatementPage = () => {
   };
 
   const handleExportExcel = () => {
-    const excelData = statementData.map(entry => ({
-      'ID Number': entry.employee.idNumber || 'N/A',
+    const excelData = declarationData.map(entry => ({
+      'NSSF Number': entry.employee.nssfNumber || 'N/A',
       'Employee ID': entry.employee.employeeId,
       'Last Name': entry.employee.lastName,
       'First Name': entry.employee.firstName,
       'Position': entry.employee.position,
-      'Marital Status': entry.employee.maritalStatus,
       'Gross Salary': entry.grossSalary,
-      'Taxable Net': entry.taxableNet,
-      'Tax Deductions': entry.taxDeductions,
-      'Taxable Base': entry.taxableBase,
-      'PAYE Calculated': entry.payeCalculated,
-      'PAYE Withheld': entry.payeWithheld,
-      'Average Rate (%)': entry.averageRate
+      'NSSF Ceiling': entry.nssfCeiling,
+      'NSSF Base': entry.nssfBase,
+      'Employee Contribution (6%)': entry.employeeContribution,
+      'Employer Contribution (6%)': entry.employerContribution,
+      'Housing Levy (1.5%)': entry.housingLevy,
+      'Training Levy (1.0%)': entry.trainingLevy,
+      'Total Contributions': entry.totalContributions
     }));
 
     const csvContent = [
@@ -247,7 +257,7 @@ const TaxStatementPage = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `paye_statement_details_${reportType === 'monthly' ? selectedMonth : selectedYear}.csv`);
+    link.setAttribute('download', `nssf_declaration_details_${selectedMonth}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -262,10 +272,6 @@ const TaxStatementPage = () => {
     }).format(amount);
   };
 
-  const formatPercentage = (percentage: number) => {
-    return `${percentage.toFixed(2)}%`;
-  };
-
   const getMonthLabel = (monthString: string) => {
     const [year, month] = monthString.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
@@ -275,23 +281,7 @@ const TaxStatementPage = () => {
     }).format(date);
   };
 
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
-
-  if (loading) {
-    return (
-      <Layout>
-        <div className="p-6">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-zinc-600">Loading...</div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
-    <Layout>
       <div className="p-6">
         <div className="mb-6">
           <button
@@ -304,14 +294,14 @@ const TaxStatementPage = () => {
                 </button>
           
           <div className="flex items-center space-x-3 mb-4">
-            <div className="flex items-center justify-center w-10 h-10 bg-zinc-700 rounded-xl p-1">
-            <Receipt className="w-6 h-6 text-blue-50" />
-            </div>
-            <h1 className="text-2xl font-bold tracking-tighter text-zinc-800">PAYE Tax Statement</h1>
+          <div className="flex items-center justify-center w-10 h-10 bg-zinc-700 rounded-xl p-1">
+            <Building className="w-6 h-6 text-blue-50" />
+          </div>
+            <h1 className="text-2xl font-bold tracking-tighter text-zinc-800">NSSF Declaration</h1>
           </div>
           
           <p className="text-zinc-400 text-sm w-[20vw]">
-            Monthly and annual details of Pay As You Earn (PAYE) tax withheld, generated according to the Kenyan tax scale.
+            Production of the monthly file or form to be submitted to NSSF for contributions due.
           </p>
         </div>
 
@@ -319,59 +309,24 @@ const TaxStatementPage = () => {
           <>
             {/* Configuration */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-zinc-900 mb-4">Tax Statement Configuration</h3>
+              <h3 className="text-lg font-medium text-zinc-900 mb-4">Declaration Configuration</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-2">
-                    Report Type
+                    <Calendar className="w-4 h-4 inline mr-1" />
+                    Declaration Period
                   </label>
-                  <select
-                    value={reportType}
-                    onChange={(e) => setReportType(e.target.value as 'monthly' | 'annual')}
+                  <input
+                    type="month"
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
                     className="payroll-input"
-                  >
-                    <option value="monthly">Monthly Report</option>
-                    <option value="annual">Annual Report</option>
-                  </select>
+                  />
+                  <p className="text-sm text-zinc-500 mt-1">
+                    Declaration for {getMonthLabel(selectedMonth)}
+                  </p>
                 </div>
-
-                {reportType === 'monthly' ? (
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-2">
-                      <Calendar className="w-4 h-4 inline mr-1" />
-                      Month
-                    </label>
-                    <input
-                      type="month"
-                      value={selectedMonth}
-                      onChange={(e) => setSelectedMonth(e.target.value)}
-                      className="payroll-input"
-                    />
-                    <p className="text-sm text-zinc-500 mt-1">
-                      Statement for {getMonthLabel(selectedMonth)}
-                    </p>
-                  </div>
-                ) : (
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-2">
-                      <Calendar className="w-4 h-4 inline mr-1" />
-                      Year
-                    </label>
-                    <select
-                      value={selectedYear}
-                      onChange={(e) => setSelectedYear(e.target.value)}
-                      className="payroll-input"
-                    >
-                      {years.map(year => (
-                        <option key={year} value={year}>{year}</option>
-                      ))}
-                    </select>
-                    <p className="text-sm text-zinc-500 mt-1">
-                      Statement for the year {selectedYear}
-                    </p>
-                  </div>
-                )}
 
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-2">
@@ -382,7 +337,7 @@ const TaxStatementPage = () => {
                     {employees.length} active employee(s)
                   </div>
                   <p className="text-sm text-zinc-500 mt-1">
-                    All active employees will be included
+                    All active employees will be included in the declaration
                   </p>
                 </div>
               </div>
@@ -390,7 +345,7 @@ const TaxStatementPage = () => {
 
             {/* Company Information */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-zinc-900 mb-4">Company Tax Information</h3>
+              <h3 className="text-lg font-medium text-zinc-900 mb-4">Company Information</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -407,14 +362,14 @@ const TaxStatementPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-2">
-                    KRA PIN
+                    NSSF Registration Number
                   </label>
                   <input
                     type="text"
-                    value={companyInfo.taxNumber}
-                    onChange={(e) => setCompanyInfo(prev => ({ ...prev, taxNumber: e.target.value }))}
+                    value={companyInfo.nssfNumber}
+                    onChange={(e) => setCompanyInfo(prev => ({ ...prev, nssfNumber: e.target.value }))}
                     className="payroll-input"
-                    placeholder="P051123456A"
+                    placeholder="1234567"
                   />
                 </div>
 
@@ -444,70 +399,44 @@ const TaxStatementPage = () => {
               </div>
             </div>
 
-            {/* PAYE Tax Scale */}
+            {/* NSSF Rates */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-zinc-900 mb-4">Kenyan PAYE Tax Scale</h3>
+              <h3 className="text-lg font-medium text-zinc-900 mb-4">Current NSSF Rates</h3>
               
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-zinc-200">
-                  <thead className="bg-zinc-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                        Income Band (KES/month)
-                      </th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                        Rate
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                        Deduction
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-zinc-200">
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">0 - 24,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-zinc-900">10%</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-zinc-900">0</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">24,001 - 32,333</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-zinc-900">25%</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-zinc-900">2,400</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">32,334 - 500,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-zinc-900">30%</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-zinc-900">3,733.25</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">500,001 - 800,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-zinc-900">32.5%</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-zinc-900">143,733.25</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">Above 800,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-zinc-900">35%</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-zinc-900">241,233.25</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-lg font-bold text-blue-600">{formatCurrency(NSSF_RATES.ceiling)}</div>
+                  <div className="text-sm text-zinc-600">Monthly ceiling</div>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-lg font-bold text-green-600">{(NSSF_RATES.employeeContribution * 100).toFixed(1)}%</div>
+                  <div className="text-sm text-zinc-600">Employee contribution</div>
+                </div>
+                <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <div className="text-lg font-bold text-orange-600">{(NSSF_RATES.employerContribution * 100).toFixed(1)}%</div>
+                  <div className="text-sm text-zinc-600">Employer contribution</div>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-lg font-bold text-purple-600">{(NSSF_RATES.housingLevy * 100).toFixed(1)}%</div>
+                  <div className="text-sm text-zinc-600">Housing levy</div>
+                </div>
               </div>
               
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <div className="flex items-center">
-                  <AlertCircle className="w-5 h-5 text-blue-600 mr-2" />
-                  <span className="text-sm text-blue-800">
-                    Tax Deductions: 2,400 KES personal relief per month + housing levy relief (up to 108,000 KES annually) + insurance relief (up to 60,000 KES annually)
+                  <AlertCircle className="w-5 h-5 text-yellow-600 mr-2" />
+                  <span className="text-sm text-yellow-800">
+                    Training levy: {(NSSF_RATES.trainingLevy * 100).toFixed(1)}% on total gross salary
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Employee Preview */}
+            {/* Employees Preview */}
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
               <div className="px-6 py-4 border-b border-zinc-200">
                 <h3 className="text-lg font-medium text-zinc-900">
-                  Employees Included in Tax Statement
+                  Employees to Declare
                 </h3>
               </div>
               
@@ -517,8 +446,8 @@ const TaxStatementPage = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-8 w-8">
-                          <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
-                            <span className="text-xs font-medium text-purple-600">
+                          <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
+                            <span className="text-xs font-medium text-orange-600">
                               {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                             </span>
                           </div>
@@ -528,7 +457,7 @@ const TaxStatementPage = () => {
                             {employee.firstName} {employee.lastName}
                           </div>
                           <div className="text-sm text-zinc-500">
-                            {employee.employeeId} • {employee.maritalStatus} • 0 deduction(s)
+                            {employee.employeeId} • {employee.position}
                           </div>
                         </div>
                       </div>
@@ -537,10 +466,10 @@ const TaxStatementPage = () => {
                           {formatCurrency(employee.baseSalary)}
                         </div>
                         <div className="text-xs text-zinc-500">
-                          {employee.idNumber ? (
-                            <span className="text-green-600">ID: {employee.idNumber}</span>
+                          {employee.nssfNumber ? (
+                            <span className="text-green-600">NSSF: {employee.nssfNumber}</span>
                           ) : (
-                            <span className="text-rose-600">ID Number missing</span>
+                            <span className="text-rose-600">NSSF missing</span>
                           )}
                         </div>
                       </div>
@@ -554,18 +483,18 @@ const TaxStatementPage = () => {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-zinc-900">Generate PAYE Tax Statement</h3>
+                  <h3 className="text-lg font-medium text-zinc-900">Generate NSSF Declaration</h3>
                   <p className="text-sm text-zinc-500 mt-1">
-                    Calculate PAYE and generate tax statement for {reportType === 'monthly' ? getMonthLabel(selectedMonth) : `the year ${selectedYear}`}
+                    Calculate contributions and generate declaration for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
                 <button
-                  onClick={handleGenerateStatement}
+                  onClick={handleGenerateDeclaration}
                   disabled={generating}
-                  className="flex items-center space-x-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Receipt className="w-5 h-5" />
-                  <span>{generating ? 'Generating...' : 'Generate Tax Statement'}</span>
+                  <Building className="w-5 h-5" />
+                  <span>{generating ? 'Generating...' : 'Generate Declaration'}</span>
                 </button>
               </div>
             </div>
@@ -575,15 +504,13 @@ const TaxStatementPage = () => {
             {/* Results */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-zinc-900">
-                  PAYE Tax Statement - {reportType === 'monthly' ? getMonthLabel(selectedMonth) : `Year ${selectedYear}`}
-                </h3>
+                <h3 className="text-lg font-medium text-zinc-900">NSSF Declaration - {getMonthLabel(selectedMonth)}</h3>
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowResults(false)}
                     className="text-sm text-zinc-600 hover:text-zinc-900"
                   >
-                    New Statement
+                    New Declaration
                   </button>
                   <button
                     onClick={handleExportExcel}
@@ -593,11 +520,11 @@ const TaxStatementPage = () => {
                     <span>Export Excel</span>
                   </button>
                   <button
-                    onClick={handleExportTaxFile}
-                    className="flex items-center space-x-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                    onClick={handleExportNSSFFile}
+                    className="flex items-center space-x-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
                   >
                     <Download className="w-4 h-4" />
-                    <span>Tax File</span>
+                    <span>NSSF File</span>
                   </button>
                 </div>
               </div>
@@ -606,64 +533,66 @@ const TaxStatementPage = () => {
             {/* Summary */}
             {summary && (
               <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-                <h4 className="text-lg font-medium text-zinc-900 mb-4">Tax Summary</h4>
+                <h4 className="text-lg font-medium text-zinc-900 mb-4">Declaration Summary</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">{summary.totalEmployees}</div>
-                    <div className="text-sm text-zinc-600">Employees</div>
+                    <div className="text-sm text-zinc-600">Employees declared</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-green-600">{formatCurrency(summary.totalGrossSalary)}</div>
-                    <div className="text-sm text-zinc-600">Total Gross Salaries</div>
+                    <div className="text-sm text-zinc-600">Total gross salaries</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-orange-600">{formatCurrency(summary.totalTaxableBase)}</div>
-                    <div className="text-sm text-zinc-600">Total Taxable Base</div>
+                    <div className="text-lg font-bold text-orange-600">{formatCurrency(summary.totalNSSFBase)}</div>
+                    <div className="text-sm text-zinc-600">Total NSSF base</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-purple-600">{formatCurrency(summary.totalPayeWithheld)}</div>
-                    <div className="text-sm text-zinc-600">Total PAYE Withheld</div>
+                    <div className="text-lg font-bold text-purple-600">{formatCurrency(summary.totalContributions)}</div>
+                    <div className="text-sm text-zinc-600">Total contributions</div>
                   </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t border-zinc-200">
+                <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-zinc-200">
                   <div className="text-center">
-                    <div className="text-lg font-bold text-blue-600">{formatCurrency(summary.totalTaxableNet)}</div>
-                    <div className="text-sm text-zinc-600">Total Taxable Net</div>
+                    <div className="text-lg font-bold text-rose-600">{formatCurrency(summary.totalEmployeeContributions)}</div>
+                    <div className="text-sm text-zinc-600">Employee contributions</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-rose-600">{formatCurrency(summary.totalTaxDeductions)}</div>
-                    <div className="text-sm text-zinc-600">Total Deductions</div>
+                    <div className="text-lg font-bold text-blue-600">{formatCurrency(summary.totalEmployerContributions)}</div>
+                    <div className="text-sm text-zinc-600">Employer contributions</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-green-600">{formatPercentage(summary.averageRateGlobal)}</div>
-                    <div className="text-sm text-zinc-600">Global Average Rate</div>
+                    <div className="text-lg font-bold text-green-600">{formatCurrency(summary.totalHousingLevy)}</div>
+                    <div className="text-sm text-zinc-600">Housing levy</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-yellow-600">{formatCurrency(summary.totalTrainingLevy)}</div>
+                    <div className="text-sm text-zinc-600">Training levy</div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Statement Information */}
+            {/* Declaration Information */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h4 className="text-lg font-medium text-zinc-900 mb-4">Tax Statement Information</h4>
+              <h4 className="text-lg font-medium text-zinc-900 mb-4">Declaration Information</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <span className="text-zinc-600">Company:</span>
+                  <span className="text-zinc-600">Company :</span>
                   <div className="font-medium">{companyInfo.name}</div>
                 </div>
                 <div>
-                  <span className="text-zinc-600">KRA PIN:</span>
-                  <div className="font-medium">{companyInfo.taxNumber}</div>
+                  <span className="text-zinc-600">NSSF Number :</span>
+                  <div className="font-medium">{companyInfo.nssfNumber}</div>
                 </div>
                 <div>
-                  <span className="text-zinc-600">Period:</span>
-                  <div className="font-medium">
-                    {reportType === 'monthly' ? getMonthLabel(selectedMonth) : `Year ${selectedYear}`}
-                  </div>
+                  <span className="text-zinc-600">Period :</span>
+                  <div className="font-medium">{getMonthLabel(selectedMonth)}</div>
                 </div>
                 <div>
-                  <span className="text-zinc-600">Generation Date:</span>
-                  <div className="font-medium">{new Date().toLocaleDateString('en-KE')}</div>
+                  <span className="text-zinc-600">Generation date :</span>
+                  <div className="font-medium">{new Date().toLocaleDateString('en-US')}</div>
                 </div>
               </div>
             </div>
@@ -678,30 +607,30 @@ const TaxStatementPage = () => {
                         Employee
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                        Gross Salary
+                        Gross salary
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                        Taxable Net
+                        NSSF base
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                        Taxable Base
+                        Employee contributions
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                        PAYE Withheld
+                        Employer contributions
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                        Average Rate
+                        Total contributions
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-zinc-200">
-                    {statementData.map((entry) => (
+                    {declarationData.map((entry) => (
                       <tr key={entry.employee.id} className="hover:bg-zinc-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-8 w-8">
-                              <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
-                                <span className="text-xs font-medium text-purple-600">
+                              <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
+                                <span className="text-xs font-medium text-orange-600">
                                   {entry.employee.firstName.charAt(0)}{entry.employee.lastName.charAt(0)}
                                 </span>
                               </div>
@@ -711,7 +640,7 @@ const TaxStatementPage = () => {
                                 {entry.employee.firstName} {entry.employee.lastName}
                               </div>
                               <div className="text-sm text-zinc-500">
-                                {entry.employee.employeeId} • {entry.employee.maritalStatus} • 0 deduction(s)
+                                {entry.employee.employeeId} • {entry.employee.nssfNumber || 'NSSF missing'}
                               </div>
                             </div>
                           </div>
@@ -720,16 +649,16 @@ const TaxStatementPage = () => {
                           {formatCurrency(entry.grossSalary)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-blue-600">
-                          {formatCurrency(entry.taxableNet)}
+                          {formatCurrency(entry.nssfBase)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-rose-600">
+                          {formatCurrency(entry.employeeContribution)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-orange-600">
-                          {formatCurrency(entry.taxableBase)}
+                          {formatCurrency(entry.employerContribution + entry.housingLevy + entry.trainingLevy)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-purple-600">
-                          {formatCurrency(entry.payeWithheld)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-zinc-600">
-                          {formatPercentage(entry.averageRate)}
+                          {formatCurrency(entry.totalContributions)}
                         </td>
                       </tr>
                     ))}
@@ -743,16 +672,16 @@ const TaxStatementPage = () => {
                         {formatCurrency(summary?.totalGrossSalary || 0)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-blue-600">
-                        {formatCurrency(summary?.totalTaxableNet || 0)}
+                        {formatCurrency(summary?.totalNSSFBase || 0)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-rose-600">
+                        {formatCurrency(summary?.totalEmployeeContributions || 0)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-orange-600">
-                        {formatCurrency(summary?.totalTaxableBase || 0)}
+                        {formatCurrency((summary?.totalEmployerContributions || 0) + (summary?.totalHousingLevy || 0) + (summary?.totalTrainingLevy || 0))}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-purple-600">
-                        {formatCurrency(summary?.totalPayeWithheld || 0)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-zinc-600">
-                        {formatPercentage(summary?.averageRateGlobal || 0)}
+                        {formatCurrency(summary?.totalContributions || 0)}
                       </td>
                     </tr>
                   </tfoot>
@@ -762,8 +691,7 @@ const TaxStatementPage = () => {
           </>
         )}
       </div>
-    </Layout>
   );
 };
 
-export default TaxStatementPage;
+export default NSSFDeclarationPage;

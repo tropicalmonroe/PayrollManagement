@@ -1,16 +1,16 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import Layout from "../../../components/Layout";
+import Layout from "../../../../components/Layout";
 import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
-import AdministrativeReportsPage from "./_components/AdministrativeReportsPage";
+import PayrollJournalPage from "./_components/PayrollJournalPage";
 
 export const metadata = {
-title: "Administrative Reports - NewLight Academy Payroll Management",
-description: "Administrative Reports page for the payroll management application",
+title: "Payroll Journal - NewLight Academy Payroll Management",
+description: "Payroll Journal page for the payroll management application",
 };
 
-export default async function AdministrativeReportsPageDashboardPage() {
+export default async function PayrollJournalDashboardPage() {
 const { userId } = await auth();
 
 if (!userId) {
@@ -22,12 +22,12 @@ return (
     <Suspense
         fallback={
         <div className="flex items-center justify-center h-screen bg-white">
-            Loading Administrative Reports...
+            Loading Payroll Journal...
         </div>
         }
     >
-        <Navbar />
-        <AdministrativeReportsPage/>
+        <Navbar/>
+        <PayrollJournalPage/>
     </Suspense>
     </Layout>
 );

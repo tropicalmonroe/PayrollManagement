@@ -404,10 +404,11 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/administrative-reports/payroll-journal', title: 'Payroll Journal' },
-            { href: '/administrative-reports/bank-transfer', title: 'Bulk Bank Transfer' },
-            { href: '/administrative-reports/nssf-declaration', title: 'NSSF Declaration' },
-            { href: '/administrative-reports/paye-tax-statement', title: 'PAYE Tax Statement' },
+            { href: '/pages/administrative-reports', title: 'Administrative Reports' },
+            { href: '/pages/administrative-reports/payroll-journal', title: 'Payroll Journal' },
+            { href: '/pages/administrative-reports/bank-transfer', title: 'Bulk Bank Transfer' },
+            { href: '/pages/administrative-reports/nssf-declaration', title: 'NSSF Declaration' },
+            { href: '/pages/administrative-reports/paye-tax-statement', title: 'PAYE Tax Statement' },
             ]}
             isOpen={openMenus['administrative-reports']}
         />

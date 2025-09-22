@@ -1,5 +1,5 @@
+"use client";
 import { useState, useEffect } from 'react';
-import Layout from '../../layout';
 import { Download, FileText, Calendar } from 'lucide-react';
 
 interface Employee {
@@ -115,7 +115,6 @@ export default function IncomeTaxStatement() {
   };
 
   return (
-    <Layout>
       <div className="p-6 space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Income Tax Statement</h1>
@@ -288,6 +287,5 @@ export default function IncomeTaxStatement() {
           </div>
         </div>
       </div>
-    </Layout>
   );
 }

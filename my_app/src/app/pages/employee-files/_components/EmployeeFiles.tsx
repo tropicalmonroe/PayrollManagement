@@ -49,7 +49,7 @@ return (
             <div
             key={index}
             onClick={() => router.push(section.href)}
-            className="bg-white rounded-lg shadow-md cursor-pointer border border-zinc-200 overflow-hidden  hover:scale-105 transition ease-in-out duration-300"
+            className="bg-white rounded-lg shadow-md cursor-pointer border border-zinc-200 overflow-hidden hover:scale-105 transition ease-in-out duration-300"
             >
             <div className={`${section.color} p-4`}>
                 <div className="text-white">

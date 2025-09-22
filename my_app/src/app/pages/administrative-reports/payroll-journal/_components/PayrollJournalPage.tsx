@@ -1,9 +1,9 @@
+"use client";
 import React, { useState, useEffect } from 'react';
-import Layout from '../../layout';
 import { BookOpen, ArrowLeft, Download, Calendar, Users, FileSpreadsheet, Filter } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Employee } from '@prisma/client';
-import { calculatePayroll, OptionalInsurances, type EmployeePayrollData } from '../../../lib/payrollCalculations';
+import { calculatePayroll, OptionalInsurances, type EmployeePayrollData } from '../../../../../lib/payrollCalculations';
 
 interface PayrollJournalEntry {
   employee: Employee;
@@ -282,21 +282,9 @@ const PayrollJournalPage = () => {
 
   const departments = Array.from(new Set(employees.map(emp => emp.position)));
 
-  if (loading) {
-    return (
-      <Layout>
-        <div className="p-6">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-zinc-600">Loading...</div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
 
   return (
-    <Layout>
-      <div className="p-6">
+      <div className="p-6 bg-white mt-[2vh] rounded-md">
         <div className="mb-6">
           <button
                     onClick={() => router.back()}
@@ -307,7 +295,7 @@ const PayrollJournalPage = () => {
                     <span className='tracking-tighter text-white'>Back</span>
                 </button>
           
-          <div className="flex items-center space-x-3 mb-4">
+          <div className="flex items-center space-x-3 my-8">
           <div className="flex items-center justify-center w-10 h-10 bg-zinc-700 rounded-xl p-1">
             <BookOpen className="w-6 h-6 text-blue-50" />
           </div>
@@ -322,31 +310,35 @@ const PayrollJournalPage = () => {
         {!showResults ? (
           <>
             {/* Configuration */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium text-zinc-900 mb-4">Journal Configuration</h3>
+            <div className="bg-[#1f435b] p-6 rounded-lg shadow-sm border mb-6">
+              <h3 className="text-lg font-medium text-zinc-50 mb-4">Journal Configuration</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
-                    <Calendar className="w-4 h-4 inline mr-1" />
+                  <div className="flex items-center mb-2">
+                  <Calendar className="w-4 h-4 inline mr-1 text-white" />
+                  <label className="block text-sm font-medium text-white">
                     Period
                   </label>
+                  </div>
                   <input
                     type="month"
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(e.target.value)}
                     className="payroll-input"
                   />
-                  <p className="text-sm text-zinc-500 mt-1">
+                  <p className="text-sm text-white mt-1">
                     Journal for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
-                    <Filter className="w-4 h-4 inline mr-1" />
+                  <div className="flex items-center mb-2">
+                    <Filter className="w-4 h-4 inline mr-1 text-white" />
+                  <label className="block text-sm font-medium text-white">
                     Filter by position
                   </label>
+                  </div>
                   <select
                     value={filterDepartment}
                     onChange={(e) => setFilterDepartment(e.target.value)}
@@ -360,11 +352,13 @@ const PayrollJournalPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
-                    <Users className="w-4 h-4 inline mr-1" />
+                  <div className="flex items-center mb-2">
+                    <Users className="w-4 h-4 inline mr-1 text-white" />
+                  <label className="block text-sm font-medium text-white">
                     Employees included
                   </label>
-                  <div className="text-lg font-medium text-zinc-900">
+                  </div>
+                  <div className="text-lg font-medium text-zinc-50">
                     {filterDepartment 
                       ? employees.filter(emp => emp.position.toLowerCase().includes(filterDepartment.toLowerCase())).length
                       : employees.length
@@ -377,7 +371,7 @@ const PayrollJournalPage = () => {
             {/* Employees Preview */}
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
               <div className="px-6 py-4 border-b border-zinc-200">
-                <h3 className="text-lg font-medium text-zinc-900">
+                <h3 className="text-lg font-medium text-zinc-900 tracking-tight capitalize">
                   Employees included in the journal
                 </h3>
               </div>
@@ -416,18 +410,18 @@ const PayrollJournalPage = () => {
             </div>
 
             {/* Generate Button */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="bg-[#1f435b] p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-zinc-900">Generate Payroll Journal</h3>
-                  <p className="text-sm text-zinc-500 mt-1">
+                  <h3 className="text-lg font-medium text-zinc-50">Generate Payroll Journal</h3>
+                  <p className="text-sm text-white mt-1">
                     Calculation and consolidation of payroll data for {getMonthLabel(selectedMonth)}
                   </p>
                 </div>
                 <button
                   onClick={handleGenerateJournal}
                   disabled={generating}
-                  className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 bg-blue-200 text-white px-6 py-3 rounded-lg hover:bg-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <BookOpen className="w-5 h-5" />
                   <span>{generating ? 'Generating...' : 'Generate Journal'}</span>
@@ -582,7 +576,6 @@ const PayrollJournalPage = () => {
           </>
         )}
       </div>
-    </Layout>
   );
 };
 
