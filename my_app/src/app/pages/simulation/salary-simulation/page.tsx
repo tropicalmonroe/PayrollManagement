@@ -1,16 +1,16 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import Layout from "../../../components/Layout";
+import Layout from "../../../../components/Layout";
 import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
-import SimulationIndex from "./_components/SimulationIndex";
+import SalarySimulation from "./_components/SalarySimulation";
 
 export const metadata = {
-title: "Simulation Index - NewLight Academy Payroll Management",
-description: "Simulation page for the payroll management application",
+title: "Simulation Salary - NewLight Academy Payroll Management",
+description: "Simulation page for salary - the payroll management application",
 };
 
-export default async function SimulationIndexDashboardPage() {
+export default async function SalarySimulationDashboardPage() {
 const { userId } = await auth();
 
 if (!userId) {
@@ -22,12 +22,12 @@ return (
     <Suspense
         fallback={
         <div className="flex items-center justify-center h-screen bg-white">
-            Loading Simulation Index...
+            Loading Salary Simulation ...
         </div>
         }
     >
         <Navbar />
-        <SimulationIndex />
+        <SalarySimulation />
     </Suspense>
     </Layout>
 );

@@ -1,22 +1,13 @@
+"use client";
+
 import { useState, useEffect } from 'react';
-import Head from 'next/head';
 import Link from 'next/link';
-import Layout from '../../layout';
 import { Calculator, ArrowLeft, Download, Save, RefreshCw, Info } from 'lucide-react';
 
 export default function SalarySimulation() {
   return (
     <>
-      <Head>
-        <title>Salary Simulation - AD Capital Payroll</title>
-        <meta name="description" content="Simulate payroll calculations for different salary amounts" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <Layout>
         <SalarySimulationContent />
-      </Layout>
     </>
   );
 }
@@ -102,19 +93,23 @@ function SalarySimulationContent() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6 bg-white mt-[2vh] rounded-md">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/simulation">
-            <button className="inline-flex items-center px-3 py-2 border border-zinc-300 shadow-sm text-sm leading-4 font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </button>
+        <div className="flex items-start flex-col space-x-4">
+          <Link href="/pages/simulation">
+            <button
+            className="flex items-center justify-center space-x-1 scale-95 hover:bg-[#3890bf] transition-colors duration-300 
+            mb-4 bg-rose-400 px-4 py-1 rounded-md"
+            >
+            <ArrowLeft className="w-5 h-5 text-white" />
+            <span className='tracking-tighter text-white'>Back</span>
+        </button>
           </Link>
-          <div>
-            <h2 className="text-2xl font-bold text-zinc-900">Salary Simulation</h2>
-            <p className="mt-1 text-sm text-zinc-600">
+          
+          <div className='my-8'>
+            <h2 className="text-2xl font-bold text-zinc-800 tracking-tighter">Salary Simulation</h2>
+            <p className="mt-1 text-sm text-zinc-400 w-[20vw]">
               Calculate net salary from gross salary with contributions and PAYE
             </p>
           </div>
@@ -122,13 +117,17 @@ function SalarySimulationContent() {
         <div className="flex space-x-3">
           <button
             onClick={resetForm}
-            className="inline-flex items-center px-4 py-2 border border-zinc-300 shadow-sm text-sm font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50"
+            className="inline-flex items-center px-4 py-2 border border-zinc-300 shadow-sm text-sm font-medium 
+            rounded-md text-zinc-700 bg-white hover:bg-rose-500 hover:cursor-pointer 
+            hover:text-white transition-colors duration-300"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Reset
           </button>
           {results && (
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium 
+            rounded-md text-white bg-blue-600 hover:bg-blue-200 hover:text-zinc-700 transition-colors 
+            duration-300 hover:cursor-pointer">
               <Download className="h-4 w-4 mr-2" />
               Export PDF
             </button>
@@ -140,7 +139,7 @@ function SalarySimulationContent() {
         {/* Simulation Parameters */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-zinc-200">
-            <h3 className="text-lg font-medium text-zinc-900">Simulation Parameters</h3>
+            <h3 className="text-lg font-medium text-zinc-800 tracking-tight">Simulation Parameters</h3>
           </div>
           <div className="p-6 space-y-6">
             {/* Gross Salary */}
@@ -236,7 +235,7 @@ function SalarySimulationContent() {
         {/* Simulation Results */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-zinc-200">
-            <h3 className="text-lg font-medium text-zinc-900">Simulation Results</h3>
+            <h3 className="text-lg font-medium text-zinc-800 tracking-tight">Simulation Results</h3>
           </div>
           <div className="p-6">
             {loading ? (
@@ -297,10 +296,12 @@ function SalarySimulationContent() {
                 </div>
 
                 {/* Important Information */}
-                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="mt-6 p-4 bg-blue-100 rounded-lg border border-blue-200">
                   <div className="flex items-start">
-                    <Info className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
-                    <div className="text-sm text-blue-800">
+                  <div className='w-8 h-8 p-1 rounded-full bg-white flex items-center justify-center'>
+                    <Info className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                  </div>
+                    <div className="text-sm text-blue-800 ml-4 mt-1">
                       <p className="font-medium mb-1">Important Information:</p>
                       <ul className="space-y-1 text-xs">
                         <li>• Calculation based on 2025 tax rates</li>

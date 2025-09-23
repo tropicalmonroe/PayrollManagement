@@ -1,11 +1,16 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import Layout from "../../components/Layout";
+import Layout from "../../../../components/Layout";
 import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
-import CreditManagementPage from "./_components/CreditManagement";
+import HousingCredit from "./_components/HousingCredit";
 
-export default async function  CreditManagementDashboardPage() {
+export const metadata = {
+title: "Housing Credit - NewLight Academy Payroll Management",
+description: "Housing credit page for the payroll management application",
+};
+
+export default async function HousingCreditDashboardPage() {
 const { userId } = await auth();
 
 if (!userId) {
@@ -17,12 +22,12 @@ return (
     <Suspense
         fallback={
         <div className="flex items-center justify-center h-screen bg-white">
-            Loading Creadit/Loan Management...
+            Loading Housing Credit...
         </div>
         }
     >
-        <Navbar/>
-        <CreditManagementPage/>
+        <Navbar />
+        <HousingCredit />
     </Suspense>
     </Layout>
 );

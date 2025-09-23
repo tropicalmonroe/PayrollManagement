@@ -257,7 +257,7 @@ const PayslipPage = () => {
                     type="month"
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(e.target.value)}
-                    className="payroll-input"
+                    className="payroll-input "
                   />
                   <p className="text-sm text-white mt-1">
                     Payslip for {getMonthLabel(selectedMonth)}

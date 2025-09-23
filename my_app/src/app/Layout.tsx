@@ -29,6 +29,7 @@ children: React.ReactNode;
 }>) {
 return (
     <ClerkProvider>
+        <ToastContainer position="bottom-right" autoClose={2000} theme="dark" transition={Bounce} />
         <html lang="en">
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 <ToastContainer position="bottom-right" autoClose={2000} theme="dark" transition={Bounce} />

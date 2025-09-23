@@ -1,22 +1,12 @@
+"use client";
 import { useState, useEffect } from 'react';
-import Head from 'next/head';
 import Link from 'next/link';
-import Layout from '../../layout';
 import { Users, ArrowLeft, Download, RefreshCw, Info, TrendingUp, TrendingDown } from 'lucide-react';
 
 export default function FamilyTaxImpact() {
   return (
     <>
-      <Head>
-        <title>Family and Tax Impact - AD Capital Payroll</title>
-        <meta name="description" content="Analyze the impact of family status on taxation" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <Layout>
         <FamilyTaxImpactContent />
-      </Layout>
     </>
   );
 }
@@ -138,19 +128,22 @@ function FamilyTaxImpactContent() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="bg-white mt-[2vh] rounded-md p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/simulation">
-            <button className="inline-flex items-center px-3 py-2 border border-zinc-300 shadow-sm text-sm leading-4 font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </button>
+        <div className="flex items-start flex-col space-x-4">
+          <Link href="/pages/simulation">
+            <button
+            className="flex items-center justify-center space-x-1 scale-95 hover:bg-[#3890bf] transition-colors duration-300 
+            mb-4 bg-rose-400 px-4 py-1 rounded-md"
+            >
+            <ArrowLeft className="w-5 h-5 text-white" />
+            <span className='tracking-tighter text-white'>Back</span>
+        </button>
           </Link>
-          <div>
-            <h2 className="text-2xl font-bold text-zinc-900">Family and Tax Impact</h2>
-            <p className="mt-1 text-sm text-zinc-600">
+          <div className='my-8'>
+            <h2 className="text-2xl font-bold text-zinc-800 tracking-tighter">Family and Tax Impact</h2>
+            <p className="mt-1 text-sm text-zinc-400 w-[20vw]">
               Compare the tax impact of different family situations
             </p>
           </div>
@@ -158,13 +151,19 @@ function FamilyTaxImpactContent() {
         <div className="flex space-x-3">
           <button
             onClick={resetForm}
-            className="inline-flex items-center px-4 py-2 border border-zinc-300 shadow-sm text-sm font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50"
+            className='inline-flex items-center px-4 py-2 border border-zinc-300 shadow-sm text-sm font-medium 
+            rounded-md text-zinc-700 bg-white hover:bg-rose-500 hover:cursor-pointer 
+            hover:text-white transition-colors duration-300'
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Reset
           </button>
           {comparison && (
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+            <button
+            className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium 
+            rounded-md text-white bg-emerald-600 hover:bg-blue-200 hover:text-zinc-700 transition-colors 
+            duration-300 hover:cursor-pointer' 
+            >
               <Download className="h-4 w-4 mr-2" />
               Export Report
             </button>
@@ -174,9 +173,9 @@ function FamilyTaxImpactContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Basic Parameters */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-zinc-200">
-            <h3 className="text-lg font-medium text-zinc-900">Basic Parameters</h3>
+        <div className="bg-purple-50 shadow rounded-lg">
+          <div className="bg-purple-300 px-6 py-4 border-b border-zinc-200">
+            <h3 className="text-lg font-medium text-zinc-900 tracking-tight">Basic Parameters</h3>
           </div>
           <div className="p-6 space-y-6">
             <div>
@@ -188,7 +187,7 @@ function FamilyTaxImpactContent() {
                 id="grossSalary"
                 value={grossSalary}
                 onChange={(e) => setGrossSalary(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
                 min="0"
                 step="100"
               />
@@ -203,7 +202,7 @@ function FamilyTaxImpactContent() {
                 id="professionalExpenses"
                 value={professionalExpenses}
                 onChange={(e) => setProfessionalExpenses(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
                 min="0"
                 step="50"
               />
@@ -218,7 +217,7 @@ function FamilyTaxImpactContent() {
                 id="otherDeductions"
                 value={otherDeductions}
                 onChange={(e) => setOtherDeductions(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
                 min="0"
                 step="50"
               />
@@ -227,8 +226,8 @@ function FamilyTaxImpactContent() {
         </div>
 
         {/* Current Status */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-zinc-200 bg-rose-50">
+        <div className="bg-rose-50 shadow rounded-lg">
+          <div className="px-6 py-4 border-b border-zinc-200 bg-rose-300">
             <h3 className="text-lg font-medium text-rose-900">Current Status</h3>
           </div>
           <div className="p-6 space-y-6">
@@ -240,7 +239,7 @@ function FamilyTaxImpactContent() {
                 id="currentStatus"
                 value={currentStatus}
                 onChange={(e) => setCurrentStatus(e.target.value)}
-                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
               >
                 <option value="single">Single</option>
                 <option value="married">Married</option>
@@ -258,14 +257,14 @@ function FamilyTaxImpactContent() {
                 id="currentDependants"
                 value={currentDependants}
                 onChange={(e) => setCurrentDependants(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
                 min="0"
                 max="10"
               />
             </div>
 
             {comparison && (
-              <div className="mt-4 p-4 bg-rose-50 rounded-lg border border-red-200">
+              <div className="mt-4 p-4 bg-white rounded-lg border border-red-200">
                 <h4 className="text-sm font-medium text-rose-800 mb-2">Current Summary</h4>
                 <div className="space-y-1 text-xs text-rose-700">
                   <div className="flex justify-between">
@@ -283,8 +282,8 @@ function FamilyTaxImpactContent() {
         </div>
 
         {/* New Status */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-zinc-200 bg-green-50">
+        <div className="bg-emerald-50 shadow rounded-lg">
+          <div className="px-6 py-4 border-b border-zinc-200 bg-emerald-300">
             <h3 className="text-lg font-medium text-green-900">New Status</h3>
           </div>
           <div className="p-6 space-y-6">
@@ -296,7 +295,7 @@ function FamilyTaxImpactContent() {
                 id="newStatus"
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value)}
-                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
               >
                 <option value="single">Single</option>
                 <option value="married">Married</option>
@@ -314,14 +313,14 @@ function FamilyTaxImpactContent() {
                 id="newDependants"
                 value={newDependants}
                 onChange={(e) => setNewDependants(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                 min="0"
                 max="10"
               />
             </div>
 
             {comparison && (
-              <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+              <div className="mt-4 p-4 bg-white rounded-lg border border-green-200">
                 <h4 className="text-sm font-medium text-green-800 mb-2">New Summary</h4>
                 <div className="space-y-1 text-xs text-green-700">
                   <div className="flex justify-between">
@@ -350,52 +349,58 @@ function FamilyTaxImpactContent() {
       ) : comparison ? (
         <div className="space-y-6">
           {/* Main Impact */}
-          <div className="bg-white shadow rounded-lg">
+          <div className="bg-white shadow rounded-lg mt-[2vh]">
             <div className="px-6 py-4 border-b border-zinc-200">
-              <h3 className="text-lg font-medium text-zinc-900">Impact of New Status</h3>
+              <h3 className="text-lg font-medium text-zinc-800 tracking-tight">Impact of New Status</h3>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center p-6 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-center p-6 bg-blue-100 rounded-lg border border-blue-200">
                   <div className="flex items-center justify-center mb-2">
+                    <div className='w-8 h-8 p-1 rounded-full bg-white flex items-center justify-center'>
                     {comparison.difference.paye < 0 ? (
-                      <TrendingDown className="h-8 w-8 text-green-600" />
+                      <TrendingDown className="h-6 w-6 text-rose-600" />
                     ) : (
-                      <TrendingUp className="h-8 w-8 text-rose-600" />
+                      <TrendingUp className="h-8 w-8 text-green-600" />
                     )}
+                    </div>
                   </div>
-                  <div className="text-2xl font-bold text-zinc-900">
+                  <div className="text-2xl font-bold text-zinc-800 tracking-tight">
                     {formatDifference(comparison.difference.paye)}
                   </div>
-                  <div className="text-sm text-zinc-600">Monthly PAYE</div>
+                  <div className="text-sm text-zinc-600 tracking-tight scale-95">Monthly PAYE</div>
                 </div>
 
-                <div className="text-center p-6 bg-green-50 rounded-lg border border-green-200">
+                <div className="text-center p-6 bg-green-100 rounded-lg border border-green-200">
                   <div className="flex items-center justify-center mb-2">
+                    <div className='w-8 h-8 p-1 rounded-full bg-white flex items-center justify-center'>
                     {comparison.difference.netSalary > 0 ? (
                       <TrendingUp className="h-8 w-8 text-green-600" />
                     ) : (
                       <TrendingDown className="h-8 w-8 text-rose-600" />
                     )}
                   </div>
-                  <div className="text-2xl font-bold text-zinc-900">
+                  </div>
+                  <div className="text-2xl font-bold text-zinc-800 tracking-tight">
                     {formatDifference(comparison.difference.netSalary)}
                   </div>
-                  <div className="text-sm text-zinc-600">Monthly Net Salary</div>
+                  <div className="text-sm text-zinc-600 tracking-tight scale-95">Monthly Net Salary</div>
                 </div>
 
-                <div className="text-center p-6 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="text-center p-6 bg-orange-100 rounded-lg border border-yellow-200">
                   <div className="flex items-center justify-center mb-2">
+                    <div className='w-8 h-8 p-1 rounded-full bg-white flex items-center justify-center'>
                     {comparison.difference.annualSavings > 0 ? (
                       <TrendingUp className="h-8 w-8 text-green-600" />
                     ) : (
                       <TrendingDown className="h-8 w-8 text-rose-600" />
                     )}
                   </div>
-                  <div className="text-2xl font-bold text-zinc-900">
+                  </div>
+                  <div className="text-2xl font-bold text-zinc-800 tracking-tight">
                     {formatCurrency(comparison.difference.annualSavings)}
                   </div>
-                  <div className="text-sm text-zinc-600">Annual Savings</div>
+                  <div className="text-sm text-zinc-600 tracking-tight scale-95">Annual Savings</div>
                 </div>
               </div>
             </div>
@@ -506,7 +511,9 @@ function FamilyTaxImpactContent() {
                 {comparison.difference.annualSavings > 0 ? (
                   <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                     <div className="flex items-start">
+                      <div className='w-8 h-8 p-1 rounded-full bg-white flex items-center justify-center'>
                       <Info className="h-5 w-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" />
+                      </div>
                       <div className="text-sm text-green-800">
                         <p className="font-medium mb-1">Favorable Situation:</p>
                         <p>The new family status would save you <strong>{formatCurrency(comparison.difference.annualSavings)}</strong> annually in taxes.</p>
@@ -514,10 +521,12 @@ function FamilyTaxImpactContent() {
                     </div>
                   </div>
                 ) : (
-                  <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <div className="p-4 bg-orange-100 rounded-lg border border-orange-200">
                     <div className="flex items-start">
-                      <Info className="h-5 w-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" />
-                      <div className="text-sm text-yellow-800">
+                      <div className='w-8 h-8 p-1 rounded-full bg-white flex items-center justify-center'>
+                      <Info className="h-5 w-5 text-orange-600 flex-shrink-0" />
+                      </div>
+                      <div className="text-sm text-orange-800 ml-4">
                         <p className="font-medium mb-1">Neutral or Negative Impact:</p>
                         <p>The new status does not provide significant tax benefits compared to your current status.</p>
                       </div>
@@ -525,10 +534,12 @@ function FamilyTaxImpactContent() {
                   </div>
                 )}
 
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="p-4 bg-blue-100 rounded-lg border border-blue-200">
                   <div className="flex items-start">
-                    <Info className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
-                    <div className="text-sm text-blue-800">
+                  <div className='w-8 h-8 p-1 rounded-full bg-white flex items-center justify-center'>
+                    <Info className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                    </div>
+                    <div className="text-sm text-blue-800 ml-4">
                       <p className="font-medium mb-1">Key Points:</p>
                       <ul className="space-y-1 text-xs">
                         <li>• Personal Relief: 2,400 KES/month for all taxpayers</li>

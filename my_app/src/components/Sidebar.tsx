@@ -449,10 +449,11 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/simulation/salary-simulation', title: 'Salary Simulation' },
-            { href: '/simulation/family-tax-impact', title: 'Family/Tax Impact' },
-            { href: '/simulation/regularization-recall', title: 'Regularization/Recall' },
-            { href: '/simulation/housing-loan', title: 'Housing Loan' },
+            { href: '/pages/simulation', title: 'Simulation' },
+            { href: '/pages/simulation/salary-simulation', title: 'Salary Simulation' },
+            { href: '/pages/simulation/family-tax-impact', title: 'Family/Tax Impact' },
+            { href: '/pages/simulation/regularization-recall', title: 'Regularization/Recall' },
+            { href: '/pages/simulation/housing-credit', title: 'Housing Credit' },
             ]}
             isOpen={openMenus['simulation']}
         />

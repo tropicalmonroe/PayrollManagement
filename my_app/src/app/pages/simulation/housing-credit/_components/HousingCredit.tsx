@@ -1,22 +1,12 @@
+"use client";
 import { useState, useEffect } from 'react';
-import Head from 'next/head';
 import Link from 'next/link';
-import Layout from '../../layout';
 import { Home, ArrowLeft, Download, RefreshCw, Info, Calculator, TrendingUp } from 'lucide-react';
 
 export default function HousingCredit() {
   return (
     <>
-      <Head>
-        <title>Housing Loan - AD Capital Payroll</title>
-        <meta name="description" content="Calculate the impact of housing loans on payroll" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <Layout>
         <HousingCreditContent />
-      </Layout>
     </>
   );
 }
@@ -179,19 +169,22 @@ function HousingCreditContent() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6 bg-white mt-[2vh] rounded-md">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/simulation">
-            <button className="inline-flex items-center px-3 py-2 border border-zinc-300 shadow-sm text-sm leading-4 font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </button>
+        <div className="flex items-start flex-col space-x-4">
+          <Link href="/pages/simulation">
+            <button
+            className="flex items-center justify-center space-x-1 scale-95 hover:bg-[#3890bf] transition-colors duration-300 
+            mb-4 bg-rose-400 px-4 py-1 rounded-md"
+            >
+            <ArrowLeft className="w-5 h-5 text-white" />
+            <span className='tracking-tighter text-white'>Back</span>
+        </button>
           </Link>
-          <div>
-            <h2 className="text-2xl font-bold text-zinc-900">Housing Loan Simulation</h2>
-            <p className="mt-1 text-sm text-zinc-600">
+          <div className='my-8'>
+            <h2 className="text-2xl font-bold text-zinc-800 tracking-tighter">Housing Loan Simulation</h2>
+            <p className="mt-1 text-sm text-zinc-400 w-[20vw]">
               Calculate the tax impact and savings from a housing loan
             </p>
           </div>
@@ -199,13 +192,19 @@ function HousingCreditContent() {
         <div className="flex space-x-3">
           <button
             onClick={resetForm}
-            className="inline-flex items-center px-4 py-2 border border-zinc-300 shadow-sm text-sm font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50"
+            className='inline-flex items-center px-4 py-2 border border-zinc-300 shadow-sm text-sm font-medium 
+            rounded-md text-zinc-700 bg-white hover:bg-rose-500 hover:cursor-pointer 
+            hover:text-white transition-colors duration-300'
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Reset
           </button>
           {results && (
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700">
+            <button
+            className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium 
+            rounded-md text-white bg-orange-600 hover:bg-blue-200 hover:text-zinc-700 transition-colors 
+            duration-300 hover:cursor-pointer'
+            >
               <Download className="h-4 w-4 mr-2" />
               Export Simulation
             </button>
@@ -215,9 +214,9 @@ function HousingCreditContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Employee Information */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-zinc-200">
-            <h3 className="text-lg font-medium text-zinc-900">Employee Information</h3>
+        <div className="bg-purple-50 shadow rounded-lg">
+          <div className="px-6 py-4 border-b border-zinc-200 bg-purple-100">
+            <h3 className="text-lg font-medium text-zinc-800 tracking-tight">Employee Information</h3>
           </div>
           <div className="p-6 space-y-6">
             <div>
@@ -229,7 +228,7 @@ function HousingCreditContent() {
                 id="grossSalary"
                 value={grossSalary}
                 onChange={(e) => setGrossSalary(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                 min="0"
                 step="100"
               />
@@ -244,7 +243,7 @@ function HousingCreditContent() {
                   id="familyStatus"
                   value={familyStatus}
                   onChange={(e) => setFamilyStatus(e.target.value)}
-                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                 >
                   <option value="single">Single</option>
                   <option value="married">Married</option>
@@ -261,7 +260,7 @@ function HousingCreditContent() {
                   id="numberOfDependants"
                   value={numberOfDependants}
                   onChange={(e) => setNumberOfDependants(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="0"
                   max="10"
                 />
@@ -278,7 +277,7 @@ function HousingCreditContent() {
                   id="professionalExpenses"
                   value={professionalExpenses}
                   onChange={(e) => setProfessionalExpenses(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="0"
                   step="50"
                 />
@@ -292,7 +291,7 @@ function HousingCreditContent() {
                   id="otherDeductions"
                   value={otherDeductions}
                   onChange={(e) => setOtherDeductions(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="0"
                   step="50"
                 />
@@ -302,9 +301,9 @@ function HousingCreditContent() {
         </div>
 
         {/* Loan Parameters */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-zinc-200">
-            <h3 className="text-lg font-medium text-zinc-900">Loan Parameters</h3>
+        <div className="bg-purple-50 shadow rounded-lg">
+          <div className="px-6 py-4 border-b border-zinc-200 bg-purple-100">
+            <h3 className="text-lg font-medium text-zinc-800 tracking-tight">Loan Parameters</h3>
           </div>
           <div className="p-6 space-y-6">
             <div>
@@ -315,7 +314,7 @@ function HousingCreditContent() {
                 id="housingType"
                 value={housingType}
                 onChange={(e) => setHousingType(e.target.value)}
-                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
               >
                 <option value="primary">Primary Residence</option>
                 <option value="affordable">Affordable Housing</option>
@@ -332,7 +331,7 @@ function HousingCreditContent() {
                 id="loanAmount"
                 value={loanAmount}
                 onChange={(e) => setLoanAmount(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                 min="0"
                 step="10000"
               />
@@ -348,7 +347,7 @@ function HousingCreditContent() {
                   id="loanTerm"
                   value={loanTerm}
                   onChange={(e) => setLoanTerm(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="1"
                   max="30"
                 />
@@ -362,7 +361,7 @@ function HousingCreditContent() {
                   id="interestRate"
                   value={interestRate}
                   onChange={(e) => setInterestRate(Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   min="0"
                   max="15"
                   step="0.1"
@@ -377,7 +376,8 @@ function HousingCreditContent() {
                 </label>
                 <button
                   onClick={calculateMonthlyRepayment}
-                  className="text-xs text-orange-600 hover:text-orange-800 font-medium"
+                  className="flex items-center justify-center space-x-1 scale-95 hover:bg-[#3890bf] transition-colors duration-300 
+                    mb-4 bg-pink-400 hover:text-white cursor-pointer px-4 py-1 rounded-md"
                 >
                   Calculate
                 </button>
@@ -387,7 +387,7 @@ function HousingCreditContent() {
                 id="monthlyRepayment"
                 value={monthlyRepayment}
                 onChange={(e) => setMonthlyRepayment(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                className="bg-white block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                 min="0"
                 step="10"
               />
@@ -409,48 +409,56 @@ function HousingCreditContent() {
           {/* Housing Loan Impact */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-zinc-200">
-              <h3 className="text-lg font-medium text-zinc-900">Housing Loan Impact</h3>
+              <h3 className="text-lg font-medium text-zinc-800 tracking-tight">Housing Loan Impact</h3>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="text-center p-6 bg-green-50 rounded-lg border border-green-200">
+                <div className="text-center p-6 bg-green-100 rounded-lg border border-green-200">
                   <div className="flex items-center justify-center mb-2">
+                  <div className='w-8 h-8 p-1 rounded-full bg-white flex items-center justify-center'>
                     <TrendingUp className="h-8 w-8 text-green-600" />
+                    </div>
                   </div>
-                  <div className="text-2xl font-bold text-zinc-900">
+                  <div className="text-2xl font-bold text-zinc-800 tracking-tight">
                     {formatCurrency(results.savings.monthlyPaye)}
                   </div>
-                  <div className="text-sm text-zinc-600">Monthly PAYE Savings</div>
+                  <div className="text-sm text-zinc-600 tracking-tight scale-95">Monthly PAYE Savings</div>
                 </div>
 
-                <div className="text-center p-6 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-center p-6 bg-blue-100 rounded-lg border border-blue-200">
                   <div className="flex items-center justify-center mb-2">
+                    <div className='w-8 h-8 p-1 rounded-full bg-white flex items-center justify-center'>
                     <Calculator className="h-8 w-8 text-blue-600" />
                   </div>
-                  <div className="text-2xl font-bold text-zinc-900">
+                  </div>
+                  <div className="text-2xl font-bold text-zinc-800 tracking-tight">
                     {formatCurrency(results.savings.annualPaye)}
                   </div>
-                  <div className="text-sm text-zinc-600">Annual PAYE Savings</div>
+                  <div className="text-sm text-zinc-600 tracking-tight scale-95">Annual PAYE Savings</div>
                 </div>
 
-                <div className="text-center p-6 bg-orange-50 rounded-lg border border-orange-200">
+                <div className="text-center p-6 bg-orange-100 rounded-lg border border-orange-200">
                   <div className="flex items-center justify-center mb-2">
+                    <div className='w-8 h-8 p-1 rounded-full bg-white flex items-center justify-center'>
                     <Home className="h-8 w-8 text-orange-600" />
                   </div>
-                  <div className="text-2xl font-bold text-zinc-900">
+                  </div>
+                  <div className="text-2xl font-bold text-zinc-800 tracking-tight">
                     {formatPercentage(results.effectiveRate)}
                   </div>
-                  <div className="text-sm text-zinc-600">Effective Rate</div>
+                  <div className="text-sm text-zinc-600 tracking-tight scale-95">Effective Rate</div>
                 </div>
 
-                <div className="text-center p-6 bg-purple-50 rounded-lg border border-purple-200">
+                <div className="text-center p-6 bg-purple-100 rounded-lg border border-purple-200">
                   <div className="flex items-center justify-center mb-2">
+                    <div className='w-8 h-8 p-1 rounded-full bg-white flex items-center justify-center'>
                     <TrendingUp className="h-8 w-8 text-purple-600" />
                   </div>
-                  <div className="text-2xl font-bold text-zinc-900">
+                  </div>
+                  <div className="text-2xl font-bold text-zinc-800 tracking-tight">
                     {formatCurrency(results.disposableIncome)}
                   </div>
-                  <div className="text-sm text-zinc-600">Disposable Income</div>
+                  <div className="text-sm text-zinc-600 tracking-tight scale-95">Disposable Income</div>
                 </div>
               </div>
             </div>
@@ -600,10 +608,12 @@ function HousingCreditContent() {
             </div>
             <div className="p-6">
               <div className="space-y-4">
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="p-4 bg-blue-100 rounded-lg border border-blue-200">
                   <div className="flex items-start">
-                    <Info className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
-                    <div className="text-sm text-blue-800">
+                    <div className='w-8 h-8 p-1 rounded-full bg-white flex items-center justify-center'>
+                    <Info className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                    </div>
+                    <div className="text-sm text-blue-800 ml-4">
                       <p className="font-medium mb-1">Tax Benefits:</p>
                       <ul className="space-y-1 text-xs">
                         <li>• Mortgage interest relief for primary residence</li>
@@ -627,13 +637,15 @@ function HousingCreditContent() {
                   </div>
                 )}
 
-                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                <div className="p-4 bg-green-100 rounded-lg border border-green-200">
                   <div className="flex items-start">
-                    <TrendingUp className="h-5 w-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" />
-                    <div className="text-sm text-green-800">
+                  <div className='w-8 h-8 p-1 rounded-full bg-white flex items-center justify-center'>
+                    <TrendingUp className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    </div>
+                    <div className="text-sm text-green-800 ml-4">
                       <p className="font-medium mb-1">Optimization:</p>
                       <p>With this housing loan, you save <strong>{formatCurrency(results.savings.annualPaye)}</strong> per year in taxes, with an effective rate of <strong>{formatPercentage(results.effectiveRate)}</strong>.</p>
-                    </div>
+                  </div>
                   </div>
                 </div>
               </div>
