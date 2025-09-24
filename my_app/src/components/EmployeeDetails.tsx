@@ -580,20 +580,20 @@ return (
             <div className="space-y-6">
             {/* Other Deductions */}
             <div className="bg-rose-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-rose-900 mb-4">Other Deductions</h3>
+                <h3 className="text-lg font-semibold text-rose-800 mb-4">Other Deductions</h3>
                 <div className="space-y-3 text-sm">
                 <div>
-                    <span className="font-medium text-rose-700">Mortgage Loan Repayment:</span>
+                    <span className="font-medium text-rose-700 tracking-tight">Mortgage Loan Repayment:</span>
                     <div className="text-rose-900">{formatCurrency(employee.loanRepayment || 0)}</div>
                 </div>
 
                 <div>
-                    <span className="font-medium text-rose-700">HELB Loan:</span>
+                    <span className="font-medium text-rose-700 tracking-tight">HELB Loan:</span>
                     <div className="text-rose-900">{formatCurrency(employee.helbLoan || 0)}</div>
                 </div>
-
-                <div className="border-t border-red-200 pt-2">
-                    <span className="font-medium text-rose-700">Total Other Deductions:</span>
+                <div className='border-[0.2px] my-4 border-red-100'/>
+                <div className=" border-red-200">
+                    <span className="font-medium text-rose-700 tracking-tight">Total Other Deductions:</span>
                     <div className="text-lg font-semibold text-rose-900">{formatCurrency(payrollResult.otherDeductions.totalOtherDeductions)}</div>
                 </div>
                 </div>
@@ -601,56 +601,58 @@ return (
 
             {/* Total Deductions */}
             <div className="bg-rose-100 p-4 rounded-lg border-2 border-red-300">
-                <h3 className="text-lg font-medium text-rose-900 mb-4">Total Deductions</h3>
+                <h3 className="text-lg font-semibold text-rose-800 mb-4 tracking-tight">Total Deductions</h3>
                 <div className="space-y-2 text-sm">
                 <div className="bg-rose-50 p-3 rounded border border-red-200">
-                    <div className="font-medium text-rose-800 mb-2">Employee Contributions:</div>
+                    <div className="font-medium text-rose-800 mb-2 tracking-tight">Employee Contributions:</div>
                     <div className="space-y-1 text-xs ml-2">
                     <div className="flex justify-between">
-                        <span className="text-rose-600">NSSF Contribution:</span>
+                        <span className="text-rose-600 tracking-tight">NSSF Contribution:</span>
                         <span className="font-medium text-rose-800">{formatCurrency(payrollResult.employeeContributions.nssfEmployee)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-rose-600">SHIF Contribution:</span>
+                        <span className="text-rose-600 tracking-tight">SHIF Contribution:</span>
                         <span className="font-medium text-rose-800">{formatCurrency(payrollResult.employeeContributions.shifEmployee)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-rose-600">Housing Levy:</span>
+                        <span className="text-rose-600 tracking-tight">Housing Levy:</span>
                         <span className="font-medium text-rose-800">{formatCurrency(payrollResult.employeeContributions.housingLevy)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-rose-600">Pension Contribution:</span>
+                        <span className="text-rose-600 tracking-tight">Pension Contribution:</span>
                         <span className="font-medium text-rose-800">{formatCurrency(payrollResult.employeeContributions.pensionEmployee)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-rose-600">Insurance Diversified:</span>
+                        <span className="text-rose-600 tracking-tight">Insurance Diversified:</span>
                         <span className="font-medium text-rose-800">{formatCurrency(payrollResult.employeeContributions.insuranceDiversifiedEmployee)}</span>
                     </div>
-                    <div className="border-t border-red-300 pt-1 flex justify-between font-medium">
-                        <span className="text-rose-700">Total:</span>
+                        <div className='border-[0.2px] my-4 border-red-100'/>
+                    <div className=" border-red-300 flex justify-between font-medium">
+                        <span className="text-rose-700 tracking-tight">Total:</span>
                         <span className="text-rose-900">{formatCurrency(payrollResult.employeeContributions.totalEmployeeContributions)}</span>
                     </div>
                     </div>
                 </div>
 
                 <div className="flex justify-between">
-                    <span className="text-rose-700">PAYE Tax:</span>
+                    <span className="text-rose-700 tracking-tight font-semibold">PAYE Tax:</span>
                     <span className="font-medium text-rose-900">{formatCurrency(payrollResult.taxCalculation.incomeTax)}</span>
                 </div>
 
                 <div className="bg-rose-50 p-3 rounded border border-red-200">
-                    <div className="font-medium text-rose-800 mb-2">Other Deductions:</div>
+                    <div className="font-semibold text-rose-800 tracking-tight mb-2">Other Deductions:</div>
                     <div className="space-y-1 text-xs ml-2">
                     <div className="flex justify-between">
-                        <span className="text-rose-600">Mortgage Loan Repayment:</span>
+                        <span className="text-rose-600 tracking-tight">Mortgage Loan Repayment:</span>
                         <span className="font-medium text-rose-800">{formatCurrency(employee.loanRepayment || 0)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-rose-600">HELB Loan:</span>
+                        <span className="text-rose-600 tracking-tight">HELB Loan:</span>
                         <span className="font-medium text-rose-800">{formatCurrency(employee.helbLoan || 0)}</span>
                     </div>
-                    <div className="border-t border-red-300 pt-1 flex justify-between font-medium">
-                        <span className="text-rose-700">Total:</span>
+                    <div className='border-[0.2px] my-4 border-red-100'/>
+                    <div className="border-red-300 flex justify-between font-medium">
+                        <span className="text-rose-700 tracking-tight">Total:</span>
                         <span className="text-rose-900">{formatCurrency(payrollResult.otherDeductions.totalOtherDeductions)}</span>
                     </div>
                     </div>
@@ -665,15 +667,15 @@ return (
 
             {/* Final Result */}
             <div className="bg-green-100 p-6 rounded-lg border-2 border-green-300">
-                <h3 className="text-xl font-bold text-green-900 mb-4">Final Result</h3>
+                <h3 className="text-xl font-bold text-green-800 tracking-tight mb-4">Final Result</h3>
                 <div className="space-y-4">
                 <div className="bg-white p-4 rounded-lg">
-                    <span className="font-medium text-green-700">Net Salary Payable:</span>
-                    <div className="text-3xl font-bold text-green-900">{formatCurrency(payrollResult.netSalaryPayable)}</div>
+                    <span className="font-medium text-green-700 tracking-tight">Net Salary Payable:</span>
+                    <div className="text-3xl font-bold text-green-900 tracking-tight">{formatCurrency(payrollResult.netSalaryPayable)}</div>
                 </div>
 
                 <div className="bg-white p-3 rounded-lg">
-                    <span className="font-medium text-green-700">Total Employer Cost:</span>
+                    <span className="font-medium text-green-700 tracking-tight">Total Employer Cost:</span>
                     <div className="text-xl font-semibold text-green-900">{formatCurrency(payrollResult.totalEmployerCost)}</div>
                 </div>
                 </div>
@@ -682,38 +684,38 @@ return (
             {/* Summary */}
             {/* Summary */}
             <div className="bg-zinc-100 p-4 rounded-lg">
-            <h3 className="text-lg font-medium text-zinc-900 mb-4">Summary</h3>
+            <h3 className="text-lg font-semibold text-zinc-800 tracking-tight mb-4">Summary</h3>
             <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                <span className="text-zinc-700">Gross Salary:</span>
+                <span className="text-zinc-700 tracking-tight">Gross Salary:</span>
                 <span className="font-medium">{formatCurrency(payrollResult.grossSalary)}</span>
                 </div>
                 <div className="flex justify-between">
-                <span className="text-zinc-700">- Employee Contributions:</span>
+                <span className="text-zinc-700 tracking-tight">- Employee Contributions:</span>
                 <span className="font-medium text-rose-600">-{formatCurrency(payrollResult.employeeContributions.totalEmployeeContributions)}</span>
                 </div>
                 <div className="flex justify-between">
-                <span className="text-zinc-700">- PAYE Tax:</span>
+                <span className="text-zinc-700 tracking-tight">- PAYE Tax:</span>
                 <span className="font-medium text-rose-600">-{formatCurrency(payrollResult.taxCalculation.incomeTax)}</span>
                 </div>
                 <div className="flex justify-between">
-                <span className="text-zinc-700">+ Personal Relief Applied:</span>
+                <span className="text-zinc-700 tracking-tight">+ Personal Relief Applied:</span>
                 <span className="font-medium text-green-600">+&nbsp;{formatCurrency(payrollResult.taxCalculation.personalRelief)}</span>
                 </div>
                 <div className="flex justify-between">
-                <span className="text-zinc-700">- Other Deductions:</span>
+                <span className="text-zinc-700 tracking-tight">- Other Deductions:</span>
                 <span className="font-medium text-rose-600">-{formatCurrency(payrollResult.otherDeductions.totalOtherDeductions)}</span>
                 </div>
                 <div className="border-t border-zinc-300 pt-2 flex justify-between font-bold text-lg">
-                <span className="text-zinc-900">Net Payable:</span>
+                <span className="text-zinc-900 tracking-tight">Net Payable:</span>
                 <span className="text-green-600">{formatCurrency(payrollResult.netSalaryPayable)}</span>
                 </div>
             </div>
             </div>
 
             {/* System Information */}
-            <div className="bg-zinc-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-zinc-900 mb-4">System Information</h3>
+            <div className="bg-stone-100 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-zinc-800 tracking-tight mb-4">System Information</h3>
                 <div className="space-y-2 text-xs text-zinc-600">
                 <div>
                     <span>Created At: </span>
