@@ -121,7 +121,7 @@ const SalaryAdvancesPage = () => {
           <span className='tracking-tighter text-white'>Back</span>
       </button>
           
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between my-8">
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-10 h-10 bg-zinc-700 rounded-xl p-1">
               <TrendingUp className="w-6 h-6 text-blue-50" />
@@ -172,72 +172,79 @@ const SalaryAdvancesPage = () => {
             {/* Desktop version - table */}
             <div className="hidden lg:block">
               <table className="min-w-full divide-y divide-zinc-200">
-                <thead className="bg-zinc-50">
+                <thead className="bg-[#6ea0c2]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out">
                       Employee
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out">
                       Amount
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out">
                       Advance Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out">
                       Installment
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out">
                       Remaining Balance
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out">
                       Reason
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-zinc-200">
+                <tbody className="bg-[#142b3d] divide-y divide-zinc-200">
                   {advances.map((advance) => (
-                    <tr key={advance.id} className="hover:bg-zinc-50">
+                    <tr key={advance.id} className="hover:bg-[#1b435b] transition duration-300">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
                             <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                              <span className="text-sm font-medium text-green-600">
+                              <span className="text-sm font-medium text-green-600 tracking-tight">
                                 {advance.employee.firstName.charAt(0)}{advance.employee.lastName.charAt(0)}
                               </span>
                             </div>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-zinc-900">
+                            <div className="text-sm font-medium tracking-tight text-white">
                               {advance.employee.firstName} {advance.employee.lastName}
                             </div>
-                            <div className="text-sm text-zinc-500">
+                            <div className="text-sm tracking-tight text-white scale-90 -ml-[4px]">
                               {advance.employee.employeeId}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm tracking-tight text-emerald-400">
                         {formatCurrency(advance.amount)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm tracking-tight text-white">
                         {formatDate(advance.advanceDate)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm tracking-tight text-white">
                         {formatCurrency(advance.installmentAmount)}
-                        <div className="text-xs text-zinc-500">
+                        <div className="text-xs text-white">
                           {advance.numberOfInstallments} installments
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm tracking-tight text-rose-400">
                         {formatCurrency(advance.remainingBalance)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(advance.status)}
                       </td>
-                      <td className="px-6 py-4 text-sm text-zinc-900 max-w-xs truncate">
+                      <td className="px-6 py-4 text-sm tracking-tight text-white max-w-xs truncate">
                         {advance.reason}
                       </td>
                     </tr>

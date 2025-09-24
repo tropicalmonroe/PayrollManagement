@@ -202,9 +202,14 @@ return (
             onClick={onClose}
             className="text-zinc-400 hover:text-zinc-600"
         >
-            <X className="w-6 h-6" />
+        <div className="flex items-center justify-center w-8 h-8 bg-rose-400 hover:bg-rose-700 
+        cursor-pointer rounded-xl p-1 transition ease-in-out duration-300">
+        <X className="w-6 h-6 text-red-50" />
+        </div>
         </button>
         </div>
+
+        
 
         {error && (
         <div className="mb-4 p-4 bg-rose-50 border border-red-200 rounded-md">

@@ -140,7 +140,7 @@ return (
             <span className='tracking-tighter text-white'>Back</span>
         </button>
         
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between my-8">
             <div className="flex items-center space-x-3">
             <div className="flex items-center justify-center w-10 h-10 bg-zinc-700 rounded-xl p-1">
             <Users className="w-6 h-6 text-blue-50" />

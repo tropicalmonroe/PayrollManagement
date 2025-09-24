@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, DollarSign, User, FileText, Clock } from 'lucide-react';
+import { BiMoneyWithdraw } from "react-icons/bi";
 
 interface Employee {
 id: string;
@@ -198,15 +199,18 @@ return (
         <div className="mt-3">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-medium text-zinc-900 flex items-center">
-            <DollarSign className="w-5 h-5 mr-2 text-[#0063b4]" />
+            <h3 className="text-lg font-medium text-zinc-800 tracking-tight flex items-center">
+            <BiMoneyWithdraw className="w-5 h-5 mr-2 text-[#0063b4]" />
             {editAdvance ? 'Edit Salary Advance' : 'New Salary Advance'}
             </h3>
             <button
             onClick={onClose}
             className="text-zinc-400 hover:text-zinc-600 transition-colors"
             >
-            <X className="w-6 h-6" />
+            <div className="flex items-center justify-center w-8 h-8 bg-rose-400 hover:bg-rose-700 
+            cursor-pointer rounded-xl p-1 transition ease-in-out duration-300">
+            <X className="w-6 h-6 text-red-50" />
+            </div>
             </button>
         </div>
 
@@ -253,7 +257,7 @@ return (
                 onChange={handleInputChange}
                 step="0.01"
                 min="0"
-                className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
+                className={`block placeholder:text-zinc-700 placeholder:text-sm placeholder:font-medium placeholder:tracking-tight w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
                     errors.amount ? 'border-red-300' : 'border-zinc-300'
                 }`}
                 placeholder="0.00"
@@ -273,7 +277,7 @@ return (
                 name="advanceDate"
                 value={formData.advanceDate}
                 onChange={handleInputChange}
-                className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
+                className={`block placeholder:text-zinc-700 placeholder:text-sm placeholder:font-medium placeholder:tracking-tight w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
                     errors.advanceDate ? 'border-red-300' : 'border-zinc-300'
                 }`}
                 />
@@ -294,7 +298,7 @@ return (
                 name="reason"
                 value={formData.reason}
                 onChange={handleInputChange}
-                className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
+                className={`block placeholder:text-zinc-700/50 placeholder:text-sm placeholder:font-medium placeholder:tracking-tight w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
                 errors.reason ? 'border-red-300' : 'border-zinc-300'
                 }`}
                 placeholder="Ex: Family emergency, medical expenses, etc."
@@ -317,7 +321,7 @@ return (
                 onChange={handleInputChange}
                 min="1"
                 max="24"
-                className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
+                className={`block placeholder:text-zinc-700/50 placeholder:text-sm placeholder:font-medium placeholder:tracking-tight w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm ${
                 errors.numberOfInstallments ? 'border-red-300' : 'border-zinc-300'
                 }`}
                 placeholder="Ex: 6"
@@ -332,10 +336,12 @@ return (
 
             {/* Calculated Monthly Payment */}
             {formData.amount && formData.numberOfInstallments && (
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+            <div className="bg-blue-100 border border-blue-200 rounded-md p-4">
                 <div className="flex items-center">
                 <div className="flex-shrink-0">
-                    <DollarSign className="h-5 w-5 text-blue-400" />
+                    <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
+                        <BiMoneyWithdraw className="h-5 w-5 text-blue-400" />
+                    </div>
                 </div>
                 <div className="ml-3">
                     <h3 className="text-sm font-medium text-blue-800">
@@ -364,7 +370,7 @@ return (
                 value={formData.notes}
                 onChange={handleInputChange}
                 rows={3}
-                className="block w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
+                className="block placeholder:text-zinc-700/50 placeholder:text-sm placeholder:font-medium placeholder:tracking-tight w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0063b4] focus:border-[#0063b4] sm:text-sm"
                 placeholder="Additional information..."
             />
             </div>

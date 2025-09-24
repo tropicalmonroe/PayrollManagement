@@ -1,31 +1,13 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export async function GET(request: NextRequest) {
   try {
-    switch (req.method) {
-      case 'GET':
-        return await getAdvances(req, res);
-      case 'POST':
-        return await createAdvance(req, res);
-      default:
-        res.setHeader('Allow', ['GET', 'POST']);
-        return res.status(405).json({ error: `Method ${req.method} not allowed` });
-    }
-  } catch (error) {
-    console.error('API Error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-}
-
-async function getAdvances(req: NextApiRequest, res: NextApiResponse) {
-  try {
-    const { employeeId } = req.query;
+    const { searchParams } = new URL(request.url);
+    const employeeId = searchParams.get('employeeId');
 
     const whereClause: any = {};
-    if (employeeId && typeof employeeId === 'string') {
+    if (employeeId) {
       whereClause.employeeId = employeeId;
     }
 
@@ -38,24 +20,28 @@ async function getAdvances(req: NextApiRequest, res: NextApiResponse) {
             employeeId: true,
             lastName: true,
             firstName: true,
-            position: true
-          }
-        }
+            position: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
-    return res.status(200).json(advances);
+    return NextResponse.json(advances);
   } catch (error) {
     console.error('Error fetching advances:', error);
-    return res.status(500).json({ error: 'Error loading advances' });
+    return NextResponse.json(
+      { error: 'Failed to fetch advances' },
+      { status: 500 }
+    );
   }
 }
 
-async function createAdvance(req: NextApiRequest, res: NextApiResponse) {
+export async function POST(request: NextRequest) {
   try {
+    const data = await request.json();
     const {
       employeeId,
       amount,
@@ -64,58 +50,100 @@ async function createAdvance(req: NextApiRequest, res: NextApiResponse) {
       numberOfInstallments,
       installmentAmount,
       remainingBalance,
-      notes
-    } = req.body;
+      notes,
+    } = data;
 
-    // Validation
+    // Required field validation
     if (!employeeId || !amount || !advanceDate || !reason || !numberOfInstallments) {
-      return res.status(400).json({ error: 'All required fields must be filled' });
+      return NextResponse.json(
+        { error: 'Employee ID, amount, advance date, reason, and number of installments are required' },
+        { status: 400 }
+      );
     }
 
-    if (amount <= 0) {
-      return res.status(400).json({ error: 'Amount must be greater than 0' });
+    // Type validation
+    const parsedAmount = parseFloat(amount);
+    const parsedInstallmentAmount = parseFloat(installmentAmount);
+    const parsedRemainingBalance = parseFloat(remainingBalance);
+    const parsedNumberOfInstallments = parseInt(numberOfInstallments, 10);
+
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      return NextResponse.json(
+        { error: 'Amount must be a valid number greater than 0' },
+        { status: 400 }
+      );
     }
 
-    if (numberOfInstallments <= 0 || numberOfInstallments > 24) {
-      return res.status(400).json({ error: 'Number of installments must be between 1 and 24' });
+    if (isNaN(parsedNumberOfInstallments) || parsedNumberOfInstallments <= 0 || parsedNumberOfInstallments > 24) {
+      return NextResponse.json(
+        { error: 'Number of installments must be a valid integer between 1 and 24' },
+        { status: 400 }
+      );
+    }
+
+    if (isNaN(parsedInstallmentAmount)) {
+      return NextResponse.json(
+        { error: 'Installment amount must be a valid number' },
+        { status: 400 }
+      );
+    }
+
+    if (isNaN(parsedRemainingBalance)) {
+      return NextResponse.json(
+        { error: 'Remaining balance must be a valid number' },
+        { status: 400 }
+      );
+    }
+
+    // Validate date
+    const parsedAdvanceDate = new Date(advanceDate);
+    if (isNaN(parsedAdvanceDate.getTime())) {
+      return NextResponse.json(
+        { error: 'Advance date must be a valid date' },
+        { status: 400 }
+      );
     }
 
     // Verify employee exists
     const employee = await prisma.employee.findUnique({
-      where: { id: employeeId }
+      where: { id: employeeId },
     });
 
     if (!employee) {
-      return res.status(404).json({ error: 'Employee not found' });
+      return NextResponse.json(
+        { error: 'Employee not found' },
+        { status: 404 }
+      );
     }
 
-    // Check if employee has active advances
+    // Check for active advances
     const activeAdvances = await prisma.advance.findMany({
       where: {
-        employeeId: employeeId,
-        status: 'IN_PROGRESS'
-      }
+        employeeId,
+        status: 'IN_PROGRESS',
+      },
     });
 
     if (activeAdvances.length > 0) {
-      return res.status(400).json({ 
-        error: 'This employee already has an advance in progress. Please settle the existing advance first.' 
-      });
+      return NextResponse.json(
+        { error: 'This employee already has an advance in progress. Please settle the existing advance first.' },
+        { status: 400 }
+      );
     }
 
     // Create advance
     const advance = await prisma.advance.create({
       data: {
         employeeId,
-        amount: parseFloat(amount),
-        advanceDate: new Date(advanceDate),
+        amount: parsedAmount,
+        advanceDate: parsedAdvanceDate,
         reason: reason.trim(),
-        numberOfInstallments: parseInt(numberOfInstallments),
-        installmentAmount: parseFloat(installmentAmount),
-        remainingBalance: parseFloat(remainingBalance),
+        numberOfInstallments: parsedNumberOfInstallments,
+        installmentAmount: parsedInstallmentAmount,
+        remainingBalance: parsedRemainingBalance,
         status: 'IN_PROGRESS',
-        createdBy: 'admin', // TODO: Get from session
-        notes: notes?.trim() || null
+        createdBy: 'admin', // TODO: Replace with actual user from session/auth
+        notes: notes?.trim() || null,
       },
       include: {
         employee: {
@@ -124,15 +152,29 @@ async function createAdvance(req: NextApiRequest, res: NextApiResponse) {
             employeeId: true,
             lastName: true,
             firstName: true,
-            position: true
-          }
-        }
-      }
+            position: true,
+          },
+        },
+      },
     });
 
-    return res.status(201).json(advance);
-  } catch (error) {
+    return NextResponse.json(advance, { status: 201 });
+  } catch (error: any) {
     console.error('Error creating advance:', error);
-    return res.status(500).json({ error: 'Error creating advance' });
+    return NextResponse.json(
+      { error: error.message || 'Failed to create advance' },
+      { status: 500 }
+    );
   }
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*', // Adjust as needed
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }

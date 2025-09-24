@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Eye, ArrowLeft, Search, Filter } from 'lucide-react';
+import { Eye, ArrowLeft, Search, Filter, LucideChevronsDownUp, LucideChevronsDown, LucideChevronsUp, LucideChevronsUpDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Employee, EmployeeStatus, MaritalStatus } from '@prisma/client';
 import EmployeeDetails from '../../../../../components/EmployeeDetails';
@@ -103,8 +103,8 @@ const EmployeeConsultationPage = () => {
   };
 
   const getSortIcon = (field: 'name' | 'hireDate' | 'baseSalary') => {
-    if (sortBy !== field) return '↕️';
-    return sortOrder === 'asc' ? '↑' : '↓';
+    if (sortBy !== field) return <LucideChevronsUpDown className="inline w-4 h-4 align-text-bottom" />;
+    return sortOrder === 'asc' ? <LucideChevronsUp className="inline w-4 h-4 align-text-bottom" /> : <LucideChevronsDown className="inline w-4 h-4 align-text-bottom" />;
   };
 
   const formatCurrency = (amount: number) => {
@@ -150,14 +150,14 @@ const EmployeeConsultationPage = () => {
             <span className='tracking-tighter text-white'>Back</span>
         </button>
           
-          <div className="flex items-center space-x-3 my-4">
+          <div className="flex items-center space-x-3 my-8">
             <div className="flex items-center justify-center w-10 h-10 bg-zinc-700 rounded-xl p-1">
             <Eye className="w-6 h-6 text-blue-50" />
             </div>
             <h1 className="text-2xl font-bold tracking-tighter text-zinc-800">Employee Profile Review</h1>
           </div>
           
-          <p className="text-zinc-400 text-sm w-[17vw]">
+          <p className="text-zinc-400 text-sm w-[17vw] mb-4">
             Read-only view of the employee’s complete profile (no modifications). 
           </p>
         </div>
@@ -212,7 +212,7 @@ const EmployeeConsultationPage = () => {
 
         {/* Employee list */}
         {filteredEmployees.length === 0 ? (
-          <div className="bg-white shadow rounded-lg">
+          <div className="bg-white shadow rounded-lg mt-[2vh]">
             <div className="px-4 py-5 sm:p-6">
               <div className="text-center py-12">
                 <Eye className="mx-auto h-12 w-12 text-rose-400" />
@@ -228,81 +228,88 @@ const EmployeeConsultationPage = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-white shadow rounded-lg overflow-hidden">
+          <div className="bg-[#6ea0c2] shadow rounded-lg overflow-hidden mt-[4vh]">
             {/* Desktop version - table */}
             <div className="hidden lg:block">
               <table className="min-w-full divide-y divide-zinc-200">
-                <thead className="bg-zinc-50">
+                <thead className="bg-[#6ea0c2]">
                   <tr>
                     <th 
-                      className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider cursor-pointer hover:bg-zinc-100"
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out"
                       onClick={() => handleSort('name')}
                     >
                       Employee {getSortIcon('name')}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out">
                       Position 
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out">
                       Marital Status 
                     </th>
                     <th 
-                      className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider cursor-pointer hover:bg-zinc-100"
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out"
                       onClick={() => handleSort('hireDate')}
                     >
                       Hire Date {getSortIcon('hireDate')} 
                     </th>
                     <th 
-                      className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider cursor-pointer hover:bg-zinc-100"
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out"
                       onClick={() => handleSort('baseSalary')}
                     >
                       Base Salary {getSortIcon('baseSalary')} 
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out">
                       Status {/* Translated Statut */}
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider 
+                    text-white cursor-pointer hover:bg-zinc-800 transition-all duration-300 ease-in-out">
                       Action {/* Translated Action */}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-zinc-200">
+                <tbody className="bg-[#142b3d] divide-y divide-zinc-200">
                   {filteredEmployees.map((employee) => (
-                    <tr key={employee.id} className="hover:bg-zinc-50">
+                    <tr key={employee.id} className="hover:bg-[#1b435b] transition-all duration-300 ease-in-out">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
                             <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                              <span className="text-sm font-medium text-blue-600">
+                              <span className="text-sm font-medium text-blue-600 tracking-tight">
                                 {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                               </span>
                             </div>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-zinc-900">
+                            <div className="text-sm font-medium tracking-tight text-white">
                               {employee.firstName} {employee.lastName}
                             </div>
-                            <div className="text-sm text-zinc-500">
+                            <div className="text-sm text-white tracking-tight font-semibold scale-90 -ml-[4px]">
                               {employee.employeeId}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm tracking-tight text-white">
                         {employee.position}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm tracking-tight text-white">
                         {employee.maritalStatus}
                         {employee.numberOfDeductions > 0 && (
-                          <div className="text-xs text-zinc-500">
+                          <div className="text-xs text-white">
                             {employee.numberOfDeductions} dependent(s) 
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm tracking-tight text-white">
                         {formatDate(employee.hireDate)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm tracking-tight text-emerald-400">
                         {formatCurrency(employee.baseSalary)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -311,11 +318,12 @@ const EmployeeConsultationPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           onClick={() => handleView(employee)}
-                          className="text-blue-600 hover:text-blue-900 flex items-center space-x-1"
+                          className="flex items-center justify-center cursor-pointer w-full h-8 bg-emerald-500
+                            rounded-md py-1 px-2 hover:bg-blue-200 transition duration-300 ease-in-out"
                           title="View full profile"
                         >
-                          <Eye className="w-4 h-4 " />
-                          <span>View</span>
+                          <Eye className="w-4 h-4 text-white mr-1" />
+                          <span className="text-white tracking-tighter">View</span>
                         </button>
                       </td>
                     </tr>

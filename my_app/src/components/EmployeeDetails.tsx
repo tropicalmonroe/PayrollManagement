@@ -1,5 +1,10 @@
 import { Employee } from '@prisma/client';
 import { calculatePayroll, type EmployeePayrollData, INCOME_TAX_BRACKETS, TaxBracket } from '../lib/payrollCalculations';
+import { X } from 'lucide-react';
+import { BiSolidBarChartSquare } from "react-icons/bi";
+import { FaHouseChimney } from 'react-icons/fa6';
+import { TbMoneybag, TbTrendingUp } from 'react-icons/tb';
+import { MdFamilyRestroom } from 'react-icons/md';
 
 interface EmployeeDetailsProps {
 employee: Employee;
@@ -156,23 +161,23 @@ const employeeData: EmployeePayrollData = {
 const payrollResult = calculatePayroll(employeeData);
 
 return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-[#142b3d] bg-opacity-50 flex items-center justify-center p-4 z-50">
     <div className="bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[95vh] overflow-y-auto">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-zinc-200 flex justify-between items-center sticky top-0 bg-white z-10">
+        <div className="px-6 py-4 border-b border-zinc-200 flex justify-between items-center sticky top-0 bg-blue-100 z-10">
         <div className="flex items-center">
             <div className="flex-shrink-0 h-12 w-12">
-            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-lg font-medium text-blue-600">
+            <div className="h-12 w-12 rounded-full bg-blue-200 flex items-center justify-center">
+                <span className="text-lg font-medium text-blue-600 tracking-tight">
                 {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                 </span>
             </div>
             </div>
             <div className="ml-4">
-            <h2 className="text-xl font-semibold text-zinc-900">
+            <h2 className="text-xl font-semibold text-zinc-800 tracking-tight">
                 Full Payroll Details - {employee.firstName} {employee.lastName}
             </h2>
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-zinc-700 tracking-tight w-[20vw]">
                 {employee.employeeId} • {employee.position}
             </p>
             </div>
@@ -181,9 +186,12 @@ return (
             {getStatusBadge(employee.status)}
             <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-600"
+            className="text-zinc-400 hover:text-zinc-600 transition-colors"
             >
-            ✕
+            <div className="flex items-center justify-center w-8 h-8 bg-rose-400 hover:bg-rose-700 
+            cursor-pointer rounded-xl p-1 transition ease-in-out duration-300">
+            <X className="w-6 h-6 text-red-50" />
+            </div>
             </button>
         </div>
         </div>
@@ -195,70 +203,78 @@ return (
             <div className="space-y-6">
             {/* Personal Information */}
             <div className="bg-blue-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-blue-900 mb-4">Personal Information</h3>
+                <h3 className="text-lg font-semibold text-blue-800 tracking-tight mb-4">Personal Information</h3>
                 <div className="space-y-3 text-sm">
                 <div className="grid grid-cols-2 gap-2">
                     <div>
-                    <span className="font-medium text-blue-700">First Name & Last Name:</span>
+                    <span className="font-medium text-blue-700 tracking-tight">First Name & Last Name:</span>
                     <div className="text-blue-900">{employee.firstName} {employee.lastName}</div>
                     </div>
                     <div>
-                    <span className="font-medium text-blue-700">Employee ID:</span>
+                    <span className="font-medium text-blue-700 tracking-tight">Employee ID:</span>
                     <div className="text-blue-900">{employee.employeeId}</div>
+                    </div>
+                    <div>
+                        <span className="font-medium text-blue-700 tracking-tight">Phone Number:</span>
+                    <div className="text-blue-900">{employee.phone}</div>
+                    </div>
+                    <div>
+                        <span className="font-medium text-blue-700 tracking-tight">Email:</span>
+                    <div className="text-blue-900">{employee.email}</div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                     <div>
-                    <span className="font-medium text-blue-700">Position:</span>
+                    <span className="font-medium text-blue-700 tracking-tight">Position:</span>
                     <div className="text-blue-900">{employee.position}</div>
                     </div>
                     <div>
-                    <span className="font-medium text-blue-700">ID Number:</span>
+                    <span className="font-medium text-blue-700 tracking-tight">ID Number:</span>
                     <div className="text-blue-900">{employee.idNumber || 'Not Provided'}</div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                     <div>
-                    <span className="font-medium text-blue-700">KRA PIN:</span>
+                    <span className="font-medium text-blue-700 tracking-tight">KRA PIN:</span>
                     <div className="text-blue-900">{employee.kraPin || 'Not Provided'}</div>
                     </div>
                     <div>
-                    <span className="font-medium text-blue-700">NSSF Number:</span>
+                    <span className="font-medium text-blue-700 tracking-tight">NSSF Number:</span>
                     <div className="text-blue-900">{employee.nssfNumber || 'Not Provided'}</div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                     <div>
-                    <span className="font-medium text-blue-700">Marital Status:</span>
+                    <span className="font-medium text-blue-700 tracking-tight">Marital Status:</span>
                     <div className="text-blue-900">{getMaritalStatus(employee.maritalStatus)}</div>
                     </div>
                     <div>
-                    <span className="font-medium text-blue-700">Date of Birth:</span>
+                    <span className="font-medium text-blue-700 tracking-tight">Date of Birth:</span>
                     <div className="text-blue-900">{formatDate(employee.dateOfBirth)}</div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                     <div>
-                    <span className="font-medium text-blue-700">Hire Date:</span>
+                    <span className="font-medium text-blue-700 tracking-tight">Hire Date:</span>
                     <div className="text-blue-900">{formatDate(employee.hireDate)}</div>
                     </div>
                     <div>
-                    <span className="font-medium text-blue-700">Seniority:</span>
+                    <span className="font-medium text-blue-700 tracking-tight">Seniority:</span>
                     <div className="text-blue-900">{calculateSeniority(employee.hireDate)}</div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                     <div>
-                    <span className="font-medium text-blue-700">Number of Deductions:</span>
+                    <span className="font-medium text-blue-700 tracking-tight">Number of Deductions:</span>
                     <div className="text-blue-900">{employee.numberOfDeductions || 0}</div>
                     </div>
                     <div>
-                    <span className="font-medium text-blue-700">Days per Month:</span>
+                    <span className="font-medium text-blue-700 tracking-tight">Days per Month:</span>
                     <div className="text-blue-900">{employee.numberOfDaysPerMonth || 30} days</div>
                     </div>
                 </div>
@@ -267,68 +283,68 @@ return (
 
             {/* Salary and Allowances */}
             <div className="bg-green-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-green-900 mb-4">Salary and Allowances</h3>
+                <h3 className="text-lg font-semibold text-green-800 mb-4 tracking-tight">Salary and Allowances</h3>
                 <div className="space-y-3 text-sm">
                 <div>
-                    <span className="font-medium text-green-700">Base Salary:</span>
+                    <span className="font-medium text-green-700 tracking-tight">Base Salary:</span>
                     <div className="text-lg font-semibold text-green-900">{formatCurrency(employee.baseSalary)}</div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                     <div>
-                    <span className="font-medium text-green-700">Seniority Rate:</span>
+                    <span className="font-medium text-green-700 tracking-tight">Seniority Rate:</span>
                     <div className="text-green-900">{formatPercentage(payrollResult.earnings.seniorityBonus / employee.baseSalary)}</div>
                     </div>
                     <div>
-                    <span className="font-medium text-green-700">Seniority Allowance:</span>
+                    <span className="font-medium text-green-700 tracking-tight">Seniority Allowance:</span>
                     <div className="text-green-900">{formatCurrency(payrollResult.earnings.seniorityBonus)}</div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                     <div>
-                    <span className="font-medium text-green-700">Housing Allowance:</span>
+                    <span className="font-medium text-green-700 tracking-tight">Housing Allowance:</span>
                     <div className="text-green-900">{formatCurrency(employee.housingAllowance || 0)}</div>
                     </div>
                     <div>
-                    <span className="font-medium text-green-700">Meal Allowance:</span>
+                    <span className="font-medium text-green-700 tracking-tight">Meal Allowance:</span>
                     <div className="text-green-900">{formatCurrency(employee.mealAllowance || 0)}</div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                     <div>
-                    <span className="font-medium text-green-700">Transport Allowance:</span>
+                    <span className="font-medium text-green-700 tracking-tight">Transport Allowance:</span>
                     <div className="text-green-900">{formatCurrency(employee.transportAllowance || 0)}</div>
                     </div>
                     <div>
-                    <span className="font-medium text-green-700">Representation Allowance:</span>
+                    <span className="font-medium text-green-700 tracking-tight">Representation Allowance:</span>
                     <div className="text-green-900">{formatCurrency(employee.representationAllowance || 0)}</div>
                     </div>
                 </div>
 
                 <div className="border-t border-green-200 pt-2">
-                    <span className="font-medium text-green-700">Gross Salary:</span>
+                    <span className="font-medium text-green-700 tracking-tight">Gross Salary:</span>
                     <div className="text-xl font-bold text-green-900">{formatCurrency(payrollResult.grossSalary)}</div>
                 </div>
 
                 <div>
-                    <span className="font-medium text-green-700">Taxable Gross Salary:</span>
+                    <span className="font-medium text-green-700 tracking-tight">Taxable Gross Salary:</span>
                     <div className="text-lg font-semibold text-green-900">{formatCurrency(payrollResult.taxableGrossSalary)}</div>
                 </div>
                 </div>
             </div>
 
             {/* Bank Account */}
-            <div className="bg-zinc-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-zinc-900 mb-4">Bank Account</h3>
+            <div className="bg-zinc-100 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-zinc-800 tracking-tight mb-4">Bank Account</h3>
                 <div className="space-y-2 text-sm">
                 <div>
-                    <span className="font-medium text-zinc-700">Bank Account:</span>
+                    <span className="font-medium text-zinc-700 tracking-tight">Bank Account:</span>
                     <div className="text-zinc-900">{employee.bankAccount || 'Not Provided'}</div>
                 </div>
                 <div>
-                    <span className="font-medium text-zinc-700">Bank Branch:</span>
+                    <span className="font-medium text-zinc-700 tracking-tight">Bank Branch:</span>
                     <div className="text-zinc-900">{employee.bankBranch || 'Not Provided'}</div>
                 </div>
                 </div>
@@ -339,36 +355,36 @@ return (
             <div className="space-y-6">
             {/* Employee Contributions */}
             <div className="bg-orange-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-orange-900 mb-4">Employee Contributions</h3>
+                <h3 className="text-lg font-semibold text-orange-800 tracking-tight mb-4">Employee Contributions</h3>
                 <div className="space-y-3 text-sm">
                 <div className="grid grid-cols-2 gap-2">
-                    <span className="font-medium text-orange-700">NSSF Contribution:</span>
+                    <span className="font-medium text-orange-700 tracking-tight">NSSF Contribution:</span>
                     <div className="text-orange-900 text-right">{formatCurrency(payrollResult.employeeContributions.nssfEmployee)}</div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                    <span className="font-medium text-orange-700">SHIF Contribution:</span>
+                    <span className="font-medium text-orange-700 tracking-tight">SHIF Contribution:</span>
                     <div className="text-orange-900 text-right">{formatCurrency(payrollResult.employeeContributions.shifEmployee)}</div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                    <span className="font-medium text-orange-700">Housing Levy:</span>
+                    <span className="font-medium text-orange-700 tracking-tight">Housing Levy:</span>
                     <div className="text-orange-900 text-right">{formatCurrency(payrollResult.employeeContributions.housingLevy)}</div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                    <span className="font-medium text-orange-700">Pension Contribution:</span>
+                    <span className="font-medium text-orange-700 tracking-tight">Pension Contribution:</span>
                     <div className="text-orange-900 text-right">{formatCurrency(payrollResult.employeeContributions.pensionEmployee)}</div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                    <span className="font-medium text-orange-700">Insurance Diversified:</span>
+                    <span className="font-medium text-orange-700 tracking-tight">Insurance Diversified:</span>
                     <div className="text-orange-900 text-right">{formatCurrency(payrollResult.employeeContributions.insuranceDiversifiedEmployee)}</div>
                 </div>
 
                 <div className="border-t border-orange-200 pt-2">
                     <div className="grid grid-cols-2 gap-2">
-                    <span className="font-medium text-orange-700">Total Employee Contributions:</span>
+                    <span className="font-medium text-orange-700 tracking-tight">Total Employee Contributions:</span>
                     <div className="text-lg font-semibold text-orange-900 text-right">{formatCurrency(payrollResult.employeeContributions.totalEmployeeContributions)}</div>
                     </div>
                 </div>
@@ -377,50 +393,50 @@ return (
 
             {/* Employer Contributions */}
             <div className="bg-purple-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-purple-900 mb-4">Employer Contributions</h3>
+                <h3 className="text-lg font-medium text-purple-800 tracking-tight mb-4">Employer Contributions</h3>
                 <div className="space-y-3 text-sm">
                 <div>
-                    <span className="font-medium text-purple-700">NSSF Employer Contribution:</span>
+                    <span className="font-medium text-purple-700 tracking-tight">NSSF Employer Contribution:</span>
                     <div className="text-purple-900">{formatCurrency(payrollResult.employerContributions.nssfEmployer)}</div>
                 </div>
 
                 <div>
-                    <span className="font-medium text-purple-700">SHIF Employer Contribution:</span>
+                    <span className="font-medium text-purple-700 tracking-tight">SHIF Employer Contribution:</span>
                     <div className="text-purple-900">{formatCurrency(payrollResult.employerContributions.shifEmployer)}</div>
                 </div>
 
                 <div>
-                    <span className="font-medium text-purple-700">Housing Levy:</span>
+                    <span className="font-medium text-purple-700 tracking-tight">Housing Levy:</span>
                     <div className="text-purple-900">{formatCurrency(payrollResult.employerContributions.housingLevy)}</div>
                 </div>
 
                 <div>
-                    <span className="font-medium text-purple-700">Training Levy:</span>
+                    <span className="font-medium text-purple-700 tracking-tight">Training Levy:</span>
                     <div className="text-purple-900">{formatCurrency(payrollResult.employerContributions.trainingLevy)}</div>
                 </div>
 
                 <div>
-                    <span className="font-medium text-purple-700">Pension Employer Contribution:</span>
+                    <span className="font-medium text-purple-700 tracking-tight">Pension Employer Contribution:</span>
                     <div className="text-purple-900">{formatCurrency(payrollResult.employerContributions.pensionEmployer)}</div>
                 </div>
 
                 <div>
-                    <span className="font-medium text-purple-700">Insurance Diversified Employer:</span>
+                    <span className="font-medium text-purple-700 tracking-tight">Insurance Diversified Employer:</span>
                     <div className="text-purple-900">{formatCurrency(payrollResult.employerContributions.insuranceDiversifiedEmployer)}</div>
                 </div>
 
                 <div>
-                    <span className="font-medium text-purple-700">Work Injury Contribution:</span>
+                    <span className="font-medium text-purple-700 tracking-tight">Work Injury Contribution:</span>
                     <div className="text-purple-900">{formatCurrency(payrollResult.employerContributions.workInjury)}</div>
                 </div>
 
                 <div>
-                    <span className="font-medium text-purple-700">SHIF Participation:</span>
+                    <span className="font-medium text-purple-700 tracking-tight">SHIF Participation:</span>
                     <div className="text-purple-900">{formatCurrency(payrollResult.employerContributions.participationSHIF)}</div>
                 </div>
 
                 <div className="border-t border-purple-200 pt-2">
-                    <span className="font-medium text-purple-700">Total Employer Contributions:</span>
+                    <span className="font-medium text-purple-700 tracking-tight">Total Employer Contributions:</span>
                     <div className="text-lg font-semibold text-purple-900">{formatCurrency(payrollResult.employerContributions.totalEmployerContributions)}</div>
                 </div>
                 </div>
@@ -428,26 +444,29 @@ return (
 
             {/* PAYE Calculation */}
             <div className="bg-indigo-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-indigo-900 mb-4">PAYE (Pay As You Earn) Calculation</h3>
+                <h3 className="text-lg font-semibold text-indigo-800 tracking-tight mb-4">PAYE (Pay As You Earn) Calculation</h3>
                 <div className="space-y-4 text-sm">
                 {/* Step 1: Calculate Taxable Net */}
                 <div className="bg-white p-3 rounded border border-indigo-200">
-                    <div className="font-medium text-indigo-800 mb-2">📊 Step 1: Calculate Taxable Net</div>
+                    <div className="font-medium text-indigo-800 mb-2">
+                        <BiSolidBarChartSquare className="inline-block mr-2 text-xl" />
+                        <b>Step 1: Calculate Taxable Net</b>
+                    </div>
                     <div className="space-y-1 text-xs ml-2">
                     <div className="flex justify-between">
-                        <span className="text-indigo-600">Taxable Gross Salary:</span>
+                        <span className="text-indigo-600 tracking-tight font-semibold">Taxable Gross Salary:</span>
                         <span className="font-medium text-indigo-800">{formatCurrency(payrollResult.taxableGrossSalary)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-indigo-600">- Employee Contributions:</span>
+                        <span className="text-indigo-600 font-medium tracking-tight">- Employee Contributions:</span>
                         <span className="font-medium text-rose-600">-{formatCurrency(payrollResult.employeeContributions.totalEmployeeContributions)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-indigo-600">- Professional Expenses:</span>
+                        <span className="text-indigo-600 font-medium tracking-tight">- Professional Expenses:</span>
                         <span className="font-medium text-rose-600">-{formatCurrency(payrollResult.taxCalculation.professionalExpenses)}</span>
                     </div>
                     <div className="border-t border-indigo-300 pt-1 flex justify-between font-medium">
-                        <span className="text-indigo-700">Taxable Net:</span>
+                        <span className="text-indigo-700 font-medium tracking-tight">Taxable Net:</span>
                         <span className="text-indigo-900">{formatCurrency(payrollResult.taxCalculation.taxableNet)}</span>
                     </div>
                     </div>
@@ -455,18 +474,21 @@ return (
 
                 {/* Step 2: Deduct Mortgage Interest */}
                 <div className="bg-white p-3 rounded border border-indigo-200">
-                    <div className="font-medium text-indigo-800 mb-2">🏠 Step 2: Deduct Mortgage Interest</div>
+                    <div className="font-medium text-indigo-800 mb-2">
+                        <FaHouseChimney className="inline-block mr-2 text-xl scale-90 -mt-[5px]"/>
+                        <b>Step 2: Deduct Mortgage Interest</b>
+                        </div>
                     <div className="space-y-1 text-xs ml-2">
                     <div className="flex justify-between">
-                        <span className="text-indigo-600">Taxable Net:</span>
+                        <span className="text-indigo-600 tracking-tight font-semibold">Taxable Net:</span>
                         <span className="font-medium text-indigo-800">{formatCurrency(payrollResult.taxCalculation.taxableNet)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-indigo-600">- Deductible Interest (Mortgage):</span>
+                        <span className="text-indigo-600 tracking-tight">- Deductible Interest (Mortgage):</span>
                         <span className="font-medium text-rose-600">-{formatCurrency(0)}</span>
                     </div>
                     <div className="border-t border-indigo-300 pt-1 flex justify-between font-medium">
-                        <span className="text-indigo-700">Net Taxable Income:</span>
+                        <span className="text-indigo-700 tracking-tight">Net Taxable Income:</span>
                         <span className="text-indigo-900">{formatCurrency(payrollResult.taxCalculation.netTaxable)}</span>
                     </div>
                     </div>
@@ -474,7 +496,10 @@ return (
 
                 {/* Step 3: Apply PAYE Tax Brackets */}
                 <div className="bg-white p-3 rounded border border-indigo-200">
-                    <div className="font-medium text-indigo-800 mb-2">📈 Step 3: Apply PAYE Tax Brackets</div>
+                    <div className="font-medium text-indigo-800 mb-2">
+                        <TbTrendingUp className="inline-block mr-2 text-xl" />
+                        <b>Step 3: Apply PAYE Tax Brackets</b>
+                        </div>
                     <div className="space-y-1 text-xs ml-2">
                     {(() => {
                         const netTaxable = payrollResult.taxCalculation.netTaxable;
@@ -492,19 +517,19 @@ return (
                         return (
                         <>
                             <div className="flex justify-between">
-                            <span className="text-indigo-600">Applicable Bracket:</span>
+                            <span className="text-indigo-600 tracking-tight">Applicable Bracket:</span>
                             <span className="font-medium text-indigo-800">{slice}</span>
                             </div>
                             <div className="flex justify-between">
-                            <span className="text-indigo-600">Tax Rate:</span>
+                            <span className="text-indigo-600 tracking-tight">Tax Rate:</span>
                             <span className="font-medium text-indigo-800">{theRate}%</span>
                             </div>
                             <div className="flex justify-between">
-                            <span className="text-indigo-600">Tax Deduction:</span>
+                            <span className="text-indigo-600 tracking-tight">Tax Deduction:</span>
                             <span className="font-medium text-indigo-800">{formatCurrency(deduction)}</span>
                             </div>
                             <div className="flex justify-between">
-                            <span className="text-indigo-600">Calculation: ({formatCurrency(netTaxable)} × {theRate}%) - {formatCurrency(deduction)}</span>
+                            <span className="text-indigo-600 tracking-tight">Calculation: ({formatCurrency(netTaxable)} × {theRate}%) - {formatCurrency(deduction)}</span>
                             <span className="font-medium text-indigo-800">{formatCurrency(theoreticalTax)}</span>
                             </div>
                         </>
@@ -515,7 +540,10 @@ return (
 
                 {/* Step 4: Apply Personal Relief */}
                 <div className="bg-white p-3 rounded border border-indigo-200">
-                <div className="font-medium text-indigo-800 mb-2">👨‍👩‍👧‍👦 Step 4: Apply Personal Relief</div>
+                <div className="font-medium text-indigo-800 mb-2">
+                    <MdFamilyRestroom className="inline-block mr-2 text-xl" />
+                    <b>Step 4: Apply Personal Relief</b>
+                    </div>
                 <div className="space-y-1 text-xs ml-2">
                     <div className="flex justify-between">
                     <span className="text-indigo-600">Theoretical Tax:</span>
@@ -534,10 +562,13 @@ return (
                 {/* Final PAYE Result */}
                 <div className="bg-indigo-100 p-3 rounded border-2 border-indigo-300">
                     <div className="flex justify-between items-center">
-                    <span className="font-bold text-indigo-900">💰 Final PAYE Tax:</span>
+                    <span className="font-bold text-indigo-800">
+                        <TbMoneybag className='inline-block mr-2 tet-xl'/>
+                        <b>Final PAYE Tax:</b>
+                        </span>
                     <span className="text-xl font-bold text-indigo-900">{formatCurrency(payrollResult.taxCalculation.incomeTax)}</span>
                     </div>
-                    <div className="text-xs text-indigo-700 mt-1">
+                    <div className="text-xs text-indigo-700 tracking-tight mt-1">
                     Formula: MAX(0, Theoretical Tax - Personal Relief)
                     </div>
                 </div>

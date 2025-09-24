@@ -168,7 +168,7 @@ async function updateEmployee(id: string, req: NextApiRequest, res: NextApiRespo
       where: { id },
       data: {
         ...(employeeId && { employeeId }),
-        ...(lastName && { lastName: lastName.toUpperCase() }),
+        ...(lastName && { lastName: lastName }),
         ...(firstName && { firstName: firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() }),
         ...(position && { position }),
         ...(idNumber !== undefined && { idNumber }),
