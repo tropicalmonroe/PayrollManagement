@@ -35,7 +35,7 @@ const [formData, setFormData] = useState({
     representationAllowance: initialData?.representationAllowance || '',
     bankAccount: initialData?.bankAccount || '',
     bankBranch: initialData?.bankBranch || '',
-    telephone: initialData?.telephone || '',
+    phone: initialData?.phone || '',
     email: initialData?.email || '',
     address: initialData?.address || '',
     status: initialData?.status || 'ACTIVE',
@@ -91,9 +91,9 @@ const validateForm = () => {
     newErrors.email = 'Invalid email format';
     }
 
-    // Telephone validation
-    if (formData.telephone && !/^[0-9+\-\s()]{10,15}$/.test(formData.telephone)) {
-    newErrors.telephone = 'Invalid phone number format (e.g., +254 7XX XXX XXX)';
+    // phone validation
+    if (formData.phone && !/^[0-9+\-\s()]{10,15}$/.test(formData.phone)) {
+    newErrors.phone = 'Invalid phone number format (e.g., +254 7XX XXX XXX)';
     }
 
     // ID number validation (Kenyan ID: 8-9 digits)
@@ -318,14 +318,14 @@ return (
             </label>
             <input
                 type="tel"
-                name="telephone"
-                value={formData.telephone}
+                name="phone"
+                value={formData.phone}
                 onChange={handleChange}
                 className={`payroll-input placeholder:text-zinc-700/50 placeholder:text-sm placeholder:font-medium 
-                    placeholder:tracking-tight ${errors.telephone ? 'input-error' : ''}`}
+                    placeholder:tracking-tight ${errors.phone ? 'input-error' : ''}`}
                 placeholder="Ex: +254 7XX XXX XXX"
             />
-            {errors.telephone && <p className="form-error">{errors.telephone}</p>}
+            {errors.phone && <p className="form-error">{errors.phone}</p>}
             </div>
 
             <div>

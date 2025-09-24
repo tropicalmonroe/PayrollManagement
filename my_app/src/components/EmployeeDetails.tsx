@@ -1,5 +1,5 @@
 import { Employee } from '@prisma/client';
-import { calculatePayroll, type EmployeePayrollData, type PayrollResult, INCOME_TAX_BRACKETS, TaxBracket } from '../lib/payrollCalculations';
+import { calculatePayroll, type EmployeePayrollData, INCOME_TAX_BRACKETS, TaxBracket } from '../lib/payrollCalculations';
 
 interface EmployeeDetailsProps {
 employee: Employee;
@@ -515,23 +515,22 @@ return (
 
                 {/* Step 4: Apply Personal Relief */}
                 <div className="bg-white p-3 rounded border border-indigo-200">
-                    <div className="font-medium text-indigo-800 mb-2">👨‍👩‍👧‍👦 Step 4: Apply Personal Relief</div>
-                    <div className="space-y-1 text-xs ml-2">
+                <div className="font-medium text-indigo-800 mb-2">👨‍👩‍👧‍👦 Step 4: Apply Personal Relief</div>
+                <div className="space-y-1 text-xs ml-2">
                     <div className="flex justify-between">
-                        <span className="text-indigo-600">Theoretical Tax:</span>
-                        <span className="font-medium text-indigo-800">{formatCurrency(payrollResult.taxCalculation.theoreticalTax)}</span>
+                    <span className="text-indigo-600">Theoretical Tax:</span>
+                    <span className="font-medium text-indigo-800">{formatCurrency(payrollResult.taxCalculation.theoreticalTax)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-indigo-600">Personal Relief (Monthly):</span>
-                        <span className="font-medium text-indigo-800">{formatCurrency(2400)}</span>
+                    <span className="text-indigo-600">Personal Relief ({employee.numberOfDeductions} × 2400):</span>
+                    <span className="font-medium text-green-600">-{formatCurrency(payrollResult.taxCalculation.personalRelief)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-indigo-600">Calculation: MAX(0, {formatCurrency(payrollResult.taxCalculation.theoreticalTax)} - {formatCurrency(2400)})</span>
-                        <span className="font-medium text-indigo-800">{formatCurrency(payrollResult.taxCalculation.incomeTax)}</span>
-                    </div>
+                    <span className="text-indigo-600">Calculation: MAX(0, {formatCurrency(payrollResult.taxCalculation.theoreticalTax)} - {formatCurrency(payrollResult.taxCalculation.personalRelief)})</span>
+                    <span className="font-medium text-indigo-800">{formatCurrency(payrollResult.taxCalculation.incomeTax)}</span>
                     </div>
                 </div>
-
+                </div>
                 {/* Final PAYE Result */}
                 <div className="bg-indigo-100 p-3 rounded border-2 border-indigo-300">
                     <div className="flex justify-between items-center">
@@ -650,30 +649,35 @@ return (
             </div>
 
             {/* Summary */}
+            {/* Summary */}
             <div className="bg-zinc-100 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-zinc-900 mb-4">Summary</h3>
-                <div className="space-y-2 text-sm">
+            <h3 className="text-lg font-medium text-zinc-900 mb-4">Summary</h3>
+            <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                    <span className="text-zinc-700">Gross Salary:</span>
-                    <span className="font-medium">{formatCurrency(payrollResult.grossSalary)}</span>
+                <span className="text-zinc-700">Gross Salary:</span>
+                <span className="font-medium">{formatCurrency(payrollResult.grossSalary)}</span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-zinc-700">- Employee Contributions:</span>
-                    <span className="font-medium text-rose-600">-{formatCurrency(payrollResult.employeeContributions.totalEmployeeContributions)}</span>
+                <span className="text-zinc-700">- Employee Contributions:</span>
+                <span className="font-medium text-rose-600">-{formatCurrency(payrollResult.employeeContributions.totalEmployeeContributions)}</span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-zinc-700">- PAYE Tax:</span>
-                    <span className="font-medium text-rose-600">-{formatCurrency(payrollResult.taxCalculation.incomeTax)}</span>
+                <span className="text-zinc-700">- PAYE Tax:</span>
+                <span className="font-medium text-rose-600">-{formatCurrency(payrollResult.taxCalculation.incomeTax)}</span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-zinc-700">- Other Deductions:</span>
-                    <span className="font-medium text-rose-600">-{formatCurrency(payrollResult.otherDeductions.totalOtherDeductions)}</span>
+                <span className="text-zinc-700">+ Personal Relief Applied:</span>
+                <span className="font-medium text-green-600">+&nbsp;{formatCurrency(payrollResult.taxCalculation.personalRelief)}</span>
+                </div>
+                <div className="flex justify-between">
+                <span className="text-zinc-700">- Other Deductions:</span>
+                <span className="font-medium text-rose-600">-{formatCurrency(payrollResult.otherDeductions.totalOtherDeductions)}</span>
                 </div>
                 <div className="border-t border-zinc-300 pt-2 flex justify-between font-bold text-lg">
-                    <span className="text-zinc-900">Net Payable:</span>
-                    <span className="text-green-600">{formatCurrency(payrollResult.netSalaryPayable)}</span>
+                <span className="text-zinc-900">Net Payable:</span>
+                <span className="text-green-600">{formatCurrency(payrollResult.netSalaryPayable)}</span>
                 </div>
-                </div>
+            </div>
             </div>
 
             {/* System Information */}

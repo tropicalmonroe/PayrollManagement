@@ -138,16 +138,6 @@ const EmployeeConsultationPage = () => {
     }
   };
 
-  if (loading) {
-    return (
-        <div className="p-6">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-zinc-600">Loading...</div>
-          </div>
-        </div>
-    );
-  }
-
   return (
       <div className="p-6 bg-white mt-[2vh] rounded-md">
         <div className="mb-6">

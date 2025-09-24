@@ -5,6 +5,7 @@ import { Employee, Credit, Advance, VariableElement } from '@prisma/client';
 import DetailedPayrollView from '../../../components/DetailedPayrollView';
 import { Card } from '@/components/ui/card';
 import { MdOutlinePeopleAlt } from 'react-icons/md';
+import { IoArrowBack } from 'react-icons/io5';
 
 interface EmployeeWithData extends Employee {
 credits?: Credit[];
@@ -118,7 +119,7 @@ const years = Array.from({ length: 10 }, (_, i) => {
 
 if (selectedEmployee) {
     return (
-    <Card className="p-4 rounded-lg bg-[#f3f8fc] border-0 shadow-md">
+    <Card className="p-4 rounded-lg bg-[#f3f8fc] border-0 shadow-md mt-[2vh]">
         <div className="space-y-6">
         <div className="flex items-center justify-between">
             <div>
@@ -131,9 +132,11 @@ if (selectedEmployee) {
             </div>
             <button
             onClick={handleClosePayroll}
-            className="payroll-button-secondary rounded-md bg-zinc-600 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+            className="payroll-button-secondary rounded-md bg-zinc-600 px-4 py-2 text-sm 
+            font-medium text-white hover:bg-zinc-700 flex items-center gap-2 cursor-pointer"
             >
-            ← Back to List
+            <IoArrowBack/>
+            Back to List
             </button>
         </div>
         <div className="bg-white rounded-lg shadow-sm border border-zinc-200 p-6">
@@ -149,7 +152,7 @@ if (selectedEmployee) {
 }
 
 return (
-    <Card className="p-4 rounded-lg bg-[#f3f8fc] border-0 shadow-md mt-[2vh] h-[84vh]">
+    <Card className="p-4 rounded-lg bg-[#f3f8fc] border-0 shadow-md mt-[2vh]">
     <div className="space-y-6">
         <div>
         <h2 className="text-2xl font-bold tracking-tighter text-zinc-900">Payroll Calculation</h2>
@@ -200,7 +203,7 @@ return (
         </div>
 
         {/* Employee List */}
-        <div className="bg-white rounded-lg shadow-sm border border-zinc-200">
+        <div className="bg-[#6ea0c2] rounded-lg shadow-sm border border-zinc-200">
         <div className="px-6 py-4 border-b border-zinc-200">
             <h3 className="text-lg font-medium text-zinc-900">
             Active Employees&nbsp;-&nbsp;<span className='tracking-normal font-semibold'>({employees.length})</span>
@@ -235,33 +238,35 @@ return (
             </p>
             </div>
         ) : (
-            <div className="divide-y divide-zinc-200">
+            <div className="divide-y divide-zinc-200 bg-[#142b3d]">
             {employees.map((employee) => (
-                <div key={employee.id} className="p-6 hover:bg-zinc-50">
+                <div key={employee.id} className="p-6 hover:bg-[#1b435b] transition duration-300">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                        <span className="text-sm font-medium text-blue-600">
+                        <span className="text-sm font-medium text-blue-600 tracking-tight">
                             {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
                         </span>
                         </div>
                     </div>
                     <div className="ml-4">
                         <div className="flex items-center">
-                        <h4 className="text-sm font-medium text-zinc-900">
+                        <h4 className="text-sm tracking-tight text-white capitalize">
                             {employee.firstName} {employee.lastName}
                         </h4>
-                        <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        </div>
+                        <div className='my-1'>
+                        <span className="ml-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs tracking-tighter font-medium bg-emerald-100 text-emerald-800">
                             {employee.status}
                         </span>
                         </div>
-                        <div className="mt-1 flex items-center text-sm text-zinc-500">
-                        <span>{employee.employeeId}</span>
+                        <div className="mt-1 flex items-center text-sm text-white">
+                        <span className='tracking-tighter'>{employee.employeeId}</span>
                         <span className="mx-2">•</span>
-                        <span>{employee.position}</span>
+                        <span className='tracking-tighter'>{employee.position}</span>
                         <span className="mx-2">•</span>
-                        <span className="font-medium">
+                        <span className="font-medium tracking-tighter">
                             {new Intl.NumberFormat('en-KE', {
                             style: 'currency',
                             currency: 'KES',
@@ -270,19 +275,21 @@ return (
                         </div>
                     </div>
                     </div>
+
                     <div className="flex items-center space-x-3">
                     <div className="text-right text-sm">
-                        <div className="text-zinc-900 font-medium">
+                        <div className="text-emerald-400 font-medium">
                         {new Intl.NumberFormat('en-KE', {
                             style: 'currency',
                             currency: 'KES',
                         }).format(employee.grossSalary || employee.baseSalary)}
                         </div>
-                        <div className="text-zinc-500">Gross Salary</div>
+                        <div className="text-white">Gross Salary</div>
                     </div>
                     <button
                         onClick={() => handleGeneratePayroll(employee)}
-                        className="payroll-button rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                        className="payroll-button rounded-md ml-2 bg-blue-600 px-4 py-2 text-sm font-medium 
+                        text-white hover:bg-blue-700 cursor-pointer"
                     >
                         Generate Payslip
                     </button>

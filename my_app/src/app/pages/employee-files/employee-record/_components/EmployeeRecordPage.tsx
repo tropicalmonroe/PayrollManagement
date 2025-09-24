@@ -85,37 +85,29 @@ const handleDelete = async (employeeId: string) => {
 
 const handleFormSubmit = async (employeeData: any) => {
     try {
-    const url = isEditing ? `/api/employees/${selectedEmployee?.id}` : '/api/employees';
-    const method = isEditing ? 'PUT' : 'POST';
-    
-    const response = await fetch(url, {
-        method,
-        headers: {
-        'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(employeeData),
-    });
+        const url = isEditing ? `/api/employees/${selectedEmployee?.id}` : '/api/employees';
+        const method = isEditing ? 'PUT' : 'POST';
+        
+        console.log('Sending data:', employeeData); // Add this line
+        
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(employeeData),
+        });
 
-    if (response.ok) {
-        const savedEmployee = await response.json();
-        
-        if (isEditing) {
-        setEmployees(employees.map(emp => 
-            emp.id === savedEmployee.id ? savedEmployee : emp
-        ));
+        if (response.ok) {
+            // ... success code
         } else {
-        setEmployees([...employees, savedEmployee]);
+            const errorData = await response.json(); // Add this line
+            console.error('API Error:', errorData); // Add this line
+            alert(`Error during save: ${errorData.message || 'Unknown error'}`);
         }
-        
-        setShowForm(false);
-        setSelectedEmployee(null);
-        setIsEditing(false);
-    } else {
-        alert('Error during save');
-    }
     } catch (error) {
-    console.error('Error during save:', error);
-    alert('Error during save');
+        console.error('Error during save:', error);
+        alert('Error during save');
     }
 };
 
@@ -135,16 +127,6 @@ const handleCloseDetails = () => {
     setShowDetails(false);
     setSelectedEmployee(null);
 };
-
-if (loading) {
-    return (
-        <div className="p-6">
-        <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-zinc-600">Loading...</div>
-        </div>
-        </div>
-    );
-}
 
 return (
     <div className="p-6 bg-white mt-[2vh] rounded-md">

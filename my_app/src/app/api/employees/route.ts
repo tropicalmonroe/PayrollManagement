@@ -122,9 +122,9 @@ export async function POST(request: NextRequest) {
 
     if (existingEmployee) {
       const field = existingEmployee.employeeId === employeeId ? 'employee ID' :
-                   existingEmployee.idNumber === idNumber ? 'ID number' :
-                   existingEmployee.kraPin === kraPin ? 'KRA PIN' :
-                   'NSSF number';
+                    existingEmployee.idNumber === idNumber ? 'ID number' :
+                    existingEmployee.kraPin === kraPin ? 'KRA PIN' :
+                    'NSSF number';
       return NextResponse.json(
         { error: `An employee with this ${field} already exists` },
         { status: 400 }

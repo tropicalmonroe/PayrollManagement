@@ -1,4 +1,3 @@
-// Payroll calculation system compliant with centralized base data
 // Based on current Kenyan regulations and reference data
 
 import {
@@ -79,12 +78,28 @@ export interface TaxBracket {
 // Export tax brackets from base data
 export { INCOME_TAX_BRACKETS };
 
-// Default values for NSSF Employee Contributions
+// Default values for NSSF Employee Contributions (optional usage)
 export const NSSF_DEFAULTS = {
   nssfEmployee: 1080,      // Based on current NSSF rates
   shifEmployee: 1080,      // Based on current SHIF rates
   pensionEmployee: 2000,   // Example pension contribution
   insuranceDiversifiedEmployee: 500 // Example insurance
+};
+
+// Contribution rates for percentage-based calculations
+export const CONTRIBUTION_RATES_PERCENTAGE = {
+  nssfEmployee: 0.06,        // 6% employee contribution
+  shifEmployee: 0.0275,      // 2.75% SHIF employee contribution
+  pensionEmployee: 0.05,     // 5% minimum pension employee contribution
+  insuranceDiversifiedEmployee: 0.015 // 1.5% example insurance rate
+};
+
+// Contribution caps (maximum amounts)
+export const CONTRIBUTION_CAPS = {
+  nssf: 1080,               // Max NSSF employee contribution
+  shif: 5000,               // Max SHIF employee contribution
+  pension: null,            // No cap for pension
+  insurance: null           // No cap for insurance
 };
 
 // Seniority bonus scale
@@ -96,7 +111,6 @@ export interface SeniorityBracket {
 
 // Export seniority scale from base data
 export { SENIORITY_SCALE };
-
 
 export const OPTIONAL_INSURANCE_RATES = {
   comprehensiveHealthInsurance: 0.025,   // 2.5%
@@ -182,7 +196,7 @@ export interface EmployeePayrollData {
   bankAccount: string;
   bankBranch: string;
   
-  // NSSF Employee Contributions (optional)
+  // ADDED BACK: Optional flags for using default values vs percentage calculations
   useNssfEmployee?: boolean;
   useShifEmployee?: boolean;
   usePensionEmployee?: boolean;
@@ -229,7 +243,7 @@ export interface PayrollResult {
     insuranceDiversifiedEmployee: number;
     optionalInsurances: number;
     totalEmployeeContributions: number;
-    housingLevy: number; // Optional, only if applicable
+    housingLevy: number;
   };
   
   // Employer contributions
@@ -253,7 +267,7 @@ export interface PayrollResult {
     theoreticalTax: number;
     incomeTax: number;
     helb?: number;
-    personalRelief?: number;
+    personalRelief: number;
   };
   
   // Other deductions
@@ -301,67 +315,90 @@ export function calculateRepresentationAllowance(baseSalary: number, requestedAm
 }
 
 /**
- * Calculates NSSF contributions with ceiling
+ * Calculates NSSF contributions using Tier I & Tier II system
  */
 export function calculateNSSFContributions(grossSalary: number, taxableGrossSalary: number): {
   nssfEmployee: number;
   housingLevy: number;
   trainingLevy: number;
+  nssfEmployer: number;
 } {
-  const nssfBase = Math.min(grossSalary, PAYROLL_CONFIG.ceilings.nssfCeiling);
+  // NSSF Tier I & II parameters (update these as per current rates)
+  const LOWER_EARNINGS_LIMIT = 8000;    // Tier I limit
+  const UPPER_EARNINGS_LIMIT = 72000;   // Tier II limit
+  const CONTRIBUTION_RATE = 0.06;       // 6% for both employee and employer
+  
+  // Calculate Tier I contribution (capped at LEL)
+  const tierISalary = Math.min(grossSalary, LOWER_EARNINGS_LIMIT);
+  const tierIContribution = tierISalary * CONTRIBUTION_RATE;
+  
+  // Calculate Tier II contribution (between LEL and UEL)
+  const tierIISalary = Math.max(0, Math.min(grossSalary, UPPER_EARNINGS_LIMIT) - LOWER_EARNINGS_LIMIT);
+  const tierIIContribution = tierIISalary * CONTRIBUTION_RATE;
+  
+  // Total NSSF contribution
+  const totalNSSFEmployee = tierIContribution + tierIIContribution;
+  const totalNSSFEmployer = tierIContribution + tierIIContribution;
   
   return {
-    nssfEmployee: nssfBase * PAYROLL_CONFIG.nssfRates.employeeContribution,
+    nssfEmployee: totalNSSFEmployee,
     housingLevy: taxableGrossSalary * PAYROLL_CONFIG.nssfRates.housingLevy,
     trainingLevy: taxableGrossSalary * PAYROLL_CONFIG.nssfRates.trainingLevy,
+    nssfEmployer: totalNSSFEmployer
   };
 }
 
 /**
- * Calculates SHIF contributions
+ * Calculates SHIF contributions using percentage-based calculation
  */
 export function calculateSHIFContributions(taxableGrossSalary: number): {
   shifEmployee: number;
   shifEmployer: number;
   participationSHIF: number;
 } {
+  const calculatedSHIF = taxableGrossSalary * PAYROLL_CONFIG.shifRates.employee;
+  const cappedSHIF = Math.min(calculatedSHIF, CONTRIBUTION_CAPS.shif);
+  
   return {
-    shifEmployee: taxableGrossSalary * PAYROLL_CONFIG.shifRates.employee,
+    shifEmployee: cappedSHIF,
     shifEmployer: taxableGrossSalary * PAYROLL_CONFIG.shifRates.employer,
     participationSHIF: taxableGrossSalary * PAYROLL_CONFIG.shifRates.participation,
   };
 }
 
 /**
- * Calculates pension contributions (only for salaries above threshold)
+ * Calculates pension contributions (only for salaries above threshold) using percentage
  */
 export function calculatePensionContributions(taxableGrossSalary: number): {
   pensionEmployee: number;
   pensionEmployer: number;
 } {
-  // No pension contribution for salaries below threshold
   if (taxableGrossSalary <= CONTRIBUTION_RATES.pensionEmployee.minimumThreshold) {
     return { pensionEmployee: 0, pensionEmployer: 0 };
   }
   
+  const calculatedPension = taxableGrossSalary * PAYROLL_CONFIG.pensionRates.employee;
+  const cappedPension = CONTRIBUTION_CAPS.pension ? Math.min(calculatedPension, CONTRIBUTION_CAPS.pension) : calculatedPension;
+  
   return {
-    pensionEmployee: taxableGrossSalary * PAYROLL_CONFIG.pensionRates.employee,
+    pensionEmployee: cappedPension,
     pensionEmployer: taxableGrossSalary * PAYROLL_CONFIG.pensionRates.employer,
   };
 }
 
 /**
- * Calculates diversified insurance
- * Formula: taxable gross salary * standard rate (without adjustment)
- * IMPORTANT: Maintains full precision without intermediate rounding
+ * Calculates diversified insurance using percentage-based calculation
  */
 export function calculateDiversifiedInsurance(taxableGrossSalary: number): {
   insuranceDiversifiedEmployee: number;
   insuranceDiversifiedEmployer: number;
   workInjury: number;
 } {
+  const calculatedInsurance = taxableGrossSalary * PAYROLL_CONFIG.insuranceRates.employeeDiversified;
+  const cappedInsurance = CONTRIBUTION_CAPS.insurance ? Math.min(calculatedInsurance, CONTRIBUTION_CAPS.insurance) : calculatedInsurance;
+  
   return {
-    insuranceDiversifiedEmployee: taxableGrossSalary * PAYROLL_CONFIG.insuranceRates.employeeDiversified,
+    insuranceDiversifiedEmployee: cappedInsurance,
     insuranceDiversifiedEmployer: taxableGrossSalary * PAYROLL_CONFIG.insuranceRates.employerDiversified,
     workInjury: taxableGrossSalary * PAYROLL_CONFIG.insuranceRates.workInjury,
   };
@@ -393,9 +430,9 @@ export function calculateOptionalInsurances(
 
 /**
  * Calculates income tax according to progressive scale with proration and new deduction formula
- * Theoretical tax formula: ((net taxable * rate) - deduction) * (number of days in month / 26)
- * Final formula: IF((theoretical tax-(personal relief*number of deductions))<=0;0;theoretical tax-(personal relief*number of deductions))
- * IMPORTANT: Maintains full precision in all intermediate calculations
+ */
+/**
+ * Calculates income tax according to progressive scale with proration and correct personal relief application
  */
 export function calculateIncomeTax(
   taxableNet: number, 
@@ -408,14 +445,12 @@ export function calculateIncomeTax(
   netTaxable: number;
   theoreticalTax: number;
   incomeTax: number;
+  personalRelief: number;
 } {
-  // Calculate net taxable (after deduction of credit interest)
-  // Maintain full precision without rounding
-  const maxDeduction = taxableNet * 0.10; // 10% of taxable net
+  const maxDeduction = taxableNet * 0.10;
   const appliedDeduction = Math.min(creditInterest, maxDeduction);
   const netTaxable = taxableNet - appliedDeduction;
   
-  // Find applicable tax bracket
   const bracket = INCOME_TAX_BRACKETS.find((t: TaxBracket) => netTaxable >= t.min && netTaxable <= t.max);
   
   if (!bracket) {
@@ -423,31 +458,28 @@ export function calculateIncomeTax(
       taxableNet,
       netTaxable,
       theoreticalTax: 0,
-      incomeTax: 0
+      incomeTax: 0,
+      personalRelief: 0
     };
   }
   
   // Calculate theoretical tax with proration based on number of working days
-  // Formula: ((net taxable * rate) - deduction) * (number of days in month / 26)
-  // Maintain full precision in all calculations
   const monthlyTaxComplete = Math.max(0, (netTaxable * bracket.rate) - bracket.deduction);
   const theoreticalTax = monthlyTaxComplete * (numberOfDaysPerMonth / 26);
   
-  // Application of new deduction formula for dependents
-  // Formula: IF((theoretical tax-(personal relief*number of deductions))<=0;0;theoretical tax-(personal relief*number of deductions))
-  // Personal relief is 2400 KES per year (200 KES per month)
-  const monthlyDeduction = 200 * numberOfDeductions;
-  const taxAfterDeduction = theoreticalTax - monthlyDeduction;
+  // Calculate personal relief (2400 per month = 2400 per month per dependent)
+  const monthlyPersonalRelief = 2400 * numberOfDeductions;
   
-  // If result is <= 0, then tax = 0, otherwise apply deduction
-  // Maintain full precision until final result
-  const incomeTax = Math.max(0, taxAfterDeduction);
+  // Apply personal relief: Income Tax = MAX(0, Theoretical Tax - Personal Relief)
+  const taxAfterRelief = theoreticalTax - monthlyPersonalRelief;
+  const incomeTax = Math.max(0, taxAfterRelief);
   
   return {
     taxableNet,
     netTaxable,
     theoreticalTax,
-    incomeTax
+    incomeTax,
+    personalRelief: monthlyPersonalRelief
   };
 }
 
@@ -480,16 +512,15 @@ export function processVariableElements(variableElements: VariableElement[] = []
         exceptionalBonuses += element.amount;
         break;
       case 'ABSENCE':
-        absences += element.amount; // Negative amount (deduction)
+        absences += element.amount;
         break;
       case 'LATENESS':
-        lateness += element.amount; // Negative amount (deduction)
+        lateness += element.amount;
         break;
       case 'ADVANCE':
-        variableAdvances += element.amount; // Negative amount (deduction)
+        variableAdvances += element.amount;
         break;
       case 'LEAVE':
-        // Leave can be paid or unpaid depending on context
         if (element.amount > 0) {
           otherEarnings += element.amount;
         } else {
@@ -497,7 +528,6 @@ export function processVariableElements(variableElements: VariableElement[] = []
         }
         break;
       case 'OTHER':
-        // Other elements can be earnings or deductions
         if (element.amount > 0) {
           otherEarnings += element.amount;
         } else {
@@ -510,7 +540,7 @@ export function processVariableElements(variableElements: VariableElement[] = []
   return {
     overtimePay,
     exceptionalBonuses,
-    absences: Math.abs(absences), // Convert to positive for deductions
+    absences: Math.abs(absences),
     lateness: Math.abs(lateness),
     variableAdvances: Math.abs(variableAdvances),
     otherEarnings,
@@ -519,15 +549,13 @@ export function processVariableElements(variableElements: VariableElement[] = []
 }
 
 /**
- * Main payroll calculation function
- * IMPORTANT: Maintains full precision in all intermediate calculations
- * Rounding is only applied at the final display level
+ * Main payroll calculation function with support for both percentage and default values
  */
 export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
-  // 0. Process variable elements
+  // Process variable elements
   const variableElements = processVariableElements(employee.variableElements);
 
-  // 1. Calculate earnings
+  // Calculate earnings
   const seniorityBonus = calculateSeniorityBonus(employee.baseSalary, employee.seniority);
   const housingAllowance = calculateHousingAllowance(employee.baseSalary, employee.housingAllowance);
   const representationAllowance = calculateRepresentationAllowance(employee.baseSalary, employee.representationAllowance);
@@ -539,7 +567,6 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
     mealAllowance: employee.mealAllowance,
     transportAllowance: employee.transportAllowance,
     representationAllowance,
-    // Add positive variable elements
     overtimePay: variableElements.overtimePay,
     exceptionalBonuses: variableElements.exceptionalBonuses,
     otherEarnings: variableElements.otherEarnings,
@@ -547,40 +574,49 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
                 employee.mealAllowance + employee.transportAllowance + representationAllowance +
                 variableElements.overtimePay + variableElements.exceptionalBonuses + 
                 variableElements.otherEarnings,
-      bonuses: seniorityBonus + housingAllowance + employee.mealAllowance + employee.transportAllowance + representationAllowance
+    bonuses: seniorityBonus + housingAllowance + employee.mealAllowance + employee.transportAllowance + representationAllowance
   };
   
-  // 2. Calculate gross salaries
+  // Calculate gross salaries
   const grossSalary = earnings.totalEarnings;
-  const taxableGrossSalary = grossSalary - employee.transportAllowance - employee.representationAllowance; // Transport and representation not taxable
+  const taxableGrossSalary = grossSalary - employee.transportAllowance - employee.representationAllowance;
   
-  // 3. Calculate employee contributions
-  const nssfContributions = calculateNSSFContributions(grossSalary, taxableGrossSalary);
-  const shifContributions = calculateSHIFContributions(taxableGrossSalary);
+  // Calculate employee contributions with support for both percentage and default values
+  const nssfContributions = employee.subjectToNssf ? calculateNSSFContributions(grossSalary, taxableGrossSalary) : {
+    nssfEmployee: 0,
+    housingLevy: 0,
+    trainingLevy: 0
+  };
+  
+  const shifContributions = employee.subjectToShif ? calculateSHIFContributions(taxableGrossSalary) : {
+    shifEmployee: 0,
+    shifEmployer: 0,
+    participationSHIF: 0
+  };
+  
   const pensionContributions = calculatePensionContributions(taxableGrossSalary);
   const diversifiedInsurance = calculateDiversifiedInsurance(taxableGrossSalary);
   const optionalInsurances = calculateOptionalInsurances(taxableGrossSalary, employee.insurances);
   
-  // Use default values if checkboxes are checked, otherwise calculate
+  // Use default values if checkboxes are checked, otherwise use percentage calculations
   const employeeContributions = {
-    nssfEmployee: employee.useNssfEmployee ? NSSF_DEFAULTS.nssfEmployee : nssfContributions.nssfEmployee,
-    shifEmployee: employee.useShifEmployee ? NSSF_DEFAULTS.shifEmployee : shifContributions.shifEmployee,
-    pensionEmployee: employee.usePensionEmployee ? NSSF_DEFAULTS.pensionEmployee : pensionContributions.pensionEmployee,
-    insuranceDiversifiedEmployee: employee.useInsuranceDiversifiedEmployee ? NSSF_DEFAULTS.insuranceDiversifiedEmployee : diversifiedInsurance.insuranceDiversifiedEmployee,
+    nssfEmployee: employee.useNssfEmployee ?? true ? nssfContributions.nssfEmployee : NSSF_DEFAULTS.nssfEmployee,
+    shifEmployee: employee.useShifEmployee ?? true ? shifContributions.shifEmployee : NSSF_DEFAULTS.shifEmployee,
+    pensionEmployee: employee.usePensionEmployee ?? true ? NSSF_DEFAULTS.pensionEmployee : pensionContributions.pensionEmployee,
+    insuranceDiversifiedEmployee: employee.useInsuranceDiversifiedEmployee ?? true ? diversifiedInsurance.insuranceDiversifiedEmployee : NSSF_DEFAULTS.insuranceDiversifiedEmployee,
     optionalInsurances,
     housingLevy: employee.subjectToHousingLevy ? nssfContributions.housingLevy : 0,
-    totalEmployeeContributions: 0 // Calculated below
+    totalEmployeeContributions: 0
   };
   
-  // Calculate total employee contributions
   employeeContributions.totalEmployeeContributions = 
     employeeContributions.nssfEmployee + employeeContributions.shifEmployee + 
     employeeContributions.pensionEmployee + employeeContributions.insuranceDiversifiedEmployee + 
     employeeContributions.optionalInsurances;
   
-  // 4. Calculate employer contributions
+  // Calculate employer contributions
   const employerContributions = {
-    nssfEmployer: Math.min(grossSalary, PAYROLL_CONFIG.ceilings.nssfCeiling) * PAYROLL_CONFIG.nssfRates.employerContribution,
+    nssfEmployer: employee.subjectToNssf ? Math.min(grossSalary, PAYROLL_CONFIG.ceilings.nssfCeiling) * PAYROLL_CONFIG.nssfRates.employerContribution : 0,
     housingLevy: nssfContributions.housingLevy,
     trainingLevy: nssfContributions.trainingLevy,
     shifEmployer: shifContributions.shifEmployer,
@@ -588,7 +624,7 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
     workInjury: diversifiedInsurance.workInjury,
     pensionEmployer: pensionContributions.pensionEmployer,
     insuranceDiversifiedEmployer: diversifiedInsurance.insuranceDiversifiedEmployer,
-    totalEmployerContributions: 0 // Calculated below
+    totalEmployerContributions: 0
   };
   
   employerContributions.totalEmployerContributions = 
@@ -597,7 +633,7 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
     employerContributions.participationSHIF + employerContributions.workInjury +
     employerContributions.pensionEmployer + employerContributions.insuranceDiversifiedEmployer;
   
-  // 5. Calculate professional expenses and taxable net according to new formula
+  // Calculate professional expenses and taxable net
   const professionalExpenses = calculateProfessionalExpenses(taxableGrossSalary);
   const taxableNet = calculateTaxableNet(
     taxableGrossSalary,
@@ -608,11 +644,11 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
     employeeContributions.insuranceDiversifiedEmployee
   );
   
-  // 6. Calculate income tax with proration based on number of working days
+  // Calculate income tax
   const creditInterest = employee.mortgageCredit?.interest || 0;
   const taxCalculation = calculateIncomeTax(taxableNet, creditInterest, employee.maritalStatus, employee.numberOfDeductions, employee.numberOfDaysPerMonth);
   
-  // 7. Other deductions
+  // Other deductions
   const otherDeductions = {
     mortgageCredit: employee.mortgageCredit?.monthlyAmount || 0,
     consumerCredit: employee.consumerCredit?.monthlyAmount || 0,
@@ -622,7 +658,7 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
                         (employee.salaryAdvance?.monthlyAmount || 0)
   };
   
-  // 8. Final calculation
+  // Final calculation
   const totalDeductions = employeeContributions.totalEmployeeContributions + taxCalculation.incomeTax + otherDeductions.totalOtherDeductions;
   const netSalaryPayable = grossSalary - totalDeductions;
   const totalEmployerCost = grossSalary + employerContributions.totalEmployerContributions;
