@@ -1,6 +1,7 @@
 "use client";
+
 import React, { useState, useEffect } from 'react';
-import { FileText, ArrowLeft, Download, User, Calendar, Search, Filter } from 'lucide-react';
+import { FileText, ArrowLeft, Download, Calendar, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Employee, VariableElement as PrismaVariableElement, Advance } from '@prisma/client';
 import { calculatePayroll, type EmployeePayrollData } from '../../../../../lib/payrollCalculations';
@@ -9,6 +10,8 @@ import { calculatePayroll, type EmployeePayrollData } from '../../../../../lib/p
 interface EmployeeWithRelations extends Employee {
   variableElements: PrismaVariableElement[];
   advances: Advance[];
+  usePensionEmployee?: boolean;
+  useInsuranceDiversifiedEmployee ?: boolean;
   otherDeductions?: number;
 }
 
@@ -104,6 +107,8 @@ const PayslipPage = () => {
         mealAllowance: employee.mealAllowance,
         bonuses,
         overtimePay,
+        usePensionEmployee: employee.usePensionEmployee = false,
+        useInsuranceDiversifiedEmployee: employee.useInsuranceDiversifiedEmployee = false,
         loanRepayment: employee.loanRepayment,
         helbLoan: employee.helbLoan,
         transportAllowance: employee.transportAllowance,
@@ -353,7 +358,8 @@ const PayslipPage = () => {
                 <button
                   onClick={handleGeneratePayslip}
                   disabled={!selectedEmployee || generating}
-                  className="flex items-center space-x-2 bg-blue-200 text-white px-6 py-3 rounded-lg hover:bg-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center cursor-pointer w-fit px-4 py-2 text-white hover:text-black bg-pink-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
                 >
                   <FileText className="w-5 h-5" />
                   <span>{generating ? 'Generating...' : 'Generate Payslip'}</span> 
@@ -370,13 +376,15 @@ const PayslipPage = () => {
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowPreview(false)}
-                    className="text-sm text-zinc-600 hover:text-zinc-900"
+                    className="flex items-center justify-center cursor-pointer w-fit px-4 py-2 text-white hover:text-black bg-rose-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
                   >
                     Back to Selection
                   </button>
                   <button
                     onClick={handleDownloadPDF}
-                    className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex items-center justify-center cursor-pointer w-fit px-4 py-2 text-white hover:text-black bg-blue-600
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
                   >
                     <Download className="w-4 h-4" />
                     <span>Download PDF</span> 

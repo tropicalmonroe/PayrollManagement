@@ -160,6 +160,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     };
     await onSubmit(submitData);
     toast.success(isEditing ? 'Employee updated successfully!' : 'Form submitted successfully!');
+    onCancel();
     } catch (error) {
     console.error('Error submitting form:', error);
     setErrors({ form: 'Failed to submit form' });

@@ -361,7 +361,8 @@ const MonthlyCalculationPage = () => {
                     setShowResults(false);
                     setCalculationResults([]);
                   }}
-                  className="text-sm text-zinc-600 hover:text-zinc-900"
+                  className="flex items-center justify-center cursor-pointer w-fit px-4 py-2 text-white hover:text-black bg-teal-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
                 >
                   New Calculation
                 </button>

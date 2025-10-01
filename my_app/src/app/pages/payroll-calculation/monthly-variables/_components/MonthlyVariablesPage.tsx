@@ -4,6 +4,7 @@ import { Edit, ArrowLeft, Plus, Save, Calendar, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Employee, VariableElement } from '@prisma/client';
 import AddVariableElementModal from '../../../../../components/AddVariableElementModal';
+import { MdDelete } from 'react-icons/md';
 
 type VariableElementWithEmployee = VariableElement & {
   employee: Employee;
@@ -356,10 +357,11 @@ const MonthlyVariablesPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           onClick={() => handleDeleteVariable(variable.id)}
-                          className="text-rose-600 hover:text-rose-900"
+                          className="flex items-center justify-center cursor-pointer w-10 h-10 bg-rose-500
+                            rounded-md p-1 hover:bg-blue-200 transition duration-300 ease-in-out"
                           title="Delete"
                         >
-                          🗑️
+                        <MdDelete className="w-5 h-5 text-white"/>
                         </button>
                       </td>
                     </tr>

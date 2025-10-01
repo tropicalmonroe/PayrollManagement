@@ -3,7 +3,9 @@ import {
   CONTRIBUTION_RATES,
   SENIORITY_SCALE,
   INCOME_TAX_BRACKETS,
+  ALLOWANCE_CEILINGS,
   calculateCompletePayroll,
+  calculateNSSFContributions,
   calculateProfessionalExpenses,
   calculateTaxableNet,
   type PayrollCalculationParams,
@@ -128,19 +130,6 @@ export const OPTIONAL_INSURANCE_RATES = {
   comprehensiveHealthInsurance: 0.025,
   foreignHealthCover: 0.005,
   enhancedDisabilityCover: 0.00316,
-};
-
-export const ALLOWANCE_CEILINGS = {
-  housing: {
-    maxPercentage: 0.20,
-    absoluteCeiling: 20000,
-  },
-  representation: {
-    maxPercentage: 0.10,
-    absoluteCeiling: 10000,
-  },
-  meal: 2000,
-  transport: [3000, 5000],
 };
 
 export interface VariableElement {
@@ -278,28 +267,7 @@ export function calculateRepresentationAllowance(baseSalary: number, requestedAm
   return Math.min(requestedAmount, effectiveCeiling);
 }
 
-export function calculateNSSFContributions(grossSalary: number, taxableGrossSalary: number): {
-  nssfEmployee: number;
-  housingLevy: number;
-  trainingLevy: number;
-  nssfEmployer: number;
-} {
-  const LOWER_EARNINGS_LIMIT = 8000;
-  const UPPER_EARNINGS_LIMIT = 72000;
-  const CONTRIBUTION_RATE = 0.06;
-  const tierISalary = Math.min(grossSalary, LOWER_EARNINGS_LIMIT);
-  const tierIContribution = tierISalary * CONTRIBUTION_RATE;
-  const tierIISalary = Math.max(0, Math.min(grossSalary, UPPER_EARNINGS_LIMIT) - LOWER_EARNINGS_LIMIT);
-  const tierIIContribution = tierIISalary * CONTRIBUTION_RATE;
-  const totalNSSFEmployee = tierIContribution + tierIIContribution;
-  const totalNSSFEmployer = tierIContribution + tierIIContribution;
-  return {
-    nssfEmployee: totalNSSFEmployee,
-    housingLevy: taxableGrossSalary * PAYROLL_CONFIG.nssfRates.housingLevy,
-    trainingLevy: taxableGrossSalary * PAYROLL_CONFIG.nssfRates.trainingLevy,
-    nssfEmployer: totalNSSFEmployer
-  };
-}
+
 
 export function calculateSHIFContributions(taxableGrossSalary: number): {
   shifEmployee: number;
@@ -363,7 +331,7 @@ export function calculateIncomeTax(
   creditInterest: number = 0,
   maritalStatus: string,
   numberOfDeductions: number,
-  numberOfDaysPerMonth: number = 30
+  numberOfDaysPerMonth: number = 26
 ): {
   taxableNet: number;
   netTaxable: number;
@@ -391,7 +359,7 @@ export function calculateIncomeTax(
   const theoreticalTax = monthlyTaxComplete * (numberOfDaysPerMonth / 30);
   
   // FIX: Remove the +1 - personal relief is per dependent, and the employee counts as 1
-  const monthlyPersonalRelief = 2400 * numberOfDeductions; // NOT numberOfDeductions + 1
+  const monthlyPersonalRelief = 2400 + (2400 * numberOfDeductions); // NOT numberOfDeductions + 1
   
   const taxAfterRelief = theoreticalTax - monthlyPersonalRelief;
   const incomeTax = Math.max(0, taxAfterRelief);
@@ -469,6 +437,7 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
   const seniorityBonus = calculateSeniorityBonus(employee.baseSalary, employee.seniority);
   const housingAllowance = calculateHousingAllowance(employee.baseSalary, employee.housingAllowance);
   const representationAllowance = calculateRepresentationAllowance(employee.baseSalary, employee.representationAllowance);
+
   const earnings = {
     baseSalary: employee.baseSalary,
     seniorityBonus,
@@ -485,6 +454,7 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
       variableElements.otherEarnings,
     bonuses: seniorityBonus + housingAllowance + employee.mealAllowance + employee.transportAllowance + representationAllowance
   };
+
   const grossSalary = earnings.totalEarnings;
   const taxableGrossSalary = grossSalary - employee.transportAllowance - employee.representationAllowance;
   const nssfContributions = employee.subjectToNssf ? calculateNSSFContributions(grossSalary, taxableGrossSalary) : {
@@ -501,6 +471,7 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
   const pensionContributions = calculatePensionContributions(taxableGrossSalary);
   const diversifiedInsurance = calculateDiversifiedInsurance(taxableGrossSalary);
   const optionalInsurances = calculateOptionalInsurances(taxableGrossSalary, employee.insurances);
+
   const employeeContributions = {
     nssfEmployee: employee.useNssfEmployee ?? true ? nssfContributions.nssfEmployee : NSSF_DEFAULTS.nssfEmployee,
     shifEmployee: employee.useShifEmployee ?? true ? shifContributions.shifEmployee : NSSF_DEFAULTS.shifEmployee,
@@ -510,10 +481,12 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
     housingLevy: employee.subjectToHousingLevy ? nssfContributions.housingLevy : 0,
     totalEmployeeContributions: 0
   };
+
   employeeContributions.totalEmployeeContributions =
     employeeContributions.nssfEmployee + employeeContributions.shifEmployee +
     employeeContributions.pensionEmployee + employeeContributions.insuranceDiversifiedEmployee +
     employeeContributions.optionalInsurances + employeeContributions.housingLevy;
+
   const employerContributions = {
     nssfEmployer: employee.useNssfEmployer ?? true ? (employee.subjectToNssf ? nssfContributions.nssfEmployer : 0) : NSSF_DEFAULTS.nssfEmployer,
     housingLevy: employee.subjectToHousingLevy ? nssfContributions.housingLevy : NSSF_DEFAULTS.housingLevy,
@@ -525,12 +498,15 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
     insuranceDiversifiedEmployer: employee.useInsuranceDiversifiedEmployer ?? true ? diversifiedInsurance.insuranceDiversifiedEmployer : NSSF_DEFAULTS.insuranceDiversifiedEmployer,
     totalEmployerContributions: 0
   };
+
   employerContributions.totalEmployerContributions =
     employerContributions.nssfEmployer + employerContributions.housingLevy +
     employerContributions.trainingLevy + employerContributions.shifEmployer +
     employerContributions.participationSHIF + employerContributions.workInjury +
     employerContributions.pensionEmployer + employerContributions.insuranceDiversifiedEmployer;
+
   const professionalExpenses = calculateProfessionalExpenses(taxableGrossSalary);
+
   const taxableNet = calculateTaxableNet(
     taxableGrossSalary,
     employeeContributions.nssfEmployee,
@@ -539,6 +515,8 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
     professionalExpenses,
     employeeContributions.insuranceDiversifiedEmployee
   );
+
+
   const creditInterest = employee.mortgageCredit?.interest || 0;
   const taxCalculation = calculateIncomeTax(taxableNet, creditInterest, employee.maritalStatus, employee.numberOfDeductions, employee.numberOfDaysPerMonth);
   const otherDeductions = {
@@ -552,6 +530,18 @@ export function calculatePayroll(employee: EmployeePayrollData): PayrollResult {
   const totalDeductions = employeeContributions.totalEmployeeContributions + taxCalculation.incomeTax + otherDeductions.totalOtherDeductions;
   const netSalaryPayable = grossSalary - totalDeductions;
   const totalEmployerCost = grossSalary + employerContributions.totalEmployerContributions;
+
+  console.log('Gross Salary:', grossSalary);
+  console.log('Taxable Gross Salary:', taxableGrossSalary);
+  console.log('Employee Contributions:', employeeContributions);
+  console.log('Professional Expenses:', professionalExpenses);
+  console.log('Taxable Net:', taxableNet);
+  console.log('Net Taxable:', taxCalculation.netTaxable);
+  console.log('Income Tax:', taxCalculation.incomeTax);
+  console.log('Personal Relief:', taxCalculation.personalRelief);
+  console.log('Total Deductions:', totalDeductions);
+  console.log('Net Salary Payable:', netSalaryPayable);
+
   return {
     earnings,
     grossSalary,
