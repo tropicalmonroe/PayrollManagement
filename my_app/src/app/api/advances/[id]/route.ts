@@ -1,34 +1,19 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { id } = req.query;
+// GET - Get a specific advance by ID
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
 
   if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'Invalid advance ID' });
+    return NextResponse.json({ error: 'Invalid advance ID' }, { status: 400 });
   }
 
-  try {
-    switch (req.method) {
-      case 'GET':
-        return await getAdvance(req, res, id);
-      case 'PUT':
-        return await updateAdvance(req, res, id);
-      case 'DELETE':
-        return await deleteAdvance(req, res, id);
-      default:
-        res.setHeader('Allow', ['GET', 'PUT', 'DELETE']);
-        return res.status(405).json({ error: `Method ${req.method} not allowed` });
-    }
-  } catch (error) {
-    console.error('API Error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-}
-
-async function getAdvance(req: NextApiRequest, res: NextApiResponse, id: string) {
   try {
     const advance = await prisma.advance.findUnique({
       where: { id },
@@ -46,17 +31,27 @@ async function getAdvance(req: NextApiRequest, res: NextApiResponse, id: string)
     });
 
     if (!advance) {
-      return res.status(404).json({ error: 'Advance not found' });
+      return NextResponse.json({ error: 'Advance not found' }, { status: 404 });
     }
 
-    return res.status(200).json(advance);
+    return NextResponse.json(advance);
   } catch (error) {
     console.error('Error fetching advance:', error);
-    return res.status(500).json({ error: 'Error loading advance' });
+    return NextResponse.json({ error: 'Error loading advance' }, { status: 500 });
   }
 }
 
-async function updateAdvance(req: NextApiRequest, res: NextApiResponse, id: string) {
+// PUT - Update an advance
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
+
+  if (!id || typeof id !== 'string') {
+    return NextResponse.json({ error: 'Invalid advance ID' }, { status: 400 });
+  }
+
   try {
     const {
       amount,
@@ -67,7 +62,7 @@ async function updateAdvance(req: NextApiRequest, res: NextApiResponse, id: stri
       remainingBalance,
       status,
       notes
-    } = req.body;
+    } = await request.json();
 
     // Check if advance exists
     const existingAdvance = await prisma.advance.findUnique({
@@ -75,20 +70,20 @@ async function updateAdvance(req: NextApiRequest, res: NextApiResponse, id: stri
     });
 
     if (!existingAdvance) {
-      return res.status(404).json({ error: 'Advance not found' });
+      return NextResponse.json({ error: 'Advance not found' }, { status: 404 });
     }
 
     // Validation
     if (amount !== undefined && amount <= 0) {
-      return res.status(400).json({ error: 'Amount must be greater than 0' });
+      return NextResponse.json({ error: 'Amount must be greater than 0' }, { status: 400 });
     }
 
     if (numberOfInstallments !== undefined && (numberOfInstallments <= 0 || numberOfInstallments > 24)) {
-      return res.status(400).json({ error: 'Number of installments must be between 1 and 24' });
+      return NextResponse.json({ error: 'Number of installments must be between 1 and 24' }, { status: 400 });
     }
 
     if (remainingBalance !== undefined && remainingBalance < 0) {
-      return res.status(400).json({ error: 'Remaining balance cannot be negative' });
+      return NextResponse.json({ error: 'Remaining balance cannot be negative' }, { status: 400 });
     }
 
     // Prepare update data
@@ -129,14 +124,24 @@ async function updateAdvance(req: NextApiRequest, res: NextApiResponse, id: stri
       }
     });
 
-    return res.status(200).json(advance);
+    return NextResponse.json(advance);
   } catch (error) {
     console.error('Error updating advance:', error);
-    return res.status(500).json({ error: 'Error updating advance' });
+    return NextResponse.json({ error: 'Error updating advance' }, { status: 500 });
   }
 }
 
-async function deleteAdvance(req: NextApiRequest, res: NextApiResponse, id: string) {
+// DELETE - Delete an advance
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
+
+  if (!id || typeof id !== 'string') {
+    return NextResponse.json({ error: 'Invalid advance ID' }, { status: 400 });
+  }
+
   try {
     // Check if advance exists
     const existingAdvance = await prisma.advance.findUnique({
@@ -144,7 +149,7 @@ async function deleteAdvance(req: NextApiRequest, res: NextApiResponse, id: stri
     });
 
     if (!existingAdvance) {
-      return res.status(404).json({ error: 'Advance not found' });
+      return NextResponse.json({ error: 'Advance not found' }, { status: 404 });
     }
 
     // Delete advance
@@ -152,9 +157,9 @@ async function deleteAdvance(req: NextApiRequest, res: NextApiResponse, id: stri
       where: { id }
     });
 
-    return res.status(200).json({ message: 'Advance successfully deleted' });
+    return NextResponse.json({ message: 'Advance successfully deleted' });
   } catch (error) {
     console.error('Error deleting advance:', error);
-    return res.status(500).json({ error: 'Error deleting advance' });
+    return NextResponse.json({ error: 'Error deleting advance' }, { status: 500 });
   }
 }

@@ -31,7 +31,7 @@ const sections = [
 ];
 
 return (
-    <div className="p-6 bg-white mt-[2vh] rounded-md h-[84vh]">
+    <div className="p-6 bg-white mt-[2vh] rounded-md ">
         <div className="mb-8">
         <div className="flex items-center space-x-3 my-8">
         <div className="flex items-center justify-center w-10 h-10 bg-zinc-700 rounded-xl p-1">

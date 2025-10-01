@@ -5,15 +5,11 @@ import CreditScheduledPayment from '../../../components/CreditScheduledPayment';
 import { 
 Plus, 
 Search, 
-Filter, 
-Download, 
 Edit, 
 Trash2, 
 Eye,
 CreditCard,
 DollarSign,
-Calendar,
-Building,
 AlertCircle,
 CheckCircle,
 Clock,
@@ -649,12 +645,13 @@ return (
                 </div>
                 </div>
                 
-                {selectedLoan.accountNumber && (
                 <div>
-                    <label className="block text-sm font-medium text-zinc-700">Account Number</label>
-                    <p className="mt-1 text-sm text-zinc-900">{selectedLoan.accountNumber}</p>
+                <label className="block text-sm font-medium text-zinc-700">Account Number</label>
+                <p className="mt-1 text-sm text-zinc-900">
+                    {selectedLoan.accountNumber ?? "Not Provided"}
+                </p>
                 </div>
-                )}
+
                 
                 {selectedLoan.notes && (
                 <div>
@@ -712,7 +709,7 @@ return (
                             'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                            loanId: selectedLoan.id,
+                            creditId: selectedLoan.id,
                             amountRepaid: parseFloat(newAmountRepaid)
                             }),
                         });

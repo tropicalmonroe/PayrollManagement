@@ -1,35 +1,17 @@
-import { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../../lib/prisma'
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
+// GET /api/employees/[id]
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
-  const { id } = req.query
+  const { id } = await params
 
   if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'Employee ID required' })
+    return NextResponse.json({ error: 'Employee ID required' }, { status: 400 })
   }
 
-  try {
-    switch (req.method) {
-      case 'GET':
-        return await getEmployee(id, res)
-      case 'PUT':
-        return await updateEmployee(id, req, res)
-      case 'DELETE':
-        return await deleteEmployee(id, res)
-      default:
-        res.setHeader('Allow', ['GET', 'PUT', 'DELETE'])
-        return res.status(405).json({ error: 'Method not allowed' })
-    }
-  } catch (error) {
-    console.error('API Error:', error)
-    return res.status(500).json({ error: 'Internal server error' })
-  }
-}
-
-async function getEmployee(id: string, res: NextApiResponse) {
   try {
     const employee = await prisma.employee.findUnique({
       where: { id },
@@ -48,18 +30,29 @@ async function getEmployee(id: string, res: NextApiResponse) {
     })
 
     if (!employee) {
-      return res.status(404).json({ error: 'Employee not found' })
+      return NextResponse.json({ error: 'Employee not found' }, { status: 404 })
     }
 
-    return res.status(200).json(employee)
+    return NextResponse.json(employee)
   } catch (error) {
     console.error('Error fetching employee:', error)
-    return res.status(500).json({ error: 'Failed to fetch employee' })
+    return NextResponse.json({ error: 'Failed to fetch employee' }, { status: 500 })
   }
 }
 
-async function updateEmployee(id: string, req: NextApiRequest, res: NextApiResponse) {
+// PUT /api/employees/[id]
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id } = await params
+
+  if (!id || typeof id !== 'string') {
+    return NextResponse.json({ error: 'Employee ID required' }, { status: 400 })
+  }
+
   try {
+    const body = await request.json()
     const {
       employeeId,
       lastName,
@@ -83,7 +76,7 @@ async function updateEmployee(id: string, req: NextApiRequest, res: NextApiRespo
       email,
       address,
       status
-    } = req.body
+    } = body
 
     // Check if employee exists
     const existingEmployee = await prisma.employee.findUnique({
@@ -91,7 +84,7 @@ async function updateEmployee(id: string, req: NextApiRequest, res: NextApiRespo
     })
 
     if (!existingEmployee) {
-      return res.status(404).json({ error: 'Employee not found' })
+      return NextResponse.json({ error: 'Employee not found' }, { status: 404 })
     }
 
     // Check employee ID uniqueness if changed
@@ -101,9 +94,9 @@ async function updateEmployee(id: string, req: NextApiRequest, res: NextApiRespo
       })
 
       if (duplicateEmployeeId) {
-        return res.status(400).json({ 
+        return NextResponse.json({ 
           error: 'An employee with this ID already exists' 
-        })
+        }, { status: 400 })
       }
     }
 
@@ -114,9 +107,9 @@ async function updateEmployee(id: string, req: NextApiRequest, res: NextApiRespo
       })
 
       if (duplicateIdNumber) {
-        return res.status(400).json({ 
+        return NextResponse.json({ 
           error: 'An employee with this ID number already exists' 
-        })
+        }, { status: 400 })
       }
     }
 
@@ -127,9 +120,9 @@ async function updateEmployee(id: string, req: NextApiRequest, res: NextApiRespo
       })
 
       if (duplicateNssfNumber) {
-        return res.status(400).json({ 
+        return NextResponse.json({ 
           error: 'An employee with this NSSF number already exists' 
-        })
+        }, { status: 400 })
       }
     }
 
@@ -195,14 +188,24 @@ async function updateEmployee(id: string, req: NextApiRequest, res: NextApiRespo
       }
     })
 
-    return res.status(200).json(updatedEmployee)
+    return NextResponse.json(updatedEmployee)
   } catch (error) {
     console.error('Error updating employee:', error)
-    return res.status(500).json({ error: 'Failed to update employee' })
+    return NextResponse.json({ error: 'Failed to update employee' }, { status: 500 })
   }
 }
 
-async function deleteEmployee(id: string, res: NextApiResponse) {
+// DELETE /api/employees/[id]
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id } = await params
+
+  if (!id || typeof id !== 'string') {
+    return NextResponse.json({ error: 'Employee ID required' }, { status: 400 })
+  }
+
   try {
     // Check if employee exists
     const existingEmployee = await prisma.employee.findUnique({
@@ -210,7 +213,7 @@ async function deleteEmployee(id: string, res: NextApiResponse) {
     })
 
     if (!existingEmployee) {
-      return res.status(404).json({ error: 'Employee not found' })
+      return NextResponse.json({ error: 'Employee not found' }, { status: 404 })
     }
 
     // Delete employee (related records will be cascade deleted)
@@ -218,9 +221,9 @@ async function deleteEmployee(id: string, res: NextApiResponse) {
       where: { id }
     })
 
-    return res.status(200).json({ message: 'Employee deleted successfully' })
+    return NextResponse.json({ message: 'Employee deleted successfully' })
   } catch (error) {
     console.error('Error deleting employee:', error)
-    return res.status(500).json({ error: 'Failed to delete employee' })
+    return NextResponse.json({ error: 'Failed to delete employee' }, { status: 500 })
   }
 }

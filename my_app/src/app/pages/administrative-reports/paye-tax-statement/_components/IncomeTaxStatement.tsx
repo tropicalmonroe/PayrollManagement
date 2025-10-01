@@ -117,9 +117,9 @@ export default function IncomeTaxStatement() {
   return (
       <div className="p-6 space-y-6 bg-white mt-[2vh] rounded-md">
         <div>
-          <h1 className="text-2xl font-bold tracking-tighter text-zinc-800">Income Tax Statement</h1>
+          <h1 className="text-2xl font-bold tracking-tighter text-zinc-800">PAYE Tax Statement</h1>
           <p className="text-zinc-400 text-sm w-[20vw]">
-            Generate income tax statements for employees
+            Generate paye tax statements for employees
           </p>
         </div>
 
@@ -132,7 +132,7 @@ export default function IncomeTaxStatement() {
                 Period Configuration
               </h3>
               <p className="text-sm text-zinc-600">
-                Select the period for the income tax statement
+                Select the period for the paye tax statement
               </p>
             </div>
             <div className="space-y-4">

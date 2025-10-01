@@ -1,5 +1,6 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import Layout from '../../layout';
 import { 
   Receipt, 
   Download, 
@@ -184,8 +185,7 @@ export default function FinalSettlementPage() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
+      <div className="space-y-6 bg-white shadow rounded-lg mt-[2vh] p-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
@@ -471,6 +471,5 @@ export default function FinalSettlementPage() {
           )}
         </div>
       </div>
-    </Layout>
   );
 }

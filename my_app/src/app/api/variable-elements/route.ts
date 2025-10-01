@@ -1,44 +1,25 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export async function GET(request: NextRequest) {
   try {
-    switch (req.method) {
-      case 'GET':
-        return await getVariableElements(req, res);
-      case 'POST':
-        return await createVariableElement(req, res);
-      default:
-        res.setHeader('Allow', ['GET', 'POST']);
-        return res.status(405).json({ error: `Method ${req.method} not allowed` });
-    }
-  } catch (error) {
-    console.error('API Error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-}
-
-async function getVariableElements(req: NextApiRequest, res: NextApiResponse) {
-  try {
-    const { employeeId, month, year, type } = req.query;
+    const { searchParams } = new URL(request.url);
+    const employeeId = searchParams.get('employeeId');
+    const month = searchParams.get('month');
+    const year = searchParams.get('year');
+    const type = searchParams.get('type');
 
     const whereClause: any = {};
-    
-    if (employeeId && typeof employeeId === 'string') {
+    if (employeeId) {
       whereClause.employeeId = employeeId;
     }
-    
-    if (month && typeof month === 'string') {
+    if (month) {
       whereClause.month = month;
     }
-    
-    if (year && typeof year === 'string') {
+    if (year) {
       whereClause.year = year;
     }
-    
-    if (type && typeof type === 'string') {
+    if (type) {
       whereClause.type = type;
     }
 
@@ -51,26 +32,30 @@ async function getVariableElements(req: NextApiRequest, res: NextApiResponse) {
             employeeId: true,
             lastName: true,
             firstName: true,
-            position: true
-          }
-        }
+            position: true,
+          },
+        },
       },
       orderBy: [
         { year: 'desc' },
         { month: 'desc' },
-        { date: 'desc' }
-      ]
+        { date: 'desc' },
+      ],
     });
 
-    return res.status(200).json(variableElements);
+    return NextResponse.json(variableElements);
   } catch (error) {
     console.error('Error fetching variable elements:', error);
-    return res.status(500).json({ error: 'Error loading variable elements' });
+    return NextResponse.json(
+      { error: 'Failed to fetch variable elements' },
+      { status: 500 }
+    );
   }
 }
 
-async function createVariableElement(req: NextApiRequest, res: NextApiResponse) {
+export async function POST(request: NextRequest) {
   try {
+    const data = await request.json();
     const {
       employeeId,
       type,
@@ -80,37 +65,82 @@ async function createVariableElement(req: NextApiRequest, res: NextApiResponse) 
       rate,
       date,
       month,
-      year
-    } = req.body;
+      year,
+    } = data;
 
-    // Validation
+    // Required field validation
     if (!employeeId || !type || !description || !date || !month || !year) {
-      return res.status(400).json({ error: 'All required fields must be filled' });
+      return NextResponse.json(
+        { error: 'Employee ID, type, description, date, month, and year are required' },
+        { status: 400 }
+      );
     }
 
-    // Check if employee exists
+    // Validate employee exists
     const employee = await prisma.employee.findUnique({
-      where: { id: employeeId }
+      where: { id: employeeId },
     });
 
     if (!employee) {
-      return res.status(404).json({ error: 'Employee not found' });
+      return NextResponse.json(
+        { error: 'Employee not found' },
+        { status: 404 }
+      );
     }
 
-    // Validation based on type
-    if (type === 'OVERTIME' && (!hours || !rate)) {
-      return res.status(400).json({ error: 'Hours and rate are required for overtime' });
+    // Validate based on type
+    if (type === 'OVERTIME') {
+      if (!hours || !rate) {
+        return NextResponse.json(
+          { error: 'Hours and rate are required for overtime' },
+          { status: 400 }
+        );
+      }
+      const parsedHours = parseFloat(hours);
+      const parsedRate = parseFloat(rate);
+      if (isNaN(parsedHours) || isNaN(parsedRate)) {
+        return NextResponse.json(
+          { error: 'Hours and rate must be valid numbers' },
+          { status: 400 }
+        );
+      }
+    } else if (!amount) {
+      return NextResponse.json(
+        { error: 'Amount is required for non-overtime elements' },
+        { status: 400 }
+      );
     }
 
-    if (type !== 'OVERTIME' && !amount) {
-      return res.status(400).json({ error: 'Amount is required for this type of element' });
+    // Validate date
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      return NextResponse.json(
+        { error: 'Date must be a valid date' },
+        { status: 400 }
+      );
+    }
+
+    // Validate numeric fields
+    const parsedAmount = amount ? parseFloat(amount) : null;
+    const parsedHours = hours ? parseFloat(hours) : null;
+    const parsedRate = rate ? parseFloat(rate) : null;
+
+    if (type !== 'OVERTIME' && (isNaN(parsedAmount!) || parsedAmount! <= 0)) {
+      return NextResponse.json(
+        { error: 'Amount must be a valid number greater than 0 for non-overtime elements' },
+        { status: 400 }
+      );
+    }
+
+    if (type === 'OVERTIME' && (isNaN(parsedHours!) || isNaN(parsedRate!))) {
+      return NextResponse.json(
+        { error: 'Hours and rate must be valid numbers for overtime' },
+        { status: 400 }
+      );
     }
 
     // Calculate amount for overtime
-    let finalAmount = amount || 0;
-    if (type === 'OVERTIME' && hours && rate) {
-      finalAmount = parseFloat(hours) * parseFloat(rate);
-    }
+    const finalAmount = type === 'OVERTIME' && parsedHours && parsedRate ? parsedHours * parsedRate : parsedAmount!;
 
     // Create variable element
     const variableElement = await prisma.variableElement.create({
@@ -118,12 +148,12 @@ async function createVariableElement(req: NextApiRequest, res: NextApiResponse) 
         employeeId,
         type,
         description: description.trim(),
-        amount: parseFloat(finalAmount.toString()),
-        hours: hours ? parseFloat(hours) : null,
-        rate: rate ? parseFloat(rate) : null,
-        date: new Date(date),
+        amount: finalAmount,
+        hours: parsedHours,
+        rate: parsedRate,
+        date: parsedDate,
         month,
-        year
+        year,
       },
       include: {
         employee: {
@@ -132,15 +162,29 @@ async function createVariableElement(req: NextApiRequest, res: NextApiResponse) 
             employeeId: true,
             lastName: true,
             firstName: true,
-            position: true
-          }
-        }
-      }
+            position: true,
+          },
+        },
+      },
     });
 
-    return res.status(201).json(variableElement);
-  } catch (error) {
+    return NextResponse.json(variableElement, { status: 201 });
+  } catch (error: any) {
     console.error('Error creating variable element:', error);
-    return res.status(500).json({ error: 'Error creating variable element' });
+    return NextResponse.json(
+      { error: error.message || 'Failed to create variable element' },
+      { status: 500 }
+    );
   }
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*', // Adjust as needed
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }

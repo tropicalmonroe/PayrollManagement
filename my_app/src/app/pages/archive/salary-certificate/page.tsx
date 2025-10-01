@@ -1,12 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import Layout from "../../../components/Layout";
+import Layout from "../../../../components/Layout";
 import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
-import PayrollCalculationPage from "./_components/PayrollcalculationPage";
+import SalaryCertPage from "./_components/SalaryCertificate";
 
 
-export default async function PayrollCalculationDashboardPage() {
+export default async function SalaryCertDashboardPage() {
 const { userId } = await auth();
 
 if (!userId) {
@@ -18,12 +18,12 @@ return (
     <Suspense
         fallback={
         <div className="flex items-center justify-center h-screen bg-white">
-            Loading Payroll Calculations...
+            Loading Salary Certificate...
         </div>
         }
     >
-        <Navbar />
-        <PayrollCalculationPage/>
+        <Navbar/>
+        <SalaryCertPage/>
     </Suspense>
     </Layout>
 );

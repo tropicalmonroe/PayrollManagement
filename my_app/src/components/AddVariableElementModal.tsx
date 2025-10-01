@@ -164,7 +164,7 @@ const elementTypes = [
     { value: 'ABSENCE', label: 'Absence', icon: <AlertCircle className="w-4 h-4" /> },
     { value: 'BONUS', label: 'Bonus', icon: <DollarSign className="w-4 h-4" /> },
     { value: 'LEAVE', label: 'Leave', icon: <Calendar className="w-4 h-4" /> },
-    { value: 'LATE', label: 'Late', icon: <Clock className="w-4 h-4" /> },
+    { value: 'LATENESS', label: 'Lateness', icon: <Clock className="w-4 h-4" /> },
     { value: 'ADVANCE', label: 'Advance', icon: <DollarSign className="w-4 h-4" /> },
     { value: 'OTHER', label: 'Other', icon: <FileText className="w-4 h-4" /> }
 ];

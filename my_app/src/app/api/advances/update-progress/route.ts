@@ -1,24 +1,25 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ error: `Method ${req.method} not allowed` });
-  }
-
+export async function POST(request: NextRequest) {
   try {
-    const { advanceId, remainingBalance } = req.body;
+    const { advanceId, remainingBalance } = await request.json();
 
     // Validation
     if (!advanceId) {
-      return res.status(400).json({ error: 'Advance ID required' });
+      return NextResponse.json(
+        { error: 'Advance ID required' },
+        { status: 400 }
+      );
     }
 
     if (remainingBalance === undefined || remainingBalance < 0) {
-      return res.status(400).json({ error: 'Remaining balance must be a positive number or zero' });
+      return NextResponse.json(
+        { error: 'Remaining balance must be a positive number or zero' },
+        { status: 400 }
+      );
     }
 
     // Check if advance exists
@@ -38,14 +39,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     if (!existingAdvance) {
-      return res.status(404).json({ error: 'Advance not found' });
+      return NextResponse.json(
+        { error: 'Advance not found' },
+        { status: 404 }
+      );
     }
 
     // Validate that the new remaining balance doesn't exceed the original amount
     if (parseFloat(remainingBalance) > existingAdvance.amount) {
-      return res.status(400).json({ 
-        error: 'Remaining balance cannot be greater than the initial advance amount' 
-      });
+      return NextResponse.json(
+        { 
+          error: 'Remaining balance cannot be greater than the initial advance amount' 
+        },
+        { status: 400 }
+      );
     }
 
     // Prepare update data
@@ -101,9 +108,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     };
 
-    return res.status(200).json(response);
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error updating advance progress:', error);
-    return res.status(500).json({ error: 'Error updating progress' });
+    return NextResponse.json(
+      { error: 'Error updating progress' },
+      { status: 500 }
+    );
   }
 }

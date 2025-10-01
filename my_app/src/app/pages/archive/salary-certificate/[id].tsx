@@ -1,5 +1,6 @@
+"use client";
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Layout from '../../../layout';
 import { SalaryCertificate } from '../../../../components/SalaryCertificate';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
@@ -31,7 +32,8 @@ interface Document {
 
 export default function SalaryCertificateViewPage() {
   const router = useRouter();
-  const { id } = router.query;
+  const params = useParams();
+  const id = params?.id as string;
   const [document, setDocument] = useState<Document | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');

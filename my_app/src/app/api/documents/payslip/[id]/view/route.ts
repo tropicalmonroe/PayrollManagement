@@ -1,88 +1,90 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../../../lib/prisma';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-if (req.method === 'GET') {
-    try {
-    const { id } = req.query;
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params;
 
     // Retrieve the document
     const document = await prisma.document.findUnique({
-        where: { id: id as string },
-        include: {
+      where: { id: id as string },
+      include: {
         employee: true
-        }
+      }
     });
 
     if (!document) {
-        return res.status(404).json({ error: 'Document not found' });
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }
 
     // Retrieve the associated payroll calculation
     const metadata = document.metadata as any;
     const payrollCalculation = await prisma.payrollCalculation.findUnique({
-        where: { id: metadata?.payrollCalculationId },
-        include: {
+      where: { id: metadata?.payrollCalculationId },
+      include: {
         employee: true
-        }
+      }
     });
 
     if (!payrollCalculation) {
-        return res.status(404).json({ error: 'Payroll calculation not found' });
+      return NextResponse.json({ error: 'Payroll calculation not found' }, { status: 404 });
     }
 
     // Generate the payslip HTML
     const html = generatePayslipHTML(document, payrollCalculation);
 
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.status(200).send(html);
-    } catch (error) {
+    return new NextResponse(html, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+      },
+    });
+  } catch (error) {
     console.error('Error generating payslip view:', error);
-    res.status(500).json({ error: 'Error generating payslip' });
-    }
-} else {
-    res.setHeader('Allow', ['GET']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
-}
+    return NextResponse.json({ error: 'Error generating payslip' }, { status: 500 });
+  }
 }
 
 function generatePayslipHTML(document: any, payrollCalculation: any) {
-const employee = payrollCalculation.employee;
-const [monthName, year] = document.period.split(' ');
+  const employee = payrollCalculation.employee;
+  const [monthName, year] = document.period.split(' ');
 
-const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
-    style: 'currency',
-    currency: 'KES',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount)
-}
+  }
 
-const formatDate = (date: Date) => {
+  const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
     }).format(new Date(date))
-}
+  }
 
-const getMaritalStatus = () => {
+  const getMaritalStatus = () => {
     switch (employee.maritalStatus) {
-    case 'SINGLE': return 'Single'
-    case 'MARRIED': return 'Married'
-    case 'DIVORCED': return 'Divorced'
-    case 'WIDOWED': return 'Widowed'
-    default: return employee.maritalStatus
+      case 'SINGLE': return 'Single'
+      case 'MARRIED': return 'Married'
+      case 'DIVORCED': return 'Divorced'
+      case 'WIDOWED': return 'Widowed'
+      default: return employee.maritalStatus
     }
-}
+  }
 
-// Calculate Kenyan statutory rates
-const nssfRate = 6.00; // 6%
-const shifRate = 2.75; // 2.75%
-const housingLevyRate = 1.50; // 1.5%
+  // Calculate Kenyan statutory rates
+  const nssfRate = 6.00; // 6%
+  const shifRate = 2.75; // 2.75%
+  const housingLevyRate = 1.50; // 1.5%
 
-return `
+  return `
 <!DOCTYPE html>
 <html lang="en">
 <head>

@@ -84,7 +84,7 @@ export class PDFGenerator {
         this.doc
           .fillColor('#ffffff')
           .fontSize(16)
-          .font('Helvetica-Bold')
+          .font('Times-Bold')
           .text('AD Capital', this.margin + 10, this.currentY + 10);
         
         this.doc

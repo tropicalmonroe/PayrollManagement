@@ -208,7 +208,7 @@ if (loading) {
 }
 
 return (
-    <Card className="p-4 rounded-lg bg-[#f3f8fc] border-0 shadow-md mt-[2vh] h-[84vh]">
+    <Card className="p-4 rounded-lg bg-[#f3f8fc] border-0 shadow-md mt-[2vh]">
     <div className="space-y-6">
         <div className="flex justify-between items-center">
         <div>

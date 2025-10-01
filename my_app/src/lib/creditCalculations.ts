@@ -180,35 +180,25 @@ export function getCreditStatus(
   return 'ACTIVE';
 }
 
-/**
- * Generate amortization table from credit parameters with Moroccan banking formulas
- * Based on the provided reference table format - calibrated to match exact banking calculations
- */
+
+// Updated calculation function in creditCalculations.ts
 export function generateAmortizationTable(
-  loanAmount: number, // Previously montantCredit
-  interestRate: number, // Previously tauxInteret
-  durationMonths: number, // Previously dureeMois
-  startDate: Date, // Previously dateDebut
-  insuranceRate: number = 0.809 // Previously tauxAssurance (Default insurance rate 0.809% as in CFG Bank example)
+  loanAmount: number,
+  interestRate: number,
+  durationMonths: number,
+  startDate: Date,
+  insuranceRate: number = 0.5 // More realistic insurance rate
 ): AmortizationEntry[] {
   const schedule: AmortizationEntry[] = [];
-  const monthlyRate = interestRate / 100 / 12; // Monthly interest rate
-  const taxRate = 0.10; // Previously tauxTVA (10% VAT on interest in Morocco)
+  const monthlyRate = interestRate / 100 / 12;
+  const taxRate = 0.10; // 10% VAT on interest
   
-  // Based on reverse engineering, the base monthly payment should be around 52,844.53
-  // This suggests a slightly different calculation or rounding method
+  // Calculate base monthly payment using standard formula
   let baseMonthlyPayment = 0;
   if (monthlyRate > 0) {
-    // Standard formula but with banking-specific adjustments
     baseMonthlyPayment = loanAmount * 
       (monthlyRate * Math.pow(1 + monthlyRate, durationMonths)) / 
       (Math.pow(1 + monthlyRate, durationMonths) - 1);
-    
-    // Adjust to match reference table (calibration based on analysis)
-    // The reference shows a base payment of ~52,844.53 vs calculated ~55,955.46
-    // This suggests banks may use a different rounding or calculation method
-    const adjustmentFactor = 52844.53 / baseMonthlyPayment;
-    baseMonthlyPayment = baseMonthlyPayment * adjustmentFactor;
   } else {
     baseMonthlyPayment = loanAmount / durationMonths;
   }
@@ -219,9 +209,8 @@ export function generateAmortizationTable(
     const dueDate = new Date(startDate);
     dueDate.setMonth(dueDate.getMonth() + i);
     
-    // Calculate interest on remaining balance: Interest = (nominal rate / 12) × remaining principal
-    // Apply slight adjustment to match reference (-99.17 MAD difference observed)
-    const interestBeforeTax = remainingPrincipal * monthlyRate * 0.9967; // Calibration factor
+    // Calculate interest on remaining balance
+    const interestBeforeTax = remainingPrincipal * monthlyRate;
     
     // Calculate principal repayment
     const principalRepayment = baseMonthlyPayment - interestBeforeTax;
@@ -229,23 +218,11 @@ export function generateAmortizationTable(
     // Calculate VAT on interest
     const interestTax = interestBeforeTax * taxRate;
     
-    // Calculate insurance - based on reference table pattern
-    // The reference shows specific values: 5783.23, 5791.70, 5799.58...
-    let insurance;
-    if (i === 1) {
-      insurance = 5783.23;
-    } else if (i === 2) {
-      insurance = 5791.70;
-    } else if (i === 3) {
-      insurance = 5799.58;
-    } else {
-      // For other months, use progressive increase pattern
-      const baseInsurance = loanAmount * (insuranceRate / 100) / 12;
-      insurance = baseInsurance + (i - 1) * 8.5; // Adjusted increase rate
-    }
+    // Calculate insurance (simplified)
+    const insurance = loanAmount * (insuranceRate / 100) / 12;
     
-    // Total monthly payment - fixed at 61,619.31 based on reference
-    const totalMonthlyPayment = 61619.31;
+    // Total monthly payment (principal + interest + tax + insurance)
+    const totalMonthlyPayment = principalRepayment + interestBeforeTax + interestTax + insurance;
     
     // Update remaining balance
     remainingPrincipal = Math.max(0, remainingPrincipal - principalRepayment);

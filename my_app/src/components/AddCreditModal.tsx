@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { X, CreditCard, Building, Calendar, DollarSign } from 'lucide-react';
 import { Advance } from '@prisma/client';
@@ -18,17 +20,20 @@ employee: Employee;
 type: 'HOUSING' | 'CONSUMER';
 loanAmount: number;
 monthlyPayment: number; 
+interestRate: number;
+durationYears: number;
 startDate: Date;
 endDate: Date; 
 remainingBalance: number; 
 amountRepaid: number; 
 status: 'ACTIVE' | 'PAID_OFF' | 'SUSPENDED'; 
+accountNumber?: string;
 bank: string;
 notes?: string;
 createdAt: Date;
 }
 
-interface AddLoanModalProps { // 'AddCreditModalProps' translated
+interface AddLoanModalProps {
 isOpen: boolean;
 onClose: () => void;
 onSuccess: () => void;
@@ -37,19 +42,22 @@ advances: Advance[];
 editLoan?: Loan;
 }
 
-const AddCreditModal: React.FC<AddLoanModalProps> = ({ // Component name translated
+const AddCreditModal: React.FC<AddLoanModalProps> = ({
 isOpen,
 onClose,
 onSuccess,
 employees,
-editLoan                  // 'editCredit' translated
+editLoan
 }) => {
 const [formData, setFormData] = useState({
     employeeId: '',
-    type: 'HOUSING' as 'HOUSING' | 'CONSUMER', // Default type translated
-    monthlyAmount: '',      // 'montantMensuel' translated
-    startDate: '',          // 'dateDebut' translated
-    bank: '',               // 'banque' translated
+    type: 'HOUSING' as 'HOUSING' | 'CONSUMER',
+    monthlyAmount: '',  
+    interestRate: '0',  // Default to 0%
+    durationYears: '1', // Default to 1 year
+    startDate: '',
+    accountNumber: '',
+    bank: '',         
     notes: ''
 });
 
@@ -63,7 +71,10 @@ useEffect(() => {
         employeeId: '',
         type: 'HOUSING',
         monthlyAmount: '',
+        interestRate: '0',
+        durationYears: '1',
         startDate: '',
+        accountNumber: '',
         bank: '',
         notes: ''
     });
@@ -74,8 +85,11 @@ useEffect(() => {
         employeeId: editLoan.employee.id,
         type: editLoan.type,
         monthlyAmount: editLoan.monthlyPayment.toString(),
+        interestRate: editLoan.interestRate.toString(),
+        durationYears: editLoan.durationYears.toString(),
         startDate: new Date(editLoan.startDate).toISOString().split('T')[0],
         bank: editLoan.bank,
+        accountNumber: editLoan.accountNumber || '',
         notes: editLoan.notes || ''
     });
     }
@@ -84,63 +98,62 @@ useEffect(() => {
 // Comprehensive Kenyan bank identification function
 function identifyBank(account: string): string {
     if (!account || typeof account !== 'string' || account.length < 2) {
-        return 'Invalid account number';
+    return 'Invalid account number';
     }
 
-    const prefix = account.substring(0, 2).padStart(2, '0'); // Ensure 2 digits
+    const prefix = account.substring(0, 2).padStart(2, '0');
     let bankName = 'Bank not identified';
 
-    // Comprehensive mapping of bank codes to names (all major banks in Kenya, 2025)
     const bankMap: { [key: string]: string } = {
-        '01': 'Kenya Commercial Bank (KCB)',
-        '02': 'National Bank of Kenya (NBK)',
-        '03': 'Absa Bank Kenya',
-        '04': 'Standard Chartered Bank Kenya',
-        '05': 'Co-operative Bank of Kenya',
-        '06': 'Family Bank',
-        '07': 'Gulf African Bank',
-        '08': 'NCBA Bank Kenya (Commercial Bank of Africa)',
-        '11': 'I&M Bank',
-        '12': 'Diamond Trust Bank (DTB) Kenya',
-        '13': 'Consolidated Bank of Kenya',
-        '14': 'Development Bank of Kenya',
-        '15': 'NCBA Bank Kenya (NIC Bank)',
-        '16': 'Middle East Bank Kenya',
-        '17': 'Dubai Islamic Bank Kenya',
-        '18': 'First Community Bank',
-        '19': 'Bank of Africa Kenya',
-        '20': 'Ecobank Kenya',
-        '21': 'Credit Bank',
-        '22': 'United Bank for Africa (UBA) Kenya',
-        '23': 'Guaranty Trust Bank (GTBank) Kenya',
-        '24': 'Paramount Universal Bank',
-        '25': 'Prime Bank',
-        '26': 'Access Bank Kenya',
-        '27': 'Kingdom Bank',
-        '28': 'HF Group (Housing Finance)',
-        '29': 'Stanbic Bank Kenya',
-        '30': 'Trans-National Bank',
-        '31': 'Victoria Commercial Bank',
-        '32': 'Charterhouse Bank',
-        '33': 'Imperial Bank (Legacy/Defunct)',
-        '34': 'Kingdom Bank (Jamii Bora)',
-        '35': 'African Banking Corporation',
-        '52': 'Habib Bank AG Zurich',
-        '53': 'Fidelity Commercial Bank',
-        '55': 'Bank of Baroda (Kenya)',
-        '56': 'Bank of India (Kenya)',
-        '57': 'Consolidated Finance Bank',
-        '62': 'Giro Commercial Bank',
-        '63': 'Equity Bank Kenya',
-        '64': 'Faulu Microfinance Bank',
-        '65': 'Kenya Women Microfinance Bank',
-        '66': 'SME Bank of Kenya',
-        '67': 'Maisha Microfinance Bank',
-        '68': 'United Bank for Africa (UBA) Kenya',
-        '69': 'Dubai Islamic Bank (DIB) Kenya',
-        '70': 'Commercial International Bank (CIB) Kenya',
-        '71': 'M-Oriental Bank Kenya',
-        '72': 'Premier Bank Kenya'
+    '01': 'Kenya Commercial Bank (KCB)',
+    '02': 'National Bank of Kenya (NBK)',
+    '03': 'Absa Bank Kenya',
+    '04': 'Standard Chartered Bank Kenya',
+    '05': 'Co-operative Bank of Kenya',
+    '06': 'Family Bank',
+    '07': 'Gulf African Bank',
+    '08': 'NCBA Bank Kenya (Commercial Bank of Africa)',
+    '11': 'I&M Bank',
+    '12': 'Diamond Trust Bank (DTB) Kenya',
+    '13': 'Consolidated Bank of Kenya',
+    '14': 'Development Bank of Kenya',
+    '15': 'NCBA Bank Kenya (NIC Bank)',
+    '16': 'Middle East Bank Kenya',
+    '17': 'Dubai Islamic Bank Kenya',
+    '18': 'First Community Bank',
+    '19': 'Bank of Africa Kenya',
+    '20': 'Ecobank Kenya',
+    '21': 'Credit Bank',
+    '22': 'United Bank for Africa (UBA) Kenya',
+    '23': 'Guaranty Trust Bank (GTBank) Kenya',
+    '24': 'Paramount Universal Bank',
+    '25': 'Prime Bank',
+    '26': 'Access Bank Kenya',
+    '27': 'Kingdom Bank',
+    '28': 'HF Group (Housing Finance)',
+    '29': 'Stanbic Bank Kenya',
+    '30': 'Trans-National Bank',
+    '31': 'Victoria Commercial Bank',
+    '32': 'Charterhouse Bank',
+    '33': 'Imperial Bank (Legacy/Defunct)',
+    '34': 'Kingdom Bank (Jamii Bora)',
+    '35': 'African Banking Corporation',
+    '52': 'Habib Bank AG Zurich',
+    '53': 'Fidelity Commercial Bank',
+    '55': 'Bank of Baroda (Kenya)',
+    '56': 'Bank of India (Kenya)',
+    '57': 'Consolidated Finance Bank',
+    '62': 'Giro Commercial Bank',
+    '63': 'Equity Bank Kenya',
+    '64': 'Faulu Microfinance Bank',
+    '65': 'Kenya Women Microfinance Bank',
+    '66': 'SME Bank of Kenya',
+    '67': 'Maisha Microfinance Bank',
+    '68': 'United Bank for Africa (UBA) Kenya',
+    '69': 'Dubai Islamic Bank (DIB) Kenya',
+    '70': 'Commercial International Bank (CIB) Kenya',
+    '71': 'M-Oriental Bank Kenya',
+    '72': 'Premier Bank Kenya'
     };
 
     bankName = bankMap[prefix] || `Other Kenyan Bank (Prefix: ${prefix} - Verify with CBK)`;
@@ -152,44 +165,51 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectEle
 
     // If an employee is selected, pre-fill bank information
     if (name === 'employeeId' && value) {
-        const selectedEmployee = employees.find(emp => emp.id === value);
-        if (selectedEmployee) {
-            // Extract bank name from bank account or branch
-            let bankName = '';
-            if (selectedEmployee.bankBranch) {
-                bankName = selectedEmployee.bankBranch;
-            } else if (selectedEmployee.bankAccount) {
-                // For Kenyan context, infer bank from account number patterns
-                const account = selectedEmployee.bankAccount.replace(/\s/g, ''); // Remove spaces
-                bankName = identifyBank(account); // Use comprehensive bank identification
-            }
-
-            setFormData(prev => ({
-                ...prev,
-                [name]: value,
-                bank: bankName
-            }));
+    const selectedEmployee = employees.find(emp => emp.id === value);
+    if (selectedEmployee) {
+        let bankName = '';
+        if (selectedEmployee.bankBranch) {
+        bankName = selectedEmployee.bankBranch;
+        } else if (selectedEmployee.bankAccount) {
+        const account = selectedEmployee.bankAccount.replace(/\s/g, '');
+        bankName = identifyBank(account);
         }
+
+        setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        bank: bankName
+        }));
+    }
     } else {
-        setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
     }
 
     // Clear error when user starts typing
     if (errors[name]) {
-        setErrors(prev => ({ ...prev, [name]: '' }));
+    setErrors(prev => ({ ...prev, [name]: '' }));
     }
 };
+
 const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.employeeId) newErrors.employeeId = 'Please select an employee';
     if (!formData.monthlyAmount) newErrors.monthlyAmount = 'Monthly amount is required';
+    if (!formData.interestRate) newErrors.interestRate = 'Interest rate is required';
+    if (!formData.durationYears) newErrors.durationYears = 'Duration is required';
     if (!formData.startDate) newErrors.startDate = 'Start date is required';
     if (!formData.bank) newErrors.bank = 'Bank is required';
 
     // Validate numeric values
     if (formData.monthlyAmount && parseFloat(formData.monthlyAmount) <= 0) {
     newErrors.monthlyAmount = 'Amount must be greater than 0';
+    }
+    if (formData.interestRate && (parseFloat(formData.interestRate) < 0 || parseFloat(formData.interestRate) > 100)) {
+    newErrors.interestRate = 'Interest rate must be between 0 and 100';
+    }
+    if (formData.durationYears && (parseInt(formData.durationYears) <= 0 || parseInt(formData.durationYears) > 50)) {
+    newErrors.durationYears = 'Duration must be between 1 and 50 years';
     }
 
     setErrors(newErrors);
@@ -203,15 +223,13 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     setLoading(true);
     try {
-    const url = editLoan ? `/api/credits/${editLoan.id}` : '/api/credits'; // Adjusted endpoint
+    const url = editLoan ? `/api/credits/${editLoan.id}` : '/api/credits';
     const method = editLoan ? 'PUT' : 'POST';
     
-    // Calculate default values for compatibility
+    // Calculate loan amount based on monthly payment and duration
     const monthlyAmount = parseFloat(formData.monthlyAmount);
-    const loanAmount = monthlyAmount * 12; // Default 1 year estimation
-    const startDate = new Date(formData.startDate);
-    const endDate = new Date(startDate);
-    endDate.setFullYear(endDate.getFullYear() + 1); // 1 year default
+    const durationYears = parseInt(formData.durationYears);
+    const loanAmount = monthlyAmount * durationYears * 12; // Total loan amount
     
     const response = await fetch(url, {
         method,
@@ -222,22 +240,14 @@ const handleSubmit = async (e: React.FormEvent) => {
         employeeId: formData.employeeId,
         type: formData.type,
         loanAmount: loanAmount,
-        interestRate: 0, // No interest calculation
-        durationYears: 1, // 1 year default
-        monthlyPayment: monthlyAmount,
+        interestRate: parseFloat(formData.interestRate), // Include interest rate
+        durationYears: durationYears, // Include duration years
         startDate: formData.startDate,
-        endDate: endDate,
-        remainingBalance: loanAmount,
-        amountRepaid: 0,
-        status: 'ACTIVE',
         bank: formData.bank,
-        accountNumber: '',
-        creationDate: new Date(),
-        createdBy: 'admin',
         notes: formData.notes,
-        interestPaid: 0,
-        remainingPrincipal: loanAmount,
-        insuranceRate: 0
+        // These fields will be calculated by the API or use defaults
+        accountNumber: formData.accountNumber,
+        createdBy: 'admin'
         }),
     });
 
@@ -258,8 +268,8 @@ const handleSubmit = async (e: React.FormEvent) => {
 if (!isOpen) return null;
 
 return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+    <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-lg shadow-xl max-w-xl w-full">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-zinc-200">
         <div className="flex items-center">
@@ -278,6 +288,7 @@ return (
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <div className='flex items-center justify-between gap-1'>
         {/* Employee Selection */}
         <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
@@ -287,7 +298,7 @@ return (
             name="employeeId"
             value={formData.employeeId}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
+            className={`w-[15vw] px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
                 errors.employeeId ? 'border-red-500' : 'border-zinc-300'
             }`}
             >
@@ -310,11 +321,32 @@ return (
             name="type"
             value={formData.type}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
+            className="w-[15vw] px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent"
             >
             <option value="HOUSING">Housing Loan</option>
             <option value="CONSUMER">Consumer Loan</option>
             </select>
+        </div>
+        </div>
+
+         {/* // Interest form */}
+        <div>
+        <label className="block text-sm font-medium text-zinc-700 mb-1">
+            Interest Rate (%) *
+        </label>
+        <input
+            type="number"
+            name="interestRate"
+            value={formData.interestRate}
+            onChange={handleInputChange}
+            step="0.01"
+            min="0"
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
+            errors.interestRate ? 'border-red-500' : 'border-zinc-300'
+            }`}
+            placeholder="Ex: 5.0"
+        />
+        {errors.interestRate && <p className="mt-1 text-sm text-rose-600">{errors.interestRate}</p>}
         </div>
 
         {/* Monthly amount */}
@@ -342,7 +374,27 @@ return (
             Amount that will be deducted each month from salary
             </p>
         </div>
-
+        
+        <div className='flex items-center justify-between gap-1'>
+        {/* Duration */}
+        <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
+            Duration (Years) *
+            </label>
+            <input
+            type="number"
+            name="durationYears"
+            value={formData.durationYears}
+            onChange={handleInputChange}
+            min="1"
+            max="50"
+            className={`w-[15vw] px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
+                errors.durationYears ? 'border-red-500' : 'border-zinc-300'
+            }`}
+            placeholder="Ex: 5"
+            />
+            {errors.durationYears && <p className="mt-1 text-sm text-rose-600">{errors.durationYears}</p>}
+        </div>
         {/* Start date */}
         <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
@@ -355,14 +407,16 @@ return (
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
+                className={`w-[15vw] pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
                 errors.startDate ? 'border-red-500' : 'border-zinc-300'
                 }`}
             />
             </div>
             {errors.startDate && <p className="mt-1 text-sm text-rose-600">{errors.startDate}</p>}
         </div>
+        </div>
 
+        <div className='flex items-center justify-between gap-1'>
         {/* Bank */}
         <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
@@ -375,13 +429,31 @@ return (
                 name="bank"
                 value={formData.bank}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
+                className={`w-[15vw] pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
                 errors.bank ? 'border-red-500' : 'border-zinc-300'
                 }`}
                 placeholder="Ex: Equity Bank"
             />
             </div>
             {errors.bank && <p className="mt-1 text-sm text-rose-600">{errors.bank}</p>}
+        </div>
+
+        <div>
+            <label className='block text-sm font-medium text-zinc-700'>
+            Bank Account Number *
+            <input
+                type="text"
+                name="accountNumber"
+                value={formData.accountNumber}
+                onChange={handleInputChange}
+                className={`w-full mt-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0063b4] focus:border-transparent ${
+                errors.bankAccountNumber ? 'border-red-500' : 'border-zinc-300'
+                }`}
+                placeholder="Ex: 123456789"
+            />
+            {errors.accountNumber && <p className="mt-1 text-sm text-rose-600">{errors.accountNumber}</p>}
+            </label>
+        </div>
         </div>
 
         {/* Notes */}

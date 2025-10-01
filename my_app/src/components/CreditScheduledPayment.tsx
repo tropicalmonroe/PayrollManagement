@@ -11,6 +11,7 @@ Eye,
 CreditCard,
 TrendingUp,
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 interface Installment {
 id: string;
@@ -66,20 +67,54 @@ useEffect(() => {
     }
 }, [isOpen, loanId]);
 
+// In your React component
 const fetchSchedule = async () => {
-    try {
+try {
     setLoading(true);
     const response = await fetch(`/api/credits/${loanId}/echeancier`);
+    
+    if (response.status === 404) {
+    const errorData = await response.json();
+    
+    // Check if credit exists but has no schedule
+    if (errorData.creditExists) {
+        setSchedule([]);
+        setStats(null);
+        // Show a button to generate schedule instead of auto-generating
+        return;
+    }
+    }
+    
     if (response.ok) {
-        const data = await response.json();
-        setSchedule(data.schedule);
-        setStats(data.stats);
+    const data = await response.json();
+    setSchedule(data.paymentSchedule);
+    setStats(data.stats);
     }
-    } catch (error) {
+} catch (error) {
     console.error('Error loading repayment schedule:', error);
-    } finally {
+} finally {
     setLoading(false);
+}
+};
+
+const generateSchedule = async () => {
+try {
+    const response = await fetch(`/api/credits/${loanId}/generate-echeancier`, {
+    method: 'POST',
+    });
+    
+    if (response.ok) {
+    const result = await response.json();
+    alert('Payment schedule generated successfully!');
+    await fetchSchedule(); // Reload the schedule
+    } else {
+    const error = await response.json();
+    alert(`Error: ${error.error}`);
     }
+} catch (error) {
+    console.error('Error generating schedule:', error);
+    alert('Error generating payment schedule');
+}
 };
 
 const formatCurrency = (amount: number) => {
@@ -135,35 +170,36 @@ const handlePayInstallment = async () => {
     if (!selectedInstallment || !paymentData.amountPaid) return;
 
     try {
-    const response = await fetch(`/api/credits/echeances/${selectedInstallment.id}/payer`, {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(paymentData),
-    });
+        const response = await fetch(`/api/credits/echeances/${selectedInstallment.id}/payer`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(paymentData),
+        });
 
-    if (response.ok) {
-        await fetchSchedule(); // Refresh data
-        setShowPaymentModal(false);
-        setSelectedInstallment(null);
-        setPaymentData({ amountPaid: '', paymentDate: '', notes: '' });
-        alert('Payment recorded successfully');
-    } else {
-        const error = await response.json();
-        alert(`Error: ${error.error}`);
-    }
+        if (response.ok) {
+            await fetchSchedule(); // Refresh data
+            setShowPaymentModal(false);
+            setSelectedInstallment(null);
+            setPaymentData({ amountPaid: '', paymentDate: '', notes: '' });
+            toast.success('Payment recorded successfully');
+        } else {
+            const error = await response.json();
+            toast.error(`Error: ${error.error}`);
+        }
     } catch (error) {
-    console.error('Error recording payment:', error);
-    alert('Error recording payment');
+        console.error('Error recording payment:', error);
+        toast.error('Error recording payment');
     }
 };
+
 
 if (!isOpen) return null;
 
 return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] overflow-hidden">
+    <div className="bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-full overflow-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-zinc-200">
         <div className="flex items-center">

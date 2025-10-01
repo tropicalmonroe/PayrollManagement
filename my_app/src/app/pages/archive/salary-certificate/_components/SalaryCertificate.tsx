@@ -1,5 +1,6 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import Layout  from '../../layout';
 import { 
   Award, 
   Download, 
@@ -195,8 +196,7 @@ export default function SalaryCertificatePage() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6 bg-white mt-[2vh] rounded-md">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
@@ -446,6 +446,5 @@ export default function SalaryCertificatePage() {
           )}
         </div>
       </div>
-    </Layout>
   );
 }

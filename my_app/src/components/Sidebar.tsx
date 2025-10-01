@@ -4,38 +4,43 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-BarChart2,
-FileText,
-Calendar,
-Settings,
-ChevronDown,
-ChevronRight,
-Home,
-Circle,
-User,
-Users,
-LogOut,
-ChevronLeft,
-Menu,
-Calculator,
-DollarSign,
-FileSpreadsheet,
-CreditCard,
-TrendingUp,
-FileCheck,
-Award,
-Receipt,
+    FileText,
+    Settings,
+    ChevronRight,
+    Home,
+    Circle,
+    User,
+    Users,
+    ChevronLeft,
+    Calculator,
+    FileSpreadsheet,
+    TrendingUp,
+    Award,
+// BarChart2,
+// Calendar,
+// ChevronDown,
+// LogOut,
+// Menu,
+// DollarSign,
+// CreditCard,
+// FileCheck,
+// Receipt,
 LucideProps,
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
-import {
-DropdownMenu,
-DropdownMenuContent,
-DropdownMenuItem,
-DropdownMenuLabel,
-DropdownMenuSeparator,
-DropdownMenuTrigger,
-} from '../components/ui/dropdown-menu';
+import { FaMoneyCheck } from 'react-icons/fa';
+import { GoTasklist } from "react-icons/go";
+import { PiBank } from "react-icons/pi";
+import { HiOutlineBanknotes } from "react-icons/hi2";
+
+// import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
+// import {
+// DropdownMenu,
+// DropdownMenuContent,
+// DropdownMenuItem,
+// DropdownMenuLabel,
+// DropdownMenuSeparator,
+// DropdownMenuTrigger,
+// } from '../components/ui/dropdown-menu';
 // import SidebarFooter from './SidebarFooter';
 
 type SidebarItemProps = {
@@ -308,7 +313,9 @@ return (
         </div>
         <button
         onClick={toggleSidebar}
-        className="absolute right-0 top-1/2 -translate-y-1/2 -mr-3 bg-white border border-zinc-200 rounded-full p-1.5 shadow-md hover:shadow-lg transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-50"
+        className="absolute right-0 top-1/2 -translate-y-1/2 -mr-3 bg-white border border-zinc-200 
+        rounded-full p-1.5 shadow-md hover:shadow-lg transition-all duration-400 
+        ease-[cubic-bezier(0.34,1.56,0.64,1)] z-50"
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
         {collapsed ? <ChevronRight size={18} className="text-zinc-600" /> : <ChevronLeft size={18} className="text-zinc-600" />}
@@ -322,6 +329,46 @@ return (
             title="Dashboard"
             isActive={pathname === '/dashboard'}
             shortcut={collapsed ? '' : 'Ctrl + D'}
+            collapsed={collapsed}
+            toggleSidebar={toggleSidebar}
+        />
+        <SidebarItem
+            href="/payroll"
+            icon={<FaMoneyCheck/>}
+            title="Generate Payslip"
+            isActive={pathname === '/payroll'}
+            collapsed={collapsed}
+            toggleSidebar={toggleSidebar}
+        />
+        <SidebarItem
+            href="/credits"
+            icon={<PiBank />}
+            title="Credits/Loans"
+            isActive={pathname === '/credits'}
+            collapsed={collapsed}
+            toggleSidebar={toggleSidebar}
+        />
+        <SidebarItem
+            href="/variables"
+            icon={<GoTasklist />}
+            title="Variable Elements"
+            isActive={pathname === '/variables'}
+            collapsed={collapsed}
+            toggleSidebar={toggleSidebar}
+        />
+        <SidebarItem
+            href="/advances"
+            icon={<HiOutlineBanknotes />}
+            title="Salary Advances"
+            isActive={pathname === '/advances'}
+            collapsed={collapsed}
+            toggleSidebar={toggleSidebar}
+        />
+        <SidebarItem
+            href="/settings"
+            icon={<Settings />}
+            title="Settings"
+            isActive={pathname === '/settings'}
             collapsed={collapsed}
             toggleSidebar={toggleSidebar}
         />
@@ -426,12 +473,12 @@ return (
         />
         <SidebarSubmenu
             items={[
-            { href: '/archive/payslips', title: 'Payslips' },
-            { href: '/archive/certificates', title: 'Certificates' },
-            { href: '/archive/nssf-declarations', title: 'NSSF Declarations' },
-            { href: '/archive/paye-statements', title: 'PAYE Statements' },
-            { href: '/archive/payroll-journals', title: 'Payroll Journals' },
-            { href: '/archive/final-settlements', title: 'Final Settlements' },
+            { href: '/pages/archive/payslip', title: 'Payslips' },
+            { href: '/pages/archive/salary-certificate', title: 'Salary Certificates' },
+            // { href: '/pages/archive/nssf-declarations', title: 'NSSF Declarations' },
+            // { href: '/pages/archive/paye-statements', title: 'PAYE Statements' },
+            // { href: '/pages/archive/payroll-journals', title: 'Payroll Journals' },
+            { href: '/pages/archive/final-settlement', title: 'Final Settlements' },
             ]}
             isOpen={openMenus['archive']}
         />

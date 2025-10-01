@@ -31,20 +31,23 @@ const NSSFDeclarationPage = () => {
   const [showResults, setShowResults] = useState(false);
   const [summary, setSummary] = useState<any>(null);
   const [companyInfo, setCompanyInfo] = useState({
-    name: 'YOUR COMPANY',
+    name: 'NewLight Academy - Mombasa',
     nssfNumber: '1234567',
-    address: 'Company address',
+    address: '110 Mombasa Road',
     city: 'Nairobi'
   });
 
-  // NSSF Rates 2024 (Kenya)
-  const NSSF_RATES = {
-    ceiling: 18000, // Monthly NSSF ceiling (Tier II)
-    employeeContribution: 0.06, // 6% (Tier II)
-    employerContribution: 0.06, // 6% (Tier II)
-    housingLevy: 0.015, // 1.5% (Employer only)
-    trainingLevy: 0.01 // 1.0% (Employer only)
-  };
+// Correct NSSF Rates for Declaration
+const NSSF_RATES = {
+  tierICeiling: 8000,    // Tier I ceiling
+  tierIICeiling: 72000,  // Tier II ceiling
+  ceiling: 72000,        // Overall ceiling
+  employeeRate: 0.06,    // 6% employee
+  employerRate: 0.06,    // 6% employer
+  housingLevy: 0.015,    // 1.5% housing levy
+  trainingLevy: 0.01     // 1.0% training levy
+};
+  
 
   useEffect(() => {
     fetchEmployees();
@@ -140,14 +143,20 @@ const NSSFDeclarationPage = () => {
         // Calculate payroll
         const payrollResult = calculatePayroll(employeeData);
 
-        // NSSF specific calculations
+        // Use ACTUAL NSSF values from payroll calculation, not recalculating
         const grossSalary = payrollResult.grossSalary;
+        
+        // Get the actual NSSF base from payroll calculation
+        // For NSSF declaration, we need the actual NSSF base used in calculations
         const nssfBase = Math.min(grossSalary, NSSF_RATES.ceiling);
         
-        const employeeContribution = nssfBase * NSSF_RATES.employeeContribution;
-        const employerContribution = nssfBase * NSSF_RATES.employerContribution;
-        const housingLevy = grossSalary * NSSF_RATES.housingLevy;
-        const trainingLevy = grossSalary * NSSF_RATES.trainingLevy;
+        // Use ACTUAL contributions from payroll result, not recalculating
+        const employeeContribution = payrollResult.employeeContributions.nssfEmployee;
+        const employerContribution = payrollResult.employerContributions.nssfEmployer;
+        
+        // Housing levy and training levy from payroll result
+        const housingLevy = payrollResult.employerContributions.housingLevy;
+        const trainingLevy = payrollResult.employerContributions.trainingLevy;
         
         const totalContributionsEmployee = employeeContribution + employerContribution + housingLevy + trainingLevy;
 
@@ -413,11 +422,11 @@ const NSSFDeclarationPage = () => {
                   <div className="text-sm text-zinc-600">Monthly ceiling</div>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-lg font-bold text-green-600">{(NSSF_RATES.employeeContribution * 100).toFixed(1)}%</div>
+                  <div className="text-lg font-bold text-green-600">{(NSSF_RATES.employeeRate * 100).toFixed(1)}%</div>
                   <div className="text-sm text-zinc-600">Employee contribution</div>
                 </div>
                 <div className="text-center p-4 bg-orange-50 rounded-lg">
-                  <div className="text-lg font-bold text-orange-600">{(NSSF_RATES.employerContribution * 100).toFixed(1)}%</div>
+                  <div className="text-lg font-bold text-orange-600">{(NSSF_RATES.employerRate * 100).toFixed(1)}%</div>
                   <div className="text-sm text-zinc-600">Employer contribution</div>
                 </div>
                 <div className="text-center p-4 bg-purple-50 rounded-lg">

@@ -1,78 +1,87 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    try {
-      const { creditId, amountRepaid } = req.body;
+export async function POST(request: NextRequest) {
+  try {
+    const { creditId, amountRepaid } = await request.json();
 
-      if (!creditId || amountRepaid === undefined) {
-        return res.status(400).json({ error: 'Credit ID and amount repaid are required' });
-      }
+    if (!creditId || amountRepaid === undefined) {
+      return NextResponse.json(
+        { error: 'Credit ID and amount repaid are required' },
+        { status: 400 }
+      );
+    }
 
-      const amount = parseFloat(amountRepaid);
-      if (amount < 0) {
-        return res.status(400).json({ error: 'Amount repaid cannot be negative' });
-      }
+    const amount = parseFloat(amountRepaid);
+    if (amount < 0) {
+      return NextResponse.json(
+        { error: 'Amount repaid cannot be negative' },
+        { status: 400 }
+      );
+    }
 
-      // Get the credit for validation
-      const credit = await prisma.credit.findUnique({
-        where: { id: creditId }
-      });
+    // Get the credit for validation
+    const credit = await prisma.credit.findUnique({
+      where: { id: creditId }
+    });
 
-      if (!credit) {
-        return res.status(404).json({ error: 'Credit not found' });
-      }
+    if (!credit) {
+      return NextResponse.json(
+        { error: 'Credit not found' },
+        { status: 404 }
+      );
+    }
 
-      if (amount > credit.loanAmount) {
-        return res.status(400).json({ error: 'Amount repaid cannot exceed the credit amount' });
-      }
+    if (amount > credit.loanAmount) {
+      return NextResponse.json(
+        { error: 'Amount repaid cannot exceed the credit amount' },
+        { status: 400 }
+      );
+    }
 
-      // Calculate the new remaining balance
-      const newRemainingBalance = Math.max(0, credit.loanAmount - amount);
-      
-      // Determine the new status
-      let newStatus = credit.status;
-      if (amount >= credit.loanAmount) {
-        newStatus = 'PAID_OFF';
+    // Calculate the new remaining balance
+    const newRemainingBalance = Math.max(0, credit.loanAmount - amount);
+    
+    // Determine the new status
+    let newStatus = credit.status;
+    if (amount >= credit.loanAmount) {
+      newStatus = 'PAID_OFF';
+    } else {
+      const now = new Date();
+      if (now > credit.endDate) {
+        newStatus = 'SUSPENDED';
       } else {
-        const now = new Date();
-        if (now > credit.endDate) {
-          newStatus = 'SUSPENDED';
-        } else {
-          newStatus = 'ACTIVE';
-        }
+        newStatus = 'ACTIVE';
       }
+    }
 
-      // Update the credit
-      const updatedCredit = await prisma.credit.update({
-        where: { id: creditId },
-        data: {
-          amountRepaid: amount,
-          remainingBalance: newRemainingBalance,
-          status: newStatus
-          // Note: capitalRestant field doesn't exist in your schema, so it's removed
-        },
-        include: {
-          employee: {
-            select: {
-              id: true,
-              employeeId: true,
-              lastName: true,
-              firstName: true,
-              position: true
-            }
+    // Update the credit
+    const updatedCredit = await prisma.credit.update({
+      where: { id: creditId },
+      data: {
+        amountRepaid: amount,
+        remainingBalance: newRemainingBalance,
+        status: newStatus
+      },
+      include: {
+        employee: {
+          select: {
+            id: true,
+            employeeId: true,
+            lastName: true,
+            firstName: true,
+            position: true
           }
         }
-      });
+      }
+    });
 
-      res.status(200).json(updatedCredit);
-    } catch (error) {
-      console.error('Error updating credit:', error);
-      res.status(500).json({ error: 'Error updating credit' });
-    }
-  } else {
-    res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+    return NextResponse.json(updatedCredit);
+  } catch (error) {
+    console.error('Error updating credit:', error);
+    return NextResponse.json(
+      { error: 'Error updating credit' },
+      { status: 500 }
+    );
   }
 }

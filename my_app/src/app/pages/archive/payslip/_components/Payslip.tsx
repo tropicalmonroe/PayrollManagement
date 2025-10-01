@@ -1,5 +1,6 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import Layout from '../../layout';
 import { 
   FileText, 
   Download, 
@@ -164,8 +165,7 @@ export default function PayslipPage() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
+      <div className="space-y-6 bg-white shadow rounded-lg mt-[2vh] p-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
@@ -401,6 +401,5 @@ export default function PayslipPage() {
           )}
         </div>
       </div>
-    </Layout>
   );
 }
