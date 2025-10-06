@@ -199,7 +199,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         paye: payrollResult.taxCalculation.incomeTax,
         // personalRelief -  ✅ required (default 2400, so optional in TS if you don’t supply)
         personalRelief: payrollResult.taxCalculation.personalRelief ?? 2400,
-        helb: payrollResult.taxCalculation.helb ?? 0,
+        // helbLoan: payrollResult.taxCalculation.helbLoan ?? 0,
         otherDeductions: payrollResult.otherDeductions.totalOtherDeductions,
         totalDeductions: payrollResult.totalDeductions,
         nssfEmployer: payrollResult.employerContributions.nssfEmployer,

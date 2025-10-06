@@ -126,7 +126,7 @@ const employeeData: EmployeePayrollData = {
     hireDate: employee.hireDate,
     seniority: getSeniorityInYears(employee.hireDate),
     numberOfDeductions: employee.numberOfDeductions || 0,
-    numberOfDaysPerMonth: employee.numberOfDaysPerMonth || 30,
+    numberOfDaysPerMonth: employee.numberOfDaysPerMonth || 26,
     baseSalary: employee.baseSalary,
     housingAllowance: employee.housingAllowance || 0,
     mealAllowance: employee.mealAllowance || 0,

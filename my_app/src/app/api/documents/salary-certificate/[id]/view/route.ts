@@ -229,8 +229,8 @@ return `
         <div class="header">
         <img src="/image001.png" alt="Company Logo" class="logo" />
         <div class="company-info">
-            <strong>AD CAPITAL</strong><br>
-            Management Company<br>
+            <strong>NewLight Academy</strong><br>
+            Finance Department<br>
             Nairobi, Kenya
         </div>
         </div>
@@ -238,7 +238,7 @@ return `
         <h1 class="document-title">Salary Certificate</h1>
 
         <div class="content">
-        <p>I, the undersigned, Director of Human Resources of the company AD CAPITAL,</p>
+        <p>I, the undersigned, Director of Human Resources of the company NewLight Academy,</p>
         
         <p><strong>Hereby certify that:</strong></p>
 
@@ -322,12 +322,12 @@ return `
         <div class="signature-block">
             <p><strong>The HR Director</strong></p>
             <div class="signature-line"></div>
-            <p>AD CAPITAL</p>
+            <p>NewLight Academy</p>
         </div>
         </div>
 
         <div class="footer">
-        <p>AD CAPITAL - Management Company | Nairobi, Kenya</p>
+        <p>NewLight Academy - Finance Department | Nairobi, Kenya</p>
         </div>
     </div>
     </body>

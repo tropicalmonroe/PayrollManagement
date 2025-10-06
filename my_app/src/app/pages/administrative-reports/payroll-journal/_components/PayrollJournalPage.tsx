@@ -114,7 +114,7 @@ const PayrollJournalPage = () => {
           hireDate: employee.hireDate,
           seniority: getSeniorityInYears(employee.hireDate),
           numberOfDeductions: 0, // calculate based on dependents
-          numberOfDaysPerMonth: employee.numberOfDaysPerMonth,
+          numberOfDaysPerMonth: employee.numberOfDaysPerMonth || 26,
           
           // Salary & allowances
           baseSalary: employee.baseSalary,
@@ -129,6 +129,12 @@ const PayrollJournalPage = () => {
             foreignHealthCover: false,
             enhancedDisabilityCover: false,
           },
+
+          // ✅ CRITICAL: Set contribution preferences to use DEFAULTS for consistency
+          useNssfEmployee: employee.subjectToNssf,
+          useShifEmployee: employee.subjectToShif, // Use default SHIF  
+          usePensionEmployee: false, // Use default pension (2,000)
+          useInsuranceDiversifiedEmployee: false, // Use default insurance (500)
     
           
           // Additional payroll fields

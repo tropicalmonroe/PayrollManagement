@@ -6,11 +6,6 @@ import { Suspense } from "react";
 import DashboardComponent from "./_components/DashboardComponent";
 import Navbar from "@/components/Navbar";
 
-export const metadata = {
-  title: "Dashboard - AD Capital Payroll Management",
-  description: "Dashboard for the payroll management application",
-};
-
 export default async function DashboardPage() {
   const { userId } = await auth();
 

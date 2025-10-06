@@ -116,47 +116,54 @@ const MonthlyCalculationPage = () => {
           : undefined;
 
         // Prepare employee data for calculation
-        const employeeData: EmployeePayrollData = {
-          lastName: employee.lastName,
-          firstName: employee.firstName,
-          employeeId: employee.employeeId,
-          idNumber: employee.idNumber || '',
-          nssfNumber: employee.nssfNumber || '',
-          maritalStatus: employee.maritalStatus,
-          dateOfBirth: employee.dateOfBirth || new Date(),
-          hireDate: employee.hireDate,
-          seniority: getSeniorityInYears(employee.hireDate),
-          numberOfDeductions: employee.numberOfDeductions,
-          numberOfDaysPerMonth: employee.numberOfDaysPerMonth || 30,
-          baseSalary: employee.baseSalary,
-          housingAllowance: employee.housingAllowance,
-          mealAllowance: employee.mealAllowance,
-          transportAllowance: employee.transportAllowance,
-          representationAllowance: employee.representationAllowance,
-          loanRepayment: employee.loanRepayment,
-          helbLoan: employee.helbLoan,
-          subjectToHousingLevy: employee.subjectToHousingLevy,
-          subjectToNssf: employee.subjectToNssf,
-          subjectToShif: employee.subjectToShif,
-          insurances: {
-            comprehensiveHealthInsurance: false, // Adjusted for Kenyan context (NHIF)
-            foreignHealthCover: false,
-            enhancedDisabilityCover: false,
-          },
-          mortgageCredit: employee.loanRepayment ? {
-          monthlyAmount: employee.loanRepayment || 0,
-          interest: 0,
-        } : undefined,
-        consumerCredit: employee.helbLoan ? {
-          monthlyAmount: employee.helbLoan,
-        } : undefined,
-        salaryAdvance,
-        bankAccount: employee.bankAccount || '',
-        bankBranch: employee.bankBranch || '',
-        bonuses,
-        overtimePay,
-        otherDeductions: employee.otherDeductions || 0,
-        };
+        // Prepare employee data for calculation - USE CONSISTENT APPROACH
+const employeeData: EmployeePayrollData = {
+  lastName: employee.lastName,
+  firstName: employee.firstName,
+  employeeId: employee.employeeId,
+  idNumber: employee.idNumber || '',
+  nssfNumber: employee.nssfNumber || '',
+  maritalStatus: employee.maritalStatus,
+  dateOfBirth: employee.dateOfBirth || new Date(),
+  hireDate: employee.hireDate,
+  seniority: getSeniorityInYears(employee.hireDate),
+  numberOfDeductions: employee.numberOfDeductions,
+  numberOfDaysPerMonth: employee.numberOfDaysPerMonth || 26, // Changed from 30 to 26 (Kenyan standard)
+  baseSalary: employee.baseSalary,
+  housingAllowance: employee.housingAllowance,
+  mealAllowance: employee.mealAllowance,
+  transportAllowance: employee.transportAllowance,
+  representationAllowance: employee.representationAllowance,
+  insurances: {
+    comprehensiveHealthInsurance: false,
+    foreignHealthCover: false,
+    enhancedDisabilityCover: false,
+  },
+  mortgageCredit: employee.loanRepayment ? {
+    monthlyAmount: employee.loanRepayment || 0,
+    interest: 0,
+  } : undefined,
+  consumerCredit: employee.helbLoan ? {
+    monthlyAmount: employee.helbLoan,
+  } : undefined,
+  salaryAdvance,
+  bankAccount: employee.bankAccount || '',
+  bankBranch: employee.bankBranch || '',
+  // ✅ CRITICAL: Set contribution preferences to use DEFAULTS for consistency
+  useNssfEmployee: employee.subjectToNssf,
+  useShifEmployee: employee.subjectToShif, // Use default SHIF  
+  usePensionEmployee: false, // Use default pension (2,000)
+  useInsuranceDiversifiedEmployee: false, // Use default insurance (500)
+  bonuses,
+  overtimePay,
+  loanRepayment: employee.loanRepayment,
+  deductibleInterest: 0,
+  otherDeductions: employee.otherDeductions || 0,
+  helbLoan: employee.helbLoan,
+  subjectToNssf: employee.subjectToNssf,
+  subjectToShif: employee.subjectToShif,
+  subjectToHousingLevy: employee.subjectToHousingLevy
+};
 
         // Perform payroll calculation
         const payrollResult = calculatePayroll(employeeData);
@@ -170,6 +177,21 @@ const MonthlyCalculationPage = () => {
           employeeContributions: payrollResult.employeeContributions.totalEmployeeContributions,
           employerContributions: payrollResult.employerContributions.totalEmployerContributions,
           totalEmployerCost: payrollResult.totalEmployerCost,
+
+           // ✅ ADD DETAILED BREAKDOWN FOR CONSISTENCY CHECKING
+          detailedDeductions: {
+            nssf: payrollResult.employeeContributions.nssfEmployee,
+            shif: payrollResult.employeeContributions.shifEmployee,
+            housingLevy: payrollResult.employeeContributions.housingLevy,
+            pension: payrollResult.employeeContributions.pensionEmployee,
+            insurance: payrollResult.employeeContributions.insuranceDiversifiedEmployee,
+            paye: payrollResult.taxCalculation.incomeTax,
+            otherDeductions: payrollResult.otherDeductions.totalOtherDeductions
+          },
+
+          taxableGrossSalary: payrollResult.taxableGrossSalary,
+          professionalExpenses: payrollResult.taxCalculation.professionalExpenses,
+          personalRelief: payrollResult.taxCalculation.personalRelief
         };
 
         results.push({
@@ -370,32 +392,38 @@ const MonthlyCalculationPage = () => {
 
               {/* Statistics */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-white p-4 rounded-lg shadow-sm border">
+                <div className="bg-[#6ea0c2] p-4 rounded-lg">
                   <div className="flex items-center">
-                    <Users className="w-8 h-8 text-blue-600" />
+                    <div className="flex items-center justify-center w-10 h-10 bg-white rounded-xl p-1">
+                    <Users className="w-6 h-6 text-blue-600" />
+                    </div>
                     <div className="ml-3">
-                      <div className="text-sm font-medium text-zinc-500">Total Employees</div>
-                      <div className="text-2xl font-bold text-zinc-900">{selectedEmployees.length}</div>
+                      <div className="text-sm font-medium text-white">Total Employees</div>
+                      <div className="text-2xl font-bold text-white">{selectedEmployees.length}</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white p-4 rounded-lg shadow-sm border">
+                <div className="bg-[#5c8ab4] p-4 rounded-lg">
                   <div className="flex items-center">
-                    <CheckCircle className="w-8 h-8 text-green-600" />
+                    <div className="flex items-center justify-center w-10 h-10 bg-white rounded-xl p-1">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                    </div>
                     <div className="ml-3">
-                      <div className="text-sm font-medium text-zinc-500">Successful Calculations</div> 
-                      <div className="text-2xl font-bold text-green-600">{successfulCalculations.length}</div>
+                      <div className="text-sm font-medium text-white">Successful Calculations</div> 
+                      <div className="text-2xl font-bold text-white">{successfulCalculations.length}</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white p-4 rounded-lg shadow-sm border">
+                <div className="bg-[#5179a4] p-4 rounded-lg">
                   <div className="flex items-center">
+                    <div className="flex items-center justify-center w-10 h-10 bg-white rounded-xl p-1">
                     <AlertCircle className="w-8 h-8 text-rose-600" />
+                    </div>
                     <div className="ml-3">
-                      <div className="text-sm font-medium text-zinc-500">Errors</div> 
-                      <div className="text-2xl font-bold text-rose-600">{failedCalculations.length}</div>
+                      <div className="text-sm font-medium text-white">Errors</div> 
+                      <div className="text-2xl font-bold text-white">{failedCalculations.length}</div>
                     </div>
                   </div>
                 </div>
@@ -453,6 +481,8 @@ const MonthlyCalculationPage = () => {
                   </div>
 
                   {result.success && result.calculation ? (
+                  <div className="space-y-4">
+                    {/* Summary row */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <span className="text-zinc-500">Gross Salary:</span> 
@@ -471,11 +501,55 @@ const MonthlyCalculationPage = () => {
                         <div className="font-medium text-green-600">{formatCurrency(result.calculation.netSalary)}</div>
                       </div>
                     </div>
-                  ) : (
-                    <div className="text-rose-600 text-sm">
-                      <strong>Error:</strong> {result.error} {/* Translated Erreur: */}
+
+                    {/* ✅ ADD DETAILED DEDUCTIONS BREAKDOWN */}
+                    <div className="bg-zinc-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-zinc-900 mb-3 text-sm">Detailed Deductions Breakdown</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-zinc-600">NSSF:</span>
+                          <span className="font-medium">{formatCurrency(result.calculation.detailedDeductions.nssf)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-zinc-600">SHIF:</span>
+                          <span className="font-medium">{formatCurrency(result.calculation.detailedDeductions.shif)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-zinc-600">Housing Levy:</span>
+                          <span className="font-medium">{formatCurrency(result.calculation.detailedDeductions.housingLevy)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-zinc-600">Pension:</span>
+                          <span className="font-medium">{formatCurrency(result.calculation.detailedDeductions.pension)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-zinc-600">Insurance:</span>
+                          <span className="font-medium">{formatCurrency(result.calculation.detailedDeductions.insurance)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-zinc-600">Other Deductions:</span>
+                          <span className="font-medium">{formatCurrency(result.calculation.detailedDeductions.otherDeductions)}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Tax calculation details */}
+                      <div className="mt-3 pt-3 border-t border-zinc-200 grid grid-cols-2 gap-3 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-zinc-600">Taxable Gross:</span>
+                          <span className="font-medium">{formatCurrency(result.calculation.taxableGrossSalary)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-zinc-600">Professional Expenses:</span>
+                          <span className="font-medium">{formatCurrency(result.calculation.professionalExpenses)}</span>
+                        </div>
+                      </div>
                     </div>
-                  )}
+                  </div>
+                ) : (
+                  <div className="text-rose-600 text-sm">
+                    <strong>Error:</strong> {result.error}
+                  </div>
+                )}
                 </div>
               ))}
             </div>

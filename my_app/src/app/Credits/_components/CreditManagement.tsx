@@ -16,6 +16,8 @@ Clock,
 FileText
 } from 'lucide-react';
 import { Advance } from '@prisma/client';
+import { toast } from 'react-toastify';
+import { CgDanger } from "react-icons/cg";
 
 // Types
 type LoanType = 'HOUSING' | 'CONSUMER';
@@ -67,6 +69,8 @@ const [updateLoading, setUpdateLoading] = useState(false);
 const [newAmountRepaid, setNewAmountRepaid] = useState('');
 const [showSchedule, setShowSchedule] = useState(false);
 const [selectedLoanForSchedule, setSelectedLoanForSchedule] = useState<string | null>(null);
+const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [loanToDelete, setLoanToDelete] = useState<string | null>(null);
 
 const fetchLoans = async () => {
     try {
@@ -209,30 +213,73 @@ const getProgressInfo = (loan: any) => {
 };
 
 // Handle delete loan
-const handleDeleteLoan = async (loanId: string) => {
-    if (!confirm('Are you sure you want to delete this loan?')) {
-    return;
-    }
+const handleDeleteLoan = async () => {
+if (!loanToDelete) return;
+setDeleteLoading(true);
 
-    setDeleteLoading(true);
-    try {
-    const response = await fetch(`/api/credits/${loanId}`, {
-        method: 'DELETE',
-    });
+try {
+    const response = await fetch(`/api/credits/${loanToDelete}`, { method: 'DELETE' });
 
     if (response.ok) {
-        await fetchLoans(); // Refresh the list
-        alert('Loan deleted successfully');
+    toast.success('Loan deleted successfully');
+    await fetchLoans();
     } else {
-        alert('Error deleting loan');
+    const err = await response.json();
+    toast.error(err.error || 'Error deleting loan');
     }
-    } catch (error) {
+} catch (error) {
     console.error('Error during deletion:', error);
-    alert('Error deleting loan');
-    } finally {
+    toast.error('Error deleting loan');
+} finally {
     setDeleteLoading(false);
-    }
+    setLoanToDelete(null);
+    setShowDeleteModal(false);
+}
 };
+
+// Handles delete as a modal
+const DeleteConfirmationModal: React.FC<{
+isOpen: boolean;
+onConfirm: () => void;
+onCancel: () => void;
+loading?: boolean;
+}> = ({ isOpen, onConfirm, onCancel, loading }) => {
+if (!isOpen) return null;
+
+return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#142b3d]/30 bg-opacity-50">
+    <div className="bg-white rounded-lg shadow-xl w-fit p-6">
+        <h3 className="text-lg font-semibold text-zinc-800 mb-2 text-center">Delete Loan</h3>
+        <div className='flex items-center justify-center my-8'>
+            <CgDanger className="text-7xl text-rose-600 mx-auto" />
+        </div>
+        <p className="text-sm text-zinc-500 mb-6 text-center tracking-tight">
+        Are you sure you want to delete this loan? This action cannot be undone.
+        </p>
+        <div className="flex justify-end space-x-3">
+        <button
+            onClick={onCancel}
+            disabled={loading}
+            className="px-4 py-2 bg-zinc-200 cursor-pointer text-zinc-700 rounded-md
+            hover:bg-emerald-200 hover:text-zinc-900 transition duration-300"
+        >
+            Cancel
+        </button>
+        <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="px-4 py-2 bg-rose-600 cursor-pointer text-white 
+            rounded-md disabled:opacity-50 hover:bg-blue-200 hover:text-zinc-900 transition duration-300"
+        >
+            {loading ? 'Deleting...' : 'Delete'}
+        </button>
+        </div>
+    </div>
+    </div>
+);
+};
+
+
 
 return (
     <>
@@ -512,8 +559,23 @@ return (
                         >
                         <Edit className="w-4 h-4" />
                         </button>
+
+                        {/* Delete Confirmation Modal */}
+                        <DeleteConfirmationModal
+                        isOpen={showDeleteModal}
+                        onConfirm={handleDeleteLoan}
+                        onCancel={() => {
+                            setShowDeleteModal(false);
+                            setLoanToDelete(null);
+                        }}
+                        loading={deleteLoading}
+                        />
+
                         <button
-                        onClick={() => handleDeleteLoan(loan.id)}
+                        onClick={() => {
+                            setLoanToDelete(loan.id);
+                            setShowDeleteModal(true);
+                        }}
                         disabled={deleteLoading}
                         className="text-rose-600 hover:text-rose-900 p-1 rounded disabled:opacity-50"
                         title="Delete"

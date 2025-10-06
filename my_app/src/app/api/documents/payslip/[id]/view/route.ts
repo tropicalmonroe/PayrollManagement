@@ -2,89 +2,151 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../../../lib/prisma';
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+request: NextRequest,
+{ params }: { params: { id: string } }
 ) {
-  try {
-    const { id } = params;
+try {
+    const { id } = await params;
 
     // Retrieve the document
     const document = await prisma.document.findUnique({
-      where: { id: id as string },
-      include: {
+    where: { id: id as string },
+    include: {
         employee: true
-      }
+    }
     });
 
     if (!document) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }
+
+    console.log('Document found:', { 
+    id: document.id, 
+    type: document.type, 
+    period: document.period,
+    employeeId: document.employeeId,
+    metadata: document.metadata 
+    });
 
     // Retrieve the associated payroll calculation
     const metadata = document.metadata as any;
-    const payrollCalculation = await prisma.payrollCalculation.findUnique({
-      where: { id: metadata?.payrollCalculationId },
-      include: {
+    const payrollCalculationId = metadata?.payrollCalculationId;
+
+    let payrollCalculation;
+
+    if (payrollCalculationId) {
+    // Method 1: Find by payrollCalculationId from metadata
+    payrollCalculation = await prisma.payrollCalculation.findUnique({
+        where: { id: payrollCalculationId as string },
+        include: {
         employee: true
-      }
+        }
+    });
+    } else {
+    // Method 2: Find by employeeId and period (fallback)
+    const [month, year] = document.period.split(' ');
+    console.log('Trying fallback method with:', { 
+        employeeId: document.employeeId, 
+        month, 
+        year 
+    });
+
+    payrollCalculation = await prisma.payrollCalculation.findFirst({
+        where: {
+        employeeId: document.employeeId!,
+        month: month,
+        year: year
+        },
+        include: {
+        employee: true
+        }
     });
 
     if (!payrollCalculation) {
-      return NextResponse.json({ error: 'Payroll calculation not found' }, { status: 404 });
+        // Method 3: Try any payroll calculation for this employee
+        payrollCalculation = await prisma.payrollCalculation.findFirst({
+        where: {
+            employeeId: document.employeeId!
+        },
+        include: {
+            employee: true
+        },
+        orderBy: {
+            createdAt: 'desc'
+        }
+        });
     }
+    }
+
+    if (!payrollCalculation) {
+    console.log('No payroll calculation found for document:', document.id);
+    return NextResponse.json(
+        { 
+        error: 'Payroll calculation not found',
+        details: 'No payroll calculation found for this employee and period'
+        }, 
+        { status: 404 }
+    );
+    }
+
+    console.log('Payroll calculation found:', payrollCalculation.id);
 
     // Generate the payslip HTML
     const html = generatePayslipHTML(document, payrollCalculation);
 
     return new NextResponse(html, {
-      status: 200,
-      headers: {
+    status: 200,
+    headers: {
         'Content-Type': 'text/html; charset=utf-8',
-      },
+    },
     });
-  } catch (error) {
+} catch (error) {
     console.error('Error generating payslip view:', error);
-    return NextResponse.json({ error: 'Error generating payslip' }, { status: 500 });
-  }
+    return NextResponse.json(
+    { error: 'Error generating payslip', details: (error as Error).message }, 
+    { status: 500 }
+    );
+}
 }
 
 function generatePayslipHTML(document: any, payrollCalculation: any) {
-  const employee = payrollCalculation.employee;
-  const [monthName, year] = document.period.split(' ');
+const employee = payrollCalculation.employee;
+const [monthName, year] = document.period.split(' ');
 
-  const formatCurrency = (amount: number) => {
+const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
-      style: 'currency',
-      currency: 'KES',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+    style: 'currency',
+    currency: 'KES',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
     }).format(amount)
-  }
+}
 
-  const formatDate = (date: Date) => {
+const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
     }).format(new Date(date))
-  }
+}
 
-  const getMaritalStatus = () => {
+const getMaritalStatus = () => {
     switch (employee.maritalStatus) {
-      case 'SINGLE': return 'Single'
-      case 'MARRIED': return 'Married'
-      case 'DIVORCED': return 'Divorced'
-      case 'WIDOWED': return 'Widowed'
-      default: return employee.maritalStatus
+    case 'SINGLE': return 'Single'
+    case 'MARRIED': return 'Married'
+    case 'DIVORCED': return 'Divorced'
+    case 'WIDOWED': return 'Widowed'
+    default: return employee.maritalStatus
     }
-  }
+}
 
-  // Calculate Kenyan statutory rates
-  const nssfRate = 6.00; // 6%
-  const shifRate = 2.75; // 2.75%
-  const housingLevyRate = 1.50; // 1.5%
+// Calculate Kenyan statutory rates
+const nssfRate = 6.00; // 6%
+const shifRate = 2.75; // 2.75%
+const housingLevyRate = 1.50; // 1.5%
 
-  return `
+
+return `
 <!DOCTYPE html>
 <html lang="en">
 <head>

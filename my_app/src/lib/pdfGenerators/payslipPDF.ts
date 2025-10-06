@@ -57,14 +57,21 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
   // Employee Information Section
   pdf.addSectionTitle('EMPLOYEE INFORMATION');
   
-  pdf.addKeyValue('Employee ID', data.employee.employeeId);
-  pdf.addKeyValue('Full Name', `${data.employee.firstName} ${data.employee.lastName}`);
-  pdf.addKeyValue('Position', data.employee.position);
-  pdf.addKeyValue('Hire Date', formatDate(data.employee.hireDate));
-  pdf.addKeyValue('Seniority', `${data.employee.seniority} years`);
-  pdf.addKeyValue('Marital Status', data.employee.maritalStatus);
-  pdf.addKeyValue('ID Number', data.employee.idNumber);
-  pdf.addKeyValue('NSSF Number', data.employee.nssfNumber);
+  pdf.addKeyValue('Employee ID', data.employee.employeeId,{ tracking: -0.5 });
+  pdf.addSpace(5);
+  pdf.addKeyValue('Full Name', `${data.employee.firstName} ${data.employee.lastName}`, { tracking: -0.5 });
+  pdf.addSpace(5);
+  pdf.addKeyValue('Position', data.employee.position, { tracking: -0.5 });
+  pdf.addSpace(5);
+  pdf.addKeyValue('Hire Date', formatDate(data.employee.hireDate), { tracking: -0.5 });
+  pdf.addSpace(5);
+  pdf.addKeyValue('Seniority', `${data.employee.seniority} years`, { tracking: -0.5 });
+  pdf.addSpace(5);
+  pdf.addKeyValue('Marital Status', data.employee.maritalStatus, { tracking: -0.5 });
+  pdf.addSpace(5);
+  pdf.addKeyValue('ID Number', data.employee.idNumber, { tracking: -0.5 });
+  pdf.addSpace(5);
+  pdf.addKeyValue('NSSF Number', data.employee.nssfNumber, { tracking: -0.5 });
 
   pdf.addSpace(10);
 

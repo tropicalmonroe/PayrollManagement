@@ -1,6 +1,8 @@
+"use client";
 import { Employee, Credit, Advance, VariableElement } from '@prisma/client';
 import { calculatePayroll, type PayrollResult, SENIORITY_SCALE } from '../lib/payrollCalculations';
 import { FaUser, FaRegIdCard } from 'react-icons/fa';
+import { useEffect } from 'react';
 
 interface DetailedPayrollViewProps {
 employee: Employee & {
@@ -183,6 +185,39 @@ const getCorrectSeniorityRate = () => {
     );
     return tranche ? tranche.rate : 0;
 };
+
+// Add this function inside your DetailedPayrollView component
+const savePayrollCalculation = async () => {
+try {
+    const response = await fetch('/api/payroll', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        employeeId: employee.id,
+        month: month,
+        year: year
+    }),
+    });
+
+    if (response.ok) {
+    const result = await response.json();
+    console.log('✅ Payroll calculation saved:', result);
+    } else {
+    console.error('❌ Failed to save payroll calculation');
+    }
+} catch (error) {
+    console.error('❌ Error saving payroll calculation:', error);
+}
+};
+
+// Call this when payroll is calculated
+useEffect(() => {
+if (payrollResult) {
+    savePayrollCalculation();
+}
+}, [payrollResult]);
 
 // Calculate total employer cost
 const totalEmployerCost = payrollResult.grossSalary + payrollResult.employerContributions.totalEmployerContributions;

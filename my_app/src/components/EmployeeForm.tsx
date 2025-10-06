@@ -27,7 +27,7 @@ const [formData, setFormData] = useState({
     dateOfBirth: initialData?.dateOfBirth ? new Date(initialData.dateOfBirth).toISOString().split('T')[0] : '',
     hireDate: initialData?.hireDate ? new Date(initialData.hireDate).toISOString().split('T')[0] : '',
     numberOfDeductions: initialData?.numberOfDeductions || 0,
-    numberOfDaysPerMonth: initialData?.numberOfDaysPerMonth || 30,
+    numberOfDaysPerMonth: initialData?.numberOfDaysPerMonth || 26,
     baseSalary: initialData?.baseSalary || '',
     housingAllowance: initialData?.housingAllowance || '',
     mealAllowance: initialData?.mealAllowance || '',

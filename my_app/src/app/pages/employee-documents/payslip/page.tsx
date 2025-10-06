@@ -5,11 +5,6 @@ import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import PayslipPage from "./_components/PayslipPage";
 
-export const metadata = {
-title: "Payslip - NewLight Academy Payroll Management",
-description: "Payslip page for the payroll management application",
-};
-
 export default async function PayslipDashboardPage() {
 const { userId } = await auth();
 
