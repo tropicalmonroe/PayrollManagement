@@ -1,10 +1,18 @@
 "use client";
+
 import React, { useState, useEffect } from 'react';
 import { Award, ArrowLeft, Download, User, Calendar, Search, FileText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Employee } from '@prisma/client';
 
 type CertificateType = 'INCOME' | 'ATTENDANCE';
+
+interface CertificateData {
+  employee: Employee;
+  type: CertificateType;
+  customText: string;
+  generatedDate: Date;
+}
 
 const SalaryCertificatePage = () => {
   const router = useRouter();
@@ -16,7 +24,7 @@ const SalaryCertificatePage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [customText, setCustomText] = useState('');
   const [showPreview, setShowPreview] = useState(false);
-  const [certificateData, setCertificateData] = useState<any>(null);
+  const [certificateData, setCertificateData] = useState<CertificateData | null>(null);
 
   useEffect(() => {
     fetchEmployees();
@@ -25,12 +33,19 @@ const SalaryCertificatePage = () => {
   const fetchEmployees = async () => {
     try {
       const response = await fetch('/api/employees');
-      if (response.ok) {
-        const data = await response.json();
-        setEmployees(data.filter((emp: Employee) => emp.status === 'ACTIVE'));
+      if (!response.ok) {
+        throw new Error(`Failed to fetch employees: ${response.statusText}`);
       }
-    } catch (error) {
+      const data = await response.json();
+      if (!Array.isArray(data)) {
+        throw new Error('Expected an array of employees');
+      }
+      const validEmployees = data.filter((emp: Employee) => emp.status === 'ACTIVE' && emp.id && emp.employeeId);
+      console.log('Fetched employees:', validEmployees);
+      setEmployees(validEmployees);
+    } catch (error: any) {
       console.error('Error loading employees:', error);
+      alert(`Failed to load employees: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -43,85 +58,114 @@ const SalaryCertificatePage = () => {
     }
 
     setGenerating(true);
-    
+
     try {
+      console.log('Selected Employee ID:', selectedEmployee);
+      console.log('Employees:', employees);
       const employee = employees.find(emp => emp.id === selectedEmployee);
       if (!employee) {
-        throw new Error('Employee not found');
+        throw new Error('Employee not found in employees list');
+      }
+
+      const requiredFields: (keyof Employee)[] = ['id', 'employeeId', 'firstName', 'lastName', 'position', 'hireDate', 'baseSalary'];
+      const missingFields = requiredFields.filter(field => employee[field] === undefined || employee[field] === null);
+      if (missingFields.length > 0) {
+        throw new Error(`Missing required employee fields: ${missingFields.join(', ')}`);
+      }
+
+      if (employee.netSalary === 0 && certificateType === 'INCOME') {
+        console.warn('Employee netSalary is 0, payroll data may be missing');
       }
 
       setCertificateData({
         employee,
         type: certificateType,
         customText,
-        generatedDate: new Date()
+        generatedDate: new Date(),
       });
       setShowPreview(true);
-
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error during generation:', error);
-      alert('Error generating certificate');
+      alert(`Error generating certificate: ${error.message}`);
     } finally {
       setGenerating(false);
     }
   };
 
-  const handleDownloadPDF = async () => {
-    if (!certificateData) return;
+const handleDownloadPDF = async () => {
+  if (!certificateData) {
+    alert('No certificate data available');
+    return;
+  }
 
-    try {
-      // Calculate date range for the certificate (last 12 months)
-      const dateEnd = new Date();
-      const dateStart = new Date();
-      dateStart.setFullYear(dateEnd.getFullYear() - 1);
+  try {
+    const dateEnd = new Date();
+    const dateStart = new Date();
+    dateStart.setFullYear(dateEnd.getFullYear() - 1);
 
-      const response = await fetch('/api/documents/salary-certificate/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          employeeId: certificateData.employee.id,
-          type: certificateType,
-          dateStart: dateStart.toISOString(),
-          dateEnd: dateEnd.toISOString(),
-          reason: `Certificate of ${certificateData.type.toLowerCase()}`
-        }),
-      });
+    const payload = {
+      employeeId: certificateData.employee.id,
+      type: certificateType,
+      startDate: dateStart.toISOString(),
+      endDate: dateEnd.toISOString(),
+      reason: `Certificate of ${certificateType.toLowerCase()}`,
+    };
+    console.log('Sending payload to API:', payload);
 
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `certificate_${certificateData.type.toLowerCase()}_${certificateData.employee.employeeId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        alert('Error downloading PDF');
-      }
-    } catch (error) {
-      console.error('Error during download:', error);
-      alert('Error downloading PDF');
+    const response = await fetch('/api/documents/salary-certificate/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('API Error:', errorData);
+      throw new Error(`Error downloading PDF: ${errorData.error || 'Unknown error'}${errorData.details ? ` - ${errorData.details}` : ''}`);
     }
-  };
+
+    const contentType = response.headers.get('Content-Type');
+    if (contentType !== 'application/pdf') {
+      throw new Error(`Invalid response Content-Type: ${contentType}`);
+    }
+
+    const blob = await response.blob();
+    console.log('Received Blob:', { size: blob.size, type: blob.type });
+
+    if (blob.size === 0) {
+      throw new Error('Received empty PDF response');
+    }
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = `certificate_${certificateType.toLowerCase()}_${certificateData.employee.employeeId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (error: any) {
+    console.error('Error during download:', error);
+    alert(`Error downloading PDF: ${error.message}`);
+  }
+};
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
       currency: 'KES',
-      minimumFractionDigits: 2
+      minimumFractionDigits: 2,
     }).format(amount);
   };
 
   const formatDate = (date: Date | string) => {
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('en-KE', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     }).format(new Date(date));
   };
 
@@ -130,15 +174,15 @@ const SalaryCertificatePage = () => {
     const hire = new Date(hireDate);
     const years = today.getFullYear() - hire.getFullYear();
     const months = today.getMonth() - hire.getMonth();
-    
+
     let totalMonths = years * 12 + months;
     if (today.getDate() < hire.getDate()) {
       totalMonths--;
     }
-    
+
     const seniorityYears = Math.floor(totalMonths / 12);
     const seniorityMonths = totalMonths % 12;
-    
+
     if (seniorityYears === 0) {
       return `${seniorityMonths} month${seniorityMonths !== 1 ? 's' : ''}`;
     } else if (seniorityMonths === 0) {
@@ -150,7 +194,7 @@ const SalaryCertificatePage = () => {
 
   const getDefaultText = (type: CertificateType, employee: Employee | null) => {
     if (!employee) return '';
-    
+
     if (type === 'INCOME') {
       return `I, the undersigned, certify that ${employee.firstName} ${employee.lastName}, holder of ID Number ${employee.idNumber || 'N/A'}, is employed as a ${employee.position} in our organization since ${formatDate(employee.hireDate)}.\n\nTheir monthly gross salary amounts to ${formatCurrency(employee.baseSalary)}.\n\nThis certificate is issued to the employee for official use as required.`;
     } else {
@@ -378,10 +422,10 @@ const SalaryCertificatePage = () => {
                 {/* Header */}
                 <div className="text-center border-b-2 border-zinc-200 pb-6 mb-8">
                   <h2 className="text-2xl font-bold text-zinc-900 mb-2">
-                    CERTIFICATE OF {certificateData.type === 'INCOME' ? 'INCOME' : 'ATTENDANCE'} 
+                    CERTIFICATE OF {certificateData?.type === 'INCOME' ? 'INCOME' : 'ATTENDANCE'} 
                   </h2>
                   <p className="text-zinc-600">
-                    Issued on {formatDate(certificateData.generatedDate)}
+                    Issued on {certificateData ? formatDate(certificateData.generatedDate) : ''}
                   </p>
                 </div>
 
@@ -392,29 +436,31 @@ const SalaryCertificatePage = () => {
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-zinc-600">Full Name:</span> 
-                        <div className="font-medium">{certificateData.employee.firstName} {certificateData.employee.lastName}</div>
+                        <div className="font-medium">
+                          {certificateData ? `${certificateData.employee.firstName} ${certificateData.employee.lastName}` : 'N/A'}
+                        </div>
                       </div>
                       <div>
                         <span className="text-zinc-600">Employee ID:</span> 
-                        <div className="font-medium">{certificateData.employee.employeeId}</div>
+                        <div className="font-medium">{certificateData ? certificateData.employee.employeeId : 'N/A'}</div>
                       </div>
                       <div>
                         <span className="text-zinc-600">ID Number:</span> 
-                        <div className="font-medium">{certificateData.employee.idNumber || 'N/A'}</div>
+                        <div className="font-medium">{certificateData ? certificateData.employee.idNumber : 'N/A'}</div>
                       </div>
                       <div>
                         <span className="text-zinc-600">Position:</span> 
-                        <div className="font-medium">{certificateData.employee.position}</div>
+                        <div className="font-medium">{certificateData ? certificateData.employee.position : 'N/A'}</div>
                       </div>
                       <div>
                         <span className="text-zinc-600">Hire Date:</span> 
-                        <div className="font-medium">{formatDate(certificateData.employee.hireDate)}</div>
+                        <div className="font-medium">{formatDate(certificateData ? certificateData.employee.hireDate : '')}</div>
                       </div>
                       <div>
                         <span className="text-zinc-600">Seniority:</span> 
-                        <div className="font-medium">{calculateSeniority(certificateData.employee.hireDate)}</div>
+                        <div className="font-medium">{calculateSeniority(certificateData ? certificateData.employee.hireDate : new Date())}</div>
                       </div>
-                      {certificateData.type === 'INCOME' && (
+                      {certificateData && certificateData.type === 'INCOME' && (
                         <>
                           <div>
                             <span className="text-zinc-600">Base Salary:</span> 
@@ -435,7 +481,9 @@ const SalaryCertificatePage = () => {
                   <h3 className="font-medium text-zinc-900 mb-4">Certificate</h3> 
                   <div className="bg-blue-50 p-6 rounded-lg">
                     <div className="text-zinc-800 leading-relaxed whitespace-pre-line">
-                      {certificateData.customText || getDefaultText(certificateData.type, certificateData.employee)}
+                      {certificateData
+                        ? (certificateData.customText || getDefaultText(certificateData.type, certificateData.employee))
+                        : ''}
                     </div>
                   </div>
                 </div>
@@ -443,7 +491,9 @@ const SalaryCertificatePage = () => {
                 {/* Signature */}
                 <div className="text-right">
                   <div className="inline-block">
-                    <div className="text-sm text-zinc-600 mb-2">Issued in Nairobi, on {formatDate(certificateData.generatedDate)}</div> 
+                    <div className="text-sm text-zinc-600 mb-2">
+                      Issued in Nairobi, on {certificateData ? formatDate(certificateData.generatedDate) : ''}
+                    </div> 
                     <div className="border-t border-zinc-300 pt-4 mt-8">
                       <div className="text-sm font-medium text-zinc-900">Employer’s Signature and Stamp</div>
                     </div>

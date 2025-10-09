@@ -231,7 +231,7 @@ const employeeData: EmployeePayrollData = {
   const getMonthLabel = (monthString: string) => {
     const [year, month] = monthString.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('en-GB', {
       year: 'numeric',
       month: 'long'
     }).format(date);
@@ -364,7 +364,8 @@ const employeeData: EmployeePayrollData = {
                 <button
                   onClick={handleCalculatePayroll}
                   disabled={selectedEmployees.length === 0 || calculating}
-                  className="flex items-center space-x-2 bg-blue-200 text-white px-6 py-3 rounded-lg hover:bg-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center space-x-2 text-white bg-fuchsia-500 cursor-pointer
+                        hover:bg-blue-200 hover:text-zinc-900 transition duration-300 rounded-xl px-6 py-3"
                 >
                   <Calculator className="w-5 h-5" />
                   <span>Calculate Payroll</span> 

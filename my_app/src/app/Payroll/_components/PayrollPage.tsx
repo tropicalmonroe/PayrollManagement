@@ -228,7 +228,7 @@ return (
         ) : employees.length === 0 ? (
             <div className="p-8 text-center">
             <div className='flex items-center justify-center'>
-            <span className="text-6xl text-rose-400 text-cente">
+            <span className="text-6xl text-rose-400 text-center">
             <MdOutlinePeopleAlt/>
             </span>
             </div>

@@ -210,7 +210,7 @@ const NSSF_RATES = {
       `# Company: ${companyInfo.name}`,
       `# NSSF Number: ${companyInfo.nssfNumber}`,
       `# Period: ${getMonthLabel(selectedMonth)}`,
-      `# Generation date: ${new Date().toLocaleDateString('en-US')}`,
+      `# Generation date: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}`,
       '',
       '# SUMMARY',
       `# Number of employees: ${summary?.totalEmployees || 0}`,
@@ -284,7 +284,7 @@ const NSSF_RATES = {
   const getMonthLabel = (monthString: string) => {
     const [year, month] = monthString.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('en-GB', {
       year: 'numeric',
       month: 'long'
     }).format(date);
@@ -605,7 +605,7 @@ const NSSF_RATES = {
                 </div>
                 <div>
                   <span className="text-zinc-600">Generation date :</span>
-                  <div className="font-medium">{new Date().toLocaleDateString('en-US')}</div>
+                  <div className="font-medium">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
                 </div>
               </div>
             </div>

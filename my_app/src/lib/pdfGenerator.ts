@@ -166,7 +166,7 @@ export class PDFGenerator {
 
     // Generation date
     const now = new Date();
-    const dateStr = now.toLocaleDateString('en-US', {
+    const dateStr = now.toLocaleDateString('en-GB', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -470,7 +470,7 @@ export const formatCurrency = (amount: number): string => {
 
 export const formatDate = (date: Date | string): string => {
   const d = typeof date === 'string' ? new Date(date) : date;
-  return d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString('en-GB', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'

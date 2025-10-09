@@ -169,14 +169,14 @@ export default function PayslipPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-zinc-900">Payslips</h1>
-            <p className="text-zinc-600">Generation and management of individual payslips</p>
+            <h1 className="text-2xl font-bold text-zinc-800 tracking-tighter">Payslips</h1>
+            <p className="text-zinc-500 tracking-tight">Generation and management of individual payslips</p>
           </div>
         </div>
 
         {/* Payslip generation */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-zinc-900 mb-4">
+        <div className="bg-[#1f435b] rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-zinc-50 mb-4">
             <Plus className="inline-block w-5 h-5 mr-2" />
             Generate New Payslip
           </h2>
@@ -190,13 +190,13 @@ export default function PayslipPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
+              <label className="block text-sm font-medium text-white tracking-tight mb-2">
                 Employee
               </label>
               <select
                 value={selectedEmployee}
                 onChange={(e) => setSelectedEmployee(e.target.value)}
-                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="">Select an employee</option>
                 {employees.map((employee) => (
@@ -208,13 +208,13 @@ export default function PayslipPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
+              <label className="block text-sm font-medium text-white tracking-tight mb-2">
                 Month
               </label>
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="">Select a month</option>
                 {months.map((month) => (
@@ -226,13 +226,13 @@ export default function PayslipPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
+              <label className="block text-sm font-medium text-white tracking-tight mb-2">
                 Year
               </label>
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 {[2024, 2025, 2026].map((year) => (
                   <option key={year} value={year}>
@@ -246,7 +246,8 @@ export default function PayslipPage() {
               <button
                 onClick={generatePayslip}
                 disabled={generating}
-                className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="flex items-center justify-center space-x-2 text-white bg-fuchsia-500 cursor-pointer
+                        hover:bg-blue-200 hover:text-zinc-900 transition duration-300 rounded-xl px-6 py-3 w-full"
               >
                 {generating ? (
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -260,7 +261,7 @@ export default function PayslipPage() {
         </div>
 
         {/* Filters and search */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-[#6ea0c2] rounded-lg shadow p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
@@ -270,13 +271,16 @@ export default function PayslipPage() {
                   placeholder="Search by name, first name or employee ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-zinc-300 rounded-md 
+                  focus:outline-none focus:ring-2 focus:ring-blue-200 bg-white
+                  placeholder:tracking-tight placeholder:text-zinc-400 placeholder:text-sm"
                 />
               </div>
             </div>
             <button
               onClick={fetchDocuments}
-              className="px-4 py-2 bg-zinc-100 text-zinc-700 rounded-md hover:bg-zinc-200 flex items-center"
+              className="flex items-center justify-center space-x-2 text-white bg-sky-800 cursor-pointer
+                        hover:bg-blue-200 hover:text-zinc-900 transition duration-300 rounded-xl px-6 py-3"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
@@ -360,37 +364,53 @@ export default function PayslipPage() {
                         {getStatusBadge(document.status)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
-                        {new Date(document.generationDate).toLocaleDateString('en-US')}
+                        {new Date(document.generationDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
+                          <div className="flex items-center justify-center w-10 h-10 cursor-pointer
+                          bg-blue-200 hover:bg-blue-900 rounded-xl p-1 text-blue-500 hover:text-blue-50 
+                          transition duration-300">
                           <button 
                             onClick={() => window.open(`/api/documents/payslip/${document.id}/view`, '_blank')}
-                            className="text-blue-600 hover:text-blue-900"
+                            className=""
                             title="View"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
+                            </div>
+                            <div className="flex items-center justify-center w-10 h-10 cursor-pointer
+                          bg-green-200 hover:bg-green-900 rounded-xl p-1 text-green-500 hover:text-green-50 
+                          transition duration-300">
                           <button 
                             onClick={() => window.open(`/api/documents/payslip/${document.id}/view`, '_blank')}
-                            className="text-green-600 hover:text-green-900"
+                            className=""
                             title="Download"
                           >
                             <Download className="w-4 h-4" />
                           </button>
+                            </div>
+                            <div className="flex items-center justify-center w-10 h-10 cursor-pointer
+                          bg-zinc-200 hover:bg-zinc-900 rounded-xl p-1 text-zinc-500 hover:text-zinc-50 
+                          transition duration-300">
                           <button 
                             onClick={() => {
                               const printWindow = window.open(`/api/documents/payslip/${document.id}/view`, '_blank');
                               printWindow?.addEventListener('load', () => printWindow.print());
                             }}
-                            className="text-zinc-600 hover:text-zinc-900"
+                            className=""
                             title="Print"
                           >
                             <Printer className="w-4 h-4" />
                           </button>
-                          <button className="text-purple-600 hover:text-purple-900" title="Send by email">
+                            </div>
+                          <div className="flex items-center justify-center w-10 h-10 cursor-pointer
+                          bg-purple-200 hover:bg-purple-900 rounded-xl p-1 text-purple-500 hover:text-purple-50 
+                          transition duration-300">
+                          <button className="" title="Send by email">
                             <Mail className="w-4 h-4" />
                           </button>
+                          </div>
                         </div>
                       </td>
                     </tr>

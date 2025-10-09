@@ -107,60 +107,88 @@ export default function FinalSettlementPage() {
     }
   };
 
-  const generateFinalSettlement = async () => {
-    if (!selectedEmployee || !endDate || !departureReason) {
-      setError('Please fill in all required fields');
-      return;
+const generateFinalSettlement = async () => {
+  if (!selectedEmployee || !endDate || !departureReason) {
+    setError('Please fill in all required fields');
+    return;
+  }
+
+  if (new Date(endDate) > new Date()) {
+    setError('End date cannot be in the future');
+    return;
+  }
+
+  setGenerating(true);
+  setError('');
+
+  try {
+    const response = await fetch('/api/documents/final-settlement/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        employeeId: selectedEmployee,
+        endDate,
+        departureReason,
+        unusedLeave: unusedLeave || '0',
+        severancePay: severancePay || '0',
+        otherAllowances: otherAllowances || '0',
+        deductions: deductions || '0'
+      }),
+    });
+
+    if (!response.ok) {
+      // Handle JSON error response
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Error generating final settlement');
     }
 
-    if (new Date(endDate) > new Date()) {
-      setError('End date cannot be in the future');
-      return;
+    // Handle PDF response
+    const contentType = response.headers.get('Content-Type');
+    if (contentType === 'application/pdf') {
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      
+      // Get employee data for filename
+      const employee = employees.find(emp => emp.id === selectedEmployee);
+      const filename = `final-settlement-${employee?.employeeId || 'unknown'}.pdf`;
+      a.download = filename;
+      
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      // Reload document list
+      fetchDocuments();
+      
+      // Reset form
+      setSelectedEmployee('');
+      setEndDate('');
+      setDepartureReason('');
+      setUnusedLeave('');
+      setSeverancePay('');
+      setOtherAllowances('');
+      setDeductions('');
+    } else {
+      // Handle unexpected response type
+      const text = await response.text();
+      console.error('Unexpected response:', text);
+      throw new Error('Unexpected response from server');
     }
-
-    setGenerating(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/documents/final-settlement/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          employeeId: selectedEmployee,
-          endDate,
-          departureReason,
-          unusedLeave: unusedLeave || '0',
-          severancePay: severancePay || '0',
-          otherAllowances: otherAllowances || '0',
-          deductions: deductions || '0'
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Reload document list
-        fetchDocuments();
-        // Reset form
-        setSelectedEmployee('');
-        setEndDate('');
-        setDepartureReason('');
-        setUnusedLeave('');
-        setSeverancePay('');
-        setOtherAllowances('');
-        setDeductions('');
-      } else {
-        setError(data.error || 'Error generating final settlement');
-      }
-    } catch (error) {
-      setError('Error generating final settlement');
-      console.error('Error generating final settlement:', error);
-    } finally {
-      setGenerating(false);
-    }
-  };
+  } catch (error: any) {
+    setError(error.message || 'Error generating final settlement');
+    console.error('Error generating final settlement:', error);
+  } finally {
+    setGenerating(false);
+  }
+};
 
   const filteredDocuments = documents.filter(doc =>
     doc.employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -189,14 +217,14 @@ export default function FinalSettlementPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-zinc-900">Final Settlement</h1>
-            <p className="text-zinc-600">Entry of termination elements and generation of official document</p>
+            <h1 className="text-2xl font-bold text-zinc-800 tracking-tighter">Final Settlement</h1>
+            <p className="text-zinc-500 tracking-tight">Entry of termination elements and generation of official document</p>
           </div>
         </div>
 
         {/* Settlement generation */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-zinc-900 mb-4">
+        <div className="bg-[#1f435b] rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-zinc-50 mb-4 flex items-center">
             <Plus className="inline-block w-5 h-5 mr-2" />
             Generate New Final Settlement
           </h2>
@@ -210,13 +238,13 @@ export default function FinalSettlementPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
+              <label className="block text-sm font-medium text-white tracking-tight mb-2">
                 Employee *
               </label>
               <select
                 value={selectedEmployee}
                 onChange={(e) => setSelectedEmployee(e.target.value)}
-                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="">Select an employee</option>
                 {employees.map((employee) => (
@@ -228,25 +256,25 @@ export default function FinalSettlementPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
+              <label className="block text-sm font-medium text-white tracking-tight mb-2">
                 Contract End Date *
               </label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
+              <label className="block text-sm font-medium text-white tracking-tight mb-2">
                 Departure Reason *
               </label>
               <select
                 value={departureReason}
                 onChange={(e) => setDepartureReason(e.target.value)}
-                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="">Select a reason</option>
                 {departureReasons.map((reason) => (
@@ -260,14 +288,14 @@ export default function FinalSettlementPage() {
 
           {/* Financial elements */}
           <div className="border-t pt-6">
-            <h3 className="text-md font-semibold text-zinc-900 mb-4 flex items-center">
+            <h3 className="text-md font-semibold text-zinc-50 mb-4 flex items-center">
               <DollarSign className="w-5 h-5 mr-2" />
               Financial Elements
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-2">
+                <label className="block text-sm font-medium text-white tracking-tight mb-2">
                   Unused Leave Days (KES)
                 </label>
                 <input
@@ -276,12 +304,12 @@ export default function FinalSettlementPage() {
                   value={unusedLeave}
                   onChange={(e) => setUnusedLeave(e.target.value)}
                   placeholder="0.00"
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-2">
+                <label className="block text-sm font-medium text-white tracking-tight mb-2">
                   Severance Pay (KES)
                 </label>
                 <input
@@ -290,12 +318,12 @@ export default function FinalSettlementPage() {
                   value={severancePay}
                   onChange={(e) => setSeverancePay(e.target.value)}
                   placeholder="0.00"
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-2">
+                <label className="block text-sm font-medium text-white tracking-tight mb-2">
                   Other Allowances (KES)
                 </label>
                 <input
@@ -304,12 +332,12 @@ export default function FinalSettlementPage() {
                   value={otherAllowances}
                   onChange={(e) => setOtherAllowances(e.target.value)}
                   placeholder="0.00"
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-2">
+                <label className="block text-sm font-medium text-white tracking-tight mb-2">
                   Various Deductions (KES)
                 </label>
                 <input
@@ -318,7 +346,7 @@ export default function FinalSettlementPage() {
                   value={deductions}
                   onChange={(e) => setDeductions(e.target.value)}
                   placeholder="0.00"
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 />
               </div>
             </div>
@@ -328,7 +356,8 @@ export default function FinalSettlementPage() {
             <button
               onClick={generateFinalSettlement}
               disabled={generating}
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="flex items-center justify-center space-x-2 text-white bg-fuchsia-500 cursor-pointer
+                        hover:bg-blue-200 hover:text-zinc-900 transition duration-300 rounded-xl px-6 py-3"
             >
               {generating ? (
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -341,7 +370,7 @@ export default function FinalSettlementPage() {
         </div>
 
         {/* Filters and search */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-[#6ea0c2] rounded-lg shadow p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
@@ -351,13 +380,15 @@ export default function FinalSettlementPage() {
                   placeholder="Search by name, first name or employee ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 
+                  focus:ring-blue-200 bg-white placeholder:tracking-tight placeholder:text-zinc-400 placeholder:text-sm"
                 />
               </div>
             </div>
             <button
               onClick={fetchDocuments}
-              className="px-4 py-2 bg-zinc-100 text-zinc-700 rounded-md hover:bg-zinc-200 flex items-center"
+              className="flex items-center justify-center space-x-2 text-white bg-sky-800 cursor-pointer
+                        hover:bg-blue-200 hover:text-zinc-900 transition duration-300 rounded-xl px-6 py-3"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
@@ -445,7 +476,7 @@ export default function FinalSettlementPage() {
                         {getStatusBadge(document.status)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
-                        {new Date(document.generationDate).toLocaleDateString('en-US')}
+                        {new Date(document.generationDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">

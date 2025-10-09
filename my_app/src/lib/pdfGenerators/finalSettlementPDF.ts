@@ -3,6 +3,7 @@ import { PDFGenerator, formatCurrency, formatDate } from '../pdfGenerator';
 export interface FinalSettlementData {
   employee: {
     employeeId: string;
+    idNumber: string;
     lastName: string;
     firstName: string;
     position: string;
@@ -53,6 +54,7 @@ export async function generateFinalSettlementPDF(data: FinalSettlementData): Pro
   
   pdf.addKeyValue('Full Name', `${data.employee.firstName} ${data.employee.lastName}`);
   pdf.addKeyValue('Employee ID', data.employee.employeeId);
+  pdf.addKeyValue('ID Number', data.employee.idNumber);
   pdf.addKeyValue('Position', data.employee.position);
   pdf.addKeyValue('Hire Date', formatDate(data.employee.hireDate));
   pdf.addKeyValue('Contract End Date', formatDate(data.settlement.endDate));

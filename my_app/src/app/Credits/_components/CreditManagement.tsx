@@ -533,7 +533,10 @@ return (
                         className="text-purple-600 hover:text-purple-900 p-1 rounded"
                         title="View payment schedule"
                         >
+                        <div className="flex items-center justify-center w-10 h-10 bg-purple-200 cursor-pointer
+                        hover:bg-purple-800 hover:text-white transition duration-300 rounded-xl p-1">
                         <FileText className="w-4 h-4" />
+                        </div>
                         </button>
                         <button
                         onClick={() => {
@@ -545,7 +548,10 @@ return (
                         className="text-[#0063b4] hover:text-[#0052a3] p-1 rounded"
                         title="View details"
                         >
+                        <div className="flex items-center justify-center w-10 h-10 bg-blue-200 cursor-pointer
+                        hover:bg-blue-800 hover:text-white transition duration-300 rounded-xl p-1">
                         <Eye className="w-4 h-4" />
+                        </div>
                         </button>
                         <button
                         onClick={() => {
@@ -557,7 +563,10 @@ return (
                         className="text-zinc-600 hover:text-zinc-900 p-1 rounded"
                         title="Edit"
                         >
+                        <div className="flex items-center justify-center w-10 h-10 bg-zinc-200 cursor-pointer
+                        hover:bg-zinc-800 hover:text-white transition duration-300 rounded-xl p-1">
                         <Edit className="w-4 h-4" />
+                        </div>
                         </button>
 
                         {/* Delete Confirmation Modal */}
@@ -580,7 +589,10 @@ return (
                         className="text-rose-600 hover:text-rose-900 p-1 rounded disabled:opacity-50"
                         title="Delete"
                         >
+                        <div className="flex items-center justify-center w-10 h-10 bg-rose-200 cursor-pointer
+                        hover:bg-rose-800 hover:text-white transition duration-300 rounded-xl p-1">
                         <Trash2 className="w-4 h-4" />
+                        </div>
                         </button>
                     </div>
                     </td>

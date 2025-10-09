@@ -198,7 +198,7 @@ const PayslipPage = () => {
   };
 
   const formatDate = (date: Date | string) => {
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('en-GB', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -208,7 +208,7 @@ const PayslipPage = () => {
   const getMonthLabel = (monthString: string) => {
     const [year, month] = monthString.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('en-GB', {
       year: 'numeric',
       month: 'long'
     }).format(date);
@@ -595,3 +595,4 @@ const PayslipPage = () => {
 };
 
 export default PayslipPage;
+

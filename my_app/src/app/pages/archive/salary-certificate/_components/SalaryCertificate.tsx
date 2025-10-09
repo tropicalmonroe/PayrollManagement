@@ -200,14 +200,14 @@ export default function SalaryCertificatePage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-zinc-900">Salary Certificates</h1>
-            <p className="text-zinc-600">Generate income or presence certificates</p>
+            <h1 className="text-2xl font-bold text-zinc-800 tracking-tighter">Salary Certificates</h1>
+            <p className="text-zinc-500 tracking-tight">Generate income or presence certificates</p>
           </div>
         </div>
 
         {/* Certificate generation */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-zinc-900 mb-4">
+        <div className="bg-[#1f435b] rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-zinc-50 mb-4">
             <Plus className="inline-block w-5 h-5 mr-2" />
             Generate New Certificate
           </h2>
@@ -221,13 +221,13 @@ export default function SalaryCertificatePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
+              <label className="block text-sm font-medium text-white tracking-tight mb-2">
                 Employee *
               </label>
               <select
                 value={selectedEmployee}
                 onChange={(e) => setSelectedEmployee(e.target.value)}
-                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="">Select an employee</option>
                 {employees.map((employee) => (
@@ -239,13 +239,13 @@ export default function SalaryCertificatePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
+              <label className="block text-sm font-medium text-white tracking-tight mb-2">
                 Certificate Type *
               </label>
               <select
                 value={certificateType}
                 onChange={(e) => setCertificateType(e.target.value)}
-                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="">Select a type</option>
                 {certificateTypes.map((type) => (
@@ -257,31 +257,31 @@ export default function SalaryCertificatePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
+              <label className="block text-sm font-medium text-white tracking-tight mb-2">
                 Start Date *
               </label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
+              <label className="block text-sm font-medium text-white tracking-tight mb-2">
                 End Date *
               </label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
+              <label className="block text-sm font-medium text-white tracking-tight mb-2">
                 Reason (optional)
               </label>
               <textarea
@@ -289,7 +289,9 @@ export default function SalaryCertificatePage() {
                 onChange={(e) => setReason(e.target.value)}
                 rows={3}
                 placeholder="Specify the reason for the certificate request..."
-                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-md 
+                focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white 
+                placeholder:tracking-tight placeholder:text-zinc-400 placeholder:text-sm" 
               />
             </div>
           </div>
@@ -298,7 +300,8 @@ export default function SalaryCertificatePage() {
             <button
               onClick={generateCertificate}
               disabled={generating}
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="flex items-center justify-center space-x-2 text-white bg-fuchsia-500 cursor-pointer
+                        hover:bg-blue-200 hover:text-zinc-900 transition duration-300 rounded-xl px-6 py-3"
             >
               {generating ? (
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -311,7 +314,7 @@ export default function SalaryCertificatePage() {
         </div>
 
         {/* Filters and search */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-[#6ea0c2] rounded-lg shadow p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
@@ -321,7 +324,8 @@ export default function SalaryCertificatePage() {
                   placeholder="Search by name, first name or employee ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2
+                  focus:ring-blue-200 bg-white placeholder:tracking-tight placeholder:text-zinc-400 placeholder:text-sm"
                 />
               </div>
             </div>
@@ -405,33 +409,37 @@ export default function SalaryCertificatePage() {
                         {getStatusBadge(document.status)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
-                        {new Date(document.generationDate).toLocaleDateString('en-US')}
+                        {new Date(document.generationDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           <button
                             onClick={() => window.open(`/documents/salary-certificate/${document.id}`, '_blank')}
-                            className="text-green-600 hover:text-green-800"
+                            className="flex items-center justify-center cursor-pointer w-fit p-2 text-white hover:text-black bg-green-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
                             title="View"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDownload(document.id)}
-                            className="text-blue-600 hover:text-blue-800"
+                            className="flex items-center justify-center cursor-pointer w-fit p-2 text-white hover:text-black bg-blue-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
                             title="Download"
                           >
                             <Download className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => window.print()}
-                            className="text-zinc-600 hover:text-zinc-800"
+                            className="flex items-center justify-center cursor-pointer w-fit p-2 text-white hover:text-black bg-zinc-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
                             title="Print"
                           >
                             <Printer className="w-4 h-4" />
                           </button>
                           <button
-                            className="text-purple-600 hover:text-purple-800"
+                            className="flex items-center justify-center cursor-pointer w-fit p-2 text-white hover:text-black bg-purple-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
                             title="Send by email"
                           >
                             <Mail className="w-4 h-4" />
