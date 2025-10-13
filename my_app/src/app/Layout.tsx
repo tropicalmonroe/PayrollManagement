@@ -31,7 +31,7 @@ return (
     <ClerkProvider>
         <ToastContainer position="bottom-right" autoClose={2000} theme="dark" transition={Bounce} />
         <html lang="en">
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+            <body className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}>
                 <ToastContainer position="bottom-right" autoClose={2000} theme="dark" transition={Bounce} />
                 {children}
             </body>

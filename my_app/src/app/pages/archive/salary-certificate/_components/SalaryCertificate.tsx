@@ -173,6 +173,27 @@ export default function SalaryCertificatePage() {
     }
   };
 
+  const handlePrint = async (documentId: string) => {
+  try {
+    const printWindow = window.open(`/api/documents/salary-certificate/${documentId}/print`, '_blank');
+    
+    if (!printWindow) {
+      throw new Error('Popup blocked! Please allow popups for this site.');
+    }
+
+    printWindow.addEventListener('load', () => {
+      setTimeout(() => {
+        printWindow.print();
+        // Optional: Close window after print dialog closes
+        printWindow.onafterprint = () => printWindow.close();
+      }, 500);
+    });
+  } catch (error: any) {
+    console.error('Error printing document:', error);
+    alert(`Error printing document: ${error.message}`);
+  }
+};
+
   const filteredDocuments = documents.filter(doc =>
     doc.employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     doc.employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -414,7 +435,7 @@ export default function SalaryCertificatePage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           <button
-                            onClick={() => window.open(`/documents/salary-certificate/${document.id}`, '_blank')}
+                            onClick={() => window.open(`/api/documents/salary-certificate/${document.id}/view`, '_blank')}
                             className="flex items-center justify-center cursor-pointer w-fit p-2 text-white hover:text-black bg-green-500
                             rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
                             title="View"
@@ -430,7 +451,7 @@ export default function SalaryCertificatePage() {
                             <Download className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => window.print()}
+                            onClick={() => handlePrint(document.id)}
                             className="flex items-center justify-center cursor-pointer w-fit p-2 text-white hover:text-black bg-zinc-500
                             rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
                             title="Print"

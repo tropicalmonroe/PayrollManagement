@@ -361,7 +361,7 @@ const PayslipPage = () => {
                   className="flex items-center justify-center cursor-pointer w-fit px-4 py-2 text-white hover:text-black bg-pink-500
                             rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
                 >
-                  <FileText className="w-5 h-5" />
+                  <FileText className="w-5 h-5 mr-2" />
                   <span>{generating ? 'Generating...' : 'Generate Payslip'}</span> 
                 </button>
               </div>

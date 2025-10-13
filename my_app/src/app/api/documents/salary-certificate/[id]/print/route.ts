@@ -1,35 +1,42 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '../../../../../../lib/prisma'
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '../../../../../../lib/prisma';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(
+request: NextRequest,
+{ params }: { params: { id: string } }
+) {
 try {
-    const { id } = await params
+    const { id } = await params;
 
     const document = await prisma.document.findUnique({
     where: { id },
     include: { employee: true },
-    })
+    });
 
     if (!document) {
-    return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+    return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }
 
-    const html = generateSalaryCertificateHTML(document)
+    // Generate HTML with print-specific styles
+    const html = generateSalaryCertificateHTML(document, true);
 
     return new NextResponse(html, {
     status: 200,
-    headers: { 'Content-Type': 'text/html; charset=utf-8' },
-    })
+    headers: { 
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': 'inline' 
+    },
+    });
 } catch (error) {
-    console.error('Error generating salary certificate view:', error)
-    return NextResponse.json({ error: 'Error while generating the certificate' }, { status: 500 })
+    console.error('Error generating salary certificate print view:', error);
+    return NextResponse.json({ error: 'Error while generating the certificate' }, { status: 500 });
 }
 }
 
-// --- HTML generator ---
-function generateSalaryCertificateHTML(document: any) {
-const employee = document.employee
-const metadata = document.metadata as any
+// Enhanced HTML generator with print optimization
+function generateSalaryCertificateHTML(document: any, forPrint: boolean = false) {
+const employee = document.employee;
+const metadata = document.metadata as any;
 
 const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('en-KE', {
@@ -37,28 +44,27 @@ const formatCurrency = (amount: number) =>
     currency: 'KES',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-    }).format(amount)
+    }).format(amount);
 
 const formatDate = (date: Date) =>
     new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-    }).format(new Date(date))
+    }).format(new Date(date));
 
 const getMaritalStatus = () => {
     switch (employee.maritalStatus) {
-    case 'SINGLE': return 'Single'
-    case 'MARRIED': return 'Married'
-    case 'DIVORCED': return 'Divorced'
-    case 'WIDOWED': return 'Widowed'
-    default: return employee.maritalStatus
+    case 'SINGLE': return 'Single';
+    case 'MARRIED': return 'Married';
+    case 'DIVORCED': return 'Divorced';
+    case 'WIDOWED': return 'Widowed';
+    default: return employee.maritalStatus;
     }
-}
+};
 
-const today = new Date()
+const today = new Date();
 
-// Return the full HTML string using a template literal.
 return `
     <!DOCTYPE html>
     <html lang="en">
@@ -69,7 +75,7 @@ return `
     <style>
         @page {
         size: A4;
-        margin: 2cm;
+        margin: 1.5cm;
         }
         
         body {
@@ -84,9 +90,9 @@ return `
         
         .certificate-container {
         width: 21cm;
-        height: 29.7cm;
+        min-height: 29.7cm;
         margin: 0 auto;
-        padding: 1cm;
+        padding: 1.5cm;
         background: white;
         box-sizing: border-box;
         position: relative;
@@ -99,8 +105,9 @@ return `
         .underline { text-decoration: underline; }
         
         .header {
-        margin-bottom: 0.8cm;
-        height: 1.5cm;
+        margin-bottom: 1cm;
+        border-bottom: 2px solid #000;
+        padding-bottom: 0.5cm;
         }
         
         .logo {
@@ -111,42 +118,45 @@ return `
         
         .company-info {
         text-align: right;
-        margin-top: 0.2cm;
-        font-size: 10pt;
+        margin-top: 0;
+        font-size: 11pt;
         }
         
         .document-title {
         clear: both;
         text-align: center;
-        font-size: 14pt;
+        font-size: 16pt;
         font-weight: bold;
         text-transform: uppercase;
-        margin: 0.6cm 0 0.6cm 0;
+        margin: 1cm 0;
         text-decoration: underline;
         }
         
         .content {
         text-align: justify;
-        margin-bottom: 0.5cm;
+        margin-bottom: 1cm;
+        font-size: 11pt;
         }
         
         .content p {
-        margin: 0.3cm 0;
+        margin: 0.4cm 0;
         }
         
         .employee-details {
-        margin: 0.5cm 0;
-        padding: 0.4cm;
-        border: 1px solid #000;
+        margin: 0.8cm 0;
+        padding: 0.6cm;
+        border: 2px solid #000;
+        background: #f9f9f9;
         }
         
         .detail-line {
-        margin: 0.1cm 0;
+        margin: 0.2cm 0;
         display: flex;
+        page-break-inside: avoid;
         }
         
         .detail-label {
-        width: 4.5cm;
+        width: 5cm;
         font-weight: bold;
         font-size: 11pt;
         }
@@ -157,59 +167,83 @@ return `
         }
         
         .signature-section {
-        margin-top: 0.8cm;
+        margin-top: 2cm;
         display: flex;
         justify-content: space-between;
+        page-break-inside: avoid;
         }
         
         .signature-block {
-        width: 5cm;
+        width: 6cm;
         text-align: center;
         }
         
         .signature-line {
         border-bottom: 1px solid #000;
         height: 1cm;
-        margin: 0.5cm 0 0.2cm 0;
+        margin: 0.8cm 0 0.3cm 0;
         }
         
         .footer {
         position: absolute;
-        bottom: 0.3cm;
-        left: 1cm;
-        right: 1cm;
+        bottom: 0.5cm;
+        left: 1.5cm;
+        right: 1.5cm;
         text-align: center;
-        font-size: 8pt;
+        font-size: 9pt;
         border-top: 1px solid #000;
-        padding-top: 0.2cm;
+        padding-top: 0.3cm;
         }
         
+        /* Print-specific styles */
         @media print {
         body { 
             margin: 0;
             padding: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
         .certificate-container {
             width: 100%;
             min-height: 100vh;
             margin: 0;
-            padding: 2cm;
+            padding: 1.5cm;
+            box-shadow: none;
+        }
+        .employee-details {
+            background: #f9f9f9 !important;
         }
         }
         
+        /* Screen styles */
         @media screen {
         body {
             background: #f0f0f0;
             padding: 1cm;
         }
         .certificate-container {
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
+        }
+        
+        /* No-print elements for screen */
+        .no-print {
+        display: none;
         }
     </style>
     </head>
     <body>
     <div class="certificate-container">
+        <!-- Print button for screen view -->
+        <div class="no-print" style="text-align: center; margin-bottom: 1cm;">
+        <button onclick="window.print()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Print Certificate
+        </button>
+        <button onclick="window.close()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+            Close Window
+        </button>
+        </div>
+
         <div class="header">
         <img src="/logosch.png" alt="Company Logo" class="logo" />
         <div class="company-info">
@@ -314,6 +348,24 @@ return `
         <p>NewLight Academy - Finance Department | Nairobi, Kenya</p>
         </div>
     </div>
+
+    <script>
+        // Auto-print when page loads (for print route)
+        ${forPrint ? `
+        window.addEventListener('load', function() {
+        setTimeout(function() {
+            window.print();
+        }, 1000);
+        });
+        
+        // Close window after print
+        window.onafterprint = function() {
+        setTimeout(function() {
+            window.close();
+        }, 500);
+        };
+        ` : ''}
+    </script>
     </body>
     </html>
 `;

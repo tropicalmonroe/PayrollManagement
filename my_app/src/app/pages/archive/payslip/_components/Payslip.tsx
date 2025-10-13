@@ -142,6 +142,35 @@ export default function PayslipPage() {
     }
   };
 
+  const handleDownload = async (documentId: string, employeeId: string, period: string) => {
+  try {
+    const response = await fetch(`/api/documents/payslip/${documentId}/download`);
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to download payslip');
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    
+    // Use the filename from response or create one
+    const filename = `payslip-${employeeId}-${period.replace(' ', '-')}.html`;
+    a.download = filename;
+    
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (error: any) {
+    console.error('Error downloading payslip:', error);
+    alert(`Error downloading payslip: ${error.message}`);
+  }
+};
+
   const filteredDocuments = documents.filter(doc =>
     doc.employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     doc.employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -383,7 +412,7 @@ export default function PayslipPage() {
                           bg-green-200 hover:bg-green-900 rounded-xl p-1 text-green-500 hover:text-green-50 
                           transition duration-300">
                           <button 
-                            onClick={() => window.open(`/api/documents/payslip/${document.id}/view`, '_blank')}
+                            onClick={() => handleDownload(document.id, document.employee.employeeId, document.period)}
                             className=""
                             title="Download"
                           >

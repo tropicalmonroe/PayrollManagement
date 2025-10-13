@@ -20,12 +20,11 @@ try {
     return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }
 
-    console.log('Document found:', { 
+    console.log('Document found for download:', { 
     id: document.id, 
     type: document.type, 
     period: document.period,
     employeeId: document.employeeId,
-    metadata: document.metadata 
     });
 
     // Retrieve the associated payroll calculation
@@ -89,21 +88,33 @@ try {
     );
     }
 
-    console.log('Payroll calculation found:', payrollCalculation.id);
+    console.log('Payroll calculation found for download:', payrollCalculation.id);
 
-    // Generate the payslip HTML
+    // Generate the payslip HTML for PDF conversion
     const html = generatePayslipHTML(document, payrollCalculation);
+    
+    // For PDF download, we'll return HTML with download headers
+    // In a real implementation, you might want to use a PDF generation library
+    // like puppeteer, jsPDF, or a service like WeasyPrint
+    
+    const filename = `payslip-${payrollCalculation.employee.employeeId}-${document.period.replace(' ', '-')}.html`;
 
     return new NextResponse(html, {
     status: 200,
     headers: {
         'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Description': 'File Transfer',
+        'Pragma': 'public',
+        'Expires': '0',
+        'Cache-Control': 'must-revalidate, post-check=0, pre-check=0',
     },
     });
+
 } catch (error) {
-    console.error('Error generating payslip view:', error);
+    console.error('Error downloading payslip:', error);
     return NextResponse.json(
-    { error: 'Error generating payslip', details: (error as Error).message }, 
+    { error: 'Error downloading payslip', details: (error as Error).message }, 
     { status: 500 }
     );
 }
@@ -145,14 +156,13 @@ const nssfRate = 6.00; // 6%
 const shifRate = 2.75; // 2.75%
 const housingLevyRate = 1.50; // 1.5%
 
-
 return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payslip - ${employee.firstName} ${employee.lastName}</title>
+    <title>Payslip - ${employee.firstName} ${employee.lastName} - ${monthName} ${year}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -166,6 +176,7 @@ return `
             padding: 32px;
             max-width: 1024px;
             margin: 0 auto;
+            border: 1px solid #ccc;
         }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
@@ -205,8 +216,15 @@ return `
         .border-b-2 { border-bottom: 2px solid #000 !important; }
         
         @media print {
-            body { padding: 16px; }
-            .payroll-slip { padding: 16px; }
+            body { 
+                padding: 16px;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .payroll-slip { 
+                padding: 16px;
+                border: none;
+            }
             .border-black { border-color: #000 !important; }
             .border-r { border-right: 1px solid #000 !important; }
             .border-b { border-bottom: 1px solid #000 !important; }
@@ -219,12 +237,16 @@ return `
         <!-- Header with logo -->
         <div class="mb-6">
             <div class="mb-4">
-                <img src="/logosch.png" alt="Company Logo" style="max-width: 100px; height: auto;" />
+                <img src="/logosch.png" 
+                alt="CompanyLogo" 
+                style="max-width: 100px; height: auto;" 
+                />
             </div>
             <div class="text-center">
                 <h1 class="text-lg font-bold underline">
                     Payslip for ${monthName.toUpperCase()} ${year}
                 </h1>
+                <p class="text-xs text-gray-600">Generated on ${new Date().toLocaleDateString('en-GB')}</p>
             </div>
         </div>
 
@@ -465,6 +487,18 @@ return `
                 <div class="border-r border-black p-2 text-right">${formatCurrency(payrollCalculation.netSalary)}</div>
                 <div class="p-2"></div>
             </div>
+        </div>
+
+        <!-- Footer with generation info -->
+        <div class="mt-6 text-xs text-center text-gray-600">
+            <p>This payslip was generated electronically on ${new Date().toLocaleDateString('en-GB', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })}</p>
+            <p>NewLight Academy - Finance Department</p>
         </div>
     </div>
 </body>

@@ -281,14 +281,14 @@ const FinalSettlementPage = () => {
                         <label htmlFor={`employee-${employee.id}`} className="ml-3 flex-1 cursor-pointer">
                           <div className="flex items-center justify-between">
                             <div>
-                              <div className="text-sm font-medium text-zinc-900">
+                              <div className="text-sm font-medium text-white">
                                 {employee.firstName} {employee.lastName}
                               </div>
-                              <div className="text-sm text-zinc-500">
+                              <div className="text-sm text-white">
                                 {employee.employeeId} • {employee.position} • {employee.status}
                               </div>
                             </div>
-                            <div className="text-sm text-zinc-500">
+                            <div className="text-sm text-green-400">
                               {formatCurrency(employee.baseSalary)}
                             </div>
                           </div>
@@ -485,9 +485,10 @@ const FinalSettlementPage = () => {
                     <button
                       onClick={handleGenerateSettlement}
                       disabled={!departureReason || generating}
-                      className="flex items-center space-x-2 bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center justify-center cursor-pointer w-fit px-4 py-2 text-white hover:text-black bg-orange-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
                     >
-                      <Calculator className="w-5 h-5" />
+                      <Calculator className="w-5 h-5 mr-2" />
                       <span>{generating ? 'Generating...' : 'Generate Settlement'}</span>
                     </button>
                   </div>

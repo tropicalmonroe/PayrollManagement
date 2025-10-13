@@ -504,9 +504,10 @@ const NSSF_RATES = {
                 <button
                   onClick={handleGenerateDeclaration}
                   disabled={generating}
-                  className="flex items-center space-x-2 bg-blue-200 text-white px-6 py-3 rounded-lg hover:bg-blue-400 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center cursor-pointer w-fit px-4 py-2 text-white hover:text-black bg-orange-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
                 >
-                  <Building className="w-5 h-5" />
+                  <Building className="w-5 h-5 mr-2 mt-[1px]" />
                   <span>{generating ? 'Generating...' : 'Generate Declaration'}</span>
                 </button>
               </div>

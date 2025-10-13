@@ -190,6 +190,92 @@ const generateFinalSettlement = async () => {
   }
 };
 
+const handleDownload = async (documentId: string, employeeId: string, employeeCode: string) => {
+  try {
+    console.log('Downloading document:', documentId);
+    
+    const response = await fetch(`/api/documents/final-settlement/download?id=${documentId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Error downloading document');
+    }
+
+    const contentType = response.headers.get('Content-Type');
+    if (contentType === 'application/pdf') {
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `final-settlement-${employeeCode}.pdf`;
+      
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      // Update download count in UI (optional)
+      setDocuments(prevDocs => 
+        prevDocs.map(doc => 
+          doc.id === documentId 
+            ? { ...doc, downloadCount: doc.downloadCount + 1 }
+            : doc
+        )
+      );
+    } else {
+      throw new Error('Invalid response format');
+    }
+  } catch (error: any) {
+    console.error('Error downloading document:', error);
+    alert(`Error downloading document: ${error.message}`);
+  }
+};
+
+const handlePrint = async (documentId: string) => {
+  try {
+    // Open print view in new window and trigger print
+    const printWindow = window.open(`/api/documents/final-settlement/${documentId}/print`, '_blank');
+    
+    if (!printWindow) {
+      throw new Error('Popup blocked! Please allow popups for this site.');
+    }
+
+    // Wait for the window to load then trigger print
+    printWindow.addEventListener('load', () => {
+      setTimeout(() => {
+        printWindow.print();
+        // Optional: Close window after print dialog closes
+        printWindow.onafterprint = () => printWindow.close();
+      }, 500);
+    });
+  } catch (error: any) {
+    console.error('Error printing document:', error);
+    alert(`Error printing document: ${error.message}`);
+  }
+};
+
+const handleView = async (documentId: string) => {
+  try {
+    // Open document in new tab for viewing
+    const viewWindow = window.open(`/api/documents/final-settlement/${documentId}/view`, '_blank');
+    
+    if (!viewWindow) {
+      throw new Error('Popup blocked! Please allow popups for this site.');
+    }
+  } catch (error: any) {
+    console.error('Error viewing document:', error);
+    alert(`Error viewing document: ${error.message}`);
+  }
+};
+
   const filteredDocuments = documents.filter(doc =>
     doc.employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     doc.employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -480,16 +566,32 @@ const generateFinalSettlement = async () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
-                          <button className="text-blue-600 hover:text-blue-900">
+                          <button 
+                          onClick={() => handleView(document.id)}
+                          className="flex items-center justify-center cursor-pointer w-fit p-2 text-white hover:text-black bg-green-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out" title='View'>
                             <Eye className="w-4 h-4" />
                           </button>
-                          <button className="text-green-600 hover:text-green-900">
+                          <button onClick={() => handleDownload(document.id, document.employee.employeeId, document.employee.id)} 
+                          className="flex items-center justify-center cursor-pointer w-fit p-2 text-white hover:text-black bg-blue-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
+                            title="Download"
+                          >
                             <Download className="w-4 h-4" />
                           </button>
-                          <button className="text-zinc-600 hover:text-zinc-900">
+                          <button 
+                          onClick={(() => handlePrint(document.id))}
+                          className="flex items-center justify-center cursor-pointer w-fit p-2 text-white hover:text-black bg-zinc-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
+                            title="Print"
+                          >
                             <Printer className="w-4 h-4" />
                           </button>
-                          <button className="text-purple-600 hover:text-purple-900">
+                          <button 
+                          className="flex items-center justify-center cursor-pointer w-fit p-2 text-white hover:text-black bg-purple-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
+                            title="Send by email"
+                          >
                             <Mail className="w-4 h-4" />
                           </button>
                         </div>

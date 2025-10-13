@@ -41,49 +41,74 @@ export default function IncomeTaxStatement() {
     }
   };
 
-  const handleGenerateStatement = async () => {
-    if (selectedEmployees.length === 0) {
-      alert('Please select at least one employee');
-      return;
-    }
+const handleGenerateStatement = async () => {
+  if (selectedEmployees.length === 0) {
+    alert('Please select at least one employee');
+    return;
+  }
 
-    try {
-      setGenerating(true);
-      
-      const response = await fetch('/api/documents/income-tax-statement/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          employeeIds: selectedEmployees,
-          period
-        }),
-      });
+  try {
+    setGenerating(true);
+    
+    const response = await fetch('/api/documents/paye-tax-statement/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        employeeIds: selectedEmployees,
+        period
+      }),
+    });
 
-      if (response.ok) {
+    // Check content type first
+    const contentType = response.headers.get('content-type');
+    console.log('Response content-type:', contentType);
+
+    if (response.ok) {
+      if (contentType?.includes('application/pdf')) {
         // Download the PDF
         const blob = await response.blob();
+        console.log('Blob size:', blob.size, 'type:', blob.type);
+        
+        if (blob.size === 0) {
+          throw new Error('Received empty PDF file');
+        }
+
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = `income-tax-statement-${period.month}-${period.year}.pdf`;
+        a.download = `paye-tax-statement-${period.month}-${period.year}.pdf`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
       } else {
-        const error = await response.json();
-        alert(`Error: ${error.error}`);
+        // It's probably a JSON error response
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        alert(`Error: ${errorData.error}${errorData.details ? ` - ${errorData.details}` : ''}`);
       }
-    } catch (error) {
-      console.error('Error generating income tax statement:', error);
-      alert('Error generating income tax statement');
-    } finally {
-      setGenerating(false);
+    } else {
+      // Handle non-OK responses
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      
+      try {
+        const errorData = JSON.parse(errorText);
+        alert(`Error: ${errorData.error}${errorData.details ? ` - ${errorData.details}` : ''}`);
+      } catch {
+        alert(`Error: ${response.status} ${response.statusText}`);
+      }
     }
-  };
+  } catch (error: any) {
+    console.error('Error generating income tax statement:', error);
+    alert(`Error generating income tax statement: ${error.message}`);
+  } finally {
+    setGenerating(false);
+  }
+};
 
   const toggleEmployeeSelection = (employeeId: string) => {
     setSelectedEmployees(prev => 
@@ -210,16 +235,17 @@ export default function IncomeTaxStatement() {
               <button
                 onClick={handleGenerateStatement}
                 disabled={generating || selectedEmployees.length === 0}
-                className="payroll-button w-full flex items-center justify-center gap-2"
+                className="flex items-center justify-center cursor-pointer w-full px-4 py-2 text-white hover:text-black bg-purple-500
+                            rounded-md hover:bg-blue-200 transition duration-300 ease-in-out"
               >
                 {generating ? (
                   <>
-                    <div className="spinner" />
+                    <div className="spinner mr-2" />
                     Generating...
                   </>
                 ) : (
                   <>
-                    <Download className="h-4 w-4" />
+                    <Download className="h-4 w-4 mr-2" />
                     Generate Income Tax Statement
                   </>
                 )}

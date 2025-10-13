@@ -292,6 +292,7 @@ enum DocumentType {
   PAYROLL_JOURNAL
   BULK_TRANSFER
   TAX_REPORT
+  TAX_STATEMENT //e.g. PAYE Tax Statement
 }
 
 enum DocumentStatus {

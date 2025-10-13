@@ -4,6 +4,7 @@ import { GrAnnounce } from "react-icons/gr";
 import { UserButton } from '@clerk/nextjs';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import FloatingDock from './FloatingDock';
 
 const Navbar = async () => {
 
@@ -16,6 +17,9 @@ const Navbar = async () => {
 return (
     <div className=' flex items-center justify-between bg-[#2772a0] h-[10vh] rounded-md'>
         {/* other icons */}
+        <div className='p-2 flex items-center gap-4 justify-start w-full'>
+        <FloatingDock />
+        </div>
         <div className='p-2 flex items-center gap-4 justify-end w-full'>
             <div className='bg-blue-100 rounded-sm items-center justify-center flex p-2 cursor-pointer'>
                 <MdMessage className='text-lg text-zinc-800 font-semibold'/>
